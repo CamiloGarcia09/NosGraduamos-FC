@@ -1,0 +1,31 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+processors:
+  resource:
+    attributes:
+      - key: "job"
+        action: upsert
+        value: "opentelemetry"
+      - key: "service.name"
+        action: upsert
+        value: "MessagesUcoLab"
+
+  batch:
+
+exporters:
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    labels:
+      attributes:
+        job: "opentelemetry"
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [resource, batch]
+      exporters: [loki]

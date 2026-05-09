@@ -1,0 +1,275 @@
+services:
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - observability-network
+
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/config.yaml
+    volumes:
+      - ./loki-config.yaml:/etc/loki/config.yaml
+      - loki-data:/loki
+    networks:
+      - observability-network
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.40.0
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"  # gRPC
+      - "4318:4318"  # HTTP
+    networks:
+      - observability-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yaml
+    ports:
+      - "9090:9090"
+    networks:
+      - observability-network
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "${REDISPORT}:${REDISPORT}"
+    volumes:
+      - redis_data:/data
+    command: [ "redis-server", "--requirepass", "${REDISPASSWORD}", "--appendonly", "yes" ]
+    networks:
+      - observability-network
+      - kong-network
+      - app-network
+
+  debezium-postgres:
+    image: debezium/postgres:13
+    container_name: crs-crossword-db
+    ports:
+      - "5432:${POSTGRESPORT}"
+    environment:
+      POSTGRES_DB: ${POSTGRESDATABASE}
+      POSTGRES_USER: ${POSTGRESUSERNAME}
+      POSTGRES_PASSWORD: ${POSTGRESPASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - observability-network
+      - kong-network
+      - app-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.0.0
+    container_name: kafka-crosswords
+    ports:
+      - "9094:9094"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS: 80000
+      KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS: 50000
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    depends_on:
+      - zookeeper
+    networks:
+      - observability-network
+      - kong-network
+      - app-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.0.0
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-logs:/var/lib/zookeeper/log
+    networks:
+      - app-network
+
+  ksqldb-server:
+    image: confluentinc/ksqldb-server:0.20.0
+    hostname: ksqldb-server
+    container_name: cdc-ksqldb-server
+    ports:
+      - "8088:8088"
+    environment:
+      KSQL_BOOTSTRAP_SERVERS: "kafka:9092"
+      KSQL_HOST_NAME: "ksqldb-server"
+      KSQL_LISTENERS: "http://0.0.0.0:8088"
+    volumes:
+      - ksqldb-data:/var/lib/ksql/data
+    depends_on:
+      - kafka
+    networks:
+      - app-network
+
+  connect:
+    image: debezium/connect:1.9
+    ports:
+      - "8083:8083"
+    environment:
+      GROUP_ID: 1
+      BOOTSTRAP_SERVERS: kafka:9092
+      CONFIG_STORAGE_TOPIC: connect-configs
+      OFFSET_STORAGE_TOPIC: connect-offsets
+      STATUS_STORAGE_TOPIC: connect-status
+      CONNECT_PLUGIN_PATH: "/kafka/connect,/mongo-connector/lib"
+    volumes:
+      - ./mongo-connector:/mongo-connector
+      - connect-data:/kafka/connect
+    depends_on:
+      - kafka
+      - debezium-postgres
+    networks:
+      - app-network
+
+  mongodb:
+    image: mongo:5.0
+    container_name: mongodb-crosswords-db
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODBUSER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODBPASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGODBDATABASE}
+    volumes:
+      - mongo-data:/data/db
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+    command: ["--auth"]
+    networks:
+      - observability-network
+      - kong-network
+      - app-network
+
+  kong:
+    image: kong/kong-gateway:3.5
+    container_name: api-gateway-kong
+    restart: always
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /kong/kong.yaml
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+    volumes:
+      - ./kong.yaml:/kong/kong.yaml
+    ports:
+      - "8000:8000"  # API Gateway (HTTP)
+      - "8001:8001"  # Kong Admin API (HTTP)
+    networks:
+      - kong-network
+
+  messageucolab:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    container_name: messageucolab-app
+    ports:
+      - "8085:8085"
+    environment:
+      - LOG_PATH=/app/logs
+      - AZURE_KEYVAULT_UCOLAB_ENDPOINT=${AZURE_KEYVAULT_UCOLAB_ENDPOINT}
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
+    volumes:
+      - ../../logs:/app/logs
+    depends_on:
+      - debezium-postgres
+      - mongodb
+      - redis
+      - kafka
+      - pulsar
+    networks:
+      - observability-network
+      - kong-network
+      - app-network
+      - pulsar-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8085/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  pulsar:
+    image: apachepulsar/pulsar:3.2.2
+    container_name: pulsar-standalone
+    command: >
+      /bin/bash -c "
+      bin/apply-config-from-env.py conf/standalone.conf &&
+      bin/apply-config-from-env.py conf/client.conf &&
+      bin/pulsar standalone -nss -nfw"
+    ports:
+      - "6650:6650"
+      - "8080:8080"
+    volumes:
+      - pulsar-data:/pulsar/data
+      - pulsar-conf:/pulsar/conf
+    environment:
+      PULSAR_MEM: "-Xms1g -Xmx1g -XX:MaxDirectMemorySize=2g"
+      PULSAR_PREFIX_allowAutoTopicCreationType: "partitioned"
+    networks:
+      - pulsar-network
+      - app-network
+
+
+volumes:
+  grafana-data:
+  redis_data:
+    driver: local
+  postgres-data:
+    driver: local
+  mongo-data:
+  kafka-data:
+    driver: local
+  ksqldb-data:
+    driver: local
+  connect-data:
+    driver: local
+  zookeeper-data:
+    driver: local
+  zookeeper-logs:
+    driver: local
+  loki-data:
+  pulsar-data:
+    driver: local
+  pulsar-conf:
+    driver: local
+
+networks:
+  observability-network:
+    driver: bridge
+  kong-network:
+    driver: bridge
+  app-network:
+    driver: bridge
+  pulsar-network:
+    driver: bridge

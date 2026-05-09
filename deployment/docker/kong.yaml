@@ -1,0 +1,28 @@
+_format_version: "3.0"
+
+services:
+  - name: message-service
+    url: http://host.docker.internal:8085
+    routes:
+      - name: get-message-by-code
+        paths:
+          - ~/messageucolab/v1/application/code/[^/]+$
+        methods:
+          - GET
+        regex_priority: 10
+        strip_path: false
+
+      - name: get-messages-by-environment
+        paths:
+          - /messageucolab/v1/application/environment
+        methods:
+          - GET
+        strip_path: false
+
+      - name: create-token
+        paths:
+          - ~/messageucolab/v1/application/[^/]+/token$
+        methods:
+          - POST
+        regex_priority: 10
+        strip_path: false
