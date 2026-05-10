@@ -167,20 +167,20 @@ services:
       - app-network
 
   surrealdb:
-    image: surrealdb/surrealdb:latest
+    image: surrealdb/surrealdb:v2.1.4
     container_name: surrealdb-messageucolab
     user: "0:0"
     ports:
-      - "8005:8000"
+      - "8005:8005"
     environment:
       SURREAL_AUTH: "true"
       SURREAL_USER: ${SURREALDBUSER}
       SURREAL_PASS: ${SURREALDBPASSWORD}
     volumes:
       - surrealdb-data:/data
-    command: start --bind 0.0.0.0:8000 --user root --pass root surrealkv:/data/database.db
+    command: start --bind 0.0.0.0:8005 --user ${SURREALDBUSER} --pass ${SURREALDBPASSWORD} surrealkv:/data/database.db
     healthcheck:
-      test: ["CMD", "/surreal", "is-ready", "--endpoint", "ws://localhost:8000"]
+      test: ["CMD", "/surreal", "is-ready", "--endpoint", "ws://localhost:8005"]
       interval: 10s
       timeout: 5s
       retries: 5

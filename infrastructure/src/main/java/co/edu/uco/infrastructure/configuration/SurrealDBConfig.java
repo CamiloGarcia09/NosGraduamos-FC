@@ -1,6 +1,7 @@
 package co.edu.uco.infrastructure.configuration;
 
-import com.surrealdb.connection.SurrealConnection;
+import com.surrealdb.Surreal;
+import com.surrealdb.signin.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 @Configuration
 public class SurrealDBConfig {
+
     private final SurrealDBProperties surrealDBProperties;
 
     public SurrealDBConfig(SurrealDBProperties surrealDBProperties) {
@@ -15,33 +17,47 @@ public class SurrealDBConfig {
     }
 
     @Bean
-    public SurrealConnection surrealConnection() throws Exception {
+    public Surreal surreal() throws Exception {
+
         String connectionUrl = String.format(
-            "ws://%s:%d",
-            surrealDBProperties.getHost(),
-            surrealDBProperties.getPort()
+                "ws://%s:%d/rpc",
+                surrealDBProperties.getHost(),
+                surrealDBProperties.getPort()
         );
 
         log.info("Connecting to SurrealDB at: {}", connectionUrl);
 
-        SurrealConnection connection = new SurrealConnection(connectionUrl);
+        Surreal surreal = new Surreal();
 
-        // Sign in
-        connection.signin(
-            surrealDBProperties.getUsername(),
-            surrealDBProperties.getPassword()
+        // Conectar
+        surreal.connect(connectionUrl);
+
+        // Autenticación root
+        surreal.signin(
+                new Root(
+                        surrealDBProperties.getUsername(),
+                        surrealDBProperties.getPassword()
+                )
         );
+
         log.info("Successfully signed in to SurrealDB");
 
-        // Use namespace and database
-        connection.use(
-            surrealDBProperties.getNamespace(),
-            surrealDBProperties.getDatabase()
+        // Seleccionar namespace
+        surreal.useNs(
+                surrealDBProperties.getNamespace()
         );
-        log.info("Using namespace: {} and database: {}", 
-            surrealDBProperties.getNamespace(), 
-            surrealDBProperties.getDatabase());
 
-        return connection;
+        // Seleccionar database
+        surreal.useDb(
+                surrealDBProperties.getDatabase()
+        );
+
+        log.info(
+                "Using namespace: {} and database: {}",
+                surrealDBProperties.getNamespace(),
+                surrealDBProperties.getDatabase()
+        );
+
+        return surreal;
     }
 }
