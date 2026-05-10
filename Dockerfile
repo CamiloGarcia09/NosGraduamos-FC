@@ -1,4 +1,5 @@
-FROM maven:3.8.4-openjdk-17-slim AS build
+FROM maven:3.9.6-eclipse-temurin-21 AS build
+
 WORKDIR /app
 
 COPY pom.xml .
@@ -8,19 +9,22 @@ COPY utils/pom.xml utils/
 
 RUN mvn dependency:go-offline -B
 
-# Copiar el código fuente de todos los módulos
+# Copiar código fuente
 COPY infrastructure/src infrastructure/src
 COPY core/src core/src
 COPY utils/src utils/src
 
-# Construir todos los módulos
+# Compilar
 RUN mvn clean package -DskipTests -B
 
-# Etapa de ejecución
-FROM eclipse-temurin:17-jdk-jammy
+# =====================================================
+# Runtime
+# =====================================================
+FROM ubuntu:24.04
 
-# Instalar herramientas de diagnóstico
+# Instalar Java 21 y utilidades
 RUN apt-get update && apt-get install -y \
+    openjdk-21-jdk \
     curl \
     iputils-ping \
     net-tools \
@@ -28,14 +32,13 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Crear directorio de logs y dar permisos
-RUN mkdir -p /app/logs && \
-    chmod 777 /app/logs
+# Logs
+RUN mkdir -p /app/logs && chmod 777 /app/logs
 
-# Copiar el JAR desde la etapa de construcción
+# Copiar JAR
 COPY --from=build /app/infrastructure/target/infrastructure-0.0.1-SNAPSHOT.jar app.jar
 
-# Configuración de variables de entorno
+# JVM
 ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
 
 EXPOSE 8085
