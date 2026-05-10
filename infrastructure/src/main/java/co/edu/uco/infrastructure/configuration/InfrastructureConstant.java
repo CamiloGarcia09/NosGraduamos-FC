@@ -98,4 +98,7 @@ public final class InfrastructureConstant {
     public static final String SWAGGER_WEBJARS = "/webjars/**";
 
     public static final String MESSAGE_CODE_PARAMETER = "messageCode";
+
+    public static final String SURREAL_CONFIG_PREFIX = "surreal";
+    public static final String SURREAL_ADAPTER = "surrealRepositoryAdapter";
 }

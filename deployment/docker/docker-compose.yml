@@ -166,6 +166,27 @@ services:
       - kong-network
       - app-network
 
+  surrealdb:
+    image: surrealdb/surrealdb:latest
+    container_name: surrealdb-messageucolab
+    ports:
+      - "8005:8005"
+    environment:
+      SURREAL_AUTH: "true"
+      SURREAL_USER: ${SURREALDBUSER}
+      SURREAL_PASS: ${SURREALDBPASSWORD}
+    volumes:
+      - ./surreal-data:/data
+    command: start --user root --pass root surrealkv:/data/database.db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - observability-network
+      - app-network
+
   kong:
     image: kong/kong-gateway:3.5
     container_name: api-gateway-kong
@@ -207,6 +228,7 @@ services:
       - redis
       - kafka
       - pulsar
+      - surrealdb
     networks:
       - observability-network
       - kong-network
@@ -262,6 +284,8 @@ volumes:
   pulsar-data:
     driver: local
   pulsar-conf:
+    driver: local
+  surrealdb-data:
     driver: local
 
 networks:
