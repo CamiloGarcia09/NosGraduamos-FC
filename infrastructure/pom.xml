@@ -124,8 +124,8 @@
         </dependency>
         <dependency>
             <groupId>com.surrealdb</groupId>
-            <artifactId>surrealdb-java</artifactId>
-            <version>1.0.1</version>
+            <artifactId>surrealdb</artifactId>
+            <version>0.2.1</version>
         </dependency>
     </dependencies>
     <build>
