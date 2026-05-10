@@ -4,7 +4,9 @@ import co.edu.uco.core.domain.data.TokenData;
 import co.edu.uco.core.domain.port.out.repository.token.FindTokenRepository;
 import co.edu.uco.core.domain.port.out.repository.token.TokenRepository;
 import co.edu.uco.utils.exception.BusinessException;
-import com.surrealdb.RecordId;
+import com.surrealdb.Array;
+import com.surrealdb.Object;
+import com.surrealdb.Response;
 import com.surrealdb.Surreal;
 import com.surrealdb.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -12,13 +14,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 
+import static co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.SurrealQLUtil.datetime;
+import static co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.SurrealQLUtil.quote;
+import static co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
 import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.FIELD_CREATION_DATE;
 import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.FIELD_ENVIRONMENT_ID;
 import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.FIELD_EXPIRATION_DATE;
@@ -32,10 +33,11 @@ import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.TOK
 /**
  * SurrealDB adapter for the Token aggregate.
  * <p>
- * Replaces both {@code TokenPostgresSQLAdapter} (write) and
- * {@code TokenMongoAdapter} (read) when {@code persistence.primary=surreal}.
- * Persists tokens into the {@code token} table inside the configured
- * SurrealDB namespace/database via the {@link Surreal} bean.
+ * Active when {@code persistence.primary=surreal}. Replaces both
+ * {@code TokenPostgresSQLAdapter} (write) and {@code TokenMongoAdapter} (read).
+ * <p>
+ * Uses {@code query(String)} with literal values because the native binding
+ * for {@code queryBind} is missing in the SurrealDB Java SDK 0.2.1.
  */
 @Slf4j
 @Primary
@@ -51,69 +53,68 @@ public final class TokenSurrealAdapter implements TokenRepository, FindTokenRepo
 
     @Override
     public TokenData save(final TokenData tokenData) {
-        final RecordId rid = new RecordId(SURREAL_TABLE_TOKEN, tokenData.getId());
-
-        final Map<String, Object> content = new LinkedHashMap<>();
-        content.put(FIELD_SECRET_NAME, tokenData.getSecretName());
-        content.put(FIELD_CREATION_DATE, toInstant(tokenData.getCreationDate()));
-        content.put(FIELD_EXPIRATION_DATE, toInstant(tokenData.getExpirationDate()));
-        content.put(FIELD_ENVIRONMENT_ID, tokenData.getEnvironmentId());
-        content.put(FIELD_STATE_ID, tokenData.getStateId());
-
-        final Map<String, Object> params = new LinkedHashMap<>();
-        params.put("rid", rid);
-        params.put("data", content);
+        final String sql = "UPSERT " + recordIdLiteral(SURREAL_TABLE_TOKEN, tokenData.getId())
+                + " CONTENT { "
+                + FIELD_SECRET_NAME     + ": " + quote(tokenData.getSecretName())          + ", "
+                + FIELD_CREATION_DATE   + ": " + datetime(tokenData.getCreationDate())     + ", "
+                + FIELD_EXPIRATION_DATE + ": " + datetime(tokenData.getExpirationDate())   + ", "
+                + FIELD_ENVIRONMENT_ID  + ": " + quote(tokenData.getEnvironmentId())       + ", "
+                + FIELD_STATE_ID        + ": " + quote(tokenData.getStateId())
+                + " } RETURN AFTER;";
 
         try {
-            surreal.queryBind("UPSERT $rid CONTENT $data RETURN AFTER;", params);
+            surreal.query(sql);
             log.debug("Token persisted into SurrealDB: {}", tokenData.getId());
             return tokenData;
         } catch (final RuntimeException ex) {
-            log.error("Error saving token in SurrealDB", ex);
+            log.error("Error saving token in SurrealDB. Query: {}", sql, ex);
             throw ex;
         }
     }
 
     @Override
     public TokenData findById(final String id) {
-        return findOne("SELECT * FROM $rid LIMIT 1;",
-                Map.of("rid", new RecordId(SURREAL_TABLE_TOKEN, id)))
-                .orElseThrow(() -> BusinessException.buildUserException(
-                        "Token not found in SurrealDB: " + id));
+        final String sql = "SELECT * FROM " + recordIdLiteral(SURREAL_TABLE_TOKEN, id) + " LIMIT 1;";
+        return findOne(sql).orElseThrow(() ->
+                BusinessException.buildUserException("Token not found in SurrealDB: " + id));
     }
 
     @Override
     public Optional<TokenData> findByEnvironmentAndState(final String environment, final String state) {
         final String sql = "SELECT * FROM " + SURREAL_TABLE_TOKEN
-                + " WHERE " + FIELD_ENVIRONMENT_ID + " = $env"
-                + " AND "  + FIELD_STATE_ID       + " = $st"
+                + " WHERE " + FIELD_ENVIRONMENT_ID + " = " + quote(environment)
+                + " AND "  + FIELD_STATE_ID       + " = " + quote(state)
                 + " LIMIT 1;";
-        return findOne(sql, Map.of("env", environment, "st", state));
+        return findOne(sql);
     }
 
     // ---------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------
 
-    private Optional<TokenData> findOne(final String sql, final Map<String, Object> params) {
-        final Value statementResult = surreal.queryBind(sql, params).take(0);
+    private Optional<TokenData> findOne(final String sql) {
+        final Response response = surreal.query(sql);
+        if (response == null || response.size() == 0) {
+            return Optional.empty();
+        }
+        final Value statementResult = response.take(0);
         if (statementResult == null || !statementResult.isArray()) {
             return Optional.empty();
         }
-        final var array = statementResult.getArray();
+        final Array array = statementResult.getArray();
         if (array.len() == 0) {
             return Optional.empty();
         }
-        final var first = array.get(0);
+        final Value first = array.get(0);
         if (first == null || !first.isObject()) {
             return Optional.empty();
         }
         return Optional.of(toTokenData(first.getObject()));
     }
 
-    private TokenData toTokenData(final com.surrealdb.Object obj) {
+    private static TokenData toTokenData(final Object obj) {
         final TokenData token = new TokenData();
-        token.setId(extractId(obj.get("id")));
+        token.setId(extractIdAsString(obj.get("id")));
         token.setSecretName(stringOf(obj.get(FIELD_SECRET_NAME)));
         token.setCreationDate(dateOf(obj.get(FIELD_CREATION_DATE)));
         token.setExpirationDate(dateOf(obj.get(FIELD_EXPIRATION_DATE)));
@@ -122,32 +123,31 @@ public final class TokenSurrealAdapter implements TokenRepository, FindTokenRepo
         return token;
     }
 
-    private static String extractId(final Value value) {
+    private static String extractIdAsString(final Value value) {
         if (value == null) return "";
         if (value.isThing()) {
-            // Thing.toString() yields "table:id"; we keep only the id part.
-            final String s = value.getThing().toString();
-            final int idx = s.indexOf(':');
-            return idx >= 0 ? s.substring(idx + 1) : s;
+            return value.getThing().getId().toString();
         }
-        return stringOf(value);
+        if (value.isString()) {
+            return value.getString();
+        }
+        return value.toPrettyString();
     }
 
     private static String stringOf(final Value value) {
-        if (value == null) return "";
-        return value.toString();
+        if (value == null || value.isNull() || value.isNone()) return "";
+        if (value.isString()) return value.getString();
+        if (value.isUuid())   return value.getUuid().toString();
+        return value.toPrettyString();
     }
 
     private static LocalDateTime dateOf(final Value value) {
-        if (value == null) return LocalDateTime.now();
-        try {
-            return LocalDateTime.ofInstant(Instant.parse(value.toString()), ZoneOffset.UTC);
-        } catch (final RuntimeException ignored) {
+        if (value == null || value.isNull() || value.isNone()) {
             return LocalDateTime.now();
         }
-    }
-
-    private static Instant toInstant(final LocalDateTime ldt) {
-        return ldt == null ? Instant.now() : ldt.toInstant(ZoneOffset.UTC);
+        if (value.isDateTime()) {
+            return value.getDateTime().toLocalDateTime();
+        }
+        return LocalDateTime.now();
     }
 }
