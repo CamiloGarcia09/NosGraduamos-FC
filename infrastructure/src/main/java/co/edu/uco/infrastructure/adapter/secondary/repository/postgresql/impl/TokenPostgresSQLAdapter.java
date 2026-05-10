@@ -4,11 +4,15 @@ import co.edu.uco.core.domain.data.TokenData;
 import co.edu.uco.core.domain.port.out.repository.token.TokenRepository;
 import co.edu.uco.infrastructure.adapter.secondary.repository.data.TokenDataMapper;
 import co.edu.uco.infrastructure.adapter.secondary.repository.postgresql.TokenPostgresSQLRepositoryAdapter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.PERSISTENCE_PRIMARY_POSTGRES;
+import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.PERSISTENCE_PRIMARY_PROPERTY;
 import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.POSTGRESQL_ADAPTER;
 
 @Component(POSTGRESQL_ADAPTER)
+@ConditionalOnProperty(name = PERSISTENCE_PRIMARY_PROPERTY, havingValue = PERSISTENCE_PRIMARY_POSTGRES, matchIfMissing = true)
 public final class TokenPostgresSQLAdapter implements TokenRepository {
     private final TokenPostgresSQLRepositoryAdapter tokenPostgresSQLRepositoryAdapter;
     private final TokenDataMapper tokenDataMapper;
