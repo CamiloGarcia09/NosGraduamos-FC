@@ -101,4 +101,15 @@ public final class InfrastructureConstant {
 
     public static final String SURREAL_CONFIG_PREFIX = "surreal";
     public static final String SURREAL_ADAPTER = "surrealRepositoryAdapter";
+
+    public static final String PERSISTENCE_PRIMARY_PROPERTY = "persistence.primary";
+    public static final String PERSISTENCE_PRIMARY_POSTGRES = "postgres";
+    public static final String PERSISTENCE_PRIMARY_MONGO = "mongo";
+    public static final String PERSISTENCE_PRIMARY_SURREAL = "surreal";
+
+    public static final String TOKEN_SURREAL_ADAPTER = "tokenSurrealAdapter";
+    public static final String TOKEN_STATE_SURREAL_ADAPTER = "tokenStateSurrealAdapter";
+
+    public static final String SURREAL_TABLE_TOKEN = "token";
+    public static final String SURREAL_TABLE_TOKEN_STATE = "token_state";
 }

@@ -188,6 +188,32 @@ services:
       - observability-network
       - app-network
 
+  surrealdb-init:
+    image: surrealdb/surrealdb:v2.1.4
+    container_name: surrealdb-init-messageucolab
+    depends_on:
+      surrealdb:
+        condition: service_healthy
+    entrypoint: ["/surreal"]
+    command:
+      - import
+      - --endpoint
+      - http://surrealdb:8005
+      - --username
+      - ${SURREALDBUSER}
+      - --password
+      - ${SURREALDBPASSWORD}
+      - --namespace
+      - ${SURREALDBNAMESPACE}
+      - --database
+      - ${SURREALDBDATABASE}
+      - /init/surreal-init.surql
+    volumes:
+      - ./scripts/surreal-init.surql:/init/surreal-init.surql:ro
+    restart: "no"
+    networks:
+      - app-network
+
   kong:
     image: kong/kong-gateway:3.5
     container_name: api-gateway-kong

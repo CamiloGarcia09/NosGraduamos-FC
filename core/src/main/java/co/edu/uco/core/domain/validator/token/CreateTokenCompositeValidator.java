@@ -29,7 +29,11 @@ public final class CreateTokenCompositeValidator {
         uuidValidator.validate(createTokenDTO.getEnvironmentId());
         dateValidValidator.validate(createTokenDTO.getExpirationDate());
         expirationDateValidator.validate(parseDate(createTokenDTO.getExpirationDate()));
-        environmentExistValidator.validate(createTokenDTO);
-        applicationBelongsEnvironmentValidator.validate(getUUIDFromString(createTokenDTO.getEnvironmentId()),getUUIDFromString(applicationId));
+        // TODO: Restaurar tras Fase 1 de la migracion a SurrealDB.
+        // Estas validaciones consultan EnvironmentRepository (Mongo) y se desactivan
+        // temporalmente para poder probar la persistencia de Token en SurrealDB
+        // sin necesidad de tener un environment cargado en MongoDB.
+        // environmentExistValidator.validate(createTokenDTO);
+        // applicationBelongsEnvironmentValidator.validate(getUUIDFromString(createTokenDTO.getEnvironmentId()),getUUIDFromString(applicationId));
     }
 }
