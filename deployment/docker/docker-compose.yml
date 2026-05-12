@@ -152,7 +152,7 @@ services:
     image: mongo:5.0
     container_name: mongodb-crosswords-db
     ports:
-      - "27017:27017"
+      - "28017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGODBUSER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGODBPASSWORD}
@@ -191,6 +191,8 @@ services:
   surrealdb-init:
     image: surrealdb/surrealdb:v2.1.4
     container_name: surrealdb-init-messageucolab
+    profiles:
+      - bootstrap
     depends_on:
       surrealdb:
         condition: service_healthy
@@ -209,7 +211,7 @@ services:
       - ${SURREALDBDATABASE}
       - /init/surreal-init.surql
     volumes:
-      - ./scripts/surreal-init.surql:/init/surreal-init.surql:ro
+      - ./scripts:/init:ro
     restart: "no"
     networks:
       - app-network
