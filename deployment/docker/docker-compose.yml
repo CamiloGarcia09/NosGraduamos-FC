@@ -191,8 +191,6 @@ services:
   surrealdb-init:
     image: surrealdb/surrealdb:v2.1.4
     container_name: surrealdb-init-messageucolab
-    profiles:
-      - bootstrap
     depends_on:
       surrealdb:
         condition: service_healthy
