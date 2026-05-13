@@ -18,13 +18,4 @@ public class SurrealDBProperties {
     private String database;
     private int maxConnections;
 
-    public SurrealDBProperties() {
-        this.host = "localhost";
-        this.port = 8000;
-        this.username = "root";
-        this.password = "root";
-        this.namespace = "messageucolab";
-        this.database = "messageucolab";
-        this.maxConnections = 10;
-    }
 }

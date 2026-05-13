@@ -1147,4 +1147,277 @@ Caused by: java.lang.IllegalArgumentException: Cannot subclass final class co.ed
                 "thread": "http-nio-8085-exec-1",
                 "logger": "co.edu.uco.infrastructure.adapter.secondary.presenter.rest.HttpPresenterAdapter",
                 "message": "The successful response is: {"data":["Y9J6tnHptuYRxxGASjPERnzAaKA5vUyKgTuaj/AKv0Aadggp9LkX7IhhbnyM5hqo6N+bFO2GmCbzG4TvOYhUAB4YHa/MvWeDIsLrA/I+XQbAxKXNgOQrWoOGgZaV0IHb/KyStTMo7mxGWd9nwq7BmOAcF6NPghFY2Ooe3w4gnwBXA0AMvjNl7O1CiVgrSdAJ6WOaJDaLOoNe6K39u9urc14OAb8JU+Kr/60pekAfRXWdo7sP9VQqQWBe5JhtwHx16VeoDkosuQxoa/qSiMAkxg959sEbbHR78ur9NZ/8F4v2I5h85kIa1xHZGwTxdWfpGtRJH41pYreH+OlbS7wPKg=="],"errors":[]}"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:39.167",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "co.edu.uco.infrastructure.init.CrossWordApplication",
+                "message": "Starting CrossWordApplication v0.0.1-SNAPSHOT using Java 21.0.10 with PID 6 (/app/app.jar started by root in /app)"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:39.198",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "co.edu.uco.infrastructure.init.CrossWordApplication",
+                "message": "No active profile set, falling back to 1 default profile: "default""
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:45.972",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
+                "message": "Multiple Spring Data modules found, entering strict repository configuration mode"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:45.974",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
+                "message": "Bootstrapping Spring Data Redis repositories in DEFAULT mode."
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:46.517",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.postgresql.TokenPostgresSQLRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:46.540",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.TokenMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:46.547",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.TokenStateMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:46.559",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.EnvironmentMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:46.573",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.EnvironmentRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:46.699",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
+                "message": "Finished Spring Data repository scanning in 633 ms. Found 1 Redis repository interface."
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:46.718",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
+                "message": "Multiple Spring Data modules found, entering strict repository configuration mode"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:46.720",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
+                "message": "Bootstrapping Spring Data JPA repositories in DEFAULT mode."
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:46.813",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
+                "message": "Finished Spring Data repository scanning in 52 ms. Found 1 JPA repository interface."
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:46.823",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
+                "message": "Multiple Spring Data modules found, entering strict repository configuration mode"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:46.826",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
+                "message": "Bootstrapping Spring Data MongoDB repositories in DEFAULT mode."
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:46.847",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.redis.RedisRepositoryAdapter; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:46.854",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.postgresql.TokenPostgresSQLRepositoryAdapter; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:46.913",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
+                "message": "Finished Spring Data repository scanning in 84 ms. Found 4 MongoDB repository interfaces."
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:51.339",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.boot.web.embedded.tomcat.TomcatWebServer",
+                "message": "Tomcat initialized with port 8085 (http)"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:51.375",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.apache.coyote.http11.Http11NioProtocol",
+                "message": "Initializing ProtocolHandler ["http-nio-8085"]"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:51.383",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.apache.catalina.core.StandardService",
+                "message": "Starting service [Tomcat]"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:51.386",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.apache.catalina.core.StandardEngine",
+                "message": "Starting Servlet engine: [Apache Tomcat/10.1.20]"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:51.534",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]",
+                "message": "Initializing Spring embedded WebApplicationContext"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:51.542",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext",
+                "message": "Root WebApplicationContext: initialization completed in 12070 ms"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:52.984",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.hibernate.jpa.internal.util.LogHelper",
+                "message": "HHH000204: Processing PersistenceUnitInfo [name: default]"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:53.267",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.hibernate.Version",
+                "message": "HHH000412: Hibernate ORM core version 6.4.4.Final"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:53.396",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.hibernate.cache.internal.RegionFactoryInitiator",
+                "message": "HHH000026: Second-level cache disabled"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:54.204",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.orm.jpa.persistenceunit.SpringPersistenceUnitInfo",
+                "message": "No LoadTimeWeaver setup: ignoring JPA class transformer"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:54.513",
+                "level": "WARN",
+                "thread": "main",
+                "logger": "org.hibernate.orm.deprecation",
+                "message": "HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:55.898",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator",
+                "message": "HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:55.904",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean",
+                "message": "Initialized JPA EntityManagerFactory for persistence unit 'default'"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:56.467",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "co.edu.uco.infrastructure.configuration.SurrealDBConfig",
+                "message": "Connecting to SurrealDB at: ws://surrealdb-messageucolab:8005/rpc"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:57.448",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "co.edu.uco.infrastructure.configuration.SurrealDBConfig",
+                "message": "Successfully signed in to SurrealDB"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:42:57.450",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "co.edu.uco.infrastructure.configuration.SurrealDBConfig",
+                "message": "Using namespace: messageucolab and database: messageucolab"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:43:00.209",
+                "level": "WARN",
+                "thread": "main",
+                "logger": "org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration",
+                "message": "spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:43:01.641",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.boot.actuate.endpoint.web.EndpointLinksResolver",
+                "message": "Exposing 3 endpoint(s) beneath base path '/actuator'"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:43:01.724",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.apache.coyote.http11.Http11NioProtocol",
+                "message": "Starting ProtocolHandler ["http-nio-8085"]"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:43:01.745",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.boot.web.embedded.tomcat.TomcatWebServer",
+                "message": "Tomcat started on port 8085 (http) with context path ''"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-13T02:43:01.763",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "co.edu.uco.infrastructure.init.CrossWordApplication",
+                "message": "Started CrossWordApplication in 42.032 seconds (process running for 50.292)"
                 }
