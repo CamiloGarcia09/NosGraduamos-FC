@@ -1,1423 +1,820 @@
 {
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:35:58.966",
+                "timestamp": "2026-05-16T01:58:05.916",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "co.edu.uco.infrastructure.init.CrossWordApplication",
                 "message": "Starting CrossWordApplication v0.0.1-SNAPSHOT using Java 21.0.10 with PID 7 (/app/app.jar started by root in /app)"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:35:58.989",
+                "timestamp": "2026-05-16T01:58:05.999",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "co.edu.uco.infrastructure.init.CrossWordApplication",
                 "message": "No active profile set, falling back to 1 default profile: "default""
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:00.244",
+                "timestamp": "2026-05-16T01:58:12.305",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
                 "message": "Multiple Spring Data modules found, entering strict repository configuration mode"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:00.245",
+                "timestamp": "2026-05-16T01:58:12.307",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
                 "message": "Bootstrapping Spring Data Redis repositories in DEFAULT mode."
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:00.295",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
-                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.EnvironmentRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T01:36:00.297",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
-                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.TokenStateMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T01:36:00.299",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
-                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.TokenMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T01:36:00.301",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
-                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.EnvironmentMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T01:36:00.305",
+                "timestamp": "2026-05-16T01:58:12.510",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
                 "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.postgresql.TokenPostgresSQLRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:00.341",
+                "timestamp": "2026-05-16T01:58:12.521",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.TokenMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-16T01:58:12.525",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.TokenStateMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-16T01:58:12.533",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.EnvironmentMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-16T01:58:12.540",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.EnvironmentRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-16T01:58:12.595",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
-                "message": "Finished Spring Data repository scanning in 71 ms. Found 1 Redis repository interface."
+                "message": "Finished Spring Data repository scanning in 232 ms. Found 1 Redis repository interface."
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:00.344",
+                "timestamp": "2026-05-16T01:58:12.616",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
                 "message": "Multiple Spring Data modules found, entering strict repository configuration mode"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:00.345",
+                "timestamp": "2026-05-16T01:58:12.618",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
                 "message": "Bootstrapping Spring Data JPA repositories in DEFAULT mode."
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:00.356",
+                "timestamp": "2026-05-16T01:58:12.657",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
-                "message": "Finished Spring Data repository scanning in 7 ms. Found 1 JPA repository interface."
+                "message": "Finished Spring Data repository scanning in 21 ms. Found 1 JPA repository interface."
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:00.359",
+                "timestamp": "2026-05-16T01:58:12.661",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
                 "message": "Multiple Spring Data modules found, entering strict repository configuration mode"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:00.359",
+                "timestamp": "2026-05-16T01:58:12.664",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
                 "message": "Bootstrapping Spring Data MongoDB repositories in DEFAULT mode."
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:00.363",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
-                "message": "Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.postgresql.TokenPostgresSQLRepositoryAdapter; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T01:36:00.364",
+                "timestamp": "2026-05-16T01:58:12.677",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
                 "message": "Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.redis.RedisRepositoryAdapter; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:00.369",
+                "timestamp": "2026-05-16T01:58:12.679",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.postgresql.TokenPostgresSQLRepositoryAdapter; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-16T01:58:12.714",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
-                "message": "Finished Spring Data repository scanning in 9 ms. Found 4 MongoDB repository interfaces."
+                "message": "Finished Spring Data repository scanning in 49 ms. Found 4 MongoDB repository interfaces."
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:02.990",
+                "timestamp": "2026-05-16T01:58:15.926",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.boot.web.embedded.tomcat.TomcatWebServer",
                 "message": "Tomcat initialized with port 8085 (http)"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:03.021",
+                "timestamp": "2026-05-16T01:58:15.956",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.apache.coyote.http11.Http11NioProtocol",
                 "message": "Initializing ProtocolHandler ["http-nio-8085"]"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:03.025",
+                "timestamp": "2026-05-16T01:58:15.959",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.apache.catalina.core.StandardService",
                 "message": "Starting service [Tomcat]"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:03.026",
+                "timestamp": "2026-05-16T01:58:15.960",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.apache.catalina.core.StandardEngine",
                 "message": "Starting Servlet engine: [Apache Tomcat/10.1.20]"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:03.084",
+                "timestamp": "2026-05-16T01:58:16.036",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]",
                 "message": "Initializing Spring embedded WebApplicationContext"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:03.085",
+                "timestamp": "2026-05-16T01:58:16.038",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext",
-                "message": "Root WebApplicationContext: initialization completed in 4052 ms"
+                "message": "Root WebApplicationContext: initialization completed in 9613 ms"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:03.521",
+                "timestamp": "2026-05-16T01:58:17.127",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.hibernate.jpa.internal.util.LogHelper",
                 "message": "HHH000204: Processing PersistenceUnitInfo [name: default]"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:03.645",
+                "timestamp": "2026-05-16T01:58:17.431",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.hibernate.Version",
                 "message": "HHH000412: Hibernate ORM core version 6.4.4.Final"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:03.719",
+                "timestamp": "2026-05-16T01:58:17.567",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.hibernate.cache.internal.RegionFactoryInitiator",
                 "message": "HHH000026: Second-level cache disabled"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:04.348",
+                "timestamp": "2026-05-16T01:58:18.254",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.orm.jpa.persistenceunit.SpringPersistenceUnitInfo",
                 "message": "No LoadTimeWeaver setup: ignoring JPA class transformer"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:04.681",
+                "timestamp": "2026-05-16T01:58:18.698",
                 "level": "WARN",
                 "thread": "main",
                 "logger": "org.hibernate.orm.deprecation",
                 "message": "HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:05.817",
+                "timestamp": "2026-05-16T01:58:19.690",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator",
                 "message": "HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:05.823",
+                "timestamp": "2026-05-16T01:58:19.695",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean",
                 "message": "Initialized JPA EntityManagerFactory for persistence unit 'default'"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:05.996",
+                "timestamp": "2026-05-16T01:58:20.544",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "co.edu.uco.infrastructure.configuration.SurrealDBConfig",
                 "message": "Connecting to SurrealDB at: ws://surrealdb-messageucolab:8005/rpc"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:07.037",
+                "timestamp": "2026-05-16T01:58:21.200",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "co.edu.uco.infrastructure.configuration.SurrealDBConfig",
                 "message": "Successfully signed in to SurrealDB"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:07.041",
+                "timestamp": "2026-05-16T01:58:21.202",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "co.edu.uco.infrastructure.configuration.SurrealDBConfig",
                 "message": "Using namespace: messageucolab and database: messageucolab"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:10.213",
+                "timestamp": "2026-05-16T01:58:23.393",
                 "level": "WARN",
                 "thread": "main",
                 "logger": "org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration",
                 "message": "spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:11.497",
+                "timestamp": "2026-05-16T01:58:25.317",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.boot.actuate.endpoint.web.EndpointLinksResolver",
                 "message": "Exposing 3 endpoint(s) beneath base path '/actuator'"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:11.590",
+                "timestamp": "2026-05-16T01:58:25.423",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.apache.coyote.http11.Http11NioProtocol",
                 "message": "Starting ProtocolHandler ["http-nio-8085"]"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:11.646",
+                "timestamp": "2026-05-16T01:58:25.447",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.boot.web.embedded.tomcat.TomcatWebServer",
                 "message": "Tomcat started on port 8085 (http) with context path ''"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:11.668",
+                "timestamp": "2026-05-16T01:58:25.466",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "co.edu.uco.infrastructure.init.CrossWordApplication",
-                "message": "Started CrossWordApplication in 24.455 seconds (process running for 29.374)"
+                "message": "Started CrossWordApplication in 39.348 seconds (process running for 48.127)"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T01:36:21.617",
-                "level": "INFO",
-                "thread": "http-nio-8085-exec-1",
-                "logger": "org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]",
-                "message": "Initializing Spring DispatcherServlet 'dispatcherServlet'"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T01:36:21.618",
-                "level": "INFO",
-                "thread": "http-nio-8085-exec-1",
-                "logger": "org.springframework.web.servlet.DispatcherServlet",
-                "message": "Initializing Servlet 'dispatcherServlet'"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T01:36:21.621",
-                "level": "INFO",
-                "thread": "http-nio-8085-exec-1",
-                "logger": "org.springframework.web.servlet.DispatcherServlet",
-                "message": "Completed initialization in 3 ms"
-                }{
-                "correlationId": "76417092-5f46-420a-9268-665f8e23a158",
-                "timestamp": "2026-05-13T01:36:21.768",
-                "level": "WARN",
-                "thread": "http-nio-8085-exec-1",
-                "logger": "co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealAdapter",
-                "message": "Cannot parse UUID from value: token_state:⟨123e4567-e89b-12d3-a456-426614175001⟩"
-                }java.lang.IllegalArgumentException: UUID string too large
-	at java.base/java.util.UUID.fromString1(UUID.java:266)
-	at java.base/java.util.UUID.fromString(UUID.java:260)
-	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealAdapter.extractUuid(TokenStateSurrealAdapter.java:83)
-	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealAdapter.findOne(TokenStateSurrealAdapter.java:74)
-	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealAdapter.findByStatusName(TokenStateSurrealAdapter.java:53)
-	at co.edu.uco.core.domain.usecase.RevokeTokenUseCase.execute(RevokeTokenUseCase.java:24)
-	at co.edu.uco.core.application.facade.token.impl.CreateTokenUseCaseFacadeImpl.execute(CreateTokenUseCaseFacadeImpl.java:60)
-	at co.edu.uco.infrastructure.adapter.primary.controller.CreateTokenControllerImpl.createToken(CreateTokenControllerImpl.java:54)
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
-	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
-	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
-	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
-	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
-	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
-	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
-	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
-	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
-	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
-	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
-	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
-	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
-	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:206)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
-	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
-	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
-	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
-	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:109)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
-	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
-	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
-	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
-	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
-	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
-	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
-	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
-	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
-	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
-	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
-	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
-	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1736)
-	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
-	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
-	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
-	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
-	at java.base/java.lang.Thread.run(Thread.java:1583)
-{
-                "correlationId": "76417092-5f46-420a-9268-665f8e23a158",
-                "timestamp": "2026-05-13T01:36:21.167",
-                "level": "INFO",
-                "thread": "http-nio-8085-exec-1",
-                "logger": "co.edu.uco.infrastructure.adapter.secondary.presenter.rest.HttpPresenterAdapter",
-                "message": "The successful response is: {"data":["Hcj1s6fNxbtkpe0fYmA/NUmxzoPSbKTdHTsRNcZtKD1t58dexL+ufSmOqGT5hbxPiSGcPWjhK5Ce7srxonHEb9iJCpwLGH07ULMtHNAeV1a8D7RfobqrgPDOKaJ6+bfrG6TquTnGDvPy6hBnBzS9NIZgcm9/DaXQrYYp7Nt/CCKcXSGjcfVX+LLRJPsvx/l8Jew81e5HMCQoT6GLGv5oVuOPnlaKtmfTvrSpOz5SPspIq0gKr5Kxcwu9qwjUvOqR83LYNTTxZpY8Iyx5tt0DHYBAh/yznGR882YrGftjBtku30Fdq9sDcl05hQiAdKpLLDLE4nInxc2fhURDIHUhFg=="],"errors":[]}"
-                }{
-                "correlationId": "cd7f8838-ffc5-4486-8762-239904f3b5e0",
-                "timestamp": "2026-05-13T02:01:19.041",
-                "level": "INFO",
-                "thread": "http-nio-8085-exec-1",
-                "logger": "org.springdoc.api.AbstractOpenApiResource",
-                "message": "Init duration for springdoc-openapi is: 821 ms"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:34.254",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "co.edu.uco.infrastructure.init.CrossWordApplication",
-                "message": "Starting CrossWordApplication v0.0.1-SNAPSHOT using Java 21.0.10 with PID 6 (/app/app.jar started by root in /app)"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:34.260",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "co.edu.uco.infrastructure.init.CrossWordApplication",
-                "message": "No active profile set, falling back to 1 default profile: "default""
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:36.766",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
-                "message": "Multiple Spring Data modules found, entering strict repository configuration mode"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:36.767",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
-                "message": "Bootstrapping Spring Data Redis repositories in DEFAULT mode."
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:36.986",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
-                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.EnvironmentRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:36.992",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
-                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.TokenStateMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:37.005",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
-                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.TokenMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:37.029",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
-                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.EnvironmentMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:37.048",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
-                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.postgresql.TokenPostgresSQLRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:37.217",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
-                "message": "Finished Spring Data repository scanning in 380 ms. Found 1 Redis repository interface."
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:37.224",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
-                "message": "Multiple Spring Data modules found, entering strict repository configuration mode"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:37.226",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
-                "message": "Bootstrapping Spring Data JPA repositories in DEFAULT mode."
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:37.275",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
-                "message": "Finished Spring Data repository scanning in 30 ms. Found 1 JPA repository interface."
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:37.277",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
-                "message": "Multiple Spring Data modules found, entering strict repository configuration mode"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:37.280",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
-                "message": "Bootstrapping Spring Data MongoDB repositories in DEFAULT mode."
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:37.289",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
-                "message": "Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.postgresql.TokenPostgresSQLRepositoryAdapter; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:37.291",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
-                "message": "Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.redis.RedisRepositoryAdapter; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:37.313",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
-                "message": "Finished Spring Data repository scanning in 32 ms. Found 4 MongoDB repository interfaces."
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:41.334",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.boot.web.embedded.tomcat.TomcatWebServer",
-                "message": "Tomcat initialized with port 8085 (http)"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:41.356",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.apache.coyote.http11.Http11NioProtocol",
-                "message": "Initializing ProtocolHandler ["http-nio-8085"]"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:41.359",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.apache.catalina.core.StandardService",
-                "message": "Starting service [Tomcat]"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:41.360",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.apache.catalina.core.StandardEngine",
-                "message": "Starting Servlet engine: [Apache Tomcat/10.1.20]"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:41.409",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]",
-                "message": "Initializing Spring embedded WebApplicationContext"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:41.410",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext",
-                "message": "Root WebApplicationContext: initialization completed in 7066 ms"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:41.902",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.hibernate.jpa.internal.util.LogHelper",
-                "message": "HHH000204: Processing PersistenceUnitInfo [name: default]"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:42.073",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.hibernate.Version",
-                "message": "HHH000412: Hibernate ORM core version 6.4.4.Final"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:42.161",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.hibernate.cache.internal.RegionFactoryInitiator",
-                "message": "HHH000026: Second-level cache disabled"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:42.654",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.orm.jpa.persistenceunit.SpringPersistenceUnitInfo",
-                "message": "No LoadTimeWeaver setup: ignoring JPA class transformer"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:42.993",
-                "level": "WARN",
-                "thread": "main",
-                "logger": "org.hibernate.orm.deprecation",
-                "message": "HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:41.745",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator",
-                "message": "HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:41.752",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean",
-                "message": "Initialized JPA EntityManagerFactory for persistence unit 'default'"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:41.925",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "co.edu.uco.infrastructure.configuration.SurrealDBConfig",
-                "message": "Connecting to SurrealDB at: ws://surrealdb-messageucolab:8005/rpc"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:42.959",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "co.edu.uco.infrastructure.configuration.SurrealDBConfig",
-                "message": "Successfully signed in to SurrealDB"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:42.961",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "co.edu.uco.infrastructure.configuration.SurrealDBConfig",
-                "message": "Using namespace: messageucolab and database: messageucolab"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:42.985",
-                "level": "WARN",
-                "thread": "main",
-                "logger": "org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext",
-                "message": "Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'tokenHeaderInterceptor' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/classes/!/co/edu/uco/infrastructure/adapter/primary/interceptors/TokenHeaderInterceptor.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'verifyAccessUseCaseFacadeImpl' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/lib/core-0.0.1-SNAPSHOT.jar!/co/edu/uco/core/application/facade/token/impl/VerifyAccessUseCaseFacadeImpl.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'verifyAccessUseCase' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/lib/core-0.0.1-SNAPSHOT.jar!/co/edu/uco/core/domain/usecase/VerifyAccessUseCase.class]: Unsatisfied dependency expressed through constructor parameter 2: Error creating bean with name 'tokenSurrealAdapter' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/classes/!/co/edu/uco/infrastructure/adapter/secondary/repository/surreal/impl/TokenSurrealAdapter.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'tokenSurrealRepositoryAdapterImpl' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/classes/!/co/edu/uco/infrastructure/adapter/secondary/repository/surreal/impl/TokenSurrealRepositoryAdapterImpl.class]: Could not generate CGLIB subclass of class co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenSurrealRepositoryAdapterImpl: Common causes of this problem include using a final class or a non-visible class"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:42.986",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean",
-                "message": "Closing JPA EntityManagerFactory for persistence unit 'default'"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:42.993",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.apache.catalina.core.StandardService",
-                "message": "Stopping service [Tomcat]"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:43.021",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLogger",
-                "message": "
-
-Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled."
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:11:43.054",
-                "level": "ERROR",
-                "thread": "main",
-                "logger": "org.springframework.boot.SpringApplication",
-                "message": "Application run failed"
-                }org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'tokenHeaderInterceptor' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/classes/!/co/edu/uco/infrastructure/adapter/primary/interceptors/TokenHeaderInterceptor.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'verifyAccessUseCaseFacadeImpl' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/lib/core-0.0.1-SNAPSHOT.jar!/co/edu/uco/core/application/facade/token/impl/VerifyAccessUseCaseFacadeImpl.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'verifyAccessUseCase' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/lib/core-0.0.1-SNAPSHOT.jar!/co/edu/uco/core/domain/usecase/VerifyAccessUseCase.class]: Unsatisfied dependency expressed through constructor parameter 2: Error creating bean with name 'tokenSurrealAdapter' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/classes/!/co/edu/uco/infrastructure/adapter/secondary/repository/surreal/impl/TokenSurrealAdapter.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'tokenSurrealRepositoryAdapterImpl' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/classes/!/co/edu/uco/infrastructure/adapter/secondary/repository/surreal/impl/TokenSurrealRepositoryAdapterImpl.class]: Could not generate CGLIB subclass of class co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenSurrealRepositoryAdapterImpl: Common causes of this problem include using a final class or a non-visible class
-	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795)
-	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1355)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1192)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:326)
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:324)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:975)
-	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:962)
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:624)
-	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
-	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754)
-	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:456)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1343)
-	at co.edu.uco.infrastructure.init.CrossWordApplication.main(CrossWordApplication.java:14)
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
-	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:91)
-	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:53)
-	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:58)
-Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'verifyAccessUseCaseFacadeImpl' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/lib/core-0.0.1-SNAPSHOT.jar!/co/edu/uco/core/application/facade/token/impl/VerifyAccessUseCaseFacadeImpl.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'verifyAccessUseCase' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/lib/core-0.0.1-SNAPSHOT.jar!/co/edu/uco/core/domain/usecase/VerifyAccessUseCase.class]: Unsatisfied dependency expressed through constructor parameter 2: Error creating bean with name 'tokenSurrealAdapter' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/classes/!/co/edu/uco/infrastructure/adapter/secondary/repository/surreal/impl/TokenSurrealAdapter.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'tokenSurrealRepositoryAdapterImpl' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/classes/!/co/edu/uco/infrastructure/adapter/secondary/repository/surreal/impl/TokenSurrealRepositoryAdapterImpl.class]: Could not generate CGLIB subclass of class co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenSurrealRepositoryAdapterImpl: Common causes of this problem include using a final class or a non-visible class
-	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795)
-	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1355)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1192)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:326)
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:324)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
-	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443)
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353)
-	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904)
-	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782)
-	... 24 common frames omitted
-Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'verifyAccessUseCase' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/lib/core-0.0.1-SNAPSHOT.jar!/co/edu/uco/core/domain/usecase/VerifyAccessUseCase.class]: Unsatisfied dependency expressed through constructor parameter 2: Error creating bean with name 'tokenSurrealAdapter' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/classes/!/co/edu/uco/infrastructure/adapter/secondary/repository/surreal/impl/TokenSurrealAdapter.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'tokenSurrealRepositoryAdapterImpl' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/classes/!/co/edu/uco/infrastructure/adapter/secondary/repository/surreal/impl/TokenSurrealRepositoryAdapterImpl.class]: Could not generate CGLIB subclass of class co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenSurrealRepositoryAdapterImpl: Common causes of this problem include using a final class or a non-visible class
-	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795)
-	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1355)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1192)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:326)
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:324)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
-	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443)
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353)
-	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904)
-	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782)
-	... 38 common frames omitted
-Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'tokenSurrealAdapter' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/classes/!/co/edu/uco/infrastructure/adapter/secondary/repository/surreal/impl/TokenSurrealAdapter.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'tokenSurrealRepositoryAdapterImpl' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/classes/!/co/edu/uco/infrastructure/adapter/secondary/repository/surreal/impl/TokenSurrealRepositoryAdapterImpl.class]: Could not generate CGLIB subclass of class co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenSurrealRepositoryAdapterImpl: Common causes of this problem include using a final class or a non-visible class
-	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795)
-	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1355)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1192)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:326)
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:324)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
-	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443)
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353)
-	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904)
-	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782)
-	... 52 common frames omitted
-Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'tokenSurrealRepositoryAdapterImpl' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/classes/!/co/edu/uco/infrastructure/adapter/secondary/repository/surreal/impl/TokenSurrealRepositoryAdapterImpl.class]: Could not generate CGLIB subclass of class co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenSurrealRepositoryAdapterImpl: Common causes of this problem include using a final class or a non-visible class
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:326)
-	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:324)
-	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
-	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443)
-	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353)
-	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904)
-	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782)
-	... 66 common frames omitted
-Caused by: org.springframework.aop.framework.AopConfigException: Could not generate CGLIB subclass of class co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenSurrealRepositoryAdapterImpl: Common causes of this problem include using a final class or a non-visible class
-	at org.springframework.aop.framework.CglibAopProxy.buildProxy(CglibAopProxy.java:230)
-	at org.springframework.aop.framework.CglibAopProxy.getProxy(CglibAopProxy.java:163)
-	at org.springframework.aop.framework.ProxyFactory.getProxy(ProxyFactory.java:110)
-	at org.springframework.aop.framework.AbstractAdvisingBeanPostProcessor.postProcessAfterInitialization(AbstractAdvisingBeanPostProcessor.java:127)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyBeanPostProcessorsAfterInitialization(AbstractAutowireCapableBeanFactory.java:438)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1789)
-	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:600)
-	... 76 common frames omitted
-Caused by: java.lang.IllegalArgumentException: Cannot subclass final class co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenSurrealRepositoryAdapterImpl
-	at org.springframework.cglib.proxy.Enhancer.generateClass(Enhancer.java:653)
-	at org.springframework.cglib.core.DefaultGeneratorStrategy.generate(DefaultGeneratorStrategy.java:26)
-	at org.springframework.cglib.core.ClassLoaderAwareGeneratorStrategy.generate(ClassLoaderAwareGeneratorStrategy.java:57)
-	at org.springframework.cglib.core.AbstractClassGenerator.generate(AbstractClassGenerator.java:366)
-	at org.springframework.cglib.proxy.Enhancer.generate(Enhancer.java:575)
-	at org.springframework.cglib.core.AbstractClassGenerator$ClassLoaderData.lambda$new$1(AbstractClassGenerator.java:107)
-	at org.springframework.cglib.core.internal.LoadingCache.lambda$createEntry$1(LoadingCache.java:52)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
-	at org.springframework.cglib.core.internal.LoadingCache.createEntry(LoadingCache.java:57)
-	at org.springframework.cglib.core.internal.LoadingCache.get(LoadingCache.java:34)
-	at org.springframework.cglib.core.AbstractClassGenerator$ClassLoaderData.get(AbstractClassGenerator.java:130)
-	at org.springframework.cglib.core.AbstractClassGenerator.create(AbstractClassGenerator.java:317)
-	at org.springframework.cglib.proxy.Enhancer.createHelper(Enhancer.java:562)
-	at org.springframework.cglib.proxy.Enhancer.createClass(Enhancer.java:407)
-	at org.springframework.aop.framework.ObjenesisCglibAopProxy.createProxyClassAndInstance(ObjenesisCglibAopProxy.java:62)
-	at org.springframework.aop.framework.CglibAopProxy.buildProxy(CglibAopProxy.java:221)
-	... 82 common frames omitted
-{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:17:24.910",
+                "timestamp": "2026-05-16T02:23:58.090",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "co.edu.uco.infrastructure.init.CrossWordApplication",
                 "message": "Starting CrossWordApplication v0.0.1-SNAPSHOT using Java 21.0.10 with PID 7 (/app/app.jar started by root in /app)"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:24.922",
+                "timestamp": "2026-05-16T02:23:58.098",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "co.edu.uco.infrastructure.init.CrossWordApplication",
                 "message": "No active profile set, falling back to 1 default profile: "default""
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:27.141",
+                "timestamp": "2026-05-16T02:24:03.272",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
                 "message": "Multiple Spring Data modules found, entering strict repository configuration mode"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:27.142",
+                "timestamp": "2026-05-16T02:24:03.275",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
                 "message": "Bootstrapping Spring Data Redis repositories in DEFAULT mode."
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:27.288",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
-                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.EnvironmentRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:17:27.293",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
-                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.TokenStateMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:17:27.300",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
-                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.TokenMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:17:27.305",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
-                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.EnvironmentMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:17:27.322",
+                "timestamp": "2026-05-16T02:24:03.719",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
                 "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.postgresql.TokenPostgresSQLRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:27.461",
+                "timestamp": "2026-05-16T02:24:03.737",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.TokenMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-16T02:24:03.749",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.TokenStateMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-16T02:24:03.759",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.EnvironmentMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-16T02:24:03.782",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.EnvironmentRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-16T02:24:03.867",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
-                "message": "Finished Spring Data repository scanning in 249 ms. Found 1 Redis repository interface."
+                "message": "Finished Spring Data repository scanning in 463 ms. Found 1 Redis repository interface."
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:27.484",
+                "timestamp": "2026-05-16T02:24:03.904",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
                 "message": "Multiple Spring Data modules found, entering strict repository configuration mode"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:27.493",
+                "timestamp": "2026-05-16T02:24:03.908",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
                 "message": "Bootstrapping Spring Data JPA repositories in DEFAULT mode."
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:27.546",
+                "timestamp": "2026-05-16T02:24:03.988",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
-                "message": "Finished Spring Data repository scanning in 34 ms. Found 1 JPA repository interface."
+                "message": "Finished Spring Data repository scanning in 60 ms. Found 1 JPA repository interface."
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:27.552",
+                "timestamp": "2026-05-16T02:24:03.996",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
                 "message": "Multiple Spring Data modules found, entering strict repository configuration mode"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:27.554",
+                "timestamp": "2026-05-16T02:24:03.998",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
                 "message": "Bootstrapping Spring Data MongoDB repositories in DEFAULT mode."
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:27.571",
-                "level": "INFO",
-                "thread": "main",
-                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
-                "message": "Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.postgresql.TokenPostgresSQLRepositoryAdapter; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:17:27.573",
+                "timestamp": "2026-05-16T02:24:04.013",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
                 "message": "Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.redis.RedisRepositoryAdapter; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:27.596",
+                "timestamp": "2026-05-16T02:24:04.016",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.postgresql.TokenPostgresSQLRepositoryAdapter; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-05-16T02:24:04.048",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
-                "message": "Finished Spring Data repository scanning in 38 ms. Found 4 MongoDB repository interfaces."
+                "message": "Finished Spring Data repository scanning in 45 ms. Found 4 MongoDB repository interfaces."
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:29.532",
+                "timestamp": "2026-05-16T02:24:06.739",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.boot.web.embedded.tomcat.TomcatWebServer",
                 "message": "Tomcat initialized with port 8085 (http)"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:29.549",
+                "timestamp": "2026-05-16T02:24:06.775",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.apache.coyote.http11.Http11NioProtocol",
                 "message": "Initializing ProtocolHandler ["http-nio-8085"]"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:29.552",
+                "timestamp": "2026-05-16T02:24:06.781",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.apache.catalina.core.StandardService",
                 "message": "Starting service [Tomcat]"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:29.553",
+                "timestamp": "2026-05-16T02:24:06.783",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.apache.catalina.core.StandardEngine",
                 "message": "Starting Servlet engine: [Apache Tomcat/10.1.20]"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:29.595",
+                "timestamp": "2026-05-16T02:24:06.892",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]",
                 "message": "Initializing Spring embedded WebApplicationContext"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:29.596",
+                "timestamp": "2026-05-16T02:24:06.895",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext",
-                "message": "Root WebApplicationContext: initialization completed in 4547 ms"
+                "message": "Root WebApplicationContext: initialization completed in 8650 ms"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:29.999",
+                "timestamp": "2026-05-16T02:24:07.834",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.hibernate.jpa.internal.util.LogHelper",
                 "message": "HHH000204: Processing PersistenceUnitInfo [name: default]"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:30.137",
+                "timestamp": "2026-05-16T02:24:07.965",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.hibernate.Version",
                 "message": "HHH000412: Hibernate ORM core version 6.4.4.Final"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:30.202",
+                "timestamp": "2026-05-16T02:24:08.056",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.hibernate.cache.internal.RegionFactoryInitiator",
                 "message": "HHH000026: Second-level cache disabled"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:30.574",
+                "timestamp": "2026-05-16T02:24:08.726",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.orm.jpa.persistenceunit.SpringPersistenceUnitInfo",
                 "message": "No LoadTimeWeaver setup: ignoring JPA class transformer"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:30.866",
+                "timestamp": "2026-05-16T02:24:09.002",
                 "level": "WARN",
                 "thread": "main",
                 "logger": "org.hibernate.orm.deprecation",
                 "message": "HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:31.721",
+                "timestamp": "2026-05-16T02:24:10.036",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator",
                 "message": "HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:31.725",
+                "timestamp": "2026-05-16T02:24:10.040",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean",
                 "message": "Initialized JPA EntityManagerFactory for persistence unit 'default'"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:31.948",
+                "timestamp": "2026-05-16T02:24:10.681",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "co.edu.uco.infrastructure.configuration.SurrealDBConfig",
                 "message": "Connecting to SurrealDB at: ws://surrealdb-messageucolab:8005/rpc"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:32.317",
+                "timestamp": "2026-05-16T02:24:11.255",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "co.edu.uco.infrastructure.configuration.SurrealDBConfig",
                 "message": "Successfully signed in to SurrealDB"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:32.319",
+                "timestamp": "2026-05-16T02:24:11.257",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "co.edu.uco.infrastructure.configuration.SurrealDBConfig",
                 "message": "Using namespace: messageucolab and database: messageucolab"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:34.332",
+                "timestamp": "2026-05-16T02:24:13.310",
                 "level": "WARN",
                 "thread": "main",
                 "logger": "org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration",
                 "message": "spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:35.377",
+                "timestamp": "2026-05-16T02:24:15.005",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.boot.actuate.endpoint.web.EndpointLinksResolver",
                 "message": "Exposing 3 endpoint(s) beneath base path '/actuator'"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:35.455",
+                "timestamp": "2026-05-16T02:24:15.092",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.apache.coyote.http11.Http11NioProtocol",
                 "message": "Starting ProtocolHandler ["http-nio-8085"]"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:35.473",
+                "timestamp": "2026-05-16T02:24:15.124",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.boot.web.embedded.tomcat.TomcatWebServer",
                 "message": "Tomcat started on port 8085 (http) with context path ''"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:17:35.489",
+                "timestamp": "2026-05-16T02:24:15.148",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "co.edu.uco.infrastructure.init.CrossWordApplication",
-                "message": "Started CrossWordApplication in 28.207 seconds (process running for 31.674)"
+                "message": "Started CrossWordApplication in 34.81 seconds (process running for 40.251)"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:19:06.663",
-                "level": "INFO",
-                "thread": "http-nio-8085-exec-1",
-                "logger": "org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]",
-                "message": "Initializing Spring DispatcherServlet 'dispatcherServlet'"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:19:06.664",
-                "level": "INFO",
-                "thread": "http-nio-8085-exec-1",
-                "logger": "org.springframework.web.servlet.DispatcherServlet",
-                "message": "Initializing Servlet 'dispatcherServlet'"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:19:06.670",
-                "level": "INFO",
-                "thread": "http-nio-8085-exec-1",
-                "logger": "org.springframework.web.servlet.DispatcherServlet",
-                "message": "Completed initialization in 4 ms"
-                }{
-                "correlationId": "6dcf56ba-04dc-4346-9fe0-18e2c6be1aeb",
-                "timestamp": "2026-05-13T02:19:06.823",
-                "level": "WARN",
-                "thread": "http-nio-8085-exec-1",
-                "logger": "co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl",
-                "message": "Cannot parse UUID from value: token_state:⟨123e4567-e89b-12d3-a456-426614175001⟩"
-                }java.lang.IllegalArgumentException: UUID string too large
-	at java.base/java.util.UUID.fromString1(UUID.java:266)
-	at java.base/java.util.UUID.fromString(UUID.java:260)
-	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl.extractUuid(TokenStateSurrealRepositoryAdapterImpl.java:75)
-	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl.findOne(TokenStateSurrealRepositoryAdapterImpl.java:67)
-	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl.findStatusTokenSurrealModelByName(TokenStateSurrealRepositoryAdapterImpl.java:46)
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
-	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:354)
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196)
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
-	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
-	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:137)
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
-	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
-	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:720)
-	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl$$SpringCGLIB$$0.findStatusTokenSurrealModelByName(<generated>)
-	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealAdapter.findByStatusName(TokenStateSurrealAdapter.java:40)
-	at co.edu.uco.core.domain.usecase.RevokeTokenUseCase.execute(RevokeTokenUseCase.java:24)
-	at co.edu.uco.core.application.facade.token.impl.CreateTokenUseCaseFacadeImpl.execute(CreateTokenUseCaseFacadeImpl.java:60)
-	at co.edu.uco.infrastructure.adapter.primary.controller.CreateTokenControllerImpl.createToken(CreateTokenControllerImpl.java:54)
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
-	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
-	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
-	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
-	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
-	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
-	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
-	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
-	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
-	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
-	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
-	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
-	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
-	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:206)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
-	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
-	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
-	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
-	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:109)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
-	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
-	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
-	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
-	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
-	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
-	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
-	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
-	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
-	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
-	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
-	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
-	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1736)
-	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
-	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
-	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
-	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
-	at java.base/java.lang.Thread.run(Thread.java:1583)
-{
-                "correlationId": "6dcf56ba-04dc-4346-9fe0-18e2c6be1aeb",
-                "timestamp": "2026-05-13T02:19:06.057",
-                "level": "INFO",
-                "thread": "http-nio-8085-exec-1",
-                "logger": "co.edu.uco.infrastructure.adapter.secondary.presenter.rest.HttpPresenterAdapter",
-                "message": "The successful response is: {"data":["Y9J6tnHptuYRxxGASjPERnzAaKA5vUyKgTuaj/AKv0Aadggp9LkX7IhhbnyM5hqo6N+bFO2GmCbzG4TvOYhUAB4YHa/MvWeDIsLrA/I+XQbAxKXNgOQrWoOGgZaV0IHb/KyStTMo7mxGWd9nwq7BmOAcF6NPghFY2Ooe3w4gnwBXA0AMvjNl7O1CiVgrSdAJ6WOaJDaLOoNe6K39u9urc14OAb8JU+Kr/60pekAfRXWdo7sP9VQqQWBe5JhtwHx16VeoDkosuQxoa/qSiMAkxg959sEbbHR78ur9NZ/8F4v2I5h85kIa1xHZGwTxdWfpGtRJH41pYreH+OlbS7wPKg=="],"errors":[]}"
-                }{
-                "correlationId": "",
-                "timestamp": "2026-05-13T02:42:39.167",
+                "timestamp": "2026-05-16T02:57:22.821",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "co.edu.uco.infrastructure.init.CrossWordApplication",
-                "message": "Starting CrossWordApplication v0.0.1-SNAPSHOT using Java 21.0.10 with PID 6 (/app/app.jar started by root in /app)"
+                "message": "Starting CrossWordApplication v0.0.1-SNAPSHOT using Java 21.0.10 with PID 7 (/app/app.jar started by root in /app)"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:39.198",
+                "timestamp": "2026-05-16T02:57:22.842",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "co.edu.uco.infrastructure.init.CrossWordApplication",
                 "message": "No active profile set, falling back to 1 default profile: "default""
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:45.972",
+                "timestamp": "2026-05-16T02:57:26.417",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
                 "message": "Multiple Spring Data modules found, entering strict repository configuration mode"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:45.974",
+                "timestamp": "2026-05-16T02:57:26.418",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
                 "message": "Bootstrapping Spring Data Redis repositories in DEFAULT mode."
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:46.517",
+                "timestamp": "2026-05-16T02:57:26.655",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
                 "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.postgresql.TokenPostgresSQLRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:46.540",
+                "timestamp": "2026-05-16T02:57:26.664",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
                 "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.TokenMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:46.547",
+                "timestamp": "2026-05-16T02:57:26.670",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
                 "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.TokenStateMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:46.559",
+                "timestamp": "2026-05-16T02:57:26.680",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
                 "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.EnvironmentMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:46.573",
+                "timestamp": "2026-05-16T02:57:26.687",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
                 "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.EnvironmentRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:46.699",
+                "timestamp": "2026-05-16T02:57:26.743",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
-                "message": "Finished Spring Data repository scanning in 633 ms. Found 1 Redis repository interface."
+                "message": "Finished Spring Data repository scanning in 257 ms. Found 1 Redis repository interface."
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:46.718",
+                "timestamp": "2026-05-16T02:57:26.753",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
                 "message": "Multiple Spring Data modules found, entering strict repository configuration mode"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:46.720",
+                "timestamp": "2026-05-16T02:57:26.756",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
                 "message": "Bootstrapping Spring Data JPA repositories in DEFAULT mode."
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:46.813",
+                "timestamp": "2026-05-16T02:57:26.791",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
-                "message": "Finished Spring Data repository scanning in 52 ms. Found 1 JPA repository interface."
+                "message": "Finished Spring Data repository scanning in 19 ms. Found 1 JPA repository interface."
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:46.823",
+                "timestamp": "2026-05-16T02:57:26.796",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
                 "message": "Multiple Spring Data modules found, entering strict repository configuration mode"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:46.826",
+                "timestamp": "2026-05-16T02:57:26.798",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
                 "message": "Bootstrapping Spring Data MongoDB repositories in DEFAULT mode."
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:46.847",
+                "timestamp": "2026-05-16T02:57:26.825",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
                 "message": "Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.redis.RedisRepositoryAdapter; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:46.854",
+                "timestamp": "2026-05-16T02:57:26.830",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
                 "message": "Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.postgresql.TokenPostgresSQLRepositoryAdapter; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:46.913",
+                "timestamp": "2026-05-16T02:57:26.898",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
-                "message": "Finished Spring Data repository scanning in 84 ms. Found 4 MongoDB repository interfaces."
+                "message": "Finished Spring Data repository scanning in 96 ms. Found 4 MongoDB repository interfaces."
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:51.339",
+                "timestamp": "2026-05-16T02:57:32.996",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.boot.web.embedded.tomcat.TomcatWebServer",
                 "message": "Tomcat initialized with port 8085 (http)"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:51.375",
+                "timestamp": "2026-05-16T02:57:33.019",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.apache.coyote.http11.Http11NioProtocol",
                 "message": "Initializing ProtocolHandler ["http-nio-8085"]"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:51.383",
+                "timestamp": "2026-05-16T02:57:33.022",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.apache.catalina.core.StandardService",
                 "message": "Starting service [Tomcat]"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:51.386",
+                "timestamp": "2026-05-16T02:57:33.023",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.apache.catalina.core.StandardEngine",
                 "message": "Starting Servlet engine: [Apache Tomcat/10.1.20]"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:51.534",
+                "timestamp": "2026-05-16T02:57:33.092",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]",
                 "message": "Initializing Spring embedded WebApplicationContext"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:51.542",
+                "timestamp": "2026-05-16T02:57:33.093",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext",
-                "message": "Root WebApplicationContext: initialization completed in 12070 ms"
+                "message": "Root WebApplicationContext: initialization completed in 10135 ms"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:52.984",
+                "timestamp": "2026-05-16T02:57:33.945",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.hibernate.jpa.internal.util.LogHelper",
                 "message": "HHH000204: Processing PersistenceUnitInfo [name: default]"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:53.267",
+                "timestamp": "2026-05-16T02:57:34.186",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.hibernate.Version",
                 "message": "HHH000412: Hibernate ORM core version 6.4.4.Final"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:53.396",
+                "timestamp": "2026-05-16T02:57:34.293",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.hibernate.cache.internal.RegionFactoryInitiator",
                 "message": "HHH000026: Second-level cache disabled"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:54.204",
+                "timestamp": "2026-05-16T02:57:35.157",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.orm.jpa.persistenceunit.SpringPersistenceUnitInfo",
                 "message": "No LoadTimeWeaver setup: ignoring JPA class transformer"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:54.513",
+                "timestamp": "2026-05-16T02:57:35.533",
                 "level": "WARN",
                 "thread": "main",
                 "logger": "org.hibernate.orm.deprecation",
                 "message": "HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:55.898",
+                "timestamp": "2026-05-16T02:57:36.835",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator",
                 "message": "HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:55.904",
+                "timestamp": "2026-05-16T02:57:36.841",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean",
                 "message": "Initialized JPA EntityManagerFactory for persistence unit 'default'"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:56.467",
+                "timestamp": "2026-05-16T02:57:37.540",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "co.edu.uco.infrastructure.configuration.SurrealDBConfig",
                 "message": "Connecting to SurrealDB at: ws://surrealdb-messageucolab:8005/rpc"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:57.448",
+                "timestamp": "2026-05-16T02:57:38.289",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "co.edu.uco.infrastructure.configuration.SurrealDBConfig",
                 "message": "Successfully signed in to SurrealDB"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:42:57.450",
+                "timestamp": "2026-05-16T02:57:38.292",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "co.edu.uco.infrastructure.configuration.SurrealDBConfig",
                 "message": "Using namespace: messageucolab and database: messageucolab"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:43:00.209",
+                "timestamp": "2026-05-16T02:57:40.574",
                 "level": "WARN",
                 "thread": "main",
                 "logger": "org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration",
                 "message": "spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:43:01.641",
+                "timestamp": "2026-05-16T02:57:42.210",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.boot.actuate.endpoint.web.EndpointLinksResolver",
                 "message": "Exposing 3 endpoint(s) beneath base path '/actuator'"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:43:01.724",
+                "timestamp": "2026-05-16T02:57:42.330",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.apache.coyote.http11.Http11NioProtocol",
                 "message": "Starting ProtocolHandler ["http-nio-8085"]"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:43:01.745",
+                "timestamp": "2026-05-16T02:57:42.357",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "org.springframework.boot.web.embedded.tomcat.TomcatWebServer",
                 "message": "Tomcat started on port 8085 (http) with context path ''"
                 }{
                 "correlationId": "",
-                "timestamp": "2026-05-13T02:43:01.763",
+                "timestamp": "2026-05-16T02:57:42.379",
                 "level": "INFO",
                 "thread": "main",
                 "logger": "co.edu.uco.infrastructure.init.CrossWordApplication",
-                "message": "Started CrossWordApplication in 42.032 seconds (process running for 50.292)"
+                "message": "Started CrossWordApplication in 36.795 seconds (process running for 43.597)"
                 }
