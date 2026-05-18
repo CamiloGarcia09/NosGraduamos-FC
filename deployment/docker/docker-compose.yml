@@ -241,6 +241,8 @@ services:
     container_name: messageucolab-app
     ports:
       - "8085:8085"
+    env_file:
+      - .env
     environment:
       - LOG_PATH=/app/logs
       - AZURE_KEYVAULT_UCOLAB_ENDPOINT=${AZURE_KEYVAULT_UCOLAB_ENDPOINT}

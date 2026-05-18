@@ -30,6 +30,9 @@ import static co.edu.uco.utils.helper.UtilUUID.getStringToUUID;
 @Slf4j
 @Component
 public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFacade {
+    // Explicit logger in case Lombok annotation processor is not active during build
+    private static final org.slf4j.Logger explicitLog = org.slf4j.LoggerFactory.getLogger(CreateTokenUseCaseFacadeImpl.class);
+
     private final HandlingCreateTokenPort handlingCreateTokenPort;
     private final TokenDTOMapper tokenDTOMapper;
     private final CreateTokenSecretPort createTokenSecretPort;
@@ -68,26 +71,26 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
 
         if(isNullObject(keyPairResponseDTO)){
             var message = DetailMessageEnum.TCH_024.getMessage();
-            log.error(message.content());
+            explicitLog.error(message.content());
             throw CrossWordsException.build(message.content());
         }
 
         try{
             var generateSignature = encrypt.generateSignature(secretName, keyPairResponseDTO.getPublicKey());
 
-            var tokenDTO = TokenDTO.builder()
-                    .id(generateSignature)
-                    .secretName(secretName)
-                    .creationDate(LocalDateTime.now())
-                    .expirationDate(parseDate(createTokenDTO.getExpirationDate()))
-                    .environmentId(getStringToUUID(createTokenDTO.getEnvironmentId()))
-                    .build();
+            var tokenDTO = new TokenDTO(
+                    generateSignature,
+                    secretName,
+                    LocalDateTime.now(),
+                    parseDate(createTokenDTO.getExpirationDate()),
+                    getStringToUUID(createTokenDTO.getEnvironmentId())
+            );
             createTokenSecretPort.execute(secretName, UtilPairKey.encodePrivateKey(keyPairResponseDTO.getPrivateKey()));
             handlingCreateTokenPort.createToken(tokenDTOMapper.mapperDomain(tokenDTO));
             return generateSignature;
         }catch (Exception e){
             var message = DetailMessageEnum.TCH_025.getContent();
-            log.error(message, e);
+            explicitLog.error(message, e);
             throw CrossWordsException.build(message, e);
         }
     }

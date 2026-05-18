@@ -15,4 +15,8 @@ import java.security.PublicKey;
 public final class KeyPairDTO {
     private PublicKey publicKey;
     private PrivateKey privateKey;
+
+    // Explicit getters in case Lombok is not processed during build
+    public PublicKey getPublicKey() { return publicKey; }
+    public PrivateKey getPrivateKey() { return privateKey; }
 }

@@ -507,7 +507,7 @@ public final class SurrealDomainEventProjectionConsumer {
     }
 
     private static String recordIdToString(final RecordId recordId) {
-        return recordId.getTable() + ":" + recordId.getId();
+        return recordId.getTable() + ":" + cleanIdPart(recordId.getId().toString());
     }
 
     private record DomainEvent(String id,
@@ -573,6 +573,9 @@ public final class SurrealDomainEventProjectionConsumer {
             return "";
         }
         if (id.length() >= 2 && id.startsWith("`") && id.endsWith("`")) {
+            return id.substring(1, id.length() - 1);
+        }
+        if (id.length() >= 2 && id.startsWith("⟨") && id.endsWith("⟩")) {
             return id.substring(1, id.length() - 1);
         }
         return id;
