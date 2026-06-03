@@ -8,4 +8,10 @@ public interface FindMessagesController {
                                          HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse);
         void findByCodeMessageAndEnvironment(String messageCode, HttpServletRequest httpServletRequest,
                         HttpServletResponse httpServletResponse);
+        void translateByCodeMessageAndEnvironment(
+                        String messageCode,
+                        String sourceLanguage,
+                        String targetLanguage,
+                        HttpServletRequest httpServletRequest,
+                        HttpServletResponse httpServletResponse);
 }

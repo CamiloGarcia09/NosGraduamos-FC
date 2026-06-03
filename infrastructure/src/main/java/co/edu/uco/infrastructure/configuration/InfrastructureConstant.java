@@ -90,6 +90,7 @@ public final class InfrastructureConstant {
     public static final String WEB_CONFIG_API_APPLICATION = "/messageucolab/v1/application/**/message/*";
     public static final String WEB_CONFIG_API_ENVIRONMENT = "/messageucolab/v1/application/environment";
     public static final String WEB_CONFIG_API_CODE = "/messageucolab/v1/application/code/*";
+    public static final String WEB_CONFIG_API_CODE_TRANSLATION = "/messageucolab/v1/application/code/*/translation";
 
     public static final String SWAGGER_UI_HTML = "/swagger-ui.html";
     public static final String SWAGGER_UI = "/swagger-ui/**";
