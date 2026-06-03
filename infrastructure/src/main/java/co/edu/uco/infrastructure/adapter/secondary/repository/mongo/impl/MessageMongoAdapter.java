@@ -7,6 +7,7 @@ import co.edu.uco.infrastructure.adapter.secondary.repository.data.DataMapper;
 import co.edu.uco.infrastructure.adapter.secondary.repository.mongo.EnvironmentMongoRepositoryAdapter;
 import co.edu.uco.infrastructure.adapter.secondary.repository.mongo.model.MessageEnvironmentDocument;
 import co.edu.uco.infrastructure.adapter.secondary.repository.mongo.model.MessageDocument;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -14,8 +15,11 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.DATABASE_MONGO_ADAPTER;
+import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.PERSISTENCE_PRIMARY_MONGO;
+import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.PERSISTENCE_PRIMARY_PROPERTY;
 
 @Component(DATABASE_MONGO_ADAPTER)
+@ConditionalOnProperty(name = PERSISTENCE_PRIMARY_PROPERTY, havingValue = PERSISTENCE_PRIMARY_MONGO, matchIfMissing = true)
 public final class MessageMongoAdapter implements DataBaseMessageRepository {
     private final EnvironmentMongoRepositoryAdapter environmentRepository;
     private final DataMapper<MessageData, MessageDocument> mapper;

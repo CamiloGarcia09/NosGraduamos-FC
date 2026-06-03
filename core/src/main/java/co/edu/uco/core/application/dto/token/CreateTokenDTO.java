@@ -24,4 +24,13 @@ public final class CreateTokenDTO {
     public void setEnvironmentId(String environmentId) {
         this.environmentId = trim(environmentId);
     }
+
+    // Explicit getters to avoid Lombok/annotation-processing issues during build
+    public String getExpirationDate() {
+        return expirationDate;
+    }
+
+    public String getEnvironmentId() {
+        return environmentId;
+    }
 }
