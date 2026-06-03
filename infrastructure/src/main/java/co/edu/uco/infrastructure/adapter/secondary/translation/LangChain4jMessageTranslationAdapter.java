@@ -13,6 +13,7 @@ import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.ResponseFormatType;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
+import dev.langchain4j.model.ollama.OllamaChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,8 @@ import static co.edu.uco.utils.helper.UtilText.trim;
 @Slf4j
 @Component
 public class LangChain4jMessageTranslationAdapter implements MessageTranslationPort {
-    private static final String PROVIDER = "langchain4j-open-ai";
+    private static final String PROVIDER_OPEN_AI = "open-ai";
+    private static final String PROVIDER_OLLAMA = "ollama";
 
     private final TranslationAiProperties properties;
     private final ObjectMapper objectMapper;
@@ -44,7 +46,7 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
         if (!properties.isEnabled()) {
             throw BusinessException.buildUserException("Dynamic translation is disabled.");
         }
-        if (isEmptyOrNull(properties.getApiKey())) {
+        if (isOpenAiProvider() && isEmptyOrNull(properties.getApiKey())) {
             throw BusinessException.buildUserException("Dynamic translation needs TRANSLATION_AI_API_KEY.");
         }
 
@@ -56,7 +58,7 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
             var elapsedMillis = Duration.ofNanos(System.nanoTime() - startedAt).toMillis();
             log.info(
                     "Dynamic translation completed with provider={} model={} code={} targetLanguage={} elapsedMs={}",
-                    PROVIDER,
+                    providerName(),
                     properties.getModelName(),
                     requestData.getCode(),
                     requestData.getTargetLanguage(),
@@ -65,14 +67,14 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
             return MessageTranslationResponseData.create(
                     translated.translatedTitle(),
                     translated.translatedContent(),
-                    PROVIDER,
+                    providerName(),
                     properties.getModelName(),
                     elapsedMillis
             );
         } catch (Exception exception) {
             log.error(
                     "Dynamic translation failed with provider={} model={} code={} targetLanguage={}",
-                    PROVIDER,
+                    providerName(),
                     properties.getModelName(),
                     requestData.getCode(),
                     requestData.getTargetLanguage(),
@@ -84,20 +86,41 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
 
     private ChatModel model() {
         if (chatModel == null) {
-            var builder = OpenAiChatModel.builder()
-                    .apiKey(properties.getApiKey())
-                    .modelName(properties.getModelName())
-                    .temperature(properties.getTemperature())
-                    .maxRetries(properties.getMaxRetries())
-                    .timeout(Duration.ofSeconds(properties.getTimeoutSeconds()));
-
-            if (!isEmptyOrNull(properties.getBaseUrl())) {
-                builder.baseUrl(properties.getBaseUrl());
-            }
-
-            chatModel = builder.build();
+            chatModel = isOpenAiProvider() ? openAiModel() : ollamaModel();
         }
         return chatModel;
+    }
+
+    private ChatModel openAiModel() {
+        var builder = OpenAiChatModel.builder()
+                .apiKey(properties.getApiKey())
+                .modelName(properties.getModelName())
+                .temperature(properties.getTemperature())
+                .maxRetries(properties.getMaxRetries())
+                .timeout(Duration.ofSeconds(properties.getTimeoutSeconds()));
+
+        if (!isEmptyOrNull(properties.getBaseUrl())) {
+            builder.baseUrl(properties.getBaseUrl());
+        }
+
+        return builder.build();
+    }
+
+    private ChatModel ollamaModel() {
+        return OllamaChatModel.builder()
+                .baseUrl(properties.getBaseUrl())
+                .modelName(properties.getModelName())
+                .temperature(properties.getTemperature())
+                .timeout(Duration.ofSeconds(properties.getTimeoutSeconds()))
+                .build();
+    }
+
+    private boolean isOpenAiProvider() {
+        return PROVIDER_OPEN_AI.equalsIgnoreCase(trim(properties.getProvider()));
+    }
+
+    private String providerName() {
+        return isOpenAiProvider() ? "langchain4j-open-ai" : "langchain4j-" + PROVIDER_OLLAMA;
     }
 
     private ChatRequest buildChatRequest(MessageTranslationRequestData requestData) {

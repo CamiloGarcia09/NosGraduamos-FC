@@ -234,6 +234,35 @@ services:
     networks:
       - kong-network
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - app-network
+
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: ollama-init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    command: pull ${TRANSLATION_AI_MODEL_NAME:-llama3.2}
+    restart: "no"
+    networks:
+      - app-network
+
   messageucolab:
     build:
       context: ../..
@@ -250,21 +279,30 @@ services:
       - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
       - AZURE_TENANT_ID=${AZURE_TENANT_ID}
       - TRANSLATION_AI_ENABLED=${TRANSLATION_AI_ENABLED:-true}
+      - TRANSLATION_AI_PROVIDER=${TRANSLATION_AI_PROVIDER:-ollama}
       - TRANSLATION_AI_API_KEY=${TRANSLATION_AI_API_KEY:-}
-      - TRANSLATION_AI_BASE_URL=${TRANSLATION_AI_BASE_URL:-}
-      - TRANSLATION_AI_MODEL_NAME=${TRANSLATION_AI_MODEL_NAME:-gpt-4o-mini}
+      - TRANSLATION_AI_BASE_URL=${TRANSLATION_AI_BASE_URL:-http://ollama:11434}
+      - TRANSLATION_AI_MODEL_NAME=${TRANSLATION_AI_MODEL_NAME:-llama3.2}
       - TRANSLATION_AI_TEMPERATURE=${TRANSLATION_AI_TEMPERATURE:-0.1}
       - TRANSLATION_AI_MAX_RETRIES=${TRANSLATION_AI_MAX_RETRIES:-0}
-      - TRANSLATION_AI_TIMEOUT_SECONDS=${TRANSLATION_AI_TIMEOUT_SECONDS:-6}
+      - TRANSLATION_AI_TIMEOUT_SECONDS=${TRANSLATION_AI_TIMEOUT_SECONDS:-30}
     volumes:
       - ../../logs:/app/logs
     depends_on:
-      - debezium-postgres
-      - mongodb
-      - redis
-      - kafka
-      - pulsar
-      - surrealdb
+      debezium-postgres:
+        condition: service_started
+      mongodb:
+        condition: service_started
+      redis:
+        condition: service_started
+      kafka:
+        condition: service_started
+      pulsar:
+        condition: service_started
+      surrealdb:
+        condition: service_started
+      ollama-init:
+        condition: service_completed_successfully
     networks:
       - observability-network
       - kong-network
@@ -322,6 +360,8 @@ volumes:
   pulsar-conf:
     driver: local
   surrealdb-data:
+    driver: local
+  ollama-data:
     driver: local
 
 networks:

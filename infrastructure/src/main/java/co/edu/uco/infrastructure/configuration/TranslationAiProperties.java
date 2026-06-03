@@ -11,10 +11,11 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "translation.ai")
 public class TranslationAiProperties {
     private boolean enabled = true;
+    private String provider = "ollama";
     private String apiKey;
-    private String baseUrl;
-    private String modelName = "gpt-4o-mini";
+    private String baseUrl = "http://host.docker.internal:11434";
+    private String modelName = "llama3.2";
     private double temperature = 0.1;
     private int maxRetries = 0;
-    private long timeoutSeconds = 6;
+    private long timeoutSeconds = 30;
 }
