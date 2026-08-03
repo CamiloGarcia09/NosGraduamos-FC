@@ -90,6 +90,7 @@ public final class InfrastructureConstant {
     public static final String WEB_CONFIG_API_APPLICATION = "/messageucolab/v1/application/**/message/*";
     public static final String WEB_CONFIG_API_ENVIRONMENT = "/messageucolab/v1/application/environment";
     public static final String WEB_CONFIG_API_CODE = "/messageucolab/v1/application/code/*";
+    public static final String WEB_CONFIG_API_CODE_TRANSLATION = "/messageucolab/v1/application/code/*/translation";
 
     public static final String SWAGGER_UI_HTML = "/swagger-ui.html";
     public static final String SWAGGER_UI = "/swagger-ui/**";
@@ -101,4 +102,15 @@ public final class InfrastructureConstant {
 
     public static final String SURREAL_CONFIG_PREFIX = "surreal";
     public static final String SURREAL_ADAPTER = "surrealRepositoryAdapter";
+
+    public static final String PERSISTENCE_PRIMARY_PROPERTY = "persistence.primary";
+    public static final String PERSISTENCE_PRIMARY_POSTGRES = "postgres";
+    public static final String PERSISTENCE_PRIMARY_MONGO = "mongo";
+    public static final String PERSISTENCE_PRIMARY_SURREAL = "surreal";
+
+    public static final String TOKEN_SURREAL_ADAPTER = "tokenSurrealAdapter";
+    public static final String TOKEN_STATE_SURREAL_ADAPTER = "tokenStateSurrealAdapter";
+
+    public static final String SURREAL_TABLE_TOKEN = "token";
+    public static final String SURREAL_TABLE_TOKEN_STATE = "token_state";
 }

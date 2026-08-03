@@ -1,8 +1,10 @@
 package co.edu.uco.infrastructure.adapter.primary.controller;
 
 import co.edu.uco.core.application.dto.message.MessageDTO;
+import co.edu.uco.core.application.dto.message.TranslatedMessageDTO;
 import co.edu.uco.core.application.dto.page.PageRequestDTO;
 import co.edu.uco.core.application.facade.message.FindMessageByCodeAndEnvironmentUseCaseFacade;
+import co.edu.uco.core.application.facade.message.TranslateMessageByCodeAndEnvironmentUseCaseFacade;
 import co.edu.uco.core.application.facade.message.impl.FindMessagesByEnvironmentFacadeImpl;
 import co.edu.uco.core.domain.port.out.presenter.PresenterPort;
 import co.edu.uco.core.domain.port.out.repository.SimplePage;
@@ -29,16 +31,22 @@ import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.MES
 final class FindMessagesControllerImpl implements FindMessagesController {
         private final FindMessagesByEnvironmentFacadeImpl findMessagesByEnvironmentFacadeImpl;
         private final FindMessageByCodeAndEnvironmentUseCaseFacade findMessageByCodeAndEnvironmentUseCaseFacade;
+        private final TranslateMessageByCodeAndEnvironmentUseCaseFacade translateMessageByCodeAndEnvironmentUseCaseFacade;
         private final PresenterPort<MessageDTO> restPresenter;
+        private final PresenterPort<TranslatedMessageDTO> translationPresenter;
         private final PresenterPort<SimplePage<MessageDTO>> restPresenterPage;
         public FindMessagesControllerImpl(
                 FindMessagesByEnvironmentFacadeImpl findMessagesByEnvironmentFacadeImpl,
                 FindMessageByCodeAndEnvironmentUseCaseFacade findMessageByCodeAndEnvironmentUseCaseFacade,
+                TranslateMessageByCodeAndEnvironmentUseCaseFacade translateMessageByCodeAndEnvironmentUseCaseFacade,
                 PresenterPort<MessageDTO> restPresenter,
+                PresenterPort<TranslatedMessageDTO> translationPresenter,
                 PresenterPort<SimplePage<MessageDTO>> restPresenterPage) {
                 this.findMessagesByEnvironmentFacadeImpl = findMessagesByEnvironmentFacadeImpl;
                 this.findMessageByCodeAndEnvironmentUseCaseFacade = findMessageByCodeAndEnvironmentUseCaseFacade;
+                this.translateMessageByCodeAndEnvironmentUseCaseFacade = translateMessageByCodeAndEnvironmentUseCaseFacade;
                 this.restPresenter = restPresenter;
+                this.translationPresenter = translationPresenter;
                 this.restPresenterPage = restPresenterPage;
         }
         @Override
@@ -114,5 +122,45 @@ final class FindMessagesControllerImpl implements FindMessagesController {
                 var messageDTO = findMessageByCodeAndEnvironmentUseCaseFacade.execute(messageCode,
                                 environmentId);
                 restPresenter.presentRestSuccess(List.of(messageDTO), httpServletRequest, httpServletResponse);
+        }
+
+        @Override
+        @GetMapping("${crosswords.api.path.message.code.translation}")
+        @Operation(summary = "Traducir mensaje por codigo y ambiente",
+                   description = "Obtiene el mensaje original asociado al ambiente del token y lo traduce dinamicamente al idioma solicitado sin guardar la traduccion en la base de datos.",
+                   parameters = {
+                           @Parameter(name = "messageCode", description = "Codigo del mensaje a traducir", required = true, example = "MSG_001"),
+                           @Parameter(name = "sourceLanguage", description = "Idioma origen. Si no se envia, se detecta automaticamente.", example = "auto"),
+                           @Parameter(name = "targetLanguage", description = "Idioma destino de la traduccion", required = true, example = "en"),
+                           @Parameter(name = "Token", description = "Token de autorizacion", required = true, in = ParameterIn.HEADER, schema = @Schema(type = "string", example = "your_token_here"))
+                   },
+                   responses = {
+                           @ApiResponse(responseCode = "200", description = "Mensaje traducido correctamente", content = {
+                                   @Content(mediaType = "application/json", schema = @Schema(implementation = TranslatedMessageDTO.class)),
+                                   @Content(mediaType = "application/yaml", schema = @Schema(implementation = TranslatedMessageDTO.class)),
+                                   @Content(mediaType = "application/xml", schema = @Schema(implementation = TranslatedMessageDTO.class)),
+                                   @Content(mediaType = "text/plain", schema = @Schema(implementation = TranslatedMessageDTO.class)),
+                                   @Content(mediaType = "text/html", schema = @Schema(implementation = TranslatedMessageDTO.class))
+                           }),
+                           @ApiResponse(responseCode = "400", description = "Solicitud incorrecta"),
+                           @ApiResponse(responseCode = "401", description = "No autorizado"),
+                           @ApiResponse(responseCode = "404", description = "Mensaje no encontrado o traduccion no disponible"),
+                           @ApiResponse(responseCode = "500", description = "Error interno del servidor"),
+                           @ApiResponse(responseCode = "406", description = "Formato de respuesta no soportado")
+                   })
+        public void translateByCodeMessageAndEnvironment(
+                        @PathVariable(MESSAGE_CODE_PARAMETER) String messageCode,
+                        @RequestParam(value = "sourceLanguage", required = false, defaultValue = "auto") String sourceLanguage,
+                        @RequestParam(value = "targetLanguage") String targetLanguage,
+                        HttpServletRequest httpServletRequest,
+                        HttpServletResponse httpServletResponse) {
+                var environmentId = (String) httpServletRequest.getAttribute(ENVIRONMENT_ID_ATTRIBUTE);
+                var translatedMessageDTO = translateMessageByCodeAndEnvironmentUseCaseFacade.execute(
+                                messageCode,
+                                environmentId,
+                                sourceLanguage,
+                                targetLanguage);
+                translationPresenter.presentRestSuccess(List.of(translatedMessageDTO), httpServletRequest,
+                                httpServletResponse);
         }
 }

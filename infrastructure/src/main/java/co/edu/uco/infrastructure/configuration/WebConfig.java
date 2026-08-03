@@ -34,7 +34,8 @@ public class WebConfig implements WebMvcConfigurer {
                         WEB_CONFIG_API_MESSAGE,
                         WEB_CONFIG_API_APPLICATION,
                         WEB_CONFIG_API_ENVIRONMENT,
-                        WEB_CONFIG_API_CODE
+                        WEB_CONFIG_API_CODE,
+                        WEB_CONFIG_API_CODE_TRANSLATION
                 );
     }
 }

@@ -12,6 +12,14 @@ services:
         regex_priority: 10
         strip_path: false
 
+      - name: translate-message-by-code
+        paths:
+          - ~/messageucolab/v1/application/code/[^/]+/translation$
+        methods:
+          - GET
+        regex_priority: 20
+        strip_path: false
+
       - name: get-messages-by-environment
         paths:
           - /messageucolab/v1/application/environment

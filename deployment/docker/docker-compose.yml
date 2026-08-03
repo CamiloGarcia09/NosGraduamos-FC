@@ -152,7 +152,7 @@ services:
     image: mongo:5.0
     container_name: mongodb-crosswords-db
     ports:
-      - "27017:27017"
+      - "28017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGODBUSER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGODBPASSWORD}
@@ -167,8 +167,9 @@ services:
       - app-network
 
   surrealdb:
-    image: surrealdb/surrealdb:latest
+    image: surrealdb/surrealdb:v2.1.4
     container_name: surrealdb-messageucolab
+    user: "0:0"
     ports:
       - "8005:8005"
     environment:
@@ -176,15 +177,41 @@ services:
       SURREAL_USER: ${SURREALDBUSER}
       SURREAL_PASS: ${SURREALDBPASSWORD}
     volumes:
-      - ./surreal-data:/data
-    command: start --user root --pass root surrealkv:/data/database.db
+      - surrealdb-data:/data
+    command: start --bind 0.0.0.0:8005 --user ${SURREALDBUSER} --pass ${SURREALDBPASSWORD} surrealkv:/data/database.db
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
+      test: ["CMD", "/surreal", "is-ready", "--endpoint", "ws://localhost:8005"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
       - observability-network
+      - app-network
+
+  surrealdb-init:
+    image: surrealdb/surrealdb:v2.1.4
+    container_name: surrealdb-init-messageucolab
+    depends_on:
+      surrealdb:
+        condition: service_healthy
+    entrypoint: ["/surreal"]
+    command:
+      - import
+      - --endpoint
+      - http://surrealdb:8005
+      - --username
+      - ${SURREALDBUSER}
+      - --password
+      - ${SURREALDBPASSWORD}
+      - --namespace
+      - ${SURREALDBNAMESPACE}
+      - --database
+      - ${SURREALDBDATABASE}
+      - /init/surreal-init.surql
+    volumes:
+      - ./scripts:/init:ro
+    restart: "no"
+    networks:
       - app-network
 
   kong:
@@ -207,6 +234,35 @@ services:
     networks:
       - kong-network
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - app-network
+
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: ollama-init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    command: pull ${TRANSLATION_AI_MODEL_NAME:-llama3.2}
+    restart: "no"
+    networks:
+      - app-network
+
   messageucolab:
     build:
       context: ../..
@@ -214,21 +270,39 @@ services:
     container_name: messageucolab-app
     ports:
       - "8085:8085"
+    env_file:
+      - .env
     environment:
       - LOG_PATH=/app/logs
       - AZURE_KEYVAULT_UCOLAB_ENDPOINT=${AZURE_KEYVAULT_UCOLAB_ENDPOINT}
       - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
       - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
       - AZURE_TENANT_ID=${AZURE_TENANT_ID}
+      - TRANSLATION_AI_ENABLED=${TRANSLATION_AI_ENABLED:-true}
+      - TRANSLATION_AI_PROVIDER=${TRANSLATION_AI_PROVIDER:-ollama}
+      - TRANSLATION_AI_API_KEY=${TRANSLATION_AI_API_KEY:-}
+      - TRANSLATION_AI_BASE_URL=${TRANSLATION_AI_BASE_URL:-http://ollama:11434}
+      - TRANSLATION_AI_MODEL_NAME=${TRANSLATION_AI_MODEL_NAME:-llama3.2}
+      - TRANSLATION_AI_TEMPERATURE=${TRANSLATION_AI_TEMPERATURE:-0.1}
+      - TRANSLATION_AI_MAX_RETRIES=${TRANSLATION_AI_MAX_RETRIES:-0}
+      - TRANSLATION_AI_TIMEOUT_SECONDS=${TRANSLATION_AI_TIMEOUT_SECONDS:-30}
     volumes:
       - ../../logs:/app/logs
     depends_on:
-      - debezium-postgres
-      - mongodb
-      - redis
-      - kafka
-      - pulsar
-      - surrealdb
+      debezium-postgres:
+        condition: service_started
+      mongodb:
+        condition: service_started
+      redis:
+        condition: service_started
+      kafka:
+        condition: service_started
+      pulsar:
+        condition: service_started
+      surrealdb:
+        condition: service_started
+      ollama-init:
+        condition: service_completed_successfully
     networks:
       - observability-network
       - kong-network
@@ -286,6 +360,8 @@ volumes:
   pulsar-conf:
     driver: local
   surrealdb-data:
+    driver: local
+  ollama-data:
     driver: local
 
 networks:
