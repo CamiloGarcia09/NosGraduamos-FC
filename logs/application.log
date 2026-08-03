@@ -5068,4 +5068,846 @@ You may need to update both your build tool settings as well as your IDE.
                 "thread": "http-nio-8085-exec-8",
                 "logger": "co.edu.uco.infrastructure.adapter.secondary.presenter.rest.HttpPresenterAdapter",
                 "message": "The error response is: {"data":[],"errors":["Access denied, the token is expired or inactive"]}"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:49.576",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "co.edu.uco.infrastructure.init.CrossWordApplication",
+                "message": "Starting CrossWordApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 7 (/app/app.jar started by root in /app)"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:49.578",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "co.edu.uco.infrastructure.init.CrossWordApplication",
+                "message": "No active profile set, falling back to 1 default profile: "default""
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:51.506",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
+                "message": "Multiple Spring Data modules found, entering strict repository configuration mode"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:51.507",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
+                "message": "Bootstrapping Spring Data Redis repositories in DEFAULT mode."
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:51.614",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.EnvironmentRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:51.617",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.TokenStateMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:51.619",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.TokenMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:51.620",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.mongo.EnvironmentMongoRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:51.623",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data Redis - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.postgresql.TokenPostgresSQLRepositoryAdapter; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:51.689",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
+                "message": "Finished Spring Data repository scanning in 142 ms. Found 1 Redis repository interface."
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:51.693",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
+                "message": "Multiple Spring Data modules found, entering strict repository configuration mode"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:51.696",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
+                "message": "Bootstrapping Spring Data JPA repositories in DEFAULT mode."
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:51.727",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
+                "message": "Finished Spring Data repository scanning in 20 ms. Found 1 JPA repository interface."
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:51.733",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
+                "message": "Multiple Spring Data modules found, entering strict repository configuration mode"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:51.734",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
+                "message": "Bootstrapping Spring Data MongoDB repositories in DEFAULT mode."
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:51.745",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.postgresql.TokenPostgresSQLRepositoryAdapter; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:51.747",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationExtensionSupport",
+                "message": "Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface co.edu.uco.infrastructure.adapter.secondary.repository.redis.RedisRepositoryAdapter; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:51.762",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.data.repository.config.RepositoryConfigurationDelegate",
+                "message": "Finished Spring Data repository scanning in 27 ms. Found 4 MongoDB repository interfaces."
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:54.303",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.boot.web.embedded.tomcat.TomcatWebServer",
+                "message": "Tomcat initialized with port 8085 (http)"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:54.315",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.apache.coyote.http11.Http11NioProtocol",
+                "message": "Initializing ProtocolHandler ["http-nio-8085"]"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:54.317",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.apache.catalina.core.StandardService",
+                "message": "Starting service [Tomcat]"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:54.318",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.apache.catalina.core.StandardEngine",
+                "message": "Starting Servlet engine: [Apache Tomcat/10.1.20]"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:54.362",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]",
+                "message": "Initializing Spring embedded WebApplicationContext"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:54.363",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext",
+                "message": "Root WebApplicationContext: initialization completed in 4716 ms"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:54.775",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.hibernate.jpa.internal.util.LogHelper",
+                "message": "HHH000204: Processing PersistenceUnitInfo [name: default]"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:55.011",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.hibernate.Version",
+                "message": "HHH000412: Hibernate ORM core version 6.4.4.Final"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:55.078",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.hibernate.cache.internal.RegionFactoryInitiator",
+                "message": "HHH000026: Second-level cache disabled"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:55.584",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.orm.jpa.persistenceunit.SpringPersistenceUnitInfo",
+                "message": "No LoadTimeWeaver setup: ignoring JPA class transformer"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:55.879",
+                "level": "WARN",
+                "thread": "main",
+                "logger": "org.hibernate.orm.deprecation",
+                "message": "HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:56.735",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator",
+                "message": "HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:56.739",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean",
+                "message": "Initialized JPA EntityManagerFactory for persistence unit 'default'"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:56.914",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "co.edu.uco.infrastructure.configuration.SurrealDBConfig",
+                "message": "Connecting to SurrealDB at: ws://surrealdb:8005/rpc"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:58.433",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "co.edu.uco.infrastructure.configuration.SurrealDBConfig",
+                "message": "Successfully signed in to SurrealDB"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:33:58.435",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "co.edu.uco.infrastructure.configuration.SurrealDBConfig",
+                "message": "Using namespace: messageucolab and database: messageucolab"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:34:00.538",
+                "level": "WARN",
+                "thread": "main",
+                "logger": "org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration",
+                "message": "spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:34:02.348",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.boot.actuate.endpoint.web.EndpointLinksResolver",
+                "message": "Exposing 3 endpoint(s) beneath base path '/actuator'"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:34:02.450",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.apache.coyote.http11.Http11NioProtocol",
+                "message": "Starting ProtocolHandler ["http-nio-8085"]"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:34:02.478",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "org.springframework.boot.web.embedded.tomcat.TomcatWebServer",
+                "message": "Tomcat started on port 8085 (http) with context path ''"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:34:02.502",
+                "level": "INFO",
+                "thread": "main",
+                "logger": "co.edu.uco.infrastructure.init.CrossWordApplication",
+                "message": "Started CrossWordApplication in 36.984 seconds (process running for 52.828)"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:34:21.571",
+                "level": "INFO",
+                "thread": "http-nio-8085-exec-1",
+                "logger": "org.apache.catalina.core.ContainerBase.[Tomcat].[localhost].[/]",
+                "message": "Initializing Spring DispatcherServlet 'dispatcherServlet'"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:34:21.573",
+                "level": "INFO",
+                "thread": "http-nio-8085-exec-1",
+                "logger": "org.springframework.web.servlet.DispatcherServlet",
+                "message": "Initializing Servlet 'dispatcherServlet'"
+                }{
+                "correlationId": "",
+                "timestamp": "2026-08-03T04:34:21.576",
+                "level": "INFO",
+                "thread": "http-nio-8085-exec-1",
+                "logger": "org.springframework.web.servlet.DispatcherServlet",
+                "message": "Completed initialization in 2 ms"
+                }{
+                "correlationId": "c89edeb7-da6c-419d-8ddd-f072c5040d5f",
+                "timestamp": "2026-08-03T04:34:22.335",
+                "level": "WARN",
+                "thread": "http-nio-8085-exec-1",
+                "logger": "co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl",
+                "message": "Cannot parse UUID from value: token_state:inactive"
+                }java.lang.IllegalArgumentException: Invalid UUID string: inactive
+	at java.base/java.util.UUID.fromString1(UUID.java:282)
+	at java.base/java.util.UUID.fromString(UUID.java:260)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl.extractUuid(TokenStateSurrealRepositoryAdapterImpl.java:75)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl.findOne(TokenStateSurrealRepositoryAdapterImpl.java:67)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl.findStatusTokenSurrealModelByName(TokenStateSurrealRepositoryAdapterImpl.java:46)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:354)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
+	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:137)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:720)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl$$SpringCGLIB$$0.findStatusTokenSurrealModelByName(<generated>)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealAdapter.findByStatusName(TokenStateSurrealAdapter.java:40)
+	at co.edu.uco.core.domain.usecase.RevokeTokenUseCase.execute(RevokeTokenUseCase.java:24)
+	at co.edu.uco.core.application.facade.token.impl.CreateTokenUseCaseFacadeImpl.execute(CreateTokenUseCaseFacadeImpl.java:63)
+	at co.edu.uco.infrastructure.adapter.primary.controller.CreateTokenControllerImpl.createToken(CreateTokenControllerImpl.java:54)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:206)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:109)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1736)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+{
+                "correlationId": "c89edeb7-da6c-419d-8ddd-f072c5040d5f",
+                "timestamp": "2026-08-03T04:34:25.425",
+                "level": "INFO",
+                "thread": "http-nio-8085-exec-1",
+                "logger": "co.edu.uco.infrastructure.adapter.secondary.presenter.rest.HttpPresenterAdapter",
+                "message": "The successful response is: {"data":["X/u5q8hLeI6XPPfUgFiLNjrYfZE1zPyECjZ87DdnE0Dxj4/0SbR1rfXrfqgvioAWMo3+LG+1Xr8bmC7/jxKrIStQLY9Vz7QyMkeNb2CfJ4r2IVIFA10herfM11482WQbW63n1cfyVY+Q6DCXwEU5vgJIM+Bw7UW2KEa5ux/jWUwMIgG53rnX4mlGZ2YGsLh+qzdrxyfomljLGCTRb6anayM0cL/VPqGJ8et/8tGcZ7i4PT3CNWWrVKds6kMbs0barWcby9M81s3HvG2xOue/ptUvOioDIT2807Z1DJkGAF1OKDMmdXG7xGDHGW5sYkN+3dQki829d7W+w3ZYfD0EeA=="],"errors":[]}"
+                }{
+                "correlationId": "2a9b687f-840b-4107-8d4e-82bd761d0474",
+                "timestamp": "2026-08-03T04:35:56.433",
+                "level": "ERROR",
+                "thread": "http-nio-8085-exec-3",
+                "logger": "co.edu.uco.infrastructure.adapter.secondary.presenter.rest.HttpPresenterAdapter",
+                "message": "The error response is: {"data":[],"errors":["Token not found in SurrealDB: FVa+2iavHfMR3JhLUoiXznY4VVb/Jtv6g/K7RDiIAf2kIie6K4pN/kmimdg0H/rNjMNG6/ZJTUTrN9XlQymN+rEaGPKjZ4G7s9Qyk0kpRGndBTfPcVtrj8FCoP28iJq7nu/sFlYAJB5uA3xLiSllqAp8eKEWsY3G5f6t/YvtUuToCDPBwpy33lD4hztO6282VW4UbyAq4O6X0Q81AC8uzI4ifPr4oy8tHTNNmw10lxV+HNCvSiQeC+GpYw3OfTcbGbrV5LgRi7CMo4Nvaiz2Rz6XZzLeDWo9rGtDYzTUnkUsyXu41E2g4AyxZShMKB7/L2qSwRfO7NpUSgdJUOBPZA=="]}"
+                }{
+                "correlationId": "975c5654-a9ae-4cd4-bd39-c86cce8533fe",
+                "timestamp": "2026-08-03T04:36:10.706",
+                "level": "WARN",
+                "thread": "http-nio-8085-exec-4",
+                "logger": "co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl",
+                "message": "Cannot parse UUID from value: token_state:⟨123e4567-e89b-12d3-a456-426614175000⟩"
+                }java.lang.IllegalArgumentException: UUID string too large
+	at java.base/java.util.UUID.fromString1(UUID.java:266)
+	at java.base/java.util.UUID.fromString(UUID.java:260)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl.extractUuid(TokenStateSurrealRepositoryAdapterImpl.java:75)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl.findOne(TokenStateSurrealRepositoryAdapterImpl.java:67)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl.findStatusTokenSurrealModelById(TokenStateSurrealRepositoryAdapterImpl.java:39)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:354)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
+	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:137)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:720)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl$$SpringCGLIB$$0.findStatusTokenSurrealModelById(<generated>)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealAdapter.findByStatus(TokenStateSurrealAdapter.java:35)
+	at co.edu.uco.core.domain.usecase.VerifyAccessUseCase.stateValid(VerifyAccessUseCase.java:46)
+	at co.edu.uco.core.domain.usecase.VerifyAccessUseCase.verifyAccess(VerifyAccessUseCase.java:31)
+	at co.edu.uco.core.application.facade.token.impl.VerifyAccessUseCaseFacadeImpl.execute(VerifyAccessUseCaseFacadeImpl.java:15)
+	at co.edu.uco.infrastructure.adapter.primary.interceptors.TokenHeaderInterceptor.preHandle(TokenHeaderInterceptor.java:45)
+	at org.springframework.web.servlet.HandlerExecutionChain.applyPreHandle(HandlerExecutionChain.java:146)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1084)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:206)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:109)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1736)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+{
+                "correlationId": "975c5654-a9ae-4cd4-bd39-c86cce8533fe",
+                "timestamp": "2026-08-03T04:36:12.076",
+                "level": "INFO",
+                "thread": "http-nio-8085-exec-4",
+                "logger": "co.edu.uco.core.application.catalog.strategy.MessageCatalogStrategy",
+                "message": "The message was not found in cache, we proceed to search in database"
+                }{
+                "correlationId": "975c5654-a9ae-4cd4-bd39-c86cce8533fe",
+                "timestamp": "2026-08-03T04:36:12.091",
+                "level": "ERROR",
+                "thread": "http-nio-8085-exec-4",
+                "logger": "co.edu.uco.infrastructure.adapter.secondary.presenter.rest.HttpPresenterAdapter",
+                "message": "The error response is: {"data":[],"errors":["There is no message with the code REL_TO_DOC_002 for the application 223e4567-e89b-12d3-a456-426614174111"]}"
+                }{
+                "correlationId": "92610cb4-a8bf-44f9-a293-cededb004669",
+                "timestamp": "2026-08-03T04:38:24.379",
+                "level": "ERROR",
+                "thread": "http-nio-8085-exec-6",
+                "logger": "co.edu.uco.infrastructure.adapter.secondary.presenter.rest.HttpPresenterAdapter",
+                "message": "The error response is: {"data":[],"errors":["Token not found in SurrealDB: VOIYsPEJMhjOQ9BiluG8chs13FHzGjODIFQYJ7gKCASVsHF1p3m+BUlgJy1EsNjkQsadD8T3NBW1O4asQ21nl3rA5f0N6+uzgUwA5o9oucFtBcyes5928CU6lj/A/M06sXsoF16hvfsg43KQU4hNl0wkwAU8F0Q5LWnciGnmMj20b910eN1y0ENMx+j3knDVaCjlxJT+L/U1JZQBQVO1mdLGFLFWCHQdszSdwrJwJ0aSCDUvvR4822z4az9exYJ9GCY7uMpF6+3GY9fqmdGMUmJX4rI+K7tvtxC5TH9q+GJ7ZBfWRlYsdEgT034kWkW0JzbyMBf+QO0K8BGEyfQy9w=="]}"
+                }{
+                "correlationId": "f3a35399-5ab6-4ce8-a301-b378331ae512",
+                "timestamp": "2026-08-03T04:38:38.492",
+                "level": "WARN",
+                "thread": "http-nio-8085-exec-7",
+                "logger": "co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl",
+                "message": "Cannot parse UUID from value: token_state:⟨123e4567-e89b-12d3-a456-426614175000⟩"
+                }java.lang.IllegalArgumentException: UUID string too large
+	at java.base/java.util.UUID.fromString1(UUID.java:266)
+	at java.base/java.util.UUID.fromString(UUID.java:260)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl.extractUuid(TokenStateSurrealRepositoryAdapterImpl.java:75)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl.findOne(TokenStateSurrealRepositoryAdapterImpl.java:67)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl.findStatusTokenSurrealModelById(TokenStateSurrealRepositoryAdapterImpl.java:39)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:354)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
+	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:137)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:720)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl$$SpringCGLIB$$0.findStatusTokenSurrealModelById(<generated>)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealAdapter.findByStatus(TokenStateSurrealAdapter.java:35)
+	at co.edu.uco.core.domain.usecase.VerifyAccessUseCase.stateValid(VerifyAccessUseCase.java:46)
+	at co.edu.uco.core.domain.usecase.VerifyAccessUseCase.verifyAccess(VerifyAccessUseCase.java:31)
+	at co.edu.uco.core.application.facade.token.impl.VerifyAccessUseCaseFacadeImpl.execute(VerifyAccessUseCaseFacadeImpl.java:15)
+	at co.edu.uco.infrastructure.adapter.primary.interceptors.TokenHeaderInterceptor.preHandle(TokenHeaderInterceptor.java:45)
+	at org.springframework.web.servlet.HandlerExecutionChain.applyPreHandle(HandlerExecutionChain.java:146)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1084)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:206)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:109)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1736)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+{
+                "correlationId": "f3a35399-5ab6-4ce8-a301-b378331ae512",
+                "timestamp": "2026-08-03T04:38:38.545",
+                "level": "INFO",
+                "thread": "http-nio-8085-exec-7",
+                "logger": "co.edu.uco.core.application.catalog.strategy.MessageCatalogStrategy",
+                "message": "The message was not found in cache, we proceed to search in database"
+                }{
+                "correlationId": "f3a35399-5ab6-4ce8-a301-b378331ae512",
+                "timestamp": "2026-08-03T04:38:38.565",
+                "level": "INFO",
+                "thread": "http-nio-8085-exec-7",
+                "logger": "co.edu.uco.core.application.catalog.strategy.MessageCatalogStrategy",
+                "message": "Messages were found in the database, proceed to return and cache."
+                }{
+                "correlationId": "f3a35399-5ab6-4ce8-a301-b378331ae512",
+                "timestamp": "2026-08-03T04:38:38.704",
+                "level": "INFO",
+                "thread": "http-nio-8085-exec-7",
+                "logger": "co.edu.uco.infrastructure.adapter.secondary.presenter.rest.HttpPresenterAdapter",
+                "message": "The successful response is: {"data":[{"data":[{"code":"REL_TO_DOC_002","title":"Mensaje relacional hacia documental","content":"Gatos","type":"Functional","category":"","application":"App Documental Flow","functionality":"Flujo documental"}],"page":0,"size":50,"totalItems":1,"totalPages":1}],"errors":[]}"
+                }{
+                "correlationId": "7e3575b6-38d7-4a9c-88da-a7a4d6cea156",
+                "timestamp": "2026-08-03T04:38:56.654",
+                "level": "WARN",
+                "thread": "http-nio-8085-exec-8",
+                "logger": "co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl",
+                "message": "Cannot parse UUID from value: token_state:⟨123e4567-e89b-12d3-a456-426614175000⟩"
+                }java.lang.IllegalArgumentException: UUID string too large
+	at java.base/java.util.UUID.fromString1(UUID.java:266)
+	at java.base/java.util.UUID.fromString(UUID.java:260)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl.extractUuid(TokenStateSurrealRepositoryAdapterImpl.java:75)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl.findOne(TokenStateSurrealRepositoryAdapterImpl.java:67)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl.findStatusTokenSurrealModelById(TokenStateSurrealRepositoryAdapterImpl.java:39)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:354)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
+	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:137)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:720)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl$$SpringCGLIB$$0.findStatusTokenSurrealModelById(<generated>)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealAdapter.findByStatus(TokenStateSurrealAdapter.java:35)
+	at co.edu.uco.core.domain.usecase.VerifyAccessUseCase.stateValid(VerifyAccessUseCase.java:46)
+	at co.edu.uco.core.domain.usecase.VerifyAccessUseCase.verifyAccess(VerifyAccessUseCase.java:31)
+	at co.edu.uco.core.application.facade.token.impl.VerifyAccessUseCaseFacadeImpl.execute(VerifyAccessUseCaseFacadeImpl.java:15)
+	at co.edu.uco.infrastructure.adapter.primary.interceptors.TokenHeaderInterceptor.preHandle(TokenHeaderInterceptor.java:45)
+	at org.springframework.web.servlet.HandlerExecutionChain.applyPreHandle(HandlerExecutionChain.java:146)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1084)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:206)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:109)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1736)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+{
+                "correlationId": "7e3575b6-38d7-4a9c-88da-a7a4d6cea156",
+                "timestamp": "2026-08-03T04:38:56.700",
+                "level": "INFO",
+                "thread": "http-nio-8085-exec-8",
+                "logger": "co.edu.uco.core.application.catalog.strategy.MessageCatalogStrategy",
+                "message": "Messages were found in cache, proceed to return."
+                }{
+                "correlationId": "7e3575b6-38d7-4a9c-88da-a7a4d6cea156",
+                "timestamp": "2026-08-03T04:38:56.706",
+                "level": "INFO",
+                "thread": "http-nio-8085-exec-8",
+                "logger": "co.edu.uco.infrastructure.adapter.secondary.presenter.rest.HttpPresenterAdapter",
+                "message": "The successful response is: {"data":[{"code":"REL_TO_DOC_002","title":"Mensaje relacional hacia documental","content":"Gatos","type":"","category":"Functional","application":"App Documental Flow","functionality":"Flujo documental"}],"errors":[]}"
+                }{
+                "correlationId": "ca88db42-a904-4c44-ae06-fcbd66148147",
+                "timestamp": "2026-08-03T04:39:13.158",
+                "level": "WARN",
+                "thread": "http-nio-8085-exec-9",
+                "logger": "co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl",
+                "message": "Cannot parse UUID from value: token_state:⟨123e4567-e89b-12d3-a456-426614175000⟩"
+                }java.lang.IllegalArgumentException: UUID string too large
+	at java.base/java.util.UUID.fromString1(UUID.java:266)
+	at java.base/java.util.UUID.fromString(UUID.java:260)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl.extractUuid(TokenStateSurrealRepositoryAdapterImpl.java:75)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl.findOne(TokenStateSurrealRepositoryAdapterImpl.java:67)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl.findStatusTokenSurrealModelById(TokenStateSurrealRepositoryAdapterImpl.java:39)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:354)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
+	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:137)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:768)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:720)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealRepositoryAdapterImpl$$SpringCGLIB$$0.findStatusTokenSurrealModelById(<generated>)
+	at co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.TokenStateSurrealAdapter.findByStatus(TokenStateSurrealAdapter.java:35)
+	at co.edu.uco.core.domain.usecase.VerifyAccessUseCase.stateValid(VerifyAccessUseCase.java:46)
+	at co.edu.uco.core.domain.usecase.VerifyAccessUseCase.verifyAccess(VerifyAccessUseCase.java:31)
+	at co.edu.uco.core.application.facade.token.impl.VerifyAccessUseCaseFacadeImpl.execute(VerifyAccessUseCaseFacadeImpl.java:15)
+	at co.edu.uco.infrastructure.adapter.primary.interceptors.TokenHeaderInterceptor.preHandle(TokenHeaderInterceptor.java:45)
+	at org.springframework.web.servlet.HandlerExecutionChain.applyPreHandle(HandlerExecutionChain.java:146)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1084)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:206)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:109)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1736)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+{
+                "correlationId": "ca88db42-a904-4c44-ae06-fcbd66148147",
+                "timestamp": "2026-08-03T04:39:13.168",
+                "level": "INFO",
+                "thread": "http-nio-8085-exec-9",
+                "logger": "co.edu.uco.core.application.catalog.strategy.MessageCatalogStrategy",
+                "message": "Messages were found in cache, proceed to return."
+                }{
+                "correlationId": "ca88db42-a904-4c44-ae06-fcbd66148147",
+                "timestamp": "2026-08-03T04:39:43.518",
+                "level": "WARN",
+                "thread": "http-nio-8085-exec-9",
+                "logger": "dev.langchain4j.internal.RetryUtils",
+                "message": "A retriable exception occurred. Remaining retries: 2 of 2"
+                }dev.langchain4j.exception.TimeoutException: request timed out
+	at dev.langchain4j.http.client.jdk.JdkHttpClient.execute(JdkHttpClient.java:59)
+	at dev.langchain4j.model.ollama.OllamaClient.chat(OllamaClient.java:116)
+	at dev.langchain4j.model.ollama.OllamaChatModel.lambda$doChat$0(OllamaChatModel.java:41)
+	at dev.langchain4j.internal.ExceptionMapper.withExceptionMapper(ExceptionMapper.java:29)
+	at dev.langchain4j.internal.RetryUtils.lambda$withRetryMappingExceptions$1(RetryUtils.java:326)
+	at dev.langchain4j.internal.RetryUtils$RetryPolicy.withRetry(RetryUtils.java:204)
+	at dev.langchain4j.internal.RetryUtils.withRetry(RetryUtils.java:263)
+	at dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions(RetryUtils.java:326)
+	at dev.langchain4j.internal.RetryUtils.withRetryMappingExceptions(RetryUtils.java:309)
+	at dev.langchain4j.model.ollama.OllamaChatModel.doChat(OllamaChatModel.java:41)
+	at dev.langchain4j.model.chat.ChatModel.chat(ChatModel.java:61)
+	at dev.langchain4j.model.chat.ChatModel.chat(ChatModel.java:36)
+	at co.edu.uco.infrastructure.adapter.secondary.translation.LangChain4jMessageTranslationAdapter.translate(LangChain4jMessageTranslationAdapter.java:55)
+	at co.edu.uco.core.domain.usecase.TranslateMessageByCodeAndEnvironmentUseCase.execute(TranslateMessageByCodeAndEnvironmentUseCase.java:80)
+	at co.edu.uco.core.application.facade.message.impl.TranslateMessageByCodeAndEnvironmentUseCaseFacadeImpl.execute(TranslateMessageByCodeAndEnvironmentUseCaseFacadeImpl.java:26)
+	at co.edu.uco.infrastructure.adapter.primary.controller.FindMessagesControllerImpl.translateByCodeMessageAndEnvironment(FindMessagesControllerImpl.java:158)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:206)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:109)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:175)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:150)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1736)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.net.http.HttpTimeoutException: request timed out
+	at java.net.http/jdk.internal.net.http.HttpClientImpl.send(HttpClientImpl.java:953)
+	at java.net.http/jdk.internal.net.http.HttpClientFacade.send(HttpClientFacade.java:133)
+	at dev.langchain4j.http.client.jdk.JdkHttpClient.execute(JdkHttpClient.java:51)
+	... 67 common frames omitted
+{
+                "correlationId": "ca88db42-a904-4c44-ae06-fcbd66148147",
+                "timestamp": "2026-08-03T04:39:52.737",
+                "level": "INFO",
+                "thread": "http-nio-8085-exec-9",
+                "logger": "co.edu.uco.infrastructure.adapter.secondary.translation.LangChain4jMessageTranslationAdapter",
+                "message": "Dynamic translation completed with provider=langchain4j-ollama model=llama3.2 code=REL_TO_DOC_002 targetLanguage=en elapsedMs=44233"
+                }{
+                "correlationId": "ca88db42-a904-4c44-ae06-fcbd66148147",
+                "timestamp": "2026-08-03T04:39:52.753",
+                "level": "INFO",
+                "thread": "http-nio-8085-exec-9",
+                "logger": "co.edu.uco.infrastructure.adapter.secondary.presenter.rest.HttpPresenterAdapter",
+                "message": "The successful response is: {"data":[{"code":"REL_TO_DOC_002","sourceLanguage":"auto","targetLanguage":"en","originalTitle":"Mensaje relacional hacia documental","originalContent":"Gatos","translatedTitle":"Relationship Message to Documental","translatedContent":"Cats","type":"","category":"Functional","application":"App Documental Flow","functionality":"Flujo documental","translationProvider":"langchain4j-ollama","translationModel":"llama3.2","translationElapsedMs":44233,"dynamicTranslation":true}],"errors":[]}"
                 }
