@@ -9,7 +9,6 @@ import com.surrealdb.Response;
 import com.surrealdb.Surreal;
 import com.surrealdb.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -17,12 +16,9 @@ import java.util.UUID;
 
 import static co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.SurrealQLUtil.quote;
 import static co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
-import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.PERSISTENCE_PRIMARY_PROPERTY;
-import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.PERSISTENCE_PRIMARY_SURREAL;
 
 @Slf4j
 @Repository
-@ConditionalOnProperty(name = PERSISTENCE_PRIMARY_PROPERTY, havingValue = PERSISTENCE_PRIMARY_SURREAL)
 public class EnvironmentSurrealRepositoryAdapterImpl implements EnvironmentRepository {
 
     private static final String SURREAL_TABLE_ENVIRONMENT = "environment";

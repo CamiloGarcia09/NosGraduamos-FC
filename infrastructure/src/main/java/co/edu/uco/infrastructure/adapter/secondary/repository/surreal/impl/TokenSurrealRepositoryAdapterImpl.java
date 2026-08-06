@@ -8,7 +8,6 @@ import com.surrealdb.Response;
 import com.surrealdb.Surreal;
 import com.surrealdb.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -22,13 +21,10 @@ import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.FIE
 import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.FIELD_EXPIRATION_DATE;
 import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.FIELD_SECRET_NAME;
 import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.FIELD_STATE_ID;
-import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.PERSISTENCE_PRIMARY_PROPERTY;
-import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.PERSISTENCE_PRIMARY_SURREAL;
 import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.SURREAL_TABLE_TOKEN;
 
 @Slf4j
 @Repository
-@ConditionalOnProperty(name = PERSISTENCE_PRIMARY_PROPERTY, havingValue = PERSISTENCE_PRIMARY_SURREAL)
 public class TokenSurrealRepositoryAdapterImpl implements TokenSurrealRepositoryAdapter {
 
     private final Surreal surreal;

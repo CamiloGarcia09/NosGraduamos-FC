@@ -6,25 +6,13 @@ import co.edu.uco.core.domain.port.out.repository.token.TokenRepository;
 import co.edu.uco.infrastructure.adapter.secondary.repository.data.TokenSurrealMapper;
 import co.edu.uco.infrastructure.adapter.secondary.repository.surreal.TokenSurrealRepositoryAdapter;
 import co.edu.uco.utils.exception.BusinessException;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.PERSISTENCE_PRIMARY_PROPERTY;
-import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.PERSISTENCE_PRIMARY_SURREAL;
 import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.TOKEN_SURREAL_ADAPTER;
 
-/**
- * SurrealDB adapter for the Token aggregate.
- * <p>
- * Active when {@code persistence.primary=surreal}. Replaces both
- * {@code TokenPostgresSQLAdapter} (write) and {@code TokenMongoAdapter} (read).
- */
-@Primary
 @Component(TOKEN_SURREAL_ADAPTER)
-@ConditionalOnProperty(name = PERSISTENCE_PRIMARY_PROPERTY, havingValue = PERSISTENCE_PRIMARY_SURREAL)
 public final class TokenSurrealAdapter implements TokenRepository, FindTokenRepository {
 
     private final TokenSurrealRepositoryAdapter tokenSurrealRepositoryAdapter;
