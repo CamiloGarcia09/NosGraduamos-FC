@@ -54,117 +54,6 @@ services:
       - kong-network
       - app-network
 
-  debezium-postgres:
-    image: debezium/postgres:13
-    container_name: crs-crossword-db
-    ports:
-      - "5432:${POSTGRESPORT}"
-    environment:
-      POSTGRES_DB: ${POSTGRESDATABASE}
-      POSTGRES_USER: ${POSTGRESUSERNAME}
-      POSTGRES_PASSWORD: ${POSTGRESPASSWORD}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - observability-network
-      - kong-network
-      - app-network
-
-  kafka:
-    image: confluentinc/cp-kafka:7.0.0
-    container_name: kafka-crosswords
-    ports:
-      - "9094:9094"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS: 80000
-      KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS: 50000
-      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:9094
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:9094
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-    volumes:
-      - kafka-data:/var/lib/kafka/data
-    depends_on:
-      - zookeeper
-    networks:
-      - observability-network
-      - kong-network
-      - app-network
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.0.0
-    ports:
-      - "2181:2181"
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-    volumes:
-      - zookeeper-data:/var/lib/zookeeper/data
-      - zookeeper-logs:/var/lib/zookeeper/log
-    networks:
-      - app-network
-
-  ksqldb-server:
-    image: confluentinc/ksqldb-server:0.20.0
-    hostname: ksqldb-server
-    container_name: cdc-ksqldb-server
-    ports:
-      - "8088:8088"
-    environment:
-      KSQL_BOOTSTRAP_SERVERS: "kafka:9092"
-      KSQL_HOST_NAME: "ksqldb-server"
-      KSQL_LISTENERS: "http://0.0.0.0:8088"
-    volumes:
-      - ksqldb-data:/var/lib/ksql/data
-    depends_on:
-      - kafka
-    networks:
-      - app-network
-
-  connect:
-    image: debezium/connect:1.9
-    ports:
-      - "8083:8083"
-    environment:
-      GROUP_ID: 1
-      BOOTSTRAP_SERVERS: kafka:9092
-      CONFIG_STORAGE_TOPIC: connect-configs
-      OFFSET_STORAGE_TOPIC: connect-offsets
-      STATUS_STORAGE_TOPIC: connect-status
-      CONNECT_PLUGIN_PATH: "/kafka/connect,/mongo-connector/lib"
-    volumes:
-      - ./mongo-connector:/mongo-connector
-      - connect-data:/kafka/connect
-    depends_on:
-      - kafka
-      - debezium-postgres
-    networks:
-      - app-network
-
-  mongodb:
-    image: mongo:5.0
-    container_name: mongodb-crosswords-db
-    ports:
-      - "28017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGODBUSER}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGODBPASSWORD}
-      MONGO_INITDB_DATABASE: ${MONGODBDATABASE}
-    volumes:
-      - mongo-data:/data/db
-      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
-    command: ["--auth"]
-    networks:
-      - observability-network
-      - kong-network
-      - app-network
 
   surrealdb:
     image: surrealdb/surrealdb:v2.1.4
@@ -234,6 +123,35 @@ services:
     networks:
       - kong-network
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - app-network
+
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: ollama-init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    command: pull ${TRANSLATION_AI_MODEL_NAME:-llama3.2}
+    restart: "no"
+    networks:
+      - app-network
+
   messageucolab:
     build:
       context: ../..
@@ -250,21 +168,24 @@ services:
       - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
       - AZURE_TENANT_ID=${AZURE_TENANT_ID}
       - TRANSLATION_AI_ENABLED=${TRANSLATION_AI_ENABLED:-true}
+      - TRANSLATION_AI_PROVIDER=${TRANSLATION_AI_PROVIDER:-ollama}
       - TRANSLATION_AI_API_KEY=${TRANSLATION_AI_API_KEY:-}
-      - TRANSLATION_AI_BASE_URL=${TRANSLATION_AI_BASE_URL:-}
-      - TRANSLATION_AI_MODEL_NAME=${TRANSLATION_AI_MODEL_NAME:-gpt-4o-mini}
+      - TRANSLATION_AI_BASE_URL=${TRANSLATION_AI_BASE_URL:-http://ollama:11434}
+      - TRANSLATION_AI_MODEL_NAME=${TRANSLATION_AI_MODEL_NAME:-llama3.2}
       - TRANSLATION_AI_TEMPERATURE=${TRANSLATION_AI_TEMPERATURE:-0.1}
       - TRANSLATION_AI_MAX_RETRIES=${TRANSLATION_AI_MAX_RETRIES:-0}
-      - TRANSLATION_AI_TIMEOUT_SECONDS=${TRANSLATION_AI_TIMEOUT_SECONDS:-6}
+      - TRANSLATION_AI_TIMEOUT_SECONDS=${TRANSLATION_AI_TIMEOUT_SECONDS:-30}
     volumes:
       - ../../logs:/app/logs
     depends_on:
-      - debezium-postgres
-      - mongodb
-      - redis
-      - kafka
-      - pulsar
-      - surrealdb
+      redis:
+        condition: service_started
+      pulsar:
+        condition: service_started
+      surrealdb:
+        condition: service_started
+      ollama-init:
+        condition: service_completed_successfully
     networks:
       - observability-network
       - kong-network
@@ -303,25 +224,14 @@ volumes:
   grafana-data:
   redis_data:
     driver: local
-  postgres-data:
-    driver: local
-  mongo-data:
-  kafka-data:
-    driver: local
-  ksqldb-data:
-    driver: local
-  connect-data:
-    driver: local
-  zookeeper-data:
-    driver: local
-  zookeeper-logs:
-    driver: local
   loki-data:
   pulsar-data:
     driver: local
   pulsar-conf:
     driver: local
   surrealdb-data:
+    driver: local
+  ollama-data:
     driver: local
 
 networks:
