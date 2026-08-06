@@ -8,7 +8,6 @@ import com.surrealdb.Response;
 import com.surrealdb.Surreal;
 import com.surrealdb.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
@@ -16,13 +15,10 @@ import java.util.UUID;
 import static co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.SurrealQLUtil.quote;
 import static co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
 import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.FIELD_NAME;
-import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.PERSISTENCE_PRIMARY_PROPERTY;
-import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.PERSISTENCE_PRIMARY_SURREAL;
 import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.SURREAL_TABLE_TOKEN_STATE;
 
 @Slf4j
 @Repository
-@ConditionalOnProperty(name = PERSISTENCE_PRIMARY_PROPERTY, havingValue = PERSISTENCE_PRIMARY_SURREAL)
 public class TokenStateSurrealRepositoryAdapterImpl implements TokenStateSurrealRepositoryAdapter {
 
     private static final UUID DEFAULT_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");

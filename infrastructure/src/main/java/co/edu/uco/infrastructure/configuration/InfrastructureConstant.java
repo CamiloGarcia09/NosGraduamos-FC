@@ -29,12 +29,6 @@ public final class InfrastructureConstant {
 
     public static final String PACKAGE_BASE = "co.edu.uco";
     public static final String PACKAGE_REPOSITORY_ADAPTER = "co.edu.uco.infrastructure.adapter.secondary.repository";
-    public static final String PACKAGE_REPOSITORY_ADAPTER_ENTITY = "co.edu.uco.infrastructure.adapter.secondary.repository.entity";
-    public static final String PACKAGE_REPOSITORY_POSTGRESQL_ADAPTER = "co.edu.uco.infrastructure.adapter.secondary.repository.postgresql";
-    public static final String JPA_CONFIG_PREFIX = "datasource";
-    public static final String JPA_DRIVER_CLASS_NAME = "org.postgresql.Driver";
-    public static final String JPA_HIBERNATE_DIALECT = "hibernate.dialect";
-    public static final String JPA_HIBERNATE_SHOW_SQL= "hibernate.show_sql";
 
     public static final int CACHE_EXPIRATION_TIME = 15;
     public static final int CACHE_MAXIMUM_SIZE = 500;
@@ -51,9 +45,7 @@ public final class InfrastructureConstant {
     public static final String PRE_CLOSE_TAG = "</pre>";
 
     public static final String REDIS_HASH = "Message";
-    public static final String DATABASE_MONGO_ADAPTER = "messageMongoAdapter";
     public static final String CACHE_REDIS_ADAPTER = "messageRedisAdapter";
-    public static final String POSTGRESQL_ADAPTER = "tokenPostgresSQLAdapter";
     public static final String CORRELATION_ID = "X-Correlation-ID";
     public static final String LOGGING_REQUEST_URI = "REQUEST_URI";
     public static final String LOGGING_HTTP_METHOD = "HTTP_METHOD";
@@ -102,11 +94,6 @@ public final class InfrastructureConstant {
 
     public static final String SURREAL_CONFIG_PREFIX = "surreal";
     public static final String SURREAL_ADAPTER = "surrealRepositoryAdapter";
-
-    public static final String PERSISTENCE_PRIMARY_PROPERTY = "persistence.primary";
-    public static final String PERSISTENCE_PRIMARY_POSTGRES = "postgres";
-    public static final String PERSISTENCE_PRIMARY_MONGO = "mongo";
-    public static final String PERSISTENCE_PRIMARY_SURREAL = "surreal";
 
     public static final String TOKEN_SURREAL_ADAPTER = "tokenSurrealAdapter";
     public static final String TOKEN_STATE_SURREAL_ADAPTER = "tokenStateSurrealAdapter";
