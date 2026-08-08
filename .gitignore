@@ -35,4 +35,4 @@ build/
 /logs/
 
 # Secrets — never commit
-deployment/docker/.env
+

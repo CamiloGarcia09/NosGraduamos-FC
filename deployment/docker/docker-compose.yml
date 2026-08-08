@@ -1,10 +1,11 @@
 services:
+
   grafana:
     image: grafana/grafana:latest
     ports:
       - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+      - GF_SECURITY_ADMIN_PASSWORD
     volumes:
       - grafana-data:/var/lib/grafana
     networks:
@@ -27,8 +28,8 @@ services:
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
     ports:
-      - "4317:4317"  # gRPC
-      - "4318:4318"  # HTTP
+      - "4317:4317"
+      - "4318:4318"
     networks:
       - observability-network
 
@@ -48,12 +49,18 @@ services:
       - "${REDISPORT}:${REDISPORT}"
     volumes:
       - redis_data:/data
-    command: [ "redis-server", "--requirepass", "${REDISPASSWORD}", "--appendonly", "yes" ]
+    command:
+      - redis-server
+      - --port
+      - "${REDISPORT}"
+      - --requirepass
+      - "${REDISPASSWORD}"
+      - --appendonly
+      - "yes"
     networks:
       - observability-network
       - kong-network
       - app-network
-
 
   surrealdb:
     image: surrealdb/surrealdb:v2.1.4
@@ -67,9 +74,21 @@ services:
       SURREAL_PASS: ${SURREALDBPASSWORD}
     volumes:
       - surrealdb-data:/data
-    command: start --bind 0.0.0.0:8005 --user ${SURREALDBUSER} --pass ${SURREALDBPASSWORD} surrealkv:/data/database.db
+    command: >
+      start
+      --bind 0.0.0.0:8005
+      --user ${SURREALDBUSER}
+      --pass ${SURREALDBPASSWORD}
+      surrealkv:/data/database.db
     healthcheck:
-      test: ["CMD", "/surreal", "is-ready", "--endpoint", "ws://localhost:8005"]
+      test:
+        [
+          "CMD",
+          "/surreal",
+          "is-ready",
+          "--endpoint",
+          "ws://localhost:8005"
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -118,8 +137,8 @@ services:
     volumes:
       - ./kong.yaml:/kong/kong.yaml
     ports:
-      - "8000:8000"  # API Gateway (HTTP)
-      - "8001:8001"  # Kong Admin API (HTTP)
+      - "8000:8000"
+      - "8001:8001"
     networks:
       - kong-network
 
@@ -146,7 +165,7 @@ services:
       ollama:
         condition: service_healthy
     environment:
-      - OLLAMA_HOST=http://ollama:11434
+      OLLAMA_HOST: http://ollama:11434
     command: pull ${TRANSLATION_AI_MODEL_NAME:-llama3.2}
     restart: "no"
     networks:
@@ -156,27 +175,57 @@ services:
     build:
       context: ../..
       dockerfile: Dockerfile
+
     container_name: messageucolab-app
+
     ports:
       - "8085:8085"
-    env_file:
-      - .env
+
     environment:
-      - LOG_PATH=/app/logs
-      - AZURE_KEYVAULT_UCOLAB_ENDPOINT=${AZURE_KEYVAULT_UCOLAB_ENDPOINT}
-      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
-      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
-      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
-      - TRANSLATION_AI_ENABLED=${TRANSLATION_AI_ENABLED:-true}
-      - TRANSLATION_AI_PROVIDER=${TRANSLATION_AI_PROVIDER:-ollama}
-      - TRANSLATION_AI_API_KEY=${TRANSLATION_AI_API_KEY:-}
-      - TRANSLATION_AI_BASE_URL=${TRANSLATION_AI_BASE_URL:-http://ollama:11434}
-      - TRANSLATION_AI_MODEL_NAME=${TRANSLATION_AI_MODEL_NAME:-llama3.2}
-      - TRANSLATION_AI_TEMPERATURE=${TRANSLATION_AI_TEMPERATURE:-0.1}
-      - TRANSLATION_AI_MAX_RETRIES=${TRANSLATION_AI_MAX_RETRIES:-0}
-      - TRANSLATION_AI_TIMEOUT_SECONDS=${TRANSLATION_AI_TIMEOUT_SECONDS:-30}
+      LOG_PATH: /app/logs
+
+      # Redis
+      REDISHOST: ${REDISHOST}
+      REDISPORT: ${REDISPORT}
+      REDISPASSWORD: ${REDISPASSWORD}
+      REDISDATABASE: ${REDISDATABASE}
+
+      # SurrealDB
+      SURREALDBHOST: ${SURREALDBHOST}
+      SURREALDBPORT: ${SURREALDBPORT}
+      SURREALDBUSER: ${SURREALDBUSER}
+      SURREALDBPASSWORD: ${SURREALDBPASSWORD}
+      SURREALDBNAMESPACE: ${SURREALDBNAMESPACE}
+      SURREALDBDATABASE: ${SURREALDBDATABASE}
+
+      # Azure
+      AZURE_KEYVAULT_UCOLAB_ENDPOINT: ${AZURE_KEYVAULT_UCOLAB_ENDPOINT}
+      AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
+      AZURE_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
+      AZURE_TENANT_ID: ${AZURE_TENANT_ID}
+
+      # Translation AI
+      TRANSLATION_AI_ENABLED: ${TRANSLATION_AI_ENABLED:-true}
+      TRANSLATION_AI_PROVIDER: ${TRANSLATION_AI_PROVIDER:-ollama}
+      TRANSLATION_AI_API_KEY: ${TRANSLATION_AI_API_KEY:-}
+      TRANSLATION_AI_BASE_URL: ${TRANSLATION_AI_BASE_URL:-http://ollama:11434}
+      TRANSLATION_AI_MODEL_NAME: ${TRANSLATION_AI_MODEL_NAME:-llama3.2}
+      TRANSLATION_AI_TEMPERATURE: ${TRANSLATION_AI_TEMPERATURE:-0.1}
+      TRANSLATION_AI_MAX_RETRIES: ${TRANSLATION_AI_MAX_RETRIES:-0}
+      TRANSLATION_AI_TIMEOUT_SECONDS: ${TRANSLATION_AI_TIMEOUT_SECONDS:-30}
+
+      # Doppler
+      DOPPLERTOKEN: ${DOPPLERTOKEN}
+
+      # Pulsar
+      PULSARURL: ${PULSARURL}
+      PULSARTOPICNAME: ${PULSARTOPICNAME}
+
+
+
     volumes:
       - ../../logs:/app/logs
+
     depends_on:
       redis:
         condition: service_started
@@ -186,13 +235,23 @@ services:
         condition: service_started
       ollama-init:
         condition: service_completed_successfully
+
     networks:
       - observability-network
       - kong-network
       - app-network
       - pulsar-network
+
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8085/actuator/health"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8085/actuator/health"
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -207,7 +266,7 @@ services:
       bin/apply-config-from-env.py conf/client.conf &&
       bin/pulsar standalone -nss -nfw"
     ports:
-      - "6650:6650"
+      - "6800:6650"
       - "8080:8080"
     volumes:
       - pulsar-data:/pulsar/data
@@ -222,24 +281,34 @@ services:
 
 volumes:
   grafana-data:
+
   redis_data:
     driver: local
+
   loki-data:
+
   pulsar-data:
     driver: local
+
   pulsar-conf:
     driver: local
+
   surrealdb-data:
     driver: local
+
   ollama-data:
     driver: local
+
 
 networks:
   observability-network:
     driver: bridge
+
   kong-network:
     driver: bridge
+
   app-network:
     driver: bridge
+
   pulsar-network:
     driver: bridge
