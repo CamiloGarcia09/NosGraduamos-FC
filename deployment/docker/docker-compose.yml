@@ -35,6 +35,8 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yaml"
     volumes:
       - ./prometheus.yaml:/etc/prometheus/prometheus.yaml
     ports:
