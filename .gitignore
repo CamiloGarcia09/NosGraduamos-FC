@@ -33,3 +33,6 @@ build/
 .vscode/
 
 /logs/
+
+# Secrets — never commit
+deployment/docker/.env
