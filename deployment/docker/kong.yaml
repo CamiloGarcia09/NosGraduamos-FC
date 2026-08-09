@@ -2,7 +2,7 @@ _format_version: "3.0"
 
 services:
   - name: message-service
-    url: http://host.docker.internal:8085
+    url: http://host.docker.internal:${MESSAGEUCOLAB_PORT}
     routes:
       - name: get-message-by-code
         paths:
