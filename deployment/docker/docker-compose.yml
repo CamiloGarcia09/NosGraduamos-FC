@@ -1,11 +1,10 @@
 services:
-
   grafana:
     image: grafana/grafana:latest
     ports:
-      - "3000:3000"
+      - "${GRAFANAPORT}:${GRAFANAPORT}"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
     volumes:
       - grafana-data:/var/lib/grafana
     networks:
@@ -13,9 +12,12 @@ services:
 
   loki:
     image: grafana/loki:latest
+    environment:
+      LOKIPORT: ${LOKIPORT}
+      LOKIPORTALERT: ${LOKIPORTALERT}
     ports:
-      - "3100:3100"
-    command: -config.file=/etc/loki/config.yaml
+      - "${LOKIPORT}:${LOKIPORT}"
+    command: -config.file=/etc/loki/config.yaml -config.expand-env=true
     volumes:
       - ./loki-config.yaml:/etc/loki/config.yaml
       - loki-data:/loki
@@ -24,23 +26,29 @@ services:
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.40.0
+    environment:
+      LOKIPORT: ${LOKIPORT}
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
     ports:
-      - "4317:4317"
-      - "4318:4318"
+      - "${GRPC_OTELPORT}:${GRPC_OTELPORT}"
+      - "${HTTP_OTELPORT}:${HTTP_OTELPORT}"
     networks:
       - observability-network
 
   prometheus:
     image: prom/prometheus:latest
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yaml"
+    environment:
+      MESSAGEUCOLAB_PORT: ${MESSAGEUCOLAB_PORT}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - "sed 's/$${MESSAGEUCOLAB_PORT}/'$$MESSAGEUCOLAB_PORT'/g' /etc/prometheus/prometheus.yaml.template > /tmp/prometheus.yaml && exec /bin/prometheus --config.file=/tmp/prometheus.yaml --storage.tsdb.path=/prometheus --web.console.libraries=/usr/share/prometheus/console_libraries --web.console.templates=/usr/share/prometheus/consoles"
     volumes:
-      - ./prometheus.yaml:/etc/prometheus/prometheus.yaml
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yaml.template:ro
     ports:
-      - "9090:9090"
+      - "${PROMETHEUSPORT}:${PROMETHEUSPORT}"
     networks:
       - observability-network
 
@@ -51,46 +59,28 @@ services:
       - "${REDISPORT}:${REDISPORT}"
     volumes:
       - redis_data:/data
-    command:
-      - redis-server
-      - --port
-      - "${REDISPORT}"
-      - --requirepass
-      - "${REDISPASSWORD}"
-      - --appendonly
-      - "yes"
+    command: [ "redis-server", "--requirepass", "${REDISPASSWORD}", "--appendonly", "yes" ]
     networks:
       - observability-network
       - kong-network
       - app-network
+
 
   surrealdb:
     image: surrealdb/surrealdb:v2.1.4
     container_name: surrealdb-messageucolab
     user: "0:0"
     ports:
-      - "8005:8005"
+      - "${SURREALDBPORT}:${SURREALDBPORT}"
     environment:
       SURREAL_AUTH: "true"
       SURREAL_USER: ${SURREALDBUSER}
       SURREAL_PASS: ${SURREALDBPASSWORD}
     volumes:
       - surrealdb-data:/data
-    command: >
-      start
-      --bind 0.0.0.0:8005
-      --user ${SURREALDBUSER}
-      --pass ${SURREALDBPASSWORD}
-      surrealkv:/data/database.db
+    command: start --bind 0.0.0.0:8005 --user ${SURREALDBUSER} --pass ${SURREALDBPASSWORD} surrealkv:/data/database.db
     healthcheck:
-      test:
-        [
-          "CMD",
-          "/surreal",
-          "is-ready",
-          "--endpoint",
-          "ws://localhost:8005"
-        ]
+      test: ["CMD", "/surreal", "is-ready", "--endpoint", "ws://localhost:${SURREALDBPORT}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -108,7 +98,7 @@ services:
     command:
       - import
       - --endpoint
-      - http://surrealdb:8005
+      - http://surrealdb:${SURREALDBPORT}
       - --username
       - ${SURREALDBUSER}
       - --password
@@ -130,17 +120,19 @@ services:
     restart: always
     environment:
       KONG_DATABASE: "off"
-      KONG_DECLARATIVE_CONFIG: /kong/kong.yaml
+      KONG_DECLARATIVE_CONFIG: /tmp/kong.yaml
       KONG_PROXY_ACCESS_LOG: /dev/stdout
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
       KONG_PROXY_ERROR_LOG: /dev/stderr
       KONG_ADMIN_ERROR_LOG: /dev/stderr
       KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      MESSAGEUCOLAB_PORT: ${MESSAGEUCOLAB_PORT}
+    entrypoint: ["/bin/sh", "-c", "sed 's/$${MESSAGEUCOLAB_PORT}/'$$MESSAGEUCOLAB_PORT'/g' /kong/kong.yaml.template > /tmp/kong.yaml && /entrypoint.sh kong docker-start"]
     volumes:
-      - ./kong.yaml:/kong/kong.yaml
+      - ./kong.yaml:/kong/kong.yaml.template:ro
     ports:
-      - "8000:8000"
-      - "8001:8001"
+      - "${APIGATEWAY_PORT}:${APIGATEWAY_PORT}"
+      - "${KONGADMIN_PORT}:${KONGADMIN_PORT}"
     networks:
       - kong-network
 
@@ -148,7 +140,7 @@ services:
     image: ollama/ollama:latest
     container_name: ollama
     ports:
-      - "11434:11434"
+      - "${OLLAMA_PORT}:${OLLAMA_PORT}"
     volumes:
       - ollama-data:/root/.ollama
     healthcheck:
@@ -167,8 +159,8 @@ services:
       ollama:
         condition: service_healthy
     environment:
-      OLLAMA_HOST: http://ollama:11434
-    command: pull ${TRANSLATION_AI_MODEL_NAME:-llama3.2}
+      - OLLAMA_HOST=http://ollama:${OLLAMA_PORT}
+    command: pull ${TRANSLATION_AI_MODEL_NAME}
     restart: "no"
     networks:
       - app-network
@@ -177,57 +169,20 @@ services:
     build:
       context: ../..
       dockerfile: Dockerfile
-
     container_name: messageucolab-app
-
     ports:
-      - "8085:8085"
-
+      - "${MESSAGEUCOLAB_PORT}:${MESSAGEUCOLAB_PORT}"
     environment:
-      LOG_PATH: /app/logs
+      - LOG_PATH=/app/logs
+      - LOKI_URL=http://loki:${LOKIPORT}
 
-      # Redis
-      REDISHOST: ${REDISHOST}
-      REDISPORT: ${REDISPORT}
-      REDISPASSWORD: ${REDISPASSWORD}
-      REDISDATABASE: ${REDISDATABASE}
-
-      # SurrealDB
-      SURREALDBHOST: ${SURREALDBHOST}
-      SURREALDBPORT: ${SURREALDBPORT}
-      SURREALDBUSER: ${SURREALDBUSER}
-      SURREALDBPASSWORD: ${SURREALDBPASSWORD}
-      SURREALDBNAMESPACE: ${SURREALDBNAMESPACE}
-      SURREALDBDATABASE: ${SURREALDBDATABASE}
-
-      # Azure
-      AZURE_KEYVAULT_UCOLAB_ENDPOINT: ${AZURE_KEYVAULT_UCOLAB_ENDPOINT}
-      AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
-      AZURE_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
-      AZURE_TENANT_ID: ${AZURE_TENANT_ID}
-
-      # Translation AI
-      TRANSLATION_AI_ENABLED: ${TRANSLATION_AI_ENABLED:-true}
-      TRANSLATION_AI_PROVIDER: ${TRANSLATION_AI_PROVIDER:-ollama}
-      TRANSLATION_AI_API_KEY: ${TRANSLATION_AI_API_KEY:-}
-      TRANSLATION_AI_BASE_URL: ${TRANSLATION_AI_BASE_URL:-http://ollama:11434}
-      TRANSLATION_AI_MODEL_NAME: ${TRANSLATION_AI_MODEL_NAME:-llama3.2}
-      TRANSLATION_AI_TEMPERATURE: ${TRANSLATION_AI_TEMPERATURE:-0.1}
-      TRANSLATION_AI_MAX_RETRIES: ${TRANSLATION_AI_MAX_RETRIES:-0}
-      TRANSLATION_AI_TIMEOUT_SECONDS: ${TRANSLATION_AI_TIMEOUT_SECONDS:-30}
-
-      # Doppler
-      DOPPLERTOKEN: ${DOPPLERTOKEN}
-
-      # Pulsar
-      PULSARURL: ${PULSARURL}
-      PULSARTOPICNAME: ${PULSARTOPICNAME}
-
-
+      - AZURE_KEYVAULT_UCOLAB_ENDPOINT=${AZURE_KEYVAULT_UCOLAB_ENDPOINT}
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
 
     volumes:
       - ../../logs:/app/logs
-
     depends_on:
       redis:
         condition: service_started
@@ -237,23 +192,15 @@ services:
         condition: service_started
       ollama-init:
         condition: service_completed_successfully
-
+      loki:
+        condition: service_started
     networks:
       - observability-network
       - kong-network
       - app-network
       - pulsar-network
-
     healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--no-verbose",
-          "--tries=1",
-          "--spider",
-          "http://localhost:8085/actuator/health"
-        ]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${MESSAGEUCOLAB_PORT}/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -263,13 +210,13 @@ services:
     image: apachepulsar/pulsar:3.2.2
     container_name: pulsar-standalone
     command: >
-      /bin/bash -c "
-      bin/apply-config-from-env.py conf/standalone.conf &&
-      bin/apply-config-from-env.py conf/client.conf &&
+      /bin/bash -c " 
+      bin/apply-config-from-env.py conf/standalone.conf && 
+      bin/apply-config-from-env.py conf/client.conf && 
       bin/pulsar standalone -nss -nfw"
     ports:
-      - "6800:6650"
-      - "8080:8080"
+      - "${PULSAR_PORT}:${PULSAR_PORTEXIT}"
+      - "${PULSAR_GENERALPORT}:${PULSAR_GENERALPORT}"
     volumes:
       - pulsar-data:/pulsar/data
       - pulsar-conf:/pulsar/conf
@@ -283,34 +230,24 @@ services:
 
 volumes:
   grafana-data:
-
   redis_data:
     driver: local
-
   loki-data:
-
   pulsar-data:
     driver: local
-
   pulsar-conf:
     driver: local
-
   surrealdb-data:
     driver: local
-
   ollama-data:
     driver: local
-
 
 networks:
   observability-network:
     driver: bridge
-
   kong-network:
     driver: bridge
-
   app-network:
     driver: bridge
-
   pulsar-network:
     driver: bridge

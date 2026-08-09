@@ -5,6 +5,6 @@ scrape_configs:
 
     static_configs:
       - targets:
-          - 'messageucolab:8085'
+          - 'messageucolab:${MESSAGEUCOLAB_PORT}'
         labels:
           application: 'MessageUcoLab'
