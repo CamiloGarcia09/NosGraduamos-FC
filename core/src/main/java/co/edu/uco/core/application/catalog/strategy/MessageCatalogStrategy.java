@@ -3,27 +3,31 @@ package co.edu.uco.core.application.catalog.strategy;
 import co.edu.uco.core.application.catalog.strategy.cache.CacheCatalog;
 import co.edu.uco.core.application.catalog.strategy.database.DatabaseCatalog;
 import co.edu.uco.core.domain.data.MessageData;
+import co.edu.uco.core.domain.port.out.logging.LoggingPort;
+import co.edu.uco.core.domain.port.out.logging.LoggingPortFactory;
 import co.edu.uco.core.domain.port.out.repository.SimplePage;
 import co.edu.uco.core.domain.port.out.repository.SimplePageRequest;
 import co.edu.uco.core.application.catalog.strategy.inmemory.InMemoryCatalog;
 import co.edu.uco.utils.exception.BusinessException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import static co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum.*;
 
 import java.util.Optional;
-@Slf4j
+
 @Component
 public final class MessageCatalogStrategy {
     private final CacheCatalog cacheCatalog;
     private final DatabaseCatalog databaseCatalog;
     private final InMemoryCatalog inMemoryCatalog;
+    private final LoggingPort log;
+
     public MessageCatalogStrategy(CacheCatalog cacheCatalog, DatabaseCatalog databaseCatalog,
-            InMemoryCatalog inMemoryCatalog) {
+            InMemoryCatalog inMemoryCatalog, LoggingPortFactory loggerFactory) {
         this.cacheCatalog = cacheCatalog;
         this.databaseCatalog = databaseCatalog;
         this.inMemoryCatalog = inMemoryCatalog;
+        this.log = loggerFactory.getLogger(MessageCatalogStrategy.class);
     }
     public SimplePage<MessageData> getMessagesWithEnvironment(String environment, SimplePageRequest request) {
         var cachedMessages = cacheCatalog.getMessageWithEnvironment(environment, request);

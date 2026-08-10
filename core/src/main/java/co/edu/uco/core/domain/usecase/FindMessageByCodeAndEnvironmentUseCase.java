@@ -6,23 +6,27 @@ import co.edu.uco.core.application.dto.message.MessageDTO;
 import co.edu.uco.core.application.mapper.entity.DataMapper;
 import co.edu.uco.core.domain.data.MessageData;
 import co.edu.uco.core.domain.domains.MessageDomain;
+import co.edu.uco.core.domain.port.out.logging.LoggingPort;
+import co.edu.uco.core.domain.port.out.logging.LoggingPortFactory;
 import co.edu.uco.core.domain.usecase.handling.HandlingFindMessageByCodeAndEnvironmentPort;
 import co.edu.uco.core.domain.validator.message.FindMessageCodeValidator;
 import co.edu.uco.utils.exception.BusinessException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Component
-@Slf4j
 public final class FindMessageByCodeAndEnvironmentUseCase implements HandlingFindMessageByCodeAndEnvironmentPort {
     private final MessageCatalogStrategy messageCatalogStrategy;
     private final FindMessageCodeValidator findMessageCodeValidator;
     private final DataMapper<MessageData, MessageDomain, MessageDTO> entityMapper;
+    private final LoggingPort log;
+
     public FindMessageByCodeAndEnvironmentUseCase(MessageCatalogStrategy messageCatalogStrategy, FindMessageCodeValidator findMessageCodeValidator,
-                                                  DataMapper<MessageData, MessageDomain, MessageDTO> entityMapper) {
+                                                  DataMapper<MessageData, MessageDomain, MessageDTO> entityMapper,
+                                                  LoggingPortFactory loggerFactory) {
         this.messageCatalogStrategy = messageCatalogStrategy;
         this.findMessageCodeValidator = findMessageCodeValidator;
         this.entityMapper = entityMapper;
+        this.log = loggerFactory.getLogger(FindMessageByCodeAndEnvironmentUseCase.class);
     }
     @Override
     public MessageDTO execute(String messageCode, String environmentId) {
