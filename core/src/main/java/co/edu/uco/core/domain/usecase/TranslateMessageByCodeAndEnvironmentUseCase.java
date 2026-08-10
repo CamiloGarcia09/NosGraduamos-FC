@@ -4,20 +4,20 @@ import co.edu.uco.core.application.catalog.strategy.MessageCatalogStrategy;
 import co.edu.uco.core.application.catalog.strategy.inmemory.enums.DetailMessageEnum;
 import co.edu.uco.core.application.dto.message.TranslatedMessageDTO;
 import co.edu.uco.core.domain.data.MessageTranslationRequestData;
+import co.edu.uco.core.domain.port.out.logging.LoggingPort;
+import co.edu.uco.core.domain.port.out.logging.LoggingPortFactory;
 import co.edu.uco.core.domain.port.out.translation.MessageTranslationPort;
 import co.edu.uco.core.domain.usecase.handling.HandlingTranslateMessageByCodeAndEnvironmentPort;
 import co.edu.uco.core.domain.validator.message.FindMessageCodeValidator;
 import co.edu.uco.core.domain.validator.message.TargetLanguageValidator;
 import co.edu.uco.utils.exception.BusinessException;
 import co.edu.uco.utils.exception.CrossWordsException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import static co.edu.uco.utils.helper.UtilText.isEmptyOrNull;
 import static co.edu.uco.utils.helper.UtilText.trim;
 
 @Component
-@Slf4j
 public final class TranslateMessageByCodeAndEnvironmentUseCase
         implements HandlingTranslateMessageByCodeAndEnvironmentPort {
     private static final String DEFAULT_SOURCE_LANGUAGE = "auto";
@@ -26,17 +26,20 @@ public final class TranslateMessageByCodeAndEnvironmentUseCase
     private final MessageTranslationPort messageTranslationPort;
     private final FindMessageCodeValidator findMessageCodeValidator;
     private final TargetLanguageValidator targetLanguageValidator;
+    private final LoggingPort log;
 
     public TranslateMessageByCodeAndEnvironmentUseCase(
             MessageCatalogStrategy messageCatalogStrategy,
             MessageTranslationPort messageTranslationPort,
             FindMessageCodeValidator findMessageCodeValidator,
-            TargetLanguageValidator targetLanguageValidator
+            TargetLanguageValidator targetLanguageValidator,
+            LoggingPortFactory loggerFactory
     ) {
         this.messageCatalogStrategy = messageCatalogStrategy;
         this.messageTranslationPort = messageTranslationPort;
         this.findMessageCodeValidator = findMessageCodeValidator;
         this.targetLanguageValidator = targetLanguageValidator;
+        this.log = loggerFactory.getLogger(TranslateMessageByCodeAndEnvironmentUseCase.class);
     }
 
     @Override
