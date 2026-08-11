@@ -3,6 +3,7 @@ package co.edu.uco.infrastructure.adapter.secondary.translation;
 import co.edu.uco.core.domain.data.MessageTranslationRequestData;
 import co.edu.uco.core.domain.data.MessageTranslationResponseData;
 import co.edu.uco.core.domain.port.out.translation.MessageTranslationPort;
+import co.edu.uco.core.domain.port.out.vault.VaultPort;
 import co.edu.uco.infrastructure.configuration.TranslationAiProperties;
 import co.edu.uco.utils.exception.BusinessException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,20 +27,25 @@ import static co.edu.uco.utils.helper.UtilText.trim;
 @Slf4j
 @Component
 public class LangChain4jMessageTranslationAdapter implements MessageTranslationPort {
-    private static final String PROVIDER_OPEN_AI = "open-ai";
-    private static final String PROVIDER_OLLAMA = "ollama";
+
+    private final VaultPort vault;
+
+
 
     private final TranslationAiProperties properties;
     private final ObjectMapper objectMapper;
     private ChatModel chatModel;
 
     public LangChain4jMessageTranslationAdapter(
-            TranslationAiProperties properties,
+            VaultPort vault, TranslationAiProperties properties,
             ObjectMapper objectMapper
     ) {
+        this.vault = vault;
         this.properties = properties;
         this.objectMapper = objectMapper;
     }
+
+    private static final String PROVIDER_OPEN_AI = "openai";
 
     @Override
     public MessageTranslationResponseData translate(MessageTranslationRequestData requestData) {
@@ -120,7 +126,7 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
     }
 
     private String providerName() {
-        return isOpenAiProvider() ? "langchain4j-open-ai" : "langchain4j-" + PROVIDER_OLLAMA;
+        return isOpenAiProvider() ? "langchain4j-open-ai" : "langchain4j-" + vault.getSecretValue("TRANSLATION-AI-PROVIDER");
     }
 
     private ChatRequest buildChatRequest(MessageTranslationRequestData requestData) {

@@ -45,5 +45,10 @@ public final class MessageRedisAdapter implements CacheMessageRepository {
     public Optional<MessageData> findMessageByCodeAndEnvironment(String code, String environmentId) {
         return repository.findByCodeAndEnvironmentId(code, environmentId)
                 .map(mapper::mapperData);
+
     }
+
+
+
+
 }
