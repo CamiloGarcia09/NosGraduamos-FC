@@ -1,7 +1,7 @@
 package co.edu.uco.infrastructure.adapter.secondary.external.secrets.impl.doppler;
 
 import co.edu.uco.core.domain.port.out.repository.token.FindTokenCachePort;
-import co.edu.uco.core.domain.port.out.secret.FindSecretTokenPort;
+import co.edu.uco.core.domain.port.out.secret.SecretProviderPort;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.stereotype.Component;
@@ -15,9 +15,9 @@ import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.CAC
 @Component
 public final class DopplerSecretCacheService  implements FindTokenCachePort {
     private final Cache<String, Map<String, String>> dopplerSecretCache;
-    private final FindSecretTokenPort findSecretTokenPort;
-    public DopplerSecretCacheService(FindSecretTokenPort findSecretTokenPort) {
-        this.findSecretTokenPort = findSecretTokenPort;
+    private final SecretProviderPort secretProviderPort;
+    public DopplerSecretCacheService(SecretProviderPort secretProviderPort) {
+        this.secretProviderPort = secretProviderPort;
         this.dopplerSecretCache = Caffeine.newBuilder()
                 .expireAfterWrite(CACHE_EXPIRATION_TIME, TimeUnit.MINUTES)
                 .maximumSize(CACHE_MAXIMUM_SIZE)
@@ -25,7 +25,7 @@ public final class DopplerSecretCacheService  implements FindTokenCachePort {
     }
     @Override
     public Map<String, String> getSecret(String secretName) {
-        return dopplerSecretCache.get(secretName, findSecretTokenPort::findSecretToken);
+        return dopplerSecretCache.get(secretName, secretProviderPort::findSecretToken);
     }
     public void invalidateCache(String secretName) {
         dopplerSecretCache.invalidate(secretName);

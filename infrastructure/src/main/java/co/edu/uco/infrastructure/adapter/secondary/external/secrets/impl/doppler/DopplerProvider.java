@@ -1,7 +1,7 @@
 package co.edu.uco.infrastructure.adapter.secondary.external.secrets.impl.doppler;
 
 import co.edu.uco.core.application.catalog.strategy.inmemory.enums.DetailMessageEnum;
-import co.edu.uco.core.domain.port.out.secret.FindSecretTokenPort;
+import co.edu.uco.core.domain.port.out.secret.SecretProviderPort;
 import co.edu.uco.infrastructure.configuration.DopplerProperties;
 import co.edu.uco.utils.exception.CrossWordsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,10 +16,10 @@ import static co.edu.uco.utils.exception.enumeration.ExceptionType.TECHNICAL;
 
 @Slf4j
 @Component
-public final class DopplerFindToken implements FindSecretTokenPort {
+public final class DopplerProvider implements SecretProviderPort {
     private final DopplerProperties properties;
     private final ObjectMapper mapper;
-    public DopplerFindToken(DopplerProperties properties, ObjectMapper mapper) {
+    public DopplerProvider(DopplerProperties properties, ObjectMapper mapper) {
         this.properties = properties;
         this.mapper = mapper;
     }
