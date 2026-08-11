@@ -1,6 +1,7 @@
 package co.edu.uco.infrastructure.adapter.secondary.presenter.serializer.impl.xml;
 
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.DetailMessageEnum;
+import co.edu.uco.core.application.catalog.InMemoryCatalogStaticRef;
+import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
 import co.edu.uco.infrastructure.adapter.secondary.presenter.serializer.AbstractSerializer;
 import co.edu.uco.utils.exception.CrossWordsException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -20,7 +21,7 @@ public final class XMLSerializer extends AbstractSerializer {
             xmlMapper.registerModule(new JavaTimeModule());
             return xmlMapper.writeValueAsString(data);
         } catch (JsonProcessingException e) {
-            throw CrossWordsException.build(DetailMessageEnum.TCH_018.getContent(), e);
+            throw CrossWordsException.build(InMemoryCatalogStaticRef.getContent(MessageKeyEnum.TCH_018.getKey()), e);
         }
     }
 }

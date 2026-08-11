@@ -1,7 +1,7 @@
 package co.edu.uco.core.domain.usecase;
 
 import co.edu.uco.core.application.catalog.strategy.MessageCatalogStrategy;
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.DetailMessageEnum;
+import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
 import co.edu.uco.core.application.dto.message.MessageDTO;
 import co.edu.uco.core.application.mapper.entity.DataMapper;
 import co.edu.uco.core.domain.data.MessageData;
@@ -46,7 +46,7 @@ public final class FindMessageByEnvironmentUseCase implements HandlingFindMessag
             throw exception;
         }
         catch (Exception exception){
-            var errorMessage = DetailMessageEnum.FUN_011.getContent();
+            var errorMessage = messageCatalogStrategy.getSystemMessageContent(MessageKeyEnum.FUN_011.getKey());
             log.error(errorMessage);
             throw BusinessException.buildUserException(errorMessage);
         }
