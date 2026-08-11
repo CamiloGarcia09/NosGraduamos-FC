@@ -1,6 +1,7 @@
 package co.edu.uco.core.application.facade.token.impl;
 
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.DetailMessageEnum;
+import co.edu.uco.core.application.catalog.strategy.inmemory.InMemoryCatalog;
+import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
 import co.edu.uco.core.application.dto.token.CreateTokenDTO;
 import co.edu.uco.core.application.dto.token.TokenDTO;
 import co.edu.uco.core.application.facade.token.CreateTokenUseCaseFacade;
@@ -38,6 +39,7 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
     private final EncryptTokenPort encrypt;
     private final HandlingRevokeTokenPort handlingRevokeTokenPort;
     private final LoggingPort log;
+    private final InMemoryCatalog inMemoryCatalog;
 
     public CreateTokenUseCaseFacadeImpl(
             HandlingCreateTokenPort handlingCreateTokenPort,
@@ -46,7 +48,8 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
             CreateTokenSecretPort createTokenSecretPort,
             CreateTokenCompositeValidator validator,
             HandlingRevokeTokenPort handlingRevokeTokenPort,
-            LoggingPortFactory loggerFactory
+            LoggingPortFactory loggerFactory,
+            InMemoryCatalog inMemoryCatalog
     ) {
         this.handlingCreateTokenPort = handlingCreateTokenPort;
         this.tokenDTOMapper = tokenDTOMapper;
@@ -55,6 +58,7 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
         this.validator = validator;
         this.handlingRevokeTokenPort = handlingRevokeTokenPort;
         this.log = loggerFactory.getLogger(CreateTokenUseCaseFacadeImpl.class);
+        this.inMemoryCatalog = inMemoryCatalog;
     }
 
     @Override
@@ -73,9 +77,9 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
         var keyPairResponseDTO = encrypt.generateKeys();
 
         if(isNullObject(keyPairResponseDTO)){
-            var message = DetailMessageEnum.TCH_024.getMessage();
-            log.error(message.content());
-            throw CrossWordsException.build(message.content());
+            var message = inMemoryCatalog.getContent(MessageKeyEnum.TCH_024.getKey());
+            log.error(message);
+            throw CrossWordsException.build(message);
         }
 
         try{
@@ -92,7 +96,7 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
             handlingCreateTokenPort.createToken(tokenDTOMapper.mapperDomain(tokenDTO));
             return generateSignature;
         }catch (Exception e){
-            var message = DetailMessageEnum.TCH_025.getContent();
+            var message = inMemoryCatalog.getContent(MessageKeyEnum.TCH_025.getKey());
             log.error(message, e);
             throw CrossWordsException.build(message, e);
         }

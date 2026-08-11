@@ -1,6 +1,7 @@
 package co.edu.uco.core.domain.usecase;
 
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.DetailMessageEnum;
+import co.edu.uco.core.application.catalog.strategy.inmemory.InMemoryCatalog;
+import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
 import co.edu.uco.core.domain.port.out.repository.token.FindTokenCachePort;
 import co.edu.uco.core.domain.port.out.repository.token.FindTokenRepository;
 import co.edu.uco.core.domain.port.out.repository.token.TokenStateRepository;
@@ -19,11 +20,13 @@ public final class VerifyAccessUseCase implements HandlingVerifyAccessPort {
     private final FindTokenCachePort findTokenCachePort;
     private final FindTokenRepository findTokenRepository;
     private final TokenStateRepository tokenStateRepository;
-    public VerifyAccessUseCase(EncryptTokenPort encryptTokenPort, FindTokenCachePort findTokenCachePort, FindTokenRepository findTokenRepository, TokenStateRepository tokenStateRepository) {
+    private final InMemoryCatalog inMemoryCatalog;
+    public VerifyAccessUseCase(EncryptTokenPort encryptTokenPort, FindTokenCachePort findTokenCachePort, FindTokenRepository findTokenRepository, TokenStateRepository tokenStateRepository, InMemoryCatalog inMemoryCatalog) {
         this.encryptTokenPort = encryptTokenPort;
         this.findTokenCachePort = findTokenCachePort;
         this.findTokenRepository = findTokenRepository;
         this.tokenStateRepository = tokenStateRepository;
+        this.inMemoryCatalog = inMemoryCatalog;
     }
     @Override
     public boolean verifyAccess(String token) {
@@ -45,7 +48,7 @@ public final class VerifyAccessUseCase implements HandlingVerifyAccessPort {
     private void stateValid(String statusId) {
         var status = tokenStateRepository.findByStatus(statusId);
         if (!status.getName().equals(STATE_ACTIVE)) {
-            throw BusinessRuleException.buildUserException(DetailMessageEnum.TCH_033.getContent());
+            throw BusinessRuleException.buildUserException(inMemoryCatalog.getContent(MessageKeyEnum.TCH_033.getKey()));
         }
     }
 }

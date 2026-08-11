@@ -1,7 +1,7 @@
 package co.edu.uco.core.domain.usecase;
 
 import co.edu.uco.core.application.catalog.strategy.MessageCatalogStrategy;
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.DetailMessageEnum;
+import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
 import co.edu.uco.core.application.dto.message.TranslatedMessageDTO;
 import co.edu.uco.core.domain.data.MessageTranslationRequestData;
 import co.edu.uco.core.domain.port.out.logging.LoggingPort;
@@ -60,7 +60,7 @@ public final class TranslateMessageByCodeAndEnvironmentUseCase
                     .getMessageByCodeAndEnvironment(messageCode, environmentId)
                     .orElseThrow(() -> {
                         var errorMessage = String.format(
-                                DetailMessageEnum.FUN_012.getContent(),
+                                messageCatalogStrategy.getSystemMessageContent(MessageKeyEnum.FUN_012.getKey()),
                                 messageCode,
                                 environmentId
                         );
@@ -100,7 +100,7 @@ public final class TranslateMessageByCodeAndEnvironmentUseCase
         } catch (CrossWordsException exception) {
             throw exception;
         } catch (Exception exception) {
-            var errorMessage = String.format(DetailMessageEnum.FUN_012.getContent(), messageCode, environmentId);
+            var errorMessage = String.format(messageCatalogStrategy.getSystemMessageContent(MessageKeyEnum.FUN_012.getKey()), messageCode, environmentId);
             log.error(errorMessage, exception);
             throw BusinessException.buildUserException(errorMessage);
         }

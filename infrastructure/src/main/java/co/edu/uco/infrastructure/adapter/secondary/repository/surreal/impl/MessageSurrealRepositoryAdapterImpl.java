@@ -81,6 +81,14 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
     }
 
     @Override
+    public Optional<MessageData> findByCode(final String code) {
+        final String sql = "SELECT * FROM " + SURREAL_TABLE_MESSAGE_DOCUMENT
+                + " WHERE code = " + quote(code)
+                + " LIMIT 1;";
+        return findOneMessageDocument(sql);
+    }
+
+    @Override
     public Optional<MessageData> findMessageByCodeAndEnvironment(final String code, final String environmentId) {
         final String sql = "SELECT * FROM " + SURREAL_TABLE_MESSAGE_ENVIRONMENT_READMODEL
                 + " WHERE " + environmentFilter(environmentId)
