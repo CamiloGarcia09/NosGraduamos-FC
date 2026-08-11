@@ -51,6 +51,15 @@ try {
         --database $env:SURREALDBDATABASE `
         /init/surreal-seed.dev.surql
 
+    Write-Host "Importing message catalog seed..."
+    docker compose run --rm surrealdb-init import `
+        --endpoint http://surrealdb:8005 `
+        --username $env:SURREALDBUSER `
+        --password $env:SURREALDBPASSWORD `
+        --namespace $env:SURREALDBNAMESPACE `
+        --database $env:SURREALDBDATABASE `
+        /init/messages-seed.surql
+
     Write-Host "Latest generated DEV identifiers:"
     @"
 SELECT * FROM bootstrap_metadata:latest_dev_seed;

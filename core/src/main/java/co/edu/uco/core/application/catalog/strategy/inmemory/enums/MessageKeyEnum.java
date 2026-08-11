@@ -94,10 +94,10 @@ public enum MessageKeyEnum {
     }
     public static MessageKeyEnum of(String key) {
         if (UtilText.isEmptyOrNull(key)) {
-            throw CrossWordsException.build(DetailMessageEnum.TCH_008.getContent());
+            throw CrossWordsException.build("Message code cannot be empty");
         }
         return Arrays.stream(MessageKeyEnum.values()).filter(messageCatalogEnum
                         -> messageCatalogEnum.getKey().equals(key)).findFirst()
-                .orElseThrow(() -> CrossWordsException.build(DetailMessageEnum.TCH_009.getContent()));
+                .orElseThrow(() -> CrossWordsException.build("Message code does not exist: " + key));
     }
 }

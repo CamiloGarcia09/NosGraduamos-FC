@@ -1,6 +1,7 @@
 package co.edu.uco.infrastructure.adapter.secondary.presenter.rest;
 
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.DetailMessageEnum;
+import co.edu.uco.core.application.catalog.strategy.inmemory.InMemoryCatalog;
+import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
 import co.edu.uco.core.domain.port.out.Response;
 import co.edu.uco.core.domain.port.out.presenter.PresenterPort;
 import co.edu.uco.infrastructure.adapter.secondary.presenter.serializer.SerializerRegistry;
@@ -23,8 +24,10 @@ import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.REQ
 @RestControllerAdvice
 public final class HttpPresenterAdapter<T> implements PresenterPort<T> {
     private final SerializerRegistry serializerRegistry;
-    public HttpPresenterAdapter(SerializerRegistry serializerRegistry) {
+    private final InMemoryCatalog inMemoryCatalog;
+    public HttpPresenterAdapter(SerializerRegistry serializerRegistry, InMemoryCatalog inMemoryCatalog) {
         this.serializerRegistry = serializerRegistry;
+        this.inMemoryCatalog = inMemoryCatalog;
     }
     @Override
     public void presentRestSuccess(
@@ -41,9 +44,9 @@ public final class HttpPresenterAdapter<T> implements PresenterPort<T> {
             response.setStatus(HttpStatus.OK.value());
             response.setContentType(serializer.getSupportedContentType());
             response.getWriter().write(formattedResponse);
-            log.info(DetailMessageEnum.TCH_021.getContent(), formattedResponse);
+            log.info(inMemoryCatalog.getContent(MessageKeyEnum.TCH_021.getKey()), formattedResponse);
         } catch (CrossWordsException | IOException ex) {
-            log.error(DetailMessageEnum.TCH_016.getContent(), ex);
+            log.error(inMemoryCatalog.getContent(MessageKeyEnum.TCH_016.getKey()), ex);
         }
     }
     @ExceptionHandler(CrossWordsException.class)
@@ -59,17 +62,17 @@ public final class HttpPresenterAdapter<T> implements PresenterPort<T> {
             var message = Optional.ofNullable(ex.getUserMessage())
                     .filter(msg -> !msg.isEmpty())
                     .orElseGet(() -> {
-                        log.error(DetailMessageEnum.TCH_016.getContent(), ex);
-                        return DetailMessageEnum.FUN_023.getContent();
+                        log.error(inMemoryCatalog.getContent(MessageKeyEnum.TCH_016.getKey()), ex);
+                        return inMemoryCatalog.getContent(MessageKeyEnum.FUN_023.getKey());
                     });
             var responseError = new Response<>(List.of(), List.of(message));
             var formattedResponse = serializer.serialize(responseError);
             response.setStatus(HttpStatus.NOT_FOUND.value());
             response.setContentType(serializer.getSupportedContentType());
             response.getWriter().write(formattedResponse);
-            log.error(DetailMessageEnum.TCH_020.getContent(), formattedResponse);
+            log.error(inMemoryCatalog.getContent(MessageKeyEnum.TCH_020.getKey()), formattedResponse);
         } catch (IOException | CrossWordsException exception) {
-            log.error(DetailMessageEnum.TCH_019.getContent(), exception);
+            log.error(inMemoryCatalog.getContent(MessageKeyEnum.TCH_019.getKey()), exception);
             throw exception;
         }
     }
@@ -88,9 +91,9 @@ public final class HttpPresenterAdapter<T> implements PresenterPort<T> {
             response.setStatus(HttpStatus.BAD_REQUEST.value());
             response.setContentType(serializer.getSupportedContentType());
             response.getWriter().write(formattedResponse);
-            log.error(DetailMessageEnum.TCH_020.getContent(), formattedResponse);
+            log.error(inMemoryCatalog.getContent(MessageKeyEnum.TCH_020.getKey()), formattedResponse);
         } catch (IOException ioEx) {
-            log.error(DetailMessageEnum.TCH_019.getContent(), ioEx);
+            log.error(inMemoryCatalog.getContent(MessageKeyEnum.TCH_019.getKey()), ioEx);
         }
     }
 }
