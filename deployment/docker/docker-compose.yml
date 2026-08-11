@@ -114,6 +114,32 @@ services:
     networks:
       - app-network
 
+  surrealdb-seed:
+    image: surrealdb/surrealdb:v2.1.4
+    container_name: surrealdb-seed-messageucolab
+    depends_on:
+      surrealdb-init:
+        condition: service_completed_successfully
+    entrypoint: ["/surreal"]
+    command:
+      - import
+      - --endpoint
+      - http://surrealdb:${SURREALDBPORT}
+      - --username
+      - ${SURREALDBUSER}
+      - --password
+      - ${SURREALDBPASSWORD}
+      - --namespace
+      - ${SURREALDBNAMESPACE}
+      - --database
+      - ${SURREALDBDATABASE}
+      - /init/messages-seed.surql
+    volumes:
+      - ./scripts:/init:ro
+    restart: "no"
+    networks:
+      - app-network
+
   kong:
     image: kong/kong-gateway:3.5
     container_name: api-gateway-kong
@@ -191,6 +217,8 @@ services:
       surrealdb:
         condition: service_started
       ollama-init:
+        condition: service_completed_successfully
+      surrealdb-seed:
         condition: service_completed_successfully
       loki:
         condition: service_started

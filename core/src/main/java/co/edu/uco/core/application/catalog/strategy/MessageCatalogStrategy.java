@@ -69,4 +69,9 @@ public final class MessageCatalogStrategy {
     private void fillCacheWithEnvironmentMessages(SimplePage<MessageData> dbMessages, String environment) {
         dbMessages.getData().forEach(message -> cacheCatalog.addMessageWithEnvironment(message, environment));
     }
+
+    /** Returns internal system message content by code; sourced from SurrealDB via InMemoryCatalog. */
+    public String getSystemMessageContent(String code) {
+        return inMemoryCatalog.getContent(code);
+    }
 }

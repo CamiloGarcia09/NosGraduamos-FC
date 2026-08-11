@@ -1,6 +1,7 @@
 package co.edu.uco.infrastructure.adapter.secondary.external.secrets.impl.doppler;
 
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.DetailMessageEnum;
+import co.edu.uco.core.application.catalog.strategy.inmemory.InMemoryCatalog;
+import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
 import co.edu.uco.core.domain.port.out.secret.CreateTokenSecretPort;
 import co.edu.uco.infrastructure.configuration.DopplerProperties;
 import co.edu.uco.utils.exception.CrossWordsException;
@@ -16,9 +17,11 @@ import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.*;
 public final class DopplerCreateToken implements CreateTokenSecretPort {
     private final DopplerProperties properties;
     private final DopplerSecretCacheService cacheService;
-    public DopplerCreateToken(DopplerProperties properties, DopplerSecretCacheService cacheService) {
+    private final InMemoryCatalog inMemoryCatalog;
+    public DopplerCreateToken(DopplerProperties properties, DopplerSecretCacheService cacheService, InMemoryCatalog inMemoryCatalog) {
         this.properties = properties;
         this.cacheService = cacheService;
+        this.inMemoryCatalog = inMemoryCatalog;
     }
     @Override
     public void execute(String secretName, String privateKey) {
@@ -35,21 +38,21 @@ public final class DopplerCreateToken implements CreateTokenSecretPort {
 
         try(Response response = client.newCall(request).execute()) {
             if(!response.isSuccessful()) {
-                var message = DetailMessageEnum.TCH_030.getContent().formatted(response.code());
+                var message = inMemoryCatalog.getContent(MessageKeyEnum.TCH_030.getKey()).formatted(response.code());
                 log.error(message);
                 throw CrossWordsException.buildInfrastructure(
                         message,
-                        DetailMessageEnum.FUN_025.getContent(),
+                        inMemoryCatalog.getContent(MessageKeyEnum.FUN_025.getKey()),
                         ExceptionType.TECHNICAL
                 );
             }
             cacheService.invalidateCache(secretName);
         } catch (Exception e) {
-            var message = DetailMessageEnum.TCH_029.getContent();
+            var message = inMemoryCatalog.getContent(MessageKeyEnum.TCH_029.getKey());
             log.error(message, e);
             throw CrossWordsException.buildInfrastructure(
                     message,
-                    DetailMessageEnum.FUN_025.getContent(),
+                    inMemoryCatalog.getContent(MessageKeyEnum.FUN_025.getKey()),
                     e,
                     ExceptionType.TECHNICAL
             );

@@ -1,6 +1,7 @@
 package co.edu.uco.infrastructure.adapter.primary.interceptors;
 
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.DetailMessageEnum;
+import co.edu.uco.core.application.catalog.strategy.inmemory.InMemoryCatalog;
+import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
 import co.edu.uco.core.application.facade.token.FindEnvironmentIdTokenUseCaseFacade;
 import co.edu.uco.core.application.facade.token.VerifyAccessUseCaseFacade;
 import co.edu.uco.core.domain.port.out.Response;
@@ -25,12 +26,15 @@ public final class TokenHeaderInterceptor implements HandlerInterceptor {
     private final SerializerRegistry serializerRegistry;
     private final VerifyAccessUseCaseFacade verifyAccessUseCaseFacade;
     private final FindEnvironmentIdTokenUseCaseFacade findEnvironmentIdTokenUseCaseFacade;
+    private final InMemoryCatalog inMemoryCatalog;
     public TokenHeaderInterceptor(SerializerRegistry serializerRegistry,
                                   VerifyAccessUseCaseFacade verifyAccessUseCaseFacade,
-                                  FindEnvironmentIdTokenUseCaseFacade findEnvironmentIdTokenUseCaseFacade) {
+                                  FindEnvironmentIdTokenUseCaseFacade findEnvironmentIdTokenUseCaseFacade,
+                                  InMemoryCatalog inMemoryCatalog) {
         this.serializerRegistry = serializerRegistry;
         this.verifyAccessUseCaseFacade = verifyAccessUseCaseFacade;
         this.findEnvironmentIdTokenUseCaseFacade = findEnvironmentIdTokenUseCaseFacade;
+        this.inMemoryCatalog = inMemoryCatalog;
     }
     @Override
     public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws Exception {
@@ -38,12 +42,12 @@ public final class TokenHeaderInterceptor implements HandlerInterceptor {
         var acceptHeader = request.getHeader(REQUEST_GET_HEADER_ACCEPT);
 
         if (isEmptyOrNull(token)) {
-            sendErrorResponse(response, acceptHeader, DetailMessageEnum.TCH_032.getContent());
+            sendErrorResponse(response, acceptHeader, inMemoryCatalog.getContent(MessageKeyEnum.TCH_032.getKey()));
             return false;
         }
 
         if (!verifyAccessUseCaseFacade.execute(token)) {
-            sendErrorResponse(response, acceptHeader, DetailMessageEnum.TCH_031.getContent());
+            sendErrorResponse(response, acceptHeader, inMemoryCatalog.getContent(MessageKeyEnum.TCH_031.getKey()));
             return false;
         }
 

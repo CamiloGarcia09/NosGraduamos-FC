@@ -1,6 +1,7 @@
 package co.edu.uco.infrastructure.adapter.primary.interceptors;
 
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.DetailMessageEnum;
+import co.edu.uco.core.application.catalog.strategy.inmemory.InMemoryCatalog;
+import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
 import co.edu.uco.core.domain.port.out.Response;
 import co.edu.uco.infrastructure.adapter.secondary.presenter.serializer.SerializerRegistry;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,8 +23,10 @@ import static co.edu.uco.utils.helper.UtilObject.isNullObject;
 @Slf4j
 public final class AcceptHeaderInterceptor implements HandlerInterceptor {
     private final SerializerRegistry serializerRegistry;
-    public AcceptHeaderInterceptor(SerializerRegistry serializerRegistry) {
+    private final InMemoryCatalog inMemoryCatalog;
+    public AcceptHeaderInterceptor(SerializerRegistry serializerRegistry, InMemoryCatalog inMemoryCatalog) {
         this.serializerRegistry = serializerRegistry;
+        this.inMemoryCatalog = inMemoryCatalog;
     }
     @Override
     public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws Exception {
@@ -33,14 +36,14 @@ public final class AcceptHeaderInterceptor implements HandlerInterceptor {
         var serializer = serializerRegistry.getSerializerForMediaType(acceptHeader);
 
         if (isNullObject(serializer) || !serializer.supports(acceptHeader)) {
-            var errorMessage = String.format(DetailMessageEnum.TCH_022.getContent(), acceptHeader);
+            var errorMessage = String.format(inMemoryCatalog.getContent(MessageKeyEnum.TCH_022.getKey()), acceptHeader);
             var errorResponse = new Response<String>(List.of(), List.of(errorMessage));
             assert !isNullObject(serializer);
             var formattedError = serializer.serialize(errorResponse);
             response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
             response.setContentType(serializer.getSupportedContentType());
             response.getWriter().write(formattedError);
-            log.error(DetailMessageEnum.TCH_023.getContent(), formattedError);
+            log.error(inMemoryCatalog.getContent(MessageKeyEnum.TCH_023.getKey()), formattedError);
             return false;
         }
         return true;
