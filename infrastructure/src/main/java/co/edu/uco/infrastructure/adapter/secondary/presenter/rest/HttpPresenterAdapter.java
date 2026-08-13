@@ -1,8 +1,7 @@
 package co.edu.uco.infrastructure.adapter.secondary.presenter.rest;
 
-import co.edu.uco.core.application.catalog.strategy.inmemory.InMemoryCatalog;
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
 import co.edu.uco.core.domain.port.out.Response;
+import co.edu.uco.core.domain.port.out.catalog.CatalogPort;
 import co.edu.uco.core.domain.port.out.presenter.PresenterPort;
 import co.edu.uco.infrastructure.adapter.secondary.presenter.serializer.SerializerRegistry;
 import co.edu.uco.utils.exception.CrossWordsException;
@@ -24,10 +23,10 @@ import static co.edu.uco.infrastructure.configuration.InfrastructureConstant.REQ
 @RestControllerAdvice
 public final class HttpPresenterAdapter<T> implements PresenterPort<T> {
     private final SerializerRegistry serializerRegistry;
-    private final InMemoryCatalog inMemoryCatalog;
-    public HttpPresenterAdapter(SerializerRegistry serializerRegistry, InMemoryCatalog inMemoryCatalog) {
+    private final CatalogPort catalogPort;
+    public HttpPresenterAdapter(SerializerRegistry serializerRegistry, CatalogPort catalogPort) {
         this.serializerRegistry = serializerRegistry;
-        this.inMemoryCatalog = inMemoryCatalog;
+        this.catalogPort = catalogPort;
     }
     @Override
     public void presentRestSuccess(
@@ -44,9 +43,9 @@ public final class HttpPresenterAdapter<T> implements PresenterPort<T> {
             response.setStatus(HttpStatus.OK.value());
             response.setContentType(serializer.getSupportedContentType());
             response.getWriter().write(formattedResponse);
-            log.info(inMemoryCatalog.getContent(MessageKeyEnum.TCH_021.getKey()), formattedResponse);
+            log.info(catalogPort.getMessage("TCH_021"), formattedResponse);
         } catch (CrossWordsException | IOException ex) {
-            log.error(inMemoryCatalog.getContent(MessageKeyEnum.TCH_016.getKey()), ex);
+            log.error(catalogPort.getMessage("TCH_016"), ex);
         }
     }
     @ExceptionHandler(CrossWordsException.class)
@@ -62,17 +61,17 @@ public final class HttpPresenterAdapter<T> implements PresenterPort<T> {
             var message = Optional.ofNullable(ex.getUserMessage())
                     .filter(msg -> !msg.isEmpty())
                     .orElseGet(() -> {
-                        log.error(inMemoryCatalog.getContent(MessageKeyEnum.TCH_016.getKey()), ex);
-                        return inMemoryCatalog.getContent(MessageKeyEnum.FUN_023.getKey());
+                        log.error(catalogPort.getMessage("TCH_016"), ex);
+                        return catalogPort.getMessage("FUN_023");
                     });
             var responseError = new Response<>(List.of(), List.of(message));
             var formattedResponse = serializer.serialize(responseError);
             response.setStatus(HttpStatus.NOT_FOUND.value());
             response.setContentType(serializer.getSupportedContentType());
             response.getWriter().write(formattedResponse);
-            log.error(inMemoryCatalog.getContent(MessageKeyEnum.TCH_020.getKey()), formattedResponse);
+            log.error(catalogPort.getMessage("TCH_020"), formattedResponse);
         } catch (IOException | CrossWordsException exception) {
-            log.error(inMemoryCatalog.getContent(MessageKeyEnum.TCH_019.getKey()), exception);
+            log.error(catalogPort.getMessage("TCH_019"), exception);
             throw exception;
         }
     }
@@ -91,9 +90,9 @@ public final class HttpPresenterAdapter<T> implements PresenterPort<T> {
             response.setStatus(HttpStatus.BAD_REQUEST.value());
             response.setContentType(serializer.getSupportedContentType());
             response.getWriter().write(formattedResponse);
-            log.error(inMemoryCatalog.getContent(MessageKeyEnum.TCH_020.getKey()), formattedResponse);
+            log.error(catalogPort.getMessage("TCH_020"), formattedResponse);
         } catch (IOException ioEx) {
-            log.error(inMemoryCatalog.getContent(MessageKeyEnum.TCH_019.getKey()), ioEx);
+            log.error(catalogPort.getMessage("TCH_019"), ioEx);
         }
     }
 }

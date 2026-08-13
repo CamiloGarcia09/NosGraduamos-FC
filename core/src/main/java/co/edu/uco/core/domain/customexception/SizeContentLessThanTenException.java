@@ -1,7 +1,6 @@
 package co.edu.uco.core.domain.customexception;
 
-import co.edu.uco.core.application.catalog.InMemoryCatalogStaticRef;
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
+import co.edu.uco.core.application.catalog.CatalogPortStaticRef;
 import co.edu.uco.utils.exception.BusinessRuleException;
 
 import java.io.Serial;
@@ -11,8 +10,8 @@ public final class SizeContentLessThanTenException extends BusinessRuleException
     private static final long serialVersionUID = -2529239574681102198L;
     private SizeContentLessThanTenException() {
         super(
-            InMemoryCatalogStaticRef.getTitle(MessageKeyEnum.FUN_018.getKey()),
-            InMemoryCatalogStaticRef.getContent(MessageKeyEnum.FUN_018.getKey())
+            CatalogPortStaticRef.getTitle("FUN_018"),
+            CatalogPortStaticRef.getMessage("FUN_018")
         );
     }
     public static void report() {

@@ -1,11 +1,10 @@
 package co.edu.uco.core.application.facade.token.impl;
 
-import co.edu.uco.core.application.catalog.strategy.inmemory.InMemoryCatalog;
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
 import co.edu.uco.core.application.dto.token.CreateTokenDTO;
 import co.edu.uco.core.application.dto.token.TokenDTO;
 import co.edu.uco.core.application.facade.token.CreateTokenUseCaseFacade;
 import co.edu.uco.core.application.mapper.dto.impl.TokenDTOMapper;
+import co.edu.uco.core.domain.port.out.catalog.CatalogPort;
 import co.edu.uco.core.domain.port.out.logging.LoggingPort;
 import co.edu.uco.core.domain.port.out.logging.LoggingPortFactory;
 import co.edu.uco.core.domain.port.out.secret.CreateTokenSecretPort;
@@ -39,7 +38,7 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
     private final EncryptTokenPort encrypt;
     private final HandlingRevokeTokenPort handlingRevokeTokenPort;
     private final LoggingPort log;
-    private final InMemoryCatalog inMemoryCatalog;
+    private final CatalogPort catalogPort;
 
     public CreateTokenUseCaseFacadeImpl(
             HandlingCreateTokenPort handlingCreateTokenPort,
@@ -49,7 +48,7 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
             CreateTokenCompositeValidator validator,
             HandlingRevokeTokenPort handlingRevokeTokenPort,
             LoggingPortFactory loggerFactory,
-            InMemoryCatalog inMemoryCatalog
+            CatalogPort catalogPort
     ) {
         this.handlingCreateTokenPort = handlingCreateTokenPort;
         this.tokenDTOMapper = tokenDTOMapper;
@@ -58,7 +57,7 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
         this.validator = validator;
         this.handlingRevokeTokenPort = handlingRevokeTokenPort;
         this.log = loggerFactory.getLogger(CreateTokenUseCaseFacadeImpl.class);
-        this.inMemoryCatalog = inMemoryCatalog;
+        this.catalogPort = catalogPort;
     }
 
     @Override
@@ -77,7 +76,7 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
         var keyPairResponseDTO = encrypt.generateKeys();
 
         if(isNullObject(keyPairResponseDTO)){
-            var message = inMemoryCatalog.getContent(MessageKeyEnum.TCH_024.getKey());
+            var message = catalogPort.getMessage("TCH_024");
             log.error(message);
             throw CrossWordsException.build(message);
         }
@@ -96,7 +95,7 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
             handlingCreateTokenPort.createToken(tokenDTOMapper.mapperDomain(tokenDTO));
             return generateSignature;
         }catch (Exception e){
-            var message = inMemoryCatalog.getContent(MessageKeyEnum.TCH_025.getKey());
+            var message = catalogPort.getMessage("TCH_025");
             log.error(message, e);
             throw CrossWordsException.build(message, e);
         }

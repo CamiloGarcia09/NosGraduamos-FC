@@ -1,7 +1,6 @@
 package co.edu.uco.core.domain.validator.token;
 
-import co.edu.uco.core.application.catalog.strategy.inmemory.InMemoryCatalog;
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
+import co.edu.uco.core.domain.port.out.catalog.CatalogPort;
 import co.edu.uco.core.domain.validator.Validator;
 import co.edu.uco.utils.exception.BusinessRuleException;
 import co.edu.uco.utils.exception.CrossWordsException;
@@ -12,14 +11,14 @@ import static co.edu.uco.utils.helper.UtilDate.parseDate;
 
 @Component
 public final class DateValidValidator implements Validator<String> {
-    private final InMemoryCatalog inMemoryCatalog;
-    public DateValidValidator(InMemoryCatalog inMemoryCatalog) {
-        this.inMemoryCatalog = inMemoryCatalog;
+    private final CatalogPort catalogPort;
+    public DateValidValidator(CatalogPort catalogPort) {
+        this.catalogPort = catalogPort;
     }
     @Override
     public void validate(String data) throws BusinessRuleException {
         if (containsInvalidCharacters(data)) {
-            throw BusinessRuleException.buildUserException(inMemoryCatalog.getContent(MessageKeyEnum.FUN_039.getKey()));
+            throw BusinessRuleException.buildUserException(catalogPort.getMessage("FUN_039"));
         }
         try {
             parseDate(data);

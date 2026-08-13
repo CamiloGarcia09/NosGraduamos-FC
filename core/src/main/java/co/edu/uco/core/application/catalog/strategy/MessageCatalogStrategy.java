@@ -3,15 +3,13 @@ package co.edu.uco.core.application.catalog.strategy;
 import co.edu.uco.core.application.catalog.strategy.cache.CacheCatalog;
 import co.edu.uco.core.application.catalog.strategy.database.DatabaseCatalog;
 import co.edu.uco.core.domain.data.MessageData;
+import co.edu.uco.core.domain.port.out.catalog.CatalogPort;
 import co.edu.uco.core.domain.port.out.logging.LoggingPort;
 import co.edu.uco.core.domain.port.out.logging.LoggingPortFactory;
 import co.edu.uco.core.domain.port.out.repository.SimplePage;
 import co.edu.uco.core.domain.port.out.repository.SimplePageRequest;
-import co.edu.uco.core.application.catalog.strategy.inmemory.InMemoryCatalog;
 import co.edu.uco.utils.exception.BusinessException;
 import org.springframework.stereotype.Component;
-
-import static co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum.*;
 
 import java.util.Optional;
 
@@ -19,48 +17,48 @@ import java.util.Optional;
 public final class MessageCatalogStrategy {
     private final CacheCatalog cacheCatalog;
     private final DatabaseCatalog databaseCatalog;
-    private final InMemoryCatalog inMemoryCatalog;
+    private final CatalogPort catalogPort;
     private final LoggingPort log;
 
     public MessageCatalogStrategy(CacheCatalog cacheCatalog, DatabaseCatalog databaseCatalog,
-            InMemoryCatalog inMemoryCatalog, LoggingPortFactory loggerFactory) {
+            CatalogPort catalogPort, LoggingPortFactory loggerFactory) {
         this.cacheCatalog = cacheCatalog;
         this.databaseCatalog = databaseCatalog;
-        this.inMemoryCatalog = inMemoryCatalog;
+        this.catalogPort = catalogPort;
         this.log = loggerFactory.getLogger(MessageCatalogStrategy.class);
     }
     public SimplePage<MessageData> getMessagesWithEnvironment(String environment, SimplePageRequest request) {
         var cachedMessages = cacheCatalog.getMessageWithEnvironment(environment, request);
         if (cachedMessages.getData().isEmpty()) {
-            log.info(inMemoryCatalog.getContent(FUN_006.getKey()));
+            log.info(catalogPort.getMessage("FUN_006"));
             var dbMessages = databaseCatalog.getMessageWithEnvironment(environment, request);
             if (!dbMessages.getData().isEmpty()) {
-                log.info(inMemoryCatalog.getContent(FUN_007.getKey()));
+                log.info(catalogPort.getMessage("FUN_007"));
                 fillCacheWithEnvironmentMessages(dbMessages, environment);
                 return dbMessages;
             }
-            throw BusinessException.buildUserException(inMemoryCatalog.getContent(TCH_009.getKey()));
+            throw BusinessException.buildUserException(catalogPort.getMessage("TCH_009"));
         }
 
         var dbMessages = databaseCatalog.getMessageWithEnvironment(environment, request);
         if (!dbMessages.getData().isEmpty()) {
             if (cachedMessages.getData().size() != dbMessages.getData().size()) {
-                log.info(inMemoryCatalog.getContent(FUN_008.getKey()));
+                log.info(catalogPort.getMessage("FUN_008"));
                 fillCacheWithEnvironmentMessages(dbMessages, environment);
                 return dbMessages;
             }
-            log.info(inMemoryCatalog.getContent(FUN_009.getKey()));
+            log.info(catalogPort.getMessage("FUN_009"));
             return cachedMessages;
         }
-        throw BusinessException.buildUserException(inMemoryCatalog.getContent(TCH_009.getKey()));
+        throw BusinessException.buildUserException(catalogPort.getMessage("TCH_009"));
     }
     public Optional<MessageData> getMessageByCodeAndEnvironment(String code, String environmentId) {
         var response = cacheCatalog.getMessageByCodeAndEnvironment(code, environmentId);
         if (response.isPresent()) {
-            log.info(inMemoryCatalog.getContent(FUN_009.getKey()));
+            log.info(catalogPort.getMessage("FUN_009"));
         }
         if (response.isEmpty()) {
-            log.info(inMemoryCatalog.getContent(FUN_006.getKey()));
+            log.info(catalogPort.getMessage("FUN_006"));
             response = databaseCatalog.getMessageByCodeAndEnvironment(code, environmentId);
             response.ifPresent(message -> cacheCatalog.addMessageWithEnvironment(message, environmentId));
         }
@@ -70,8 +68,8 @@ public final class MessageCatalogStrategy {
         dbMessages.getData().forEach(message -> cacheCatalog.addMessageWithEnvironment(message, environment));
     }
 
-    /** Returns internal system message content by code; sourced from SurrealDB via InMemoryCatalog. */
+    /** Returns internal system message content by code; sourced from Redis via CatalogPort. */
     public String getSystemMessageContent(String code) {
-        return inMemoryCatalog.getContent(code);
+        return catalogPort.getMessage(code);
     }
 }
