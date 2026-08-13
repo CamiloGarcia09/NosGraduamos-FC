@@ -5,6 +5,8 @@ import co.edu.uco.application.secondaryports.entity.FunctionalityData;
 import co.edu.uco.application.secondaryports.entity.MessageCategoryData;
 import co.edu.uco.application.secondaryports.entity.MessageTypeData;
 import co.edu.uco.application.secondaryports.entity.StatusMessageData;
+import co.edu.uco.application.secondaryports.logging.LoggingPort;
+import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.DataBaseMessageRepository;
 import co.edu.uco.application.secondaryports.repository.SimplePage;
 import com.surrealdb.Array;
@@ -12,7 +14,6 @@ import com.surrealdb.Object;
 import com.surrealdb.Response;
 import com.surrealdb.Surreal;
 import com.surrealdb.Value;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
@@ -25,16 +26,17 @@ import java.util.UUID;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.quote;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
 
-@Slf4j
 @Repository
 public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepository {
 
     private static final String SURREAL_TABLE_MESSAGE_DOCUMENT = "message_data_collection";
     private static final String SURREAL_TABLE_MESSAGE_ENVIRONMENT_READMODEL = "message_environment_readmodel";
 
+    private final LoggingPort log;
     private final Surreal surreal;
 
-    public MessageSurrealRepositoryAdapterImpl(final Surreal surreal) {
+    public MessageSurrealRepositoryAdapterImpl(final Surreal surreal, final LoggingPortFactory loggerFactory) {
+        this.log = loggerFactory.getLogger(MessageSurrealRepositoryAdapterImpl.class);
         this.surreal = surreal;
     }
 

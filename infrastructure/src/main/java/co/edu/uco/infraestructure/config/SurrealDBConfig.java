@@ -1,18 +1,20 @@
 ﻿package co.edu.uco.infraestructure.config;
 
+import co.edu.uco.application.secondaryports.logging.LoggingPort;
+import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import com.surrealdb.Surreal;
 import com.surrealdb.signin.Root;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Slf4j
 @Configuration
 public class SurrealDBConfig {
 
+    private final LoggingPort log;
     private final SurrealDBProperties surrealDBProperties;
 
-    public SurrealDBConfig(SurrealDBProperties surrealDBProperties) {
+    public SurrealDBConfig(SurrealDBProperties surrealDBProperties, LoggingPortFactory loggerFactory) {
+        this.log = loggerFactory.getLogger(SurrealDBConfig.class);
         this.surrealDBProperties = surrealDBProperties;
     }
 

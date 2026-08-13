@@ -1,5 +1,7 @@
 ﻿package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
+import co.edu.uco.application.secondaryports.logging.LoggingPort;
+import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.infraestructure.secondaryadapters.repository.surreal.TokenSurrealRepositoryAdapter;
 import co.edu.uco.infraestructure.secondaryadapters.repository.surreal.model.TokenSurrealModel;
 import com.surrealdb.Array;
@@ -7,7 +9,6 @@ import com.surrealdb.Object;
 import com.surrealdb.Response;
 import com.surrealdb.Surreal;
 import com.surrealdb.Value;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -23,13 +24,14 @@ import static co.edu.uco.infraestructure.config.InfrastructureConstant.FIELD_SEC
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.FIELD_STATE_ID;
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.SURREAL_TABLE_TOKEN;
 
-@Slf4j
 @Repository
 public class TokenSurrealRepositoryAdapterImpl implements TokenSurrealRepositoryAdapter {
 
+    private final LoggingPort log;
     private final Surreal surreal;
 
-    public TokenSurrealRepositoryAdapterImpl(final Surreal surreal) {
+    public TokenSurrealRepositoryAdapterImpl(final Surreal surreal, final LoggingPortFactory loggerFactory) {
+        this.log = loggerFactory.getLogger(TokenSurrealRepositoryAdapterImpl.class);
         this.surreal = surreal;
     }
 

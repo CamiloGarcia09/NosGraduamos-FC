@@ -2,10 +2,11 @@
 
 import co.edu.uco.application.primaryports.dto.keypair.KeyPairDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
+import co.edu.uco.application.secondaryports.logging.LoggingPort;
+import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.secret.EncryptTokenPort;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.BadPaddingException;
@@ -20,11 +21,12 @@ import java.util.Base64;
 
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.*;
 
-@Slf4j
 @Service
 public final class JavaSecurityEncryptTokenAdapter implements EncryptTokenPort {
+    private final LoggingPort log;
     private final CatalogPort catalogPort;
-    public JavaSecurityEncryptTokenAdapter(CatalogPort catalogPort) {
+    public JavaSecurityEncryptTokenAdapter(CatalogPort catalogPort, LoggingPortFactory loggerFactory) {
+        this.log = loggerFactory.getLogger(JavaSecurityEncryptTokenAdapter.class);
         this.catalogPort = catalogPort;
     }
     @Override

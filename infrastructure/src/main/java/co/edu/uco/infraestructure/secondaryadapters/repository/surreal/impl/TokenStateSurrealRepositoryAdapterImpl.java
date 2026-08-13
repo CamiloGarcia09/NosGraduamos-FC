@@ -1,5 +1,7 @@
 ﻿package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
+import co.edu.uco.application.secondaryports.logging.LoggingPort;
+import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.infraestructure.secondaryadapters.repository.surreal.TokenStateSurrealRepositoryAdapter;
 import co.edu.uco.infraestructure.secondaryadapters.repository.surreal.model.StatusTokenSurrealModel;
 import com.surrealdb.Array;
@@ -7,7 +9,6 @@ import com.surrealdb.Object;
 import com.surrealdb.Response;
 import com.surrealdb.Surreal;
 import com.surrealdb.Value;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
@@ -17,15 +18,16 @@ import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.im
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.FIELD_NAME;
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.SURREAL_TABLE_TOKEN_STATE;
 
-@Slf4j
 @Repository
 public class TokenStateSurrealRepositoryAdapterImpl implements TokenStateSurrealRepositoryAdapter {
 
     private static final UUID DEFAULT_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
+    private final LoggingPort log;
     private final Surreal surreal;
 
-    public TokenStateSurrealRepositoryAdapterImpl(final Surreal surreal) {
+    public TokenStateSurrealRepositoryAdapterImpl(final Surreal surreal, final LoggingPortFactory loggerFactory) {
+        this.log = loggerFactory.getLogger(TokenStateSurrealRepositoryAdapterImpl.class);
         this.surreal = surreal;
     }
 

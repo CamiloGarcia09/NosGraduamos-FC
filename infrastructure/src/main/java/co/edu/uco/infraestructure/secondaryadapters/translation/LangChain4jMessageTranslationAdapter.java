@@ -3,6 +3,8 @@
 import co.edu.uco.application.secondaryports.entity.MessageTranslationRequestData;
 import co.edu.uco.application.secondaryports.entity.MessageTranslationResponseData;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
+import co.edu.uco.application.secondaryports.logging.LoggingPort;
+import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.translation.MessageTranslationPort;
 import co.edu.uco.application.secondaryports.vault.VaultPort;
 import co.edu.uco.infraestructure.config.TranslationAiProperties;
@@ -17,7 +19,6 @@ import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
 import dev.langchain4j.model.ollama.OllamaChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -25,10 +26,10 @@ import java.time.Duration;
 import static co.edu.uco.crosscutting.helpers.UtilText.isEmptyOrNull;
 import static co.edu.uco.crosscutting.helpers.UtilText.trim;
 
-@Slf4j
 @Component
 public class LangChain4jMessageTranslationAdapter implements MessageTranslationPort {
 
+    private final LoggingPort log;
     private final VaultPort vault;
     private final CatalogPort catalogPort;
     private final TranslationAiProperties properties;
@@ -37,8 +38,9 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
 
     public LangChain4jMessageTranslationAdapter(
             VaultPort vault, CatalogPort catalogPort, TranslationAiProperties properties,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper, LoggingPortFactory loggerFactory
     ) {
+        this.log = loggerFactory.getLogger(LangChain4jMessageTranslationAdapter.class);
         this.vault = vault;
         this.catalogPort = catalogPort;
         this.properties = properties;

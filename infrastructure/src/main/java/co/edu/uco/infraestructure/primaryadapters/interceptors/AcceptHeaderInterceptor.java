@@ -2,10 +2,11 @@
 
 import co.edu.uco.application.secondaryports.Response;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
+import co.edu.uco.application.secondaryports.logging.LoggingPort;
+import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.SerializerRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,11 +20,13 @@ import static co.edu.uco.infraestructure.config.InfrastructureConstant.REQUEST_G
 import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 
 @Component
-@Slf4j
 public final class AcceptHeaderInterceptor implements HandlerInterceptor {
+    private final LoggingPort log;
     private final SerializerRegistry serializerRegistry;
     private final CatalogPort catalogPort;
-    public AcceptHeaderInterceptor(SerializerRegistry serializerRegistry, CatalogPort catalogPort) {
+    public AcceptHeaderInterceptor(SerializerRegistry serializerRegistry, CatalogPort catalogPort,
+                                   LoggingPortFactory loggerFactory) {
+        this.log = loggerFactory.getLogger(AcceptHeaderInterceptor.class);
         this.serializerRegistry = serializerRegistry;
         this.catalogPort = catalogPort;
     }

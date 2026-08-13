@@ -2,13 +2,14 @@
 
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.entity.EnvironmentData;
+import co.edu.uco.application.secondaryports.logging.LoggingPort;
+import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
 import com.surrealdb.Array;
 import com.surrealdb.Object;
 import com.surrealdb.Response;
 import com.surrealdb.Surreal;
 import com.surrealdb.Value;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -17,15 +18,16 @@ import java.util.UUID;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.quote;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
 
-@Slf4j
 @Repository
 public class EnvironmentSurrealRepositoryAdapterImpl implements EnvironmentRepository {
 
     private static final String SURREAL_TABLE_ENVIRONMENT = "environment";
 
+    private final LoggingPort log;
     private final Surreal surreal;
 
-    public EnvironmentSurrealRepositoryAdapterImpl(final Surreal surreal) {
+    public EnvironmentSurrealRepositoryAdapterImpl(final Surreal surreal, final LoggingPortFactory loggerFactory) {
+        this.log = loggerFactory.getLogger(EnvironmentSurrealRepositoryAdapterImpl.class);
         this.surreal = surreal;
     }
 
