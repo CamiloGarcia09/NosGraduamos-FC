@@ -1,7 +1,6 @@
 package co.edu.uco.core.domain.customexception;
 
-import co.edu.uco.core.application.catalog.InMemoryCatalogStaticRef;
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
+import co.edu.uco.core.application.catalog.CatalogPortStaticRef;
 import co.edu.uco.utils.exception.BusinessRuleException;
 
 import java.io.Serial;
@@ -11,8 +10,8 @@ public final class SizeTitleMoreThanFiftyException extends BusinessRuleException
     private static final long serialVersionUID = -2432315861505641573L;
     private SizeTitleMoreThanFiftyException() {
         super(
-            InMemoryCatalogStaticRef.getTitle(MessageKeyEnum.FUN_021.getKey()),
-            InMemoryCatalogStaticRef.getContent(MessageKeyEnum.FUN_021.getKey())
+            CatalogPortStaticRef.getTitle("FUN_021"),
+            CatalogPortStaticRef.getMessage("FUN_021")
         );
     }
     public static void report() {

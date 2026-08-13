@@ -1,7 +1,6 @@
 package co.edu.uco.infrastructure.adapter.secondary.presenter.serializer.impl.html;
 
-import co.edu.uco.core.application.catalog.InMemoryCatalogStaticRef;
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
+import co.edu.uco.core.application.catalog.CatalogPortStaticRef;
 import co.edu.uco.infrastructure.adapter.secondary.presenter.serializer.AbstractSerializer;
 import co.edu.uco.utils.exception.CrossWordsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +24,7 @@ public final class HTMLSerializer extends AbstractSerializer {
             html.append(BODY_CLOSE_TAG).append(HTML_CLOSE_TAG);
             return html.toString();
         } catch (Exception e) {
-            throw CrossWordsException.build(InMemoryCatalogStaticRef.getContent(MessageKeyEnum.TCH_018.getKey()), e);
+            throw CrossWordsException.build(CatalogPortStaticRef.getMessage("TCH_018"), e);
         }
     }
 }

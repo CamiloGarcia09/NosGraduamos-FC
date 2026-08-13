@@ -1,9 +1,8 @@
 package co.edu.uco.infrastructure.adapter.secondary.broker;
 
-import co.edu.uco.core.application.catalog.strategy.inmemory.InMemoryCatalog;
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
 import co.edu.uco.core.domain.domains.MessageCodeDomain;
 import co.edu.uco.core.domain.port.out.broker.SendMessage;
+import co.edu.uco.core.domain.port.out.catalog.CatalogPort;
 import co.edu.uco.infrastructure.configuration.PulsarProperties;
 import co.edu.uco.utils.exception.CrossWordsException;
 import co.edu.uco.utils.mapper.json.UtilMapperJson;
@@ -21,12 +20,12 @@ public final class SendBrokerMessage implements SendMessage {
     private final PulsarClient client;
     private final UtilMapperJson utilMapperJson;
     private final PulsarProperties pulsarProperties;
-    private final InMemoryCatalog inMemoryCatalog;
-    public SendBrokerMessage(PulsarClient client, UtilMapperJson utilMapperJson, PulsarProperties pulsarProperties, InMemoryCatalog inMemoryCatalog) {
+    private final CatalogPort catalogPort;
+    public SendBrokerMessage(PulsarClient client, UtilMapperJson utilMapperJson, PulsarProperties pulsarProperties, CatalogPort catalogPort) {
         this.client = client;
         this.utilMapperJson = utilMapperJson;
         this.pulsarProperties = pulsarProperties;
-        this.inMemoryCatalog = inMemoryCatalog;
+        this.catalogPort = catalogPort;
     }
     @Override
     public void execute(MessageCodeDomain messageDomain, HttpServletResponse response) {
@@ -39,7 +38,7 @@ public final class SendBrokerMessage implements SendMessage {
                 stringProducer.send(message.get());
             }
         } catch (PulsarClientException ex) {
-            throw CrossWordsException.buildInfrastructure(inMemoryCatalog.getContent(MessageKeyEnum.TCH_002.getKey()), ex);
+            throw CrossWordsException.buildInfrastructure(catalogPort.getMessage("TCH_002"), ex);
         }
     }
 }

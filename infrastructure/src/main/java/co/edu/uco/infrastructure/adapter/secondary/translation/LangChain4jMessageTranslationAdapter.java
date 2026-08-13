@@ -2,6 +2,7 @@ package co.edu.uco.infrastructure.adapter.secondary.translation;
 
 import co.edu.uco.core.domain.data.MessageTranslationRequestData;
 import co.edu.uco.core.domain.data.MessageTranslationResponseData;
+import co.edu.uco.core.domain.port.out.catalog.CatalogPort;
 import co.edu.uco.core.domain.port.out.translation.MessageTranslationPort;
 import co.edu.uco.core.domain.port.out.vault.VaultPort;
 import co.edu.uco.infrastructure.configuration.TranslationAiProperties;
@@ -29,18 +30,17 @@ import static co.edu.uco.utils.helper.UtilText.trim;
 public class LangChain4jMessageTranslationAdapter implements MessageTranslationPort {
 
     private final VaultPort vault;
-
-
-
+    private final CatalogPort catalogPort;
     private final TranslationAiProperties properties;
     private final ObjectMapper objectMapper;
     private ChatModel chatModel;
 
     public LangChain4jMessageTranslationAdapter(
-            VaultPort vault, TranslationAiProperties properties,
+            VaultPort vault, CatalogPort catalogPort, TranslationAiProperties properties,
             ObjectMapper objectMapper
     ) {
         this.vault = vault;
+        this.catalogPort = catalogPort;
         this.properties = properties;
         this.objectMapper = objectMapper;
     }
@@ -50,10 +50,10 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
     @Override
     public MessageTranslationResponseData translate(MessageTranslationRequestData requestData) {
         if (!properties.isEnabled()) {
-            throw BusinessException.buildUserException("Dynamic translation is disabled.");
+            throw BusinessException.buildUserException(catalogPort.getMessage("FUN_046"));
         }
         if (isOpenAiProvider() && isEmptyOrNull(properties.getApiKey())) {
-            throw BusinessException.buildUserException("Dynamic translation needs TRANSLATION_AI_API_KEY.");
+            throw BusinessException.buildUserException(catalogPort.getMessage("FUN_047"));
         }
 
         var startedAt = System.nanoTime();
@@ -86,7 +86,7 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
                     requestData.getTargetLanguage(),
                     exception
             );
-            throw BusinessException.buildUserException("The message could not be translated dynamically.");
+            throw BusinessException.buildUserException(catalogPort.getMessage("FUN_048"));
         }
     }
 

@@ -1,6 +1,5 @@
 package co.edu.uco.infrastructure.configuration;
 
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
 import co.edu.uco.infrastructure.adapter.secondary.repository.redis.MessageRedis;
 import co.edu.uco.utils.exception.BusinessException;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -46,14 +45,14 @@ public class RedisConfig {
             template.setValueSerializer(serializer);
             template.afterPropertiesSet();
         } catch (RedisConnectionFailureException ex) {
-            log.error(MessageKeyEnum.FUN_013.getKey(), ex);
-            throw BusinessException.buildTechnicalException(MessageKeyEnum.FUN_013.getKey());
+            log.error("FUN_013", ex);
+            throw BusinessException.buildTechnicalException("FUN_013");
         } catch (DataAccessException ex) {
-            log.error(MessageKeyEnum.FUN_014.getKey(), ex);
-            throw BusinessException.buildTechnicalException(MessageKeyEnum.FUN_014.getKey());
+            log.error("FUN_014", ex);
+            throw BusinessException.buildTechnicalException("FUN_014");
         } catch (Exception ex) {
-            log.error(MessageKeyEnum.FUN_015.getKey(), ex);
-            throw BusinessException.buildTechnicalException(MessageKeyEnum.FUN_015.getKey());
+            log.error("FUN_015", ex);
+            throw BusinessException.buildTechnicalException("FUN_015");
         }
         return template;
     }

@@ -12,4 +12,5 @@ import java.util.UUID;
 public interface RedisRepositoryAdapter extends CrudRepository<MessageRedis, UUID> {
     Page<MessageRedis> findByEnvironmentId(String environmentId, Pageable pageable);
     Optional<MessageRedis> findByCodeAndEnvironmentId(String code, String environmentId);
+    Optional<MessageRedis> findByCode(String code);
 }

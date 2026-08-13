@@ -1,7 +1,6 @@
 package co.edu.uco.infrastructure.adapter.secondary.external.secrets.impl.doppler;
 
-import co.edu.uco.core.application.catalog.strategy.inmemory.InMemoryCatalog;
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
+import co.edu.uco.core.domain.port.out.catalog.CatalogPort;
 import co.edu.uco.core.domain.port.out.secret.SecretProviderPort;
 import co.edu.uco.infrastructure.configuration.DopplerProperties;
 import co.edu.uco.utils.exception.CrossWordsException;
@@ -20,11 +19,11 @@ import static co.edu.uco.utils.exception.enumeration.ExceptionType.TECHNICAL;
 public final class DopplerProvider implements SecretProviderPort {
     private final DopplerProperties properties;
     private final ObjectMapper mapper;
-    private final InMemoryCatalog inMemoryCatalog;
-    public DopplerProvider(DopplerProperties properties, ObjectMapper mapper, InMemoryCatalog inMemoryCatalog) {
+    private final CatalogPort catalogPort;
+    public DopplerProvider(DopplerProperties properties, ObjectMapper mapper, CatalogPort catalogPort) {
         this.properties = properties;
         this.mapper = mapper;
-        this.inMemoryCatalog = inMemoryCatalog;
+        this.catalogPort = catalogPort;
     }
     @Override
     public Map<String, String> findSecretToken(String secretName) {
@@ -39,11 +38,11 @@ public final class DopplerProvider implements SecretProviderPort {
 
         try(Response response = client.newCall(request).execute()){
             if(!response.isSuccessful()){
-                var message = inMemoryCatalog.getContent(MessageKeyEnum.TCH_030.getKey()).formatted(response.code());
+                var message = catalogPort.getMessage("TCH_030").formatted(response.code());
                 log.error(message);
                 throw CrossWordsException.buildInfrastructure(
                         message,
-                        inMemoryCatalog.getContent(MessageKeyEnum.FUN_025.getKey()),
+                        catalogPort.getMessage("FUN_025"),
                         TECHNICAL
                 );
             }else {
@@ -55,11 +54,11 @@ public final class DopplerProvider implements SecretProviderPort {
                 );
             }
         }catch (Exception e){
-            var message = inMemoryCatalog.getContent(MessageKeyEnum.TCH_029.getKey());
+            var message = catalogPort.getMessage("TCH_029");
             log.error(message, e);
             throw CrossWordsException.buildInfrastructure(
                     message,
-                    inMemoryCatalog.getContent(MessageKeyEnum.FUN_025.getKey()),
+                    catalogPort.getMessage("FUN_025"),
                     e,
                     TECHNICAL
             );
