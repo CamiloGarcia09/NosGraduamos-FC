@@ -1,4 +1,4 @@
-﻿package co.edu.uco.crosscutting;
+package co.edu.uco.crosscutting;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

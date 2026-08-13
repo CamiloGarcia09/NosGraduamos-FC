@@ -1,4 +1,4 @@
-﻿package co.edu.uco.crosscutting.helpers;
+package co.edu.uco.crosscutting.helpers;
 
 public final class UtilObject {
     private UtilObject() {}

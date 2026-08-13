@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application;
+package co.edu.uco.application;
 
 public final class CrosswordsConstant {
     private CrosswordsConstant() {}

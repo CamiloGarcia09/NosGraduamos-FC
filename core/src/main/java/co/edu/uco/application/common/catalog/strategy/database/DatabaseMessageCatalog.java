@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.common.catalog.strategy.database;
+package co.edu.uco.application.common.catalog.strategy.database;
 
 import co.edu.uco.application.secondaryports.entity.MessageData;
 import co.edu.uco.application.secondaryports.repository.DataBaseMessageRepository;

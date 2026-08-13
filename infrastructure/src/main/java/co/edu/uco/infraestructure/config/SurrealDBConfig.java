@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.config;
+package co.edu.uco.infraestructure.config;
 
 import com.surrealdb.Surreal;
 import com.surrealdb.signin.Root;

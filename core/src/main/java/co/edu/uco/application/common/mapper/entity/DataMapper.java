@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.common.mapper.entity;
+package co.edu.uco.application.common.mapper.entity;
 
 public interface DataMapper<E,D,T> {
     D mapperDomain(E entity);

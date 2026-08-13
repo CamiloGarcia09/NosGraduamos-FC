@@ -1,4 +1,4 @@
-﻿package co.edu.uco.crosscutting.helpers.json;
+package co.edu.uco.crosscutting.helpers.json;
 
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import co.edu.uco.crosscutting.helpers.config.LocalDateTimeDeserializer;

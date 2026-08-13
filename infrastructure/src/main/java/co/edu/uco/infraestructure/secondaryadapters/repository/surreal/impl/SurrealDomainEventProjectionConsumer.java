@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
+package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
 import com.surrealdb.Array;
 import com.surrealdb.Entry;

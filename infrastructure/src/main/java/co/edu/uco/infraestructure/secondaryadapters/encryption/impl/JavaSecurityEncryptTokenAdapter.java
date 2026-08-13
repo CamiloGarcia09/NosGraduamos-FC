@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.encryption.impl;
+package co.edu.uco.infraestructure.secondaryadapters.encryption.impl;
 
 import co.edu.uco.application.primaryports.dto.keypair.KeyPairDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;

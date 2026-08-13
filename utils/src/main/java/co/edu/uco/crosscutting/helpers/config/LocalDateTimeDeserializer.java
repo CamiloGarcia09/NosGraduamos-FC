@@ -1,4 +1,4 @@
-﻿package co.edu.uco.crosscutting.helpers.config;
+package co.edu.uco.crosscutting.helpers.config;
 
 import com.google.gson.*;
 

@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.primaryports.dto.token;
+package co.edu.uco.application.primaryports.dto.token;
 
 import lombok.*;
 

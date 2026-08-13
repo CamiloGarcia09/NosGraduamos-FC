@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.config;
+package co.edu.uco.infraestructure.config;
 
 import co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.SerializerType;
 import co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.impl.html.HTMLSerializer;

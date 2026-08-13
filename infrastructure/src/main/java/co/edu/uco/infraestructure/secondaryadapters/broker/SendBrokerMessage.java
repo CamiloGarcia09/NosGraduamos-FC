@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.broker;
+package co.edu.uco.infraestructure.secondaryadapters.broker;
 
 import co.edu.uco.application.usecase.domain.MessageCodeDomain;
 import co.edu.uco.application.secondaryports.broker.SendMessage;

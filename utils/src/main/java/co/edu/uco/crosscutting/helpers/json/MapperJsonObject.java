@@ -1,4 +1,4 @@
-﻿package co.edu.uco.crosscutting.helpers.json;
+package co.edu.uco.crosscutting.helpers.json;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;

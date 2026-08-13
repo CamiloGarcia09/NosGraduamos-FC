@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.secondaryports.entity;
+package co.edu.uco.application.secondaryports.entity;
 import co.edu.uco.crosscutting.helpers.UtilUUID;
 import lombok.Getter;
 

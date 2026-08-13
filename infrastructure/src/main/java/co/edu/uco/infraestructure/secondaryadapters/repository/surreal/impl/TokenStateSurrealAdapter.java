@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
+package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
 import co.edu.uco.application.secondaryports.entity.StatusTokenData;
 import co.edu.uco.application.secondaryports.repository.token.TokenStateRepository;

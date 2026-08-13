@@ -1,14 +1,15 @@
-﻿package co.edu.uco.infraestructure.primaryadapters.controller;
+package co.edu.uco.infraestructure.primaryadapters.controller;
 
 import co.edu.uco.application.primaryports.dto.message.MessageDTO;
 import co.edu.uco.application.primaryports.dto.message.TranslatedMessageDTO;
 import co.edu.uco.application.primaryports.dto.page.PageRequestDTO;
 import co.edu.uco.application.primaryports.facade.message.FindMessageByCodeAndEnvironmentUseCaseFacade;
+import co.edu.uco.application.primaryports.facade.message.FindMessagesByEnvironmentUsecaseFacade;
 import co.edu.uco.application.primaryports.facade.message.TranslateMessageByCodeAndEnvironmentUseCaseFacade;
-import co.edu.uco.application.primaryports.facade.message.impl.FindMessagesByEnvironmentFacadeImpl;
+import co.edu.uco.application.primaryports.facade.message.impl.FindMessagesByEnvironmentUsecaseFacadeImpl;
 import co.edu.uco.application.secondaryports.presenter.PresenterPort;
 import co.edu.uco.application.secondaryports.repository.SimplePage;
-import co.edu.uco.infraestructure.primaryadapters.FindMessagesController;
+import co.edu.uco.infraestructure.primaryadapters.MessagesController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -28,22 +29,22 @@ import static co.edu.uco.infraestructure.config.InfrastructureConstant.MESSAGE_C
 @RestController
 @RequestMapping("${crosswords.api.path.message}")
 @Tag(name = "Consulta de Mensajes", description = "Endpoints para obtener información de mensajes")
-final class FindMessagesControllerImpl implements FindMessagesController {
-        private final FindMessagesByEnvironmentFacadeImpl findMessagesByEnvironmentFacadeImpl;
+final class MessagesControllerImpl implements MessagesController {
+        private final FindMessagesByEnvironmentUsecaseFacade findMessagesByEnvironmentUsecaseFacade;
         private final FindMessageByCodeAndEnvironmentUseCaseFacade findMessageByCodeAndEnvironmentUseCaseFacade;
         private final TranslateMessageByCodeAndEnvironmentUseCaseFacade translateMessageByCodeAndEnvironmentUseCaseFacade;
         private final PresenterPort<MessageDTO> restPresenter;
         private final PresenterPort<TranslatedMessageDTO> translationPresenter;
         private final PresenterPort<SimplePage<MessageDTO>> restPresenterPage;
-        public FindMessagesControllerImpl(
-                FindMessagesByEnvironmentFacadeImpl findMessagesByEnvironmentFacadeImpl,
+        public MessagesControllerImpl(
+ FindMessagesByEnvironmentUsecaseFacade findMessagesByEnvironmentUsecaseFacade,
                 FindMessageByCodeAndEnvironmentUseCaseFacade findMessageByCodeAndEnvironmentUseCaseFacade,
                 TranslateMessageByCodeAndEnvironmentUseCaseFacade translateMessageByCodeAndEnvironmentUseCaseFacade,
                 PresenterPort<MessageDTO> restPresenter,
                 PresenterPort<TranslatedMessageDTO> translationPresenter,
                 PresenterPort<SimplePage<MessageDTO>> restPresenterPage) {
-                this.findMessagesByEnvironmentFacadeImpl = findMessagesByEnvironmentFacadeImpl;
-                this.findMessageByCodeAndEnvironmentUseCaseFacade = findMessageByCodeAndEnvironmentUseCaseFacade;
+            this.findMessagesByEnvironmentUsecaseFacade = findMessagesByEnvironmentUsecaseFacade;
+            this.findMessageByCodeAndEnvironmentUseCaseFacade = findMessageByCodeAndEnvironmentUseCaseFacade;
                 this.translateMessageByCodeAndEnvironmentUseCaseFacade = translateMessageByCodeAndEnvironmentUseCaseFacade;
                 this.restPresenter = restPresenter;
                 this.translationPresenter = translationPresenter;
@@ -89,7 +90,7 @@ final class FindMessagesControllerImpl implements FindMessagesController {
                         .build();
                 
                 var environmentId = (String) httpServletRequest.getAttribute(ENVIRONMENT_ID_ATTRIBUTE);
-                var messageDTOSimplePage = findMessagesByEnvironmentFacadeImpl.execute(environmentId, pageRequestDTO);
+                var messageDTOSimplePage = findMessagesByEnvironmentUsecaseFacade.execute(environmentId, pageRequestDTO);
                 restPresenterPage.presentRestSuccess(List.of(messageDTOSimplePage), httpServletRequest,
                                 httpServletResponse);
         }

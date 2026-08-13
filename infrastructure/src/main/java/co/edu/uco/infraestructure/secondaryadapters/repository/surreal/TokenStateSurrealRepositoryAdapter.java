@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.repository.surreal;
+package co.edu.uco.infraestructure.secondaryadapters.repository.surreal;
 
 import co.edu.uco.infraestructure.secondaryadapters.repository.surreal.model.StatusTokenSurrealModel;
 

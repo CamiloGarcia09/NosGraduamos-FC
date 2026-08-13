@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.repository.data;
+package co.edu.uco.infraestructure.secondaryadapters.repository.data;
 
 import co.edu.uco.application.secondaryports.entity.MessageData;
 import co.edu.uco.infraestructure.secondaryadapters.repository.surreal.model.MessageSurrealModel;

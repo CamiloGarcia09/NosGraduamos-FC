@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.primaryports.dto.page;
+package co.edu.uco.application.primaryports.dto.page;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

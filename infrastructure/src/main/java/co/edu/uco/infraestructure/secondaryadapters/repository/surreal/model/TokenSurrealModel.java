@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.model;
+package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.model;
 
 import lombok.Getter;
 

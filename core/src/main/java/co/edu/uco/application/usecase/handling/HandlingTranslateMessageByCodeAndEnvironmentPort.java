@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.usecase.handling;
+package co.edu.uco.application.usecase.handling;
 
 import co.edu.uco.application.primaryports.dto.message.TranslatedMessageDTO;
 

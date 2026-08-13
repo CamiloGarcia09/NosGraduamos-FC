@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.common.mapper.entity.impl;
+package co.edu.uco.application.common.mapper.entity.impl;
 
 import co.edu.uco.application.primaryports.dto.message.MessageDTO;
 import co.edu.uco.application.secondaryports.entity.MessageData;

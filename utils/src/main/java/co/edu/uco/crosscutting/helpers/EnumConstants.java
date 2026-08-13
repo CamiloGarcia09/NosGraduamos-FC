@@ -1,4 +1,4 @@
-﻿package co.edu.uco.crosscutting.helpers;
+package co.edu.uco.crosscutting.helpers;
 
 public enum EnumConstants {
     PULSAR_URL("pulsar://localhost:6650"),

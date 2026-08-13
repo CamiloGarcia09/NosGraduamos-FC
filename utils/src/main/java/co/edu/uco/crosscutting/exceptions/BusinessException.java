@@ -1,4 +1,4 @@
-﻿package co.edu.uco.crosscutting.exceptions;
+package co.edu.uco.crosscutting.exceptions;
 
 import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionLocation;
 import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType;

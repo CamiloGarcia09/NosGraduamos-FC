@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.repository.redis.impl;
+package co.edu.uco.infraestructure.secondaryadapters.repository.redis.impl;
 
 import co.edu.uco.application.secondaryports.entity.MessageData;
 import co.edu.uco.application.secondaryports.repository.CacheMessageRepository;

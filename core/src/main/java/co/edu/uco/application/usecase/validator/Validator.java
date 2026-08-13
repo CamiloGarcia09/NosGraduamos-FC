@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.usecase.validator;
+package co.edu.uco.application.usecase.validator;
 
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
 
