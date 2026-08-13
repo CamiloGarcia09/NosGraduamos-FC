@@ -1,0 +1,18 @@
+﻿package co.edu.uco.application.usecase.validator.page;
+
+import co.edu.uco.application.primaryports.dto.page.PageRequestDTO;
+import co.edu.uco.application.secondaryports.catalog.CatalogPort;
+import co.edu.uco.application.usecase.validator.CompositeValidator;
+import co.edu.uco.application.usecase.validator.Validator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+@Component
+public final class PageRequestDTOCompositeValidator extends CompositeValidator<PageRequestDTO> {
+    @Autowired
+    public PageRequestDTOCompositeValidator(List<Validator<PageRequestDTO>> validators, CatalogPort catalogPort) {
+        super(validators, catalogPort);
+    }
+}
