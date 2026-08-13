@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.common.catalog;
+package co.edu.uco.application.common.catalog;
 
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 

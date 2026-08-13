@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.primaryports.dto.keypair;
+package co.edu.uco.application.primaryports.dto.keypair;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.common.mapper;
+package co.edu.uco.application.common.mapper;
 
 import co.edu.uco.application.primaryports.dto.page.PageRequestDTO;
 import co.edu.uco.application.secondaryports.repository.SimplePageRequest;

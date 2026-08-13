@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.impl.json;
+package co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.impl.json;
 
 import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
 import co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.AbstractSerializer;

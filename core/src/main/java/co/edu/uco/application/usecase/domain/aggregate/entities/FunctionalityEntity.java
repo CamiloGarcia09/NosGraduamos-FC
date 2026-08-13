@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.usecase.domain.aggregate.entities;
+package co.edu.uco.application.usecase.domain.aggregate.entities;
 
 import co.edu.uco.application.usecase.domain.aggregate.Entity;
 import lombok.Getter;

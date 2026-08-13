@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.config;
+package co.edu.uco.infraestructure.config;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;

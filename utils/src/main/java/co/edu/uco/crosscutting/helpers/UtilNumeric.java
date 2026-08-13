@@ -1,4 +1,4 @@
-﻿package co.edu.uco.crosscutting.helpers;
+package co.edu.uco.crosscutting.helpers;
 
 
 import static co.edu.uco.crosscutting.helpers.UtilObject.getDefaultIsNullObject;

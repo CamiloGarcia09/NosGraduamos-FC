@@ -1,4 +1,4 @@
-﻿package co.edu.uco.init;
+package co.edu.uco.init;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

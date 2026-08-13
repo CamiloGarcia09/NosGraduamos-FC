@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.usecase;
+package co.edu.uco.application.usecase;
 
 import co.edu.uco.application.common.mapper.entity.impl.TokenEntityMapper;
 import co.edu.uco.application.usecase.domain.TokenDomain;

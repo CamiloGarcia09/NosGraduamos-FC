@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.primaryports.dto.message;
+package co.edu.uco.application.primaryports.dto.message;
 
 import lombok.Getter;
 

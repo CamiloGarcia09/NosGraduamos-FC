@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.logging;
+package co.edu.uco.infraestructure.secondaryadapters.logging;
 
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;

@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure;
+package co.edu.uco.infraestructure;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

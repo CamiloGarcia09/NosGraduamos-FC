@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.crosscutting.exceptions;
+package co.edu.uco.application.crosscutting.exceptions;
 
 import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;

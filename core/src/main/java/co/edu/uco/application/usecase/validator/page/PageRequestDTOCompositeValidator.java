@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.usecase.validator.page;
+package co.edu.uco.application.usecase.validator.page;
 
 import co.edu.uco.application.primaryports.dto.page.PageRequestDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;

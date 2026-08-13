@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.usecase.validator.token;
+package co.edu.uco.application.usecase.validator.token;
 
 import co.edu.uco.application.primaryports.dto.token.CreateTokenDTO;
 import co.edu.uco.application.usecase.validator.environment.ApplicationBelongsEnvironmentValidator;

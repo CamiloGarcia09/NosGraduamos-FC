@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.config;
+package co.edu.uco.infraestructure.config;
 
 import co.edu.uco.infraestructure.primaryadapters.interceptors.AcceptHeaderInterceptor;
 import co.edu.uco.infraestructure.primaryadapters.interceptors.TokenHeaderInterceptor;

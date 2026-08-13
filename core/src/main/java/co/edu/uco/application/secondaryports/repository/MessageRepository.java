@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.secondaryports.repository;
+package co.edu.uco.application.secondaryports.repository;
 
 import co.edu.uco.application.secondaryports.entity.MessageData;
 import org.springframework.data.domain.Pageable;

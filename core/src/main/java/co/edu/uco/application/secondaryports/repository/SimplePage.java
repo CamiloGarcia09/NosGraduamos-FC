@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.secondaryports.repository;
+package co.edu.uco.application.secondaryports.repository;
 
 import lombok.Getter;
 import org.springframework.data.domain.Page;

@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.repository.redis;
+package co.edu.uco.infraestructure.secondaryadapters.repository.redis;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

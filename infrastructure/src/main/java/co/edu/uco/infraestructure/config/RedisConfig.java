@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.config;
+package co.edu.uco.infraestructure.config;
 
 import co.edu.uco.infraestructure.secondaryadapters.repository.redis.MessageRedis;
 import co.edu.uco.crosscutting.exceptions.BusinessException;

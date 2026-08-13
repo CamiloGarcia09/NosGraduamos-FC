@@ -133,7 +133,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>co.edu.uco.infrastructure.init.CrossWordApplication</mainClass>
+                    <mainClass>co.edu.uco.init.CrossWordApplication</mainClass>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

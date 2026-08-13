@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.presenter.rest;
+package co.edu.uco.infraestructure.secondaryadapters.presenter.rest;
 
 import co.edu.uco.application.secondaryports.Response;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;

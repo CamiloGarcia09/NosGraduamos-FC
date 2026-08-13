@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.primaryports.facade.message;
+package co.edu.uco.application.primaryports.facade.message;
 
 import co.edu.uco.application.primaryports.dto.message.TranslatedMessageDTO;
 

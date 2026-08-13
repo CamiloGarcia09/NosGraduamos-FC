@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.usecase;
+package co.edu.uco.application.usecase;
 
 import co.edu.uco.application.secondaryports.repository.token.FindTokenRepository;
 import co.edu.uco.application.secondaryports.repository.token.TokenRepository;

@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.usecase;
+package co.edu.uco.application.usecase;
 
 import co.edu.uco.application.common.catalog.strategy.MessageCatalogStrategy;
 import co.edu.uco.application.primaryports.dto.message.MessageDTO;

@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.secondaryports.secret;
+package co.edu.uco.application.secondaryports.secret;
 
 import co.edu.uco.application.primaryports.dto.keypair.KeyPairDTO;
 

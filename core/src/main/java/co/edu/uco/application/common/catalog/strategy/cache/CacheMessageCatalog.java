@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.common.catalog.strategy.cache;
+package co.edu.uco.application.common.catalog.strategy.cache;
 
 import co.edu.uco.application.secondaryports.entity.MessageData;
 import co.edu.uco.application.secondaryports.repository.CacheMessageRepository;

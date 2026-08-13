@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.common.catalog.strategy;
+package co.edu.uco.application.common.catalog.strategy;
 
 import co.edu.uco.application.common.catalog.strategy.cache.CacheCatalog;
 import co.edu.uco.application.common.catalog.strategy.database.DatabaseCatalog;

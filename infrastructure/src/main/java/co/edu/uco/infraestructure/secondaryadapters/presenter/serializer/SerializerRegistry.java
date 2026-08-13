@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.presenter.serializer;
+package co.edu.uco.infraestructure.secondaryadapters.presenter.serializer;
 
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import lombok.extern.slf4j.Slf4j;
