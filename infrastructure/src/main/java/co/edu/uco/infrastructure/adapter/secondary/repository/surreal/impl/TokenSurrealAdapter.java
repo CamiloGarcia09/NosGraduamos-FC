@@ -1,6 +1,7 @@
 package co.edu.uco.infrastructure.adapter.secondary.repository.surreal.impl;
 
 import co.edu.uco.core.domain.data.TokenData;
+import co.edu.uco.core.domain.port.out.catalog.CatalogPort;
 import co.edu.uco.core.domain.port.out.repository.token.FindTokenRepository;
 import co.edu.uco.core.domain.port.out.repository.token.TokenRepository;
 import co.edu.uco.infrastructure.adapter.secondary.repository.data.TokenSurrealMapper;
@@ -17,11 +18,13 @@ public final class TokenSurrealAdapter implements TokenRepository, FindTokenRepo
 
     private final TokenSurrealRepositoryAdapter tokenSurrealRepositoryAdapter;
     private final TokenSurrealMapper mapper;
+    private final CatalogPort catalogPort;
 
     public TokenSurrealAdapter(final TokenSurrealRepositoryAdapter tokenSurrealRepositoryAdapter,
-                               final TokenSurrealMapper mapper) {
+                               final TokenSurrealMapper mapper, CatalogPort catalogPort) {
         this.tokenSurrealRepositoryAdapter = tokenSurrealRepositoryAdapter;
         this.mapper = mapper;
+        this.catalogPort = catalogPort;
     }
 
     @Override
@@ -34,7 +37,7 @@ public final class TokenSurrealAdapter implements TokenRepository, FindTokenRepo
     public TokenData findById(final String id) {
         return tokenSurrealRepositoryAdapter.findTokenSurrealModelById(id)
                 .map(mapper::mapperData)
-                .orElseThrow(() -> BusinessException.buildUserException("Token not found in SurrealDB: " + id));
+                .orElseThrow(() -> BusinessException.buildUserException(catalogPort.getMessage("FUN_049") + id));
     }
 
     @Override

@@ -1,8 +1,7 @@
 package co.edu.uco.infrastructure.adapter.primary.interceptors;
 
-import co.edu.uco.core.application.catalog.strategy.inmemory.InMemoryCatalog;
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
 import co.edu.uco.core.domain.port.out.Response;
+import co.edu.uco.core.domain.port.out.catalog.CatalogPort;
 import co.edu.uco.infrastructure.adapter.secondary.presenter.serializer.SerializerRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,10 +22,10 @@ import static co.edu.uco.utils.helper.UtilObject.isNullObject;
 @Slf4j
 public final class AcceptHeaderInterceptor implements HandlerInterceptor {
     private final SerializerRegistry serializerRegistry;
-    private final InMemoryCatalog inMemoryCatalog;
-    public AcceptHeaderInterceptor(SerializerRegistry serializerRegistry, InMemoryCatalog inMemoryCatalog) {
+    private final CatalogPort catalogPort;
+    public AcceptHeaderInterceptor(SerializerRegistry serializerRegistry, CatalogPort catalogPort) {
         this.serializerRegistry = serializerRegistry;
-        this.inMemoryCatalog = inMemoryCatalog;
+        this.catalogPort = catalogPort;
     }
     @Override
     public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws Exception {
@@ -36,14 +35,14 @@ public final class AcceptHeaderInterceptor implements HandlerInterceptor {
         var serializer = serializerRegistry.getSerializerForMediaType(acceptHeader);
 
         if (isNullObject(serializer) || !serializer.supports(acceptHeader)) {
-            var errorMessage = String.format(inMemoryCatalog.getContent(MessageKeyEnum.TCH_022.getKey()), acceptHeader);
+            var errorMessage = String.format(catalogPort.getMessage("TCH_022"), acceptHeader);
             var errorResponse = new Response<String>(List.of(), List.of(errorMessage));
             assert !isNullObject(serializer);
             var formattedError = serializer.serialize(errorResponse);
             response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
             response.setContentType(serializer.getSupportedContentType());
             response.getWriter().write(formattedError);
-            log.error(inMemoryCatalog.getContent(MessageKeyEnum.TCH_023.getKey()), formattedError);
+            log.error(catalogPort.getMessage("TCH_023"), formattedError);
             return false;
         }
         return true;

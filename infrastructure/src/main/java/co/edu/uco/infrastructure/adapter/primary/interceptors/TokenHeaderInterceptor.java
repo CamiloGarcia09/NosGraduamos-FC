@@ -1,10 +1,9 @@
 package co.edu.uco.infrastructure.adapter.primary.interceptors;
 
-import co.edu.uco.core.application.catalog.strategy.inmemory.InMemoryCatalog;
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
 import co.edu.uco.core.application.facade.token.FindEnvironmentIdTokenUseCaseFacade;
 import co.edu.uco.core.application.facade.token.VerifyAccessUseCaseFacade;
 import co.edu.uco.core.domain.port.out.Response;
+import co.edu.uco.core.domain.port.out.catalog.CatalogPort;
 import co.edu.uco.infrastructure.adapter.secondary.presenter.serializer.SerializerRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,15 +25,15 @@ public final class TokenHeaderInterceptor implements HandlerInterceptor {
     private final SerializerRegistry serializerRegistry;
     private final VerifyAccessUseCaseFacade verifyAccessUseCaseFacade;
     private final FindEnvironmentIdTokenUseCaseFacade findEnvironmentIdTokenUseCaseFacade;
-    private final InMemoryCatalog inMemoryCatalog;
+    private final CatalogPort catalogPort;
     public TokenHeaderInterceptor(SerializerRegistry serializerRegistry,
                                   VerifyAccessUseCaseFacade verifyAccessUseCaseFacade,
                                   FindEnvironmentIdTokenUseCaseFacade findEnvironmentIdTokenUseCaseFacade,
-                                  InMemoryCatalog inMemoryCatalog) {
+                                  CatalogPort catalogPort) {
         this.serializerRegistry = serializerRegistry;
         this.verifyAccessUseCaseFacade = verifyAccessUseCaseFacade;
         this.findEnvironmentIdTokenUseCaseFacade = findEnvironmentIdTokenUseCaseFacade;
-        this.inMemoryCatalog = inMemoryCatalog;
+        this.catalogPort = catalogPort;
     }
     @Override
     public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws Exception {
@@ -42,12 +41,12 @@ public final class TokenHeaderInterceptor implements HandlerInterceptor {
         var acceptHeader = request.getHeader(REQUEST_GET_HEADER_ACCEPT);
 
         if (isEmptyOrNull(token)) {
-            sendErrorResponse(response, acceptHeader, inMemoryCatalog.getContent(MessageKeyEnum.TCH_032.getKey()));
+            sendErrorResponse(response, acceptHeader, catalogPort.getMessage("TCH_032"));
             return false;
         }
 
         if (!verifyAccessUseCaseFacade.execute(token)) {
-            sendErrorResponse(response, acceptHeader, inMemoryCatalog.getContent(MessageKeyEnum.TCH_031.getKey()));
+            sendErrorResponse(response, acceptHeader, catalogPort.getMessage("TCH_031"));
             return false;
         }
 

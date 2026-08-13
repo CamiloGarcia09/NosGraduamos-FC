@@ -1,7 +1,6 @@
 package co.edu.uco.core.domain.validator.page;
 
-import co.edu.uco.core.application.catalog.InMemoryCatalogStaticRef;
-import co.edu.uco.core.application.catalog.strategy.inmemory.enums.MessageKeyEnum;
+import co.edu.uco.core.application.catalog.CatalogPortStaticRef;
 import co.edu.uco.core.domain.port.out.repository.SimplePageRequest;
 import co.edu.uco.core.domain.validator.Validator;
 import co.edu.uco.utils.exception.BusinessRuleException;
@@ -27,7 +26,7 @@ public final class SortColumnValidator implements Validator<SimplePageRequest> {
     public void validate(SimplePageRequest data) throws BusinessRuleException {
         if (!validColumns.contains(data.getColumnSort())) {
              throw BusinessRuleException.buildUserException(String.format(
-                     InMemoryCatalogStaticRef.getContent(MessageKeyEnum.FUN_030.getKey()),
+                     CatalogPortStaticRef.getMessage("FUN_030"),
                      data.getColumnSort()));
         }
     }
