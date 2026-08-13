@@ -1,0 +1,20 @@
+﻿package co.edu.uco.application.crosscutting.exceptions;
+
+import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
+import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
+
+import java.io.Serial;
+
+public final class SizeContentMoreThanOneHundred extends BusinessRuleException {
+    @Serial
+    private static final long serialVersionUID = -4177616618105416722L;
+    private SizeContentMoreThanOneHundred() {
+        super(
+            CatalogPortStaticRef.getTitle("FUN_019"),
+            CatalogPortStaticRef.getMessage("FUN_019")
+        );
+    }
+    public static void report() {
+        throw new SizeContentMoreThanOneHundred();
+    }
+}

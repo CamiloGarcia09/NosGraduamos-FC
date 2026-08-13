@@ -1,0 +1,21 @@
+﻿package co.edu.uco.infraestructure.config;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+@Getter
+@Setter
+@Configuration
+@ConfigurationProperties(prefix = "surreal")
+public class SurrealDBProperties {
+    private String host;
+    private int port;
+    private String username;
+    private String password;
+    private String namespace;
+    private String database;
+    private int maxConnections;
+
+}
