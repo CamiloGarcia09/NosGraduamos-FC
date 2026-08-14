@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.usecase.validator.impl;
+package co.edu.uco.application.usecase.validator.impl;
 
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.usecase.validator.Validator;

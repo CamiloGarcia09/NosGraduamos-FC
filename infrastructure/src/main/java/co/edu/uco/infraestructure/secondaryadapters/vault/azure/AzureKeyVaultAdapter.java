@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.vault.azure;
+package co.edu.uco.infraestructure.secondaryadapters.vault.azure;
 
 import co.edu.uco.application.secondaryports.vault.VaultPort;
 import com.azure.identity.DefaultAzureCredentialBuilder;

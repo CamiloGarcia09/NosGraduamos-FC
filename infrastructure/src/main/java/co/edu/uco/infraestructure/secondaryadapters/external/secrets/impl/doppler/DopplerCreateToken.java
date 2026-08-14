@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.external.secrets.impl.doppler;
+package co.edu.uco.infraestructure.secondaryadapters.external.secrets.impl.doppler;
 
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;

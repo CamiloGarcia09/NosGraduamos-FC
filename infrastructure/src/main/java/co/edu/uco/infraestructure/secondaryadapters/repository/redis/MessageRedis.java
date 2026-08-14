@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.repository.redis;
+package co.edu.uco.infraestructure.secondaryadapters.repository.redis;
 
 import co.edu.uco.crosscutting.helpers.UtilUUID;
 import jakarta.persistence.Id;

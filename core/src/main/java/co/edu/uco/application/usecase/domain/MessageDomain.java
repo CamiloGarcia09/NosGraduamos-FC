@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.usecase.domain;
+package co.edu.uco.application.usecase.domain;
 
 import co.edu.uco.crosscutting.helpers.UtilUUID;
 import lombok.Getter;

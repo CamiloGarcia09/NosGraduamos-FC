@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.secondaryports.repository.token;
+package co.edu.uco.application.secondaryports.repository.token;
 
 import co.edu.uco.application.secondaryports.repository.SimplePageRequest;
 import org.springframework.data.domain.PageRequest;

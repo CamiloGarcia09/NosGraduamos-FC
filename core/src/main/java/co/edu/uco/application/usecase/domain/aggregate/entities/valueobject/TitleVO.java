@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.usecase.domain.aggregate.entities.valueobject;
+package co.edu.uco.application.usecase.domain.aggregate.entities.valueobject;
 
 import co.edu.uco.application.crosscutting.exceptions.SizeTitleLessThanTenException;
 import co.edu.uco.application.crosscutting.exceptions.SizeTitleMoreThanFiftyException;

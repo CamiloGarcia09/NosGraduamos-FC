@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.catalog;
+package co.edu.uco.infraestructure.secondaryadapters.catalog;
 
 
 import co.edu.uco.application.common.catalog.CatalogPortStaticRef;

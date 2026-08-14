@@ -1,4 +1,4 @@
-﻿package co.edu.uco.crosscutting.helpers;
+package co.edu.uco.crosscutting.helpers;
 
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;

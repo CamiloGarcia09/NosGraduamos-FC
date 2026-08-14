@@ -1,9 +1,9 @@
-﻿package co.edu.uco.infraestructure.primaryadapters.controller;
+package co.edu.uco.infraestructure.primaryadapters.controller;
 
 import co.edu.uco.application.primaryports.dto.token.CreateTokenDTO;
 import co.edu.uco.application.primaryports.facade.token.CreateTokenUseCaseFacade;
 import co.edu.uco.application.secondaryports.presenter.PresenterPort;
-import co.edu.uco.infraestructure.primaryadapters.CreateTokenController;
+import co.edu.uco.infraestructure.primaryadapters.TokenController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,10 +20,10 @@ import static co.edu.uco.infraestructure.config.InfrastructureConstant.FIELD_ID;
 @RestController
 @RequestMapping("${crosswords.api.path.message}")
 @Tag(name = "Gestión de Tokens", description = "Endpoints para la gestión de tokens")
-final class CreateTokenControllerImpl implements CreateTokenController {
+final class TokenControllerImpl implements TokenController {
     private final CreateTokenUseCaseFacade createTokenUseCaseFacade;
     private final PresenterPort<String> restPresenter;
-    public CreateTokenControllerImpl(CreateTokenUseCaseFacade createTokenUseCaseFacade, PresenterPort<String> restPresenter) {
+    public TokenControllerImpl(CreateTokenUseCaseFacade createTokenUseCaseFacade, PresenterPort<String> restPresenter) {
         this.createTokenUseCaseFacade = createTokenUseCaseFacade;
         this.restPresenter = restPresenter;
     }

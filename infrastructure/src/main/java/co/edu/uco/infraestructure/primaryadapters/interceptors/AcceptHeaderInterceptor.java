@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.primaryadapters.interceptors;
+package co.edu.uco.infraestructure.primaryadapters.interceptors;
 
 import co.edu.uco.application.secondaryports.Response;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;

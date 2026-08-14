@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.presenter.serializer;
+package co.edu.uco.infraestructure.secondaryadapters.presenter.serializer;
 
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 

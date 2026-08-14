@@ -1,4 +1,4 @@
-﻿package co.edu.uco.infraestructure.secondaryadapters.translation;
+package co.edu.uco.infraestructure.secondaryadapters.translation;
 
 import co.edu.uco.application.secondaryports.entity.MessageTranslationRequestData;
 import co.edu.uco.application.secondaryports.entity.MessageTranslationResponseData;

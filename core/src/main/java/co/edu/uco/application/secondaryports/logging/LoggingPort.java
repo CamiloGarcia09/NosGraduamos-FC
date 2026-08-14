@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.secondaryports.logging;
+package co.edu.uco.application.secondaryports.logging;
 
 public interface LoggingPort {
     void debug(String message, Object... arguments);

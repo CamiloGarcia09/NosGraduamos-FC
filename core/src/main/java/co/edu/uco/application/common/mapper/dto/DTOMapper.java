@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.common.mapper.dto;
+package co.edu.uco.application.common.mapper.dto;
 
 public interface DTOMapper<T,D> {
     D mapperDomain(T dto);

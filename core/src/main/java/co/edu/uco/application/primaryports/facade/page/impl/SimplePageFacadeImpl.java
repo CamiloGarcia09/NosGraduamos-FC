@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.primaryports.facade.page.impl;
+package co.edu.uco.application.primaryports.facade.page.impl;
 
 import co.edu.uco.application.primaryports.dto.page.PageRequestDTO;
 import co.edu.uco.application.primaryports.facade.page.SimplePageFacade;

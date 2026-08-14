@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.usecase.validator.environment;
+package co.edu.uco.application.usecase.validator.environment;
 
 import co.edu.uco.application.secondaryports.entity.EnvironmentData;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;

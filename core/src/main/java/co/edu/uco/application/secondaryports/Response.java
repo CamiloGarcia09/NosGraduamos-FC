@@ -1,4 +1,4 @@
-﻿package co.edu.uco.application.secondaryports;
+package co.edu.uco.application.secondaryports;
 
 import java.util.List;
 
