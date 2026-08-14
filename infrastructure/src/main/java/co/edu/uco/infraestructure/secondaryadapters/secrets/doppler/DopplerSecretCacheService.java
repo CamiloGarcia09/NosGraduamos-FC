@@ -1,4 +1,4 @@
-package co.edu.uco.infraestructure.secondaryadapters.external.secrets.impl.doppler;
+package co.edu.uco.infraestructure.secondaryadapters.secrets.doppler;
 
 import co.edu.uco.application.secondaryports.repository.token.FindTokenCachePort;
 import co.edu.uco.application.secondaryports.secret.SecretProviderPort;

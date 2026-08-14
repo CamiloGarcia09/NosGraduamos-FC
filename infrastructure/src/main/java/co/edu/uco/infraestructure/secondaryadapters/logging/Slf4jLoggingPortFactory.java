@@ -10,6 +10,7 @@ public class Slf4jLoggingPortFactory implements LoggingPortFactory {
 
     @Override
     public LoggingPort getLogger(Class<?> source) {
+
         return new Slf4jLoggingAdapter(LoggerFactory.getLogger(source));
     }
 }

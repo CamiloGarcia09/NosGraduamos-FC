@@ -33,7 +33,7 @@ public final class CreateTokenCompositeValidator {
         // Estas validaciones consultan EnvironmentRepository (Mongo) y se desactivan
         // temporalmente para poder probar la persistencia de Token en SurrealDB
         // sin necesidad de tener un environment cargado en MongoDB.
-        // environmentExistValidator.validate(createTokenDTO);
-        // applicationBelongsEnvironmentValidator.validate(getUUIDFromString(createTokenDTO.getEnvironmentId()),getUUIDFromString(applicationId));
+        environmentExistValidator.validate(createTokenDTO);
+        applicationBelongsEnvironmentValidator.validate(getUUIDFromString(createTokenDTO.getEnvironmentId()),getUUIDFromString(applicationId));
     }
 }
