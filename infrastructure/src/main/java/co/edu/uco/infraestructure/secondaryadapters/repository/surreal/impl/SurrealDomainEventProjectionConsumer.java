@@ -1,5 +1,7 @@
 package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
+import co.edu.uco.application.secondaryports.logging.LoggingPort;
+import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import com.surrealdb.Array;
 import com.surrealdb.Entry;
 import com.surrealdb.RecordId;
@@ -23,9 +25,6 @@ import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.im
 @ConditionalOnProperty(prefix = "surreal.projection", name = "enabled", havingValue = "true", matchIfMissing = true)
 public final class SurrealDomainEventProjectionConsumer {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(
-            SurrealDomainEventProjectionConsumer.class);
-
     private static final String TABLE_DOMAIN_EVENTS = "domain_events";
     private static final String COLLECTION_DOMAIN_EVENT_DOCUMENT = "domain_event_document";
     private static final String COLLECTION_APPLICATION_DOCUMENT = "application_document";
@@ -36,12 +35,15 @@ public final class SurrealDomainEventProjectionConsumer {
     private static final String PROJECTION_STATUS_FAILED = "failed";
     private static final String DELETE_SUFFIX = "_DELETED";
 
+    private final LoggingPort log;
     private final Surreal surreal;
     private final int batchSize;
 
     public SurrealDomainEventProjectionConsumer(
             final Surreal surreal,
-            @org.springframework.beans.factory.annotation.Value("${surreal.projection.batch-size:100}") final int batchSize) {
+            @org.springframework.beans.factory.annotation.Value("${surreal.projection.batch-size:100}") final int batchSize,
+            final LoggingPortFactory loggerFactory) {
+        this.log = loggerFactory.getLogger(SurrealDomainEventProjectionConsumer.class);
         this.surreal = surreal;
         this.batchSize = Math.max(1, batchSize);
     }
@@ -63,7 +65,7 @@ public final class SurrealDomainEventProjectionConsumer {
             return;
         }
 
-        LOG.debug("Projecting {} SurrealDB domain event(s)", events.size());
+        log.debug("Projecting {} SurrealDB domain event(s)", events.size());
         events.forEach(this::project);
     }
 
@@ -73,7 +75,7 @@ public final class SurrealDomainEventProjectionConsumer {
             projectAggregateDocument(event);
             markProcessed(event);
         } catch (final RuntimeException exception) {
-            LOG.warn("Could not project SurrealDB domain event {}", event.fullId(), exception);
+            log.warn("Could not project SurrealDB domain event {}", event.fullId(), exception);
             markFailed(event, exception);
         }
     }
@@ -85,7 +87,7 @@ public final class SurrealDomainEventProjectionConsumer {
             case "environment" -> projectEnvironment(event);
             case "message" -> projectMessage(event);
             case "message_environment" -> projectMessageEnvironment(event);
-            default -> LOG.debug("Domain event {} stored only as raw document", event.fullId());
+            default -> log.debug("Domain event {} stored only as raw document", event.fullId());
         }
     }
 

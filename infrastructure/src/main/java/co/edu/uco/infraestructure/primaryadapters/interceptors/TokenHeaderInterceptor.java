@@ -7,7 +7,6 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.SerializerRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -20,7 +19,6 @@ import static co.edu.uco.infraestructure.config.InfrastructureConstant.*;
 import static co.edu.uco.crosscutting.helpers.UtilText.isEmptyOrNull;
 
 @Component
-@Slf4j
 public final class TokenHeaderInterceptor implements HandlerInterceptor {
     private final SerializerRegistry serializerRegistry;
     private final VerifyAccessUseCaseFacade verifyAccessUseCaseFacade;

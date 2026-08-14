@@ -1,11 +1,12 @@
 package co.edu.uco.infraestructure.secondaryadapters.external.secrets.impl.doppler;
 
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
+import co.edu.uco.application.secondaryports.logging.LoggingPort;
+import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.secret.SecretProviderPort;
 import co.edu.uco.infraestructure.config.DopplerProperties;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.springframework.stereotype.Component;
 
@@ -14,13 +15,15 @@ import java.util.Map;
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.*;
 import static co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType.TECHNICAL;
 
-@Slf4j
 @Component
 public final class DopplerProvider implements SecretProviderPort {
+    private final LoggingPort log;
     private final DopplerProperties properties;
     private final ObjectMapper mapper;
     private final CatalogPort catalogPort;
-    public DopplerProvider(DopplerProperties properties, ObjectMapper mapper, CatalogPort catalogPort) {
+    public DopplerProvider(DopplerProperties properties, ObjectMapper mapper, CatalogPort catalogPort,
+                           LoggingPortFactory loggerFactory) {
+        this.log = loggerFactory.getLogger(DopplerProvider.class);
         this.properties = properties;
         this.mapper = mapper;
         this.catalogPort = catalogPort;

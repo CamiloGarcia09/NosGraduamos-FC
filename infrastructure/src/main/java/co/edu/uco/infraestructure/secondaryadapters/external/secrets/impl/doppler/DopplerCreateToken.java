@@ -1,23 +1,26 @@
 package co.edu.uco.infraestructure.secondaryadapters.external.secrets.impl.doppler;
 
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
+import co.edu.uco.application.secondaryports.logging.LoggingPort;
+import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.secret.CreateTokenSecretPort;
 import co.edu.uco.infraestructure.config.DopplerProperties;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType;
-import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.springframework.stereotype.Component;
 
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.*;
 
-@Slf4j
 @Component
 public final class DopplerCreateToken implements CreateTokenSecretPort {
+    private final LoggingPort log;
     private final DopplerProperties properties;
     private final DopplerSecretCacheService cacheService;
     private final CatalogPort catalogPort;
-    public DopplerCreateToken(DopplerProperties properties, DopplerSecretCacheService cacheService, CatalogPort catalogPort) {
+    public DopplerCreateToken(DopplerProperties properties, DopplerSecretCacheService cacheService,
+                              CatalogPort catalogPort, LoggingPortFactory loggerFactory) {
+        this.log = loggerFactory.getLogger(DopplerCreateToken.class);
         this.properties = properties;
         this.cacheService = cacheService;
         this.catalogPort = catalogPort;

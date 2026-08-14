@@ -1,18 +1,21 @@
 package co.edu.uco.infraestructure.secondaryadapters.presenter.serializer;
 
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
-import lombok.extern.slf4j.Slf4j;
+import co.edu.uco.application.secondaryports.logging.LoggingPort;
+import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
 @Component
 public final class SerializerRegistry {
+    private final LoggingPort log;
     private final List<SerializerType> serializers;
     private final CatalogPort catalogPort;
-    public SerializerRegistry(List<SerializerType> serializers, CatalogPort catalogPort) {
+    public SerializerRegistry(List<SerializerType> serializers, CatalogPort catalogPort,
+                              LoggingPortFactory loggerFactory) {
+        this.log = loggerFactory.getLogger(SerializerRegistry.class);
         this.serializers = serializers;
         this.catalogPort = catalogPort;
     }
