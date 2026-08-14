@@ -62,6 +62,8 @@ redis_hset "TCH_032" "Token header dont send" "Access denied, the header 'Token'
 redis_hset "TCH_033" "Token expired" "Access denied, the token is expired or inactive" "TECHNICAL" "ERROR"
 redis_hset "TCH_034" "SHA-256 not available" "SHA-256 algorithm not available" "TECHNICAL" "ERROR"
 redis_hset "TCH_035" "Environment id does not exits" "The environment with the id %s provided does not exist." "FUNCTIONAL" "ERROR"
+redis_hset "TCH_036" "Dynamic translation completed" "Dynamic translation completed with provider={} model={} code={} targetLanguage={} elapsedMs={}" "TECHNICAL" "INFORMATION"
+redis_hset "TCH_037" "Dynamic translation failed" "Dynamic translation failed with provider={} model={} code={} targetLanguage={}" "TECHNICAL" "ERROR"
 
 # =============================================================
 # Functional Messages
@@ -119,5 +121,32 @@ redis_hset "FUN_050" "Invalid UUID format" "The UUID to be converted has no vali
 redis_hset "FUN_051" "UUID conversion error" "An unexpected error occurred while trying to convert the entry to UUID." "FUNCTIONAL" "ERROR"
 redis_hset "FUN_052" "Invalid date format" "The date to be converted has no valid format." "FUNCTIONAL" "ERROR"
 redis_hset "FUN_053" "Unexpected error" "An unexpected error has occurred." "FUNCTIONAL" "ERROR"
+redis_hset "FUN_054" "Dynamic translation prompt" "Translate this catalog message dynamically.
+
+Rules:
+- Translate intent, tone, and colloquial meaning instead of word by word.
+- Keep placeholders unchanged: %%s, %%d, {}, {name}, \${value}.
+- Keep message codes, URLs, HTML tags, and technical identifiers unchanged.
+- Return only the requested JSON fields.
+
+Context:
+code: %s
+sourceLanguage: %s
+targetLanguage: %s
+application: %s
+functionality: %s
+type: %s
+category: %s
+
+Title:
+%s
+
+Content:
+%s" "FUNCTIONAL" "INFORMATION"
+redis_hset "FUN_055" "Translation schema name" "MessageTranslation" "FUNCTIONAL" "INFORMATION"
+redis_hset "FUN_056" "Translated title field" "translatedTitle" "FUNCTIONAL" "INFORMATION"
+redis_hset "FUN_057" "Translated content field" "translatedContent" "FUNCTIONAL" "INFORMATION"
+redis_hset "FUN_058" "OpenAI translation provider name" "langchain4j-open-ai" "FUNCTIONAL" "INFORMATION"
+redis_hset "FUN_059" "Translation provider name pattern" "langchain4j-%s" "FUNCTIONAL" "INFORMATION"
 
 echo "Message catalog loaded successfully."

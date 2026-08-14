@@ -65,7 +65,7 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
             var translated = objectMapper.readValue(output, TranslationModelResponse.class);
             var elapsedMillis = Duration.ofNanos(System.nanoTime() - startedAt).toMillis();
             log.info(
-                    "Dynamic translation completed with provider={} model={} code={} targetLanguage={} elapsedMs={}",
+                    catalogPort.getMessage("TCH_036"),
                     providerName(),
                     properties.getModelName(),
                     requestData.getCode(),
@@ -81,7 +81,7 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
             );
         } catch (Exception exception) {
             log.error(
-                    "Dynamic translation failed with provider={} model={} code={} targetLanguage={}",
+                    catalogPort.getMessage("TCH_037"),
                     providerName(),
                     properties.getModelName(),
                     requestData.getCode(),
@@ -128,18 +128,20 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
     }
 
     private String providerName() {
-        return isOpenAiProvider() ? "langchain4j-open-ai" : "langchain4j-" + vault.getSecretValue("TRANSLATION-AI-PROVIDER");
+        return isOpenAiProvider()
+                ? catalogPort.getMessage("FUN_058")
+                : catalogPort.getMessage("FUN_059").formatted(vault.getSecretValue("TRANSLATION-AI-PROVIDER"));
     }
 
     private ChatRequest buildChatRequest(MessageTranslationRequestData requestData) {
         var responseFormat = ResponseFormat.builder()
                 .type(ResponseFormatType.JSON)
                 .jsonSchema(JsonSchema.builder()
-                        .name("MessageTranslation")
+                        .name(catalogPort.getMessage("FUN_055"))
                         .rootElement(JsonObjectSchema.builder()
-                                .addStringProperty("translatedTitle")
-                                .addStringProperty("translatedContent")
-                                .required("translatedTitle", "translatedContent")
+                                .addStringProperty(catalogPort.getMessage("FUN_056"))
+                                .addStringProperty(catalogPort.getMessage("FUN_057"))
+                                .required(catalogPort.getMessage("FUN_056"), catalogPort.getMessage("FUN_057"))
                                 .build())
                         .build())
                 .build();
@@ -151,30 +153,7 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
     }
 
     private String buildPrompt(MessageTranslationRequestData requestData) {
-        return """
-                Translate this catalog message dynamically.
-
-                Rules:
-                - Translate intent, tone, and colloquial meaning instead of word by word.
-                - Keep placeholders unchanged: %%s, %%d, {}, {name}, ${value}.
-                - Keep message codes, URLs, HTML tags, and technical identifiers unchanged.
-                - Return only the requested JSON fields.
-
-                Context:
-                code: %s
-                sourceLanguage: %s
-                targetLanguage: %s
-                application: %s
-                functionality: %s
-                type: %s
-                category: %s
-
-                Title:
-                %s
-
-                Content:
-                %s
-                """.formatted(
+        return catalogPort.getMessage("FUN_054").formatted(
                 requestData.getCode(),
                 requestData.getSourceLanguage(),
                 requestData.getTargetLanguage(),

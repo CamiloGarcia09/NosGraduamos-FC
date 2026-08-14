@@ -1,4 +1,4 @@
-package co.edu.uco.infraestructure.secondaryadapters.external.secrets.impl.doppler;
+package co.edu.uco.infraestructure.secondaryadapters.secrets.doppler;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
