@@ -26,6 +26,7 @@ public final class InfrastructureConstant {
     public static final String ENVIRONMENT_ID_ATTRIBUTE = "environmentId";
     public static final String TOKEN_ENTITY = "token_data";
     public static final String TOKEN_STATE_ACTIVE_ID = "123e4567-e89b-12d3-a456-426614175000";
+    public static final String TOKEN_STATE_INACTIVE_ID = "123e4567-e89b-12d3-a456-426614175001";
 
     public static final String PACKAGE_BASE = "co.edu.uco";
     public static final String PACKAGE_REPOSITORY_ADAPTER = "co.edu.uco.infraestructure.secondaryadapters.repository";
@@ -81,8 +82,9 @@ public final class InfrastructureConstant {
     public static final String WEB_CONFIG_API_MESSAGE = "/messageucolab/v1/application/**/message/*";
     public static final String WEB_CONFIG_API_APPLICATION = "/messageucolab/v1/application/**/message/*";
     public static final String WEB_CONFIG_API_ENVIRONMENT = "/messageucolab/v1/application/environment";
-    public static final String WEB_CONFIG_API_CODE = "/messageucolab/v1/application/code/*";
-    public static final String WEB_CONFIG_API_CODE_TRANSLATION = "/messageucolab/v1/application/code/*/translation";
+    public static final String WEB_CONFIG_API_MESSAGE_LIST = "/messageucolab/v1/application/messages";
+    public static final String WEB_CONFIG_API_MESSAGE_CODE = "/messageucolab/v1/application/messages/*";
+    public static final String WEB_CONFIG_API_MESSAGE_CODE_TRANSLATION = "/messageucolab/v1/application/messages/*/translation";
 
     public static final String SWAGGER_UI_HTML = "/swagger-ui.html";
     public static final String SWAGGER_UI = "/swagger-ui/**";
