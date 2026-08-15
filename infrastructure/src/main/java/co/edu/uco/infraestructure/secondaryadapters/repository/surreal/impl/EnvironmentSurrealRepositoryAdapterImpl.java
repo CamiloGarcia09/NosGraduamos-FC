@@ -69,8 +69,8 @@ public class EnvironmentSurrealRepositoryAdapterImpl implements EnvironmentRepos
         
         final ApplicationData app = ApplicationData.build();
         final Value appIdValue = obj.get("application_id");
-        if (appIdValue != null && appIdValue.isThing()) {
-            app.setId(UUID.fromString(cleanThingId(appIdValue.getThing().getId().toString())));
+        if (appIdValue != null) {
+            app.setId(extractIdAsUUID(appIdValue));
         }
         data.setApplication(app);
         
@@ -81,14 +81,22 @@ public class EnvironmentSurrealRepositoryAdapterImpl implements EnvironmentRepos
         if (value == null) return UUID.randomUUID();
         if (value.isThing()) {
             try {
-                return UUID.fromString(cleanThingId(value.getThing().getId().toString()));
+                final String fullId = value.getThing().toString();
+                final int separator = fullId.indexOf(':');
+                if (separator > 0) {
+                    final String idPart = cleanThingId(fullId.substring(separator + 1));
+                    return UUID.fromString(idPart);
+                }
             } catch (Exception e) {
                 return UUID.randomUUID();
             }
         }
         if (value.isString()) {
             try {
-                return UUID.fromString(value.getString());
+                final String raw = value.getString();
+                final int separator = raw.indexOf(':');
+                final String idPart = separator > 0 ? cleanThingId(raw.substring(separator + 1)) : cleanThingId(raw);
+                return UUID.fromString(idPart);
             } catch (Exception e) {
                 return UUID.randomUUID();
             }
@@ -96,11 +104,20 @@ public class EnvironmentSurrealRepositoryAdapterImpl implements EnvironmentRepos
         return UUID.randomUUID();
     }
 
-    private static String cleanThingId(final String id) {
-        if (id != null && id.length() >= 2 && id.startsWith("\u27E8") && id.endsWith("\u27E9")) {
-            return id.substring(1, id.length() - 1);
+    private static String cleanThingId(String id) {
+        if (id == null) return "";
+        id = id.trim();
+        if (id.length() >= 2 && id.startsWith("`") && id.endsWith("`")) {
+            id = id.substring(1, id.length() - 1);
         }
-        return id;
+        if (id.length() >= 2 && id.startsWith("\u27E8") && id.endsWith("\u27E9")) {
+            id = id.substring(1, id.length() - 1);
+        }
+        final int separator = id.indexOf(':');
+        if (separator > 0) {
+            id = id.substring(separator + 1);
+        }
+        return id.trim();
     }
 
     private static String stringOf(final Value value) {

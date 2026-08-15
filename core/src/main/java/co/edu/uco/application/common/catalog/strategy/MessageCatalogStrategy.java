@@ -11,6 +11,7 @@ import co.edu.uco.application.secondaryports.repository.SimplePageRequest;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -28,7 +29,7 @@ public final class MessageCatalogStrategy {
         this.log = loggerFactory.getLogger(MessageCatalogStrategy.class);
     }
     public SimplePage<MessageData> getMessagesWithEnvironment(String environment, SimplePageRequest request) {
-        var cachedMessages = cacheCatalog.getMessageWithEnvironment(environment, request);
+        var cachedMessages = getCachedMessagesWithEnvironment(environment, request);
         if (cachedMessages.getData().isEmpty()) {
             log.info(catalogPort.getMessage("FUN_006"));
             var dbMessages = databaseCatalog.getMessageWithEnvironment(environment, request);
@@ -63,6 +64,14 @@ public final class MessageCatalogStrategy {
             response.ifPresent(message -> cacheCatalog.addMessageWithEnvironment(message, environmentId));
         }
         return response;
+    }
+    private SimplePage<MessageData> getCachedMessagesWithEnvironment(String environment, SimplePageRequest request) {
+        try {
+            return cacheCatalog.getMessageWithEnvironment(environment, request);
+        } catch (Exception exception) {
+            log.error(catalogPort.getMessage("FUN_013"), exception);
+            return SimplePage.of(List.of(), request.getPage(), request.getSize(), 0, 0);
+        }
     }
     private void fillCacheWithEnvironmentMessages(SimplePage<MessageData> dbMessages, String environment) {
         dbMessages.getData().forEach(message -> cacheCatalog.addMessageWithEnvironment(message, environment));

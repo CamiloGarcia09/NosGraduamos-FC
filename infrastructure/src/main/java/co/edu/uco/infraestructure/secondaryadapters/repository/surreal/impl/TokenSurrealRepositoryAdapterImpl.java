@@ -105,9 +105,21 @@ public class TokenSurrealRepositoryAdapterImpl implements TokenSurrealRepository
 
     private static String extractIdAsString(final Value value) {
         if (value == null) return "";
-        if (value.isThing()) return value.getThing().getId().toString();
+        if (value.isThing()) return cleanIdPart(value.getThing().getId().toString());
         if (value.isString()) return value.getString();
         return value.toPrettyString();
+    }
+
+    private static String cleanIdPart(String id) {
+        if (id == null) return "";
+        id = id.trim();
+        if (id.length() >= 2 && id.startsWith("`") && id.endsWith("`")) {
+            id = id.substring(1, id.length() - 1);
+        }
+        if (id.length() >= 2 && id.startsWith("\u27E8") && id.endsWith("\u27E9")) {
+            id = id.substring(1, id.length() - 1);
+        }
+        return id;
     }
 
     private static String stringOf(final Value value) {
