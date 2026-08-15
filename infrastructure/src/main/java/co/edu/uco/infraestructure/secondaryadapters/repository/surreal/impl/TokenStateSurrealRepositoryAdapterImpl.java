@@ -70,7 +70,14 @@ public class TokenStateSurrealRepositoryAdapterImpl implements TokenStateSurreal
             return DEFAULT_UUID;
         }
         try {
-            if (value.isThing()) return UUID.fromString(value.getThing().getId().toString());
+            if (value.isThing()) {
+                String rawId = value.getThing().getId().toString();
+                // SurrealDB wraps UUID record IDs in ⟨⟩ angle brackets
+                if (rawId.startsWith("\u27E8") && rawId.endsWith("\u27E9")) {
+                    rawId = rawId.substring(1, rawId.length() - 1);
+                }
+                return UUID.fromString(rawId);
+            }
             if (value.isUuid()) return value.getUuid();
             if (value.isString()) return UUID.fromString(value.getString());
             return UUID.fromString(value.toPrettyString());

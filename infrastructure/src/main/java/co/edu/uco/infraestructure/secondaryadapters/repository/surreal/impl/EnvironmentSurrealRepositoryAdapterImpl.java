@@ -70,7 +70,7 @@ public class EnvironmentSurrealRepositoryAdapterImpl implements EnvironmentRepos
         final ApplicationData app = ApplicationData.build();
         final Value appIdValue = obj.get("application_id");
         if (appIdValue != null && appIdValue.isThing()) {
-            app.setId(UUID.fromString(appIdValue.getThing().getId().toString()));
+            app.setId(UUID.fromString(cleanThingId(appIdValue.getThing().getId().toString())));
         }
         data.setApplication(app);
         
@@ -81,7 +81,7 @@ public class EnvironmentSurrealRepositoryAdapterImpl implements EnvironmentRepos
         if (value == null) return UUID.randomUUID();
         if (value.isThing()) {
             try {
-                return UUID.fromString(value.getThing().getId().toString());
+                return UUID.fromString(cleanThingId(value.getThing().getId().toString()));
             } catch (Exception e) {
                 return UUID.randomUUID();
             }
@@ -94,6 +94,13 @@ public class EnvironmentSurrealRepositoryAdapterImpl implements EnvironmentRepos
             }
         }
         return UUID.randomUUID();
+    }
+
+    private static String cleanThingId(final String id) {
+        if (id != null && id.length() >= 2 && id.startsWith("\u27E8") && id.endsWith("\u27E9")) {
+            return id.substring(1, id.length() - 1);
+        }
+        return id;
     }
 
     private static String stringOf(final Value value) {

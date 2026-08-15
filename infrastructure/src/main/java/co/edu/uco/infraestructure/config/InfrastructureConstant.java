@@ -26,6 +26,7 @@ public final class InfrastructureConstant {
     public static final String ENVIRONMENT_ID_ATTRIBUTE = "environmentId";
     public static final String TOKEN_ENTITY = "token_data";
     public static final String TOKEN_STATE_ACTIVE_ID = "123e4567-e89b-12d3-a456-426614175000";
+    public static final String TOKEN_STATE_INACTIVE_ID = "123e4567-e89b-12d3-a456-426614175001";
 
     public static final String PACKAGE_BASE = "co.edu.uco";
     public static final String PACKAGE_REPOSITORY_ADAPTER = "co.edu.uco.infraestructure.secondaryadapters.repository";

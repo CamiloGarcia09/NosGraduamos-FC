@@ -228,7 +228,7 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
         if (value == null) return UUID.randomUUID();
         if (value.isThing()) {
             try {
-                return UUID.fromString(value.getThing().getId().toString());
+                return UUID.fromString(cleanThingId(value.getThing().getId().toString()));
             } catch (Exception e) {
                 return UUID.randomUUID();
             }
@@ -241,6 +241,13 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
             }
         }
         return UUID.randomUUID();
+    }
+
+    private static String cleanThingId(final String id) {
+        if (id != null && id.length() >= 2 && id.startsWith("\u27E8") && id.endsWith("\u27E9")) {
+            return id.substring(1, id.length() - 1);
+        }
+        return id;
     }
 
     private static String stringOf(final Value value) {
