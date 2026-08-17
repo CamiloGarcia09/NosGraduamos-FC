@@ -207,17 +207,24 @@ curl http://localhost:8000/actuator/health
 ```bash
 # Get messages for an application
 # Direct access
-curl http://localhost:8085/messageucolab/v1/application/environment
+curl http://localhost:8085/messageucolab/v1/application/messages
 
 # Through API Gateway
-curl http://localhost:8000/messageucolab/v1/application/environment
+curl http://localhost:8000/messageucolab/v1/application/messages
 
 # Get a specific message by code
 # Direct access
-curl http://localhost:8085/messageucolab/v1/application/code/{messageCode}
+curl http://localhost:8085/messageucolab/v1/application/messages/{messageCode}
 
 # Through API Gateway
-curl http://localhost:8000/messageucolab/v1/application/code/{messageCode}
+curl http://localhost:8000/messageucolab/v1/application/messages/{messageCode}
+
+# Translate a specific message
+# Direct access
+curl "http://localhost:8085/messageucolab/v1/application/messages/{messageCode}/translation?targetLanguage=en"
+
+# Through API Gateway
+curl "http://localhost:8000/messageucolab/v1/application/messages/{messageCode}/translation?targetLanguage=en"
 
 # Get token for an application
 # Direct access
