@@ -28,6 +28,7 @@ public final class InfrastructureConstant {
     public static final String ENVIRONMENT_ID_ATTRIBUTE = CatalogPortStaticRef.getMessage("FUN_093");
     public static final String TOKEN_ENTITY = CatalogPortStaticRef.getMessage("FUN_094");
     public static final String TOKEN_STATE_ACTIVE_ID = CatalogPortStaticRef.getMessage("FUN_095");
+    public static final String TOKEN_STATE_INACTIVE_ID = CatalogPortStaticRef.getMessage("FUN_144");
 
     public static final String PACKAGE_BASE = "co.edu.uco";
     public static final String PACKAGE_REPOSITORY_ADAPTER = "co.edu.uco.infraestructure.secondaryadapters.repository";
@@ -83,8 +84,9 @@ public final class InfrastructureConstant {
     public static final String WEB_CONFIG_API_MESSAGE = CatalogPortStaticRef.getMessage("FUN_130");
     public static final String WEB_CONFIG_API_APPLICATION = CatalogPortStaticRef.getMessage("FUN_131");
     public static final String WEB_CONFIG_API_ENVIRONMENT = CatalogPortStaticRef.getMessage("FUN_132");
-    public static final String WEB_CONFIG_API_CODE = CatalogPortStaticRef.getMessage("FUN_133");
-    public static final String WEB_CONFIG_API_CODE_TRANSLATION = CatalogPortStaticRef.getMessage("FUN_134");
+    public static final String WEB_CONFIG_API_MESSAGE_LIST = CatalogPortStaticRef.getMessage("FUN_133");
+    public static final String WEB_CONFIG_API_MESSAGE_CODE = CatalogPortStaticRef.getMessage("FUN_134");
+    public static final String WEB_CONFIG_API_MESSAGE_CODE_TRANSLATION = CatalogPortStaticRef.getMessage("FUN_143");
 
     public static final String SWAGGER_UI_HTML = CatalogPortStaticRef.getMessage("FUN_135");
     public static final String SWAGGER_UI = CatalogPortStaticRef.getMessage("FUN_136");

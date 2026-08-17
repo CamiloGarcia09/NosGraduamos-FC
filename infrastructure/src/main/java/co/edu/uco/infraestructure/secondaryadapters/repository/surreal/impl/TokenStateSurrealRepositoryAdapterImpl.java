@@ -70,14 +70,40 @@ public class TokenStateSurrealRepositoryAdapterImpl implements TokenStateSurreal
             return DEFAULT_UUID;
         }
         try {
-            if (value.isThing()) return UUID.fromString(value.getThing().getId().toString());
-            if (value.isUuid()) return value.getUuid();
-            if (value.isString()) return UUID.fromString(value.getString());
-            return UUID.fromString(value.toPrettyString());
+            String rawId = null;
+            if (value.isThing()) {
+                rawId = cleanIdPart(value.getThing().toString());
+            } else if (value.isUuid()) {
+                return value.getUuid();
+            } else if (value.isString()) {
+                rawId = cleanIdPart(value.getString());
+            } else {
+                rawId = cleanIdPart(value.toPrettyString());
+            }
+            if (rawId == null || rawId.isBlank()) {
+                return DEFAULT_UUID;
+            }
+            return UUID.fromString(rawId);
         } catch (final RuntimeException ex) {
-            log.warn("Cannot parse UUID from value: {}", value.toPrettyString(), ex);
             return DEFAULT_UUID;
         }
+    }
+
+    private static String cleanIdPart(String id) {
+        if (id == null) return "";
+        id = id.trim();
+        final int separator = id.indexOf(':');
+        if (separator > 0) {
+            id = id.substring(separator + 1);
+        }
+        id = id.trim();
+        if (id.length() >= 2 && id.startsWith("`") && id.endsWith("`")) {
+            id = id.substring(1, id.length() - 1);
+        }
+        if (id.length() >= 2 && id.startsWith("\u27E8") && id.endsWith("\u27E9")) {
+            id = id.substring(1, id.length() - 1);
+        }
+        return id.trim();
     }
 
     private static String stringOf(final Value value) {

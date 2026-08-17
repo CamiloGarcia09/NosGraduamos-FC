@@ -21,4 +21,5 @@ public final class CrosswordsConstant {
     public static final byte REQUEST_PAGE_DEFAULT = 1;
     public static final byte REQUEST_SIZE_DEFAULT = 50;
     public static final String TOKEN_STATE_ACTIVE_ID = CatalogPortStaticRef.getMessage("FUN_073");
+    public static final String TOKEN_STATE_INACTIVE_ID = CatalogPortStaticRef.getMessage("FUN_144");
 }

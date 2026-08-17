@@ -904,7 +904,7 @@ UPSERT token_state:`123e4567-e89b-12d3-a456-426614175000` CONTENT {
     name: "Active"
 };
 
-UPSERT token_state:inactive CONTENT {
+UPSERT token_state:`123e4567-e89b-12d3-a456-426614175001` CONTENT {
     name: "Inactive"
 };
 

@@ -6,7 +6,7 @@ services:
     routes:
       - name: get-message-by-code
         paths:
-          - ~/messageucolab/v1/application/code/[^/]+$
+          - ~/messageucolab/v1/application/messages/[^/]+$
         methods:
           - GET
         regex_priority: 10
@@ -14,7 +14,7 @@ services:
 
       - name: translate-message-by-code
         paths:
-          - ~/messageucolab/v1/application/code/[^/]+/translation$
+          - ~/messageucolab/v1/application/messages/[^/]+/translation$
         methods:
           - GET
         regex_priority: 20
@@ -22,7 +22,7 @@ services:
 
       - name: get-messages-by-environment
         paths:
-          - /messageucolab/v1/application/environment
+          - /messageucolab/v1/application/messages
         methods:
           - GET
         strip_path: false
