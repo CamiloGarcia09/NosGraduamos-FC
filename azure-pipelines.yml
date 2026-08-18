@@ -255,8 +255,9 @@ stages:
                   --query 'value[0].message' `
                   --output tsv
                 if ($LASTEXITCODE -ne 0) { throw 'Remote deployment failed.' }
-                Write-Host $result
-                if ($result -notmatch 'Deployment completed with image tag') {
+                $resultText = $result -join [Environment]::NewLine
+                Write-Host $resultText
+                if ($resultText -notmatch 'Deployment completed with image tag') {
                   throw 'Remote deployment did not report success.'
                 }
 
