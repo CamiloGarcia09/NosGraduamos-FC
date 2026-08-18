@@ -11,12 +11,15 @@ import static co.edu.uco.crosscutting.helpers.UtilUUID.getStringToUUID;
 
 @Component
 public final class CreateTokenUseCase implements HandlingCreateTokenPort {
+
     private final TokenRepository tokenRepository;
     private final TokenEntityMapper tokenEntityMapper;
+
     public CreateTokenUseCase(TokenRepository tokenRepository, TokenEntityMapper tokenEntityMapper) {
         this.tokenRepository = tokenRepository;
         this.tokenEntityMapper = tokenEntityMapper;
     }
+
     @Override
     public void createToken(TokenDomain tokenDomain) {
         tokenDomain.setStateId(getStringToUUID(TOKEN_STATE_ACTIVE_ID));

@@ -29,26 +29,28 @@ import static co.edu.uco.infraestructure.config.InfrastructureConstant.MESSAGE_C
 @RequestMapping("${crosswords.api.path.message}")
 @Tag(name = "Consulta de Mensajes", description = "Endpoints para obtener información de mensajes")
 final class MessagesControllerImpl implements MessagesController {
+
         private final FindMessagesByEnvironmentUsecaseFacade findMessagesByEnvironmentUsecaseFacade;
         private final FindMessageByCodeAndEnvironmentUseCaseFacade findMessageByCodeAndEnvironmentUseCaseFacade;
         private final TranslateMessageByCodeAndEnvironmentUseCaseFacade translateMessageByCodeAndEnvironmentUseCaseFacade;
         private final PresenterPort<MessageDTO> restPresenter;
         private final PresenterPort<TranslatedMessageDTO> translationPresenter;
         private final PresenterPort<SimplePage<MessageDTO>> restPresenterPage;
-        public MessagesControllerImpl(
- FindMessagesByEnvironmentUsecaseFacade findMessagesByEnvironmentUsecaseFacade,
-                FindMessageByCodeAndEnvironmentUseCaseFacade findMessageByCodeAndEnvironmentUseCaseFacade,
-                TranslateMessageByCodeAndEnvironmentUseCaseFacade translateMessageByCodeAndEnvironmentUseCaseFacade,
-                PresenterPort<MessageDTO> restPresenter,
-                PresenterPort<TranslatedMessageDTO> translationPresenter,
-                PresenterPort<SimplePage<MessageDTO>> restPresenterPage) {
+
+        public MessagesControllerImpl(FindMessagesByEnvironmentUsecaseFacade findMessagesByEnvironmentUsecaseFacade,
+                                      FindMessageByCodeAndEnvironmentUseCaseFacade findMessageByCodeAndEnvironmentUseCaseFacade,
+                                      TranslateMessageByCodeAndEnvironmentUseCaseFacade translateMessageByCodeAndEnvironmentUseCaseFacade,
+                                      PresenterPort<MessageDTO> restPresenter,
+                                      PresenterPort<TranslatedMessageDTO> translationPresenter,
+                                      PresenterPort<SimplePage<MessageDTO>> restPresenterPage) {
             this.findMessagesByEnvironmentUsecaseFacade = findMessagesByEnvironmentUsecaseFacade;
             this.findMessageByCodeAndEnvironmentUseCaseFacade = findMessageByCodeAndEnvironmentUseCaseFacade;
-                this.translateMessageByCodeAndEnvironmentUseCaseFacade = translateMessageByCodeAndEnvironmentUseCaseFacade;
-                this.restPresenter = restPresenter;
-                this.translationPresenter = translationPresenter;
-                this.restPresenterPage = restPresenterPage;
+            this.translateMessageByCodeAndEnvironmentUseCaseFacade = translateMessageByCodeAndEnvironmentUseCaseFacade;
+            this.restPresenter = restPresenter;
+            this.translationPresenter = translationPresenter;
+            this.restPresenterPage = restPresenterPage;
         }
+
         @Override
         @GetMapping("${crosswords.api.path.message.environment}")
         @Operation(summary = "Listar mensajes por ambiente", 
@@ -93,6 +95,7 @@ final class MessagesControllerImpl implements MessagesController {
                 restPresenterPage.presentRestSuccess(List.of(messageDTOSimplePage), httpServletRequest,
                                 httpServletResponse);
         }
+
         @Override
         @GetMapping("${crosswords.api.path.message.code.environment}")
         @Operation(summary = "Buscar mensaje por código y ambiente", description = "Permite obtener el mensaje correspondiente a un código específico en el ambiente asociado al token. "

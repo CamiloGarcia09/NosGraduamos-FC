@@ -18,6 +18,7 @@ public final class DopplerCreateToken implements CreateTokenSecretPort {
     private final DopplerProperties properties;
     private final DopplerSecretCacheService cacheService;
     private final CatalogPort catalogPort;
+
     public DopplerCreateToken(DopplerProperties properties, DopplerSecretCacheService cacheService,
                               CatalogPort catalogPort, LoggingPortFactory loggerFactory) {
         this.log = loggerFactory.getLogger(DopplerCreateToken.class);
@@ -25,8 +26,10 @@ public final class DopplerCreateToken implements CreateTokenSecretPort {
         this.cacheService = cacheService;
         this.catalogPort = catalogPort;
     }
+
     @Override
     public void execute(String secretName, String privateKey) {
+
         var client = new OkHttpClient();
         var mediaType = MediaType.parse(JSON_SERIALIZER_CONTENT_TYPE);
         var body = RequestBody.create(String.format(properties.getRequest(), secretName, secretName, privateKey), mediaType);

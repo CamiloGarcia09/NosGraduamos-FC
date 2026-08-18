@@ -23,12 +23,15 @@ import static co.edu.uco.infraestructure.config.InfrastructureConstant.*;
 
 @Service
 public final class JavaSecurityEncryptTokenAdapter implements EncryptTokenPort {
+
     private final LoggingPort log;
     private final CatalogPort catalogPort;
+
     public JavaSecurityEncryptTokenAdapter(CatalogPort catalogPort, LoggingPortFactory loggerFactory) {
         this.log = loggerFactory.getLogger(JavaSecurityEncryptTokenAdapter.class);
         this.catalogPort = catalogPort;
     }
+
     @Override
     public KeyPairDTO generateKeys() {
         try {
@@ -39,9 +42,11 @@ public final class JavaSecurityEncryptTokenAdapter implements EncryptTokenPort {
         } catch (Exception e) {
             var message = catalogPort.getMessage("TCH_026");
             log.error(message, e);
-            throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage("FUN_025"), e, ExceptionType.TECHNICAL);
+            throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage("FUN_025"), e,
+                    ExceptionType.TECHNICAL);
         }
     }
+
     @Override
     public String generateSignature(String data, PublicKey publicKey) {
         try{
@@ -52,12 +57,15 @@ public final class JavaSecurityEncryptTokenAdapter implements EncryptTokenPort {
             byte[] encryptedData = encryptCipher.doFinal(dataBytes);
 
             return Base64.getEncoder().encodeToString(encryptedData);
-        }catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e){
+        }catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException |
+                BadPaddingException e){
             var message = catalogPort.getMessage("TCH_027");
             log.error(message, e);
-            throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage("FUN_025"), e, ExceptionType.TECHNICAL);
+            throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage("FUN_025"), e,
+                    ExceptionType.TECHNICAL);
         }
     }
+
     @Override
     public Boolean access(String privateKey, String signature, String secretName) {
         byte[] signatureBytes = Base64.getDecoder().decode(signature);
@@ -73,7 +81,8 @@ public final class JavaSecurityEncryptTokenAdapter implements EncryptTokenPort {
             var data = new String(decryptedData, StandardCharsets.UTF_8);
 
             return data.equals(secretName);
-        }catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException e){
+        }catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException |
+                BadPaddingException | InvalidKeySpecException e){
             log.error(catalogPort.getMessage("TCH_028"),privateKey,signature,secretName, e);
             return false;
         }

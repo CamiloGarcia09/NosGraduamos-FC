@@ -15,18 +15,23 @@ import static co.edu.uco.application.CrosswordsConstant.*;
 
 @Service
 public final class VerifyAccessUseCase implements HandlingVerifyAccessPort {
+
     private final EncryptTokenPort encryptTokenPort;
     private final FindTokenCachePort findTokenCachePort;
     private final FindTokenRepository findTokenRepository;
     private final TokenStateRepository tokenStateRepository;
     private final CatalogPort catalogPort;
-    public VerifyAccessUseCase(EncryptTokenPort encryptTokenPort, FindTokenCachePort findTokenCachePort, FindTokenRepository findTokenRepository, TokenStateRepository tokenStateRepository, CatalogPort catalogPort) {
+
+    public VerifyAccessUseCase(EncryptTokenPort encryptTokenPort, FindTokenCachePort findTokenCachePort,
+                               FindTokenRepository findTokenRepository, TokenStateRepository tokenStateRepository,
+                               CatalogPort catalogPort) {
         this.encryptTokenPort = encryptTokenPort;
         this.findTokenCachePort = findTokenCachePort;
         this.findTokenRepository = findTokenRepository;
         this.tokenStateRepository = tokenStateRepository;
         this.catalogPort = catalogPort;
     }
+
     @Override
     public boolean verifyAccess(String token) {
         var secretName = findTokenRepository.findById(token);
@@ -44,6 +49,7 @@ public final class VerifyAccessUseCase implements HandlingVerifyAccessPort {
         }
         return result;
     }
+
     private void stateValid(String statusId) {
         var status = tokenStateRepository.findByStatus(statusId);
         if (!status.getName().equals(STATE_ACTIVE)) {

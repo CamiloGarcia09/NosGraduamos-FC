@@ -81,7 +81,6 @@ public final class InfrastructureConstant {
     public static final String DOPPLER_CONFIG_PREFIX = "doppler";
     public static final String WEB_CONFIG_API_MESSAGE = "/messageucolab/v1/application/**/message/*";
     public static final String WEB_CONFIG_API_APPLICATION = "/messageucolab/v1/application/**/message/*";
-    public static final String WEB_CONFIG_API_ENVIRONMENT = "/messageucolab/v1/application/environment";
     public static final String WEB_CONFIG_API_MESSAGE_LIST = "/messageucolab/v1/application/messages";
     public static final String WEB_CONFIG_API_MESSAGE_CODE = "/messageucolab/v1/application/messages/*";
     public static final String WEB_CONFIG_API_MESSAGE_CODE_TRANSLATION = "/messageucolab/v1/application/messages/*/translation";

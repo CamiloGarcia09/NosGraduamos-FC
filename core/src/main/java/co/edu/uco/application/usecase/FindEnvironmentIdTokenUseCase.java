@@ -10,12 +10,15 @@ import static co.edu.uco.crosscutting.helpers.UtilText.getDefault;
 
 @Component
 public final class FindEnvironmentIdTokenUseCase implements HandlingFindEnvironmentIdTokenPort {
+
     private final FindTokenRepository findTokenRepository;
     private final CatalogPort catalogPort;
+
     public FindEnvironmentIdTokenUseCase(FindTokenRepository findTokenRepository, CatalogPort catalogPort) {
         this.findTokenRepository = findTokenRepository;
         this.catalogPort = catalogPort;
     }
+
     @Override
     public String execute(String token) {
         try{

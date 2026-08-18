@@ -23,10 +23,12 @@ import static co.edu.uco.infraestructure.config.InfrastructureConstant.FIELD_ID;
 final class TokenControllerImpl implements TokenController {
     private final CreateTokenUseCaseFacade createTokenUseCaseFacade;
     private final PresenterPort<String> restPresenter;
+
     public TokenControllerImpl(CreateTokenUseCaseFacade createTokenUseCaseFacade, PresenterPort<String> restPresenter) {
         this.createTokenUseCaseFacade = createTokenUseCaseFacade;
         this.restPresenter = restPresenter;
     }
+
     @PostMapping("${crosswords.api.path.token.application}")
     @Operation(summary = "Crear token de aplicación", 
               description = "Crea un nuevo token para una aplicación específica. El token generado puede ser utilizado para autenticar las solicitudes.")
