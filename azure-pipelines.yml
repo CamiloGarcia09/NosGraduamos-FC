@@ -19,12 +19,14 @@ parameters:
       - stop
 
 pool:
-  vmImage: ubuntu-latest
+  name: Default
+  demands:
+    - Agent.OS -equals Windows_NT
 
 variables:
   - group: messageucolab-cicd
   - name: MAVEN_CACHE_FOLDER
-    value: $(Pipeline.Workspace)/.m2/repository
+    value: '$(Pipeline.Workspace)\.m2\repository'
   - name: IMAGE_REPOSITORY
     value: messageucolab
   - name: IMAGE_TAG
@@ -47,19 +49,18 @@ stages:
           - checkout: self
             clean: true
 
-          - task: JavaToolInstaller@0
-            displayName: Use Java 17
+          - task: PowerShell@2
+            displayName: Validate agent tools
             inputs:
-              versionSpec: "17"
-              jdkArchitectureOption: x64
-              jdkSourceOption: PreInstalled
-
-          - bash: |
-              set -euo pipefail
-              java -version
-              mvn -version
-              docker version
-            displayName: Validate tools
+              targetType: inline
+              script: |
+                $ErrorActionPreference = 'Stop'
+                docker version
+                if ($LASTEXITCODE -ne 0) { throw 'Docker Engine is not available.' }
+                az version
+                if ($LASTEXITCODE -ne 0) { throw 'Azure CLI is not available.' }
+                ssh -V
+                if ($LASTEXITCODE -ne 0) { throw 'OpenSSH is not available.' }
 
           - task: Cache@2
             displayName: Cache Maven dependencies
@@ -69,10 +70,20 @@ stages:
                 maven | "$(Agent.OS)"
               path: $(MAVEN_CACHE_FOLDER)
 
-          - bash: |
-              set -euo pipefail
-              mvn -B clean verify "-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)"
-            displayName: Build and test
+          - task: PowerShell@2
+            displayName: Build and test with Java 17 container
+            inputs:
+              targetType: inline
+              script: |
+                $ErrorActionPreference = 'Stop'
+                New-Item -ItemType Directory -Force -Path '$(MAVEN_CACHE_FOLDER)' | Out-Null
+                docker run --rm `
+                  --volume "$(Build.SourcesDirectory):/workspace" `
+                  --volume "$(MAVEN_CACHE_FOLDER):/root/.m2/repository" `
+                  --workdir /workspace `
+                  maven:3.9.6-eclipse-temurin-17 `
+                  mvn -B clean verify
+                if ($LASTEXITCODE -ne 0) { throw 'Maven build or tests failed.' }
 
           - task: PublishTestResults@2
             displayName: Publish test results
@@ -85,10 +96,13 @@ stages:
               failTaskOnFailedTests: true
               failTaskOnMissingResultsFile: false
 
-          - bash: |
-              set -euo pipefail
-              docker compose --file deployment/azure/docker-compose.yml config --quiet
+          - task: PowerShell@2
             displayName: Validate Azure Docker Compose
+            inputs:
+              targetType: inline
+              script: |
+                docker compose --file deployment/azure/docker-compose.yml config --quiet
+                if ($LASTEXITCODE -ne 0) { throw 'Azure Docker Compose is invalid.' }
             env:
               ACR_LOGIN_SERVER: example.azurecr.io
               IMAGE_TAG: validation
@@ -101,18 +115,24 @@ stages:
               SURREALDBNAMESPACE: messageucolab
               SURREALDBDATABASE: messageucolab
 
-          - bash: |
-              set -euo pipefail
-              az bicep build --file infrastructure/azure/main.bicep --stdout >/dev/null
+          - task: PowerShell@2
             displayName: Validate Bicep
+            inputs:
+              targetType: inline
+              script: |
+                az bicep build --file infrastructure/azure/main.bicep --stdout | Out-Null
+                if ($LASTEXITCODE -ne 0) { throw 'Bicep validation failed.' }
 
-          - bash: |
-              set -euo pipefail
-              docker build --tag "$(IMAGE_REPOSITORY):ci-$(Build.BuildId)" .
+          - task: PowerShell@2
             displayName: Validate application image
+            inputs:
+              targetType: inline
+              script: |
+                docker build --tag "$(IMAGE_REPOSITORY):ci-$(Build.BuildId)" .
+                if ($LASTEXITCODE -ne 0) { throw 'Application image build failed.' }
 
           - task: AzureCLI@2
-            displayName: Build and push application image
+            displayName: Push application image
             condition: >-
               and(
                 succeeded(),
@@ -124,18 +144,21 @@ stages:
               )
             inputs:
               azureSubscription: $(AZURE_SERVICE_CONNECTION)
-              scriptType: bash
+              scriptType: ps
               scriptLocation: inlineScript
               inlineScript: |
-                set -euo pipefail
-                login_server="$(ACR_NAME).azurecr.io"
-                commit_image="${login_server}/$(IMAGE_REPOSITORY):$(IMAGE_TAG)"
-                build_image="${login_server}/$(IMAGE_REPOSITORY):build-$(Build.BuildId)"
+                $ErrorActionPreference = 'Stop'
+                $loginServer = "$(ACR_NAME).azurecr.io"
+                $commitImage = "${loginServer}/$(IMAGE_REPOSITORY):$(IMAGE_TAG)"
+                $buildImage = "${loginServer}/$(IMAGE_REPOSITORY):build-$(Build.BuildId)"
                 az acr login --name "$(ACR_NAME)"
-                docker tag "$(IMAGE_REPOSITORY):ci-$(Build.BuildId)" "$commit_image"
-                docker tag "$(IMAGE_REPOSITORY):ci-$(Build.BuildId)" "$build_image"
-                docker push "$commit_image"
-                docker push "$build_image"
+                if ($LASTEXITCODE -ne 0) { throw 'ACR login failed.' }
+                docker tag "$(IMAGE_REPOSITORY):ci-$(Build.BuildId)" $commitImage
+                docker tag "$(IMAGE_REPOSITORY):ci-$(Build.BuildId)" $buildImage
+                docker push $commitImage
+                if ($LASTEXITCODE -ne 0) { throw 'Commit image push failed.' }
+                docker push $buildImage
+                if ($LASTEXITCODE -ne 0) { throw 'Build image push failed.' }
 
   - stage: DeployDemo
     displayName: Deploy demo environment
@@ -163,71 +186,76 @@ stages:
             displayName: Start VM and open temporary SSH access
             inputs:
               azureSubscription: $(AZURE_SERVICE_CONNECTION)
-              scriptType: bash
+              scriptType: ps
               scriptLocation: inlineScript
               inlineScript: |
-                set -euo pipefail
-                agent_ip="$(curl --fail --silent https://api.ipify.org)"
+                $ErrorActionPreference = 'Stop'
+                $agentIp = (Invoke-RestMethod -Uri 'https://api.ipify.org').Trim()
                 az vm start --resource-group "$(AZURE_RESOURCE_GROUP)" --name "$(AZURE_VM_NAME)"
-                public_ip="$(az vm list-ip-addresses --resource-group "$(AZURE_RESOURCE_GROUP)" --name "$(AZURE_VM_NAME)" --query '[0].virtualMachine.network.publicIpAddresses[0].ipAddress' --output tsv)"
-                echo "##vso[task.setvariable variable=VM_PUBLIC_IP]${public_ip}"
-                az network nsg rule create \
-                  --resource-group "$(AZURE_RESOURCE_GROUP)" \
-                  --nsg-name "$(AZURE_NSG_NAME)" \
-                  --name AllowPipelineDeployment \
-                  --priority 100 \
-                  --access Allow \
-                  --direction Inbound \
-                  --protocol Tcp \
-                  --source-address-prefixes "${agent_ip}/32" \
-                  --source-port-ranges '*' \
-                  --destination-address-prefixes '*' \
-                  --destination-port-ranges 22 8085 \
+                if ($LASTEXITCODE -ne 0) { throw 'VM start failed.' }
+                $publicIp = az vm list-ip-addresses --resource-group "$(AZURE_RESOURCE_GROUP)" --name "$(AZURE_VM_NAME)" --query '[0].virtualMachine.network.publicIpAddresses[0].ipAddress' --output tsv
+                if ($LASTEXITCODE -ne 0) { throw 'Could not obtain the VM public IP.' }
+                Write-Host "##vso[task.setvariable variable=VM_PUBLIC_IP]$publicIp"
+                az network nsg rule create `
+                  --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                  --nsg-name "$(AZURE_NSG_NAME)" `
+                  --name AllowPipelineDeployment `
+                  --priority 100 `
+                  --access Allow `
+                  --direction Inbound `
+                  --protocol Tcp `
+                  --source-address-prefixes "$agentIp/32" `
+                  --source-port-ranges '*' `
+                  --destination-address-prefixes '*' `
+                  --destination-port-ranges 22 8085 `
                   --output none
+                if ($LASTEXITCODE -ne 0) { throw 'Could not create temporary NSG access.' }
 
-          - bash: |
-              set -euo pipefail
-              key="$(sshKey.secureFilePath)"
-              host="azureuser@$(VM_PUBLIC_IP)"
-              chmod 600 "$key"
-              ssh -i "$key" -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30 "$host" \
-                "mkdir -p $(DEPLOY_ROOT)/deployment/docker"
-              scp -i "$key" -r deployment/azure "$host:$(DEPLOY_ROOT)/deployment/"
-              scp -i "$key" -r deployment/docker/scripts "$host:$(DEPLOY_ROOT)/deployment/docker/"
-              ssh -i "$key" "$host" \
-                "chmod +x '$(DEPLOY_ROOT)/deployment/azure/deploy.sh' && \
-                '$(DEPLOY_ROOT)/deployment/azure/deploy.sh' \
-                '$(IMAGE_TAG)' \
-                '$(ACR_NAME)' \
-                '$(KEY_VAULT_NAME)' \
-                '$(DOPPLER_DEPLOY_TOKEN_SECRET)' \
-                '$(DOPPLER_APP_TOKEN_SECRET)'"
+          - task: PowerShell@2
             displayName: Copy manifests, deploy and verify containers
+            inputs:
+              targetType: inline
+              script: |
+                $ErrorActionPreference = 'Stop'
+                $key = '$(sshKey.secureFilePath)'
+                $remoteHost = 'azureuser@$(VM_PUBLIC_IP)'
+                ssh -i $key -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30 $remoteHost `
+                  "mkdir -p $(DEPLOY_ROOT)/deployment/docker"
+                if ($LASTEXITCODE -ne 0) { throw 'SSH connection failed.' }
+                scp -i $key -r deployment/azure "${remoteHost}:$(DEPLOY_ROOT)/deployment/"
+                if ($LASTEXITCODE -ne 0) { throw 'Could not copy Azure deployment files.' }
+                scp -i $key -r deployment/docker/scripts "${remoteHost}:$(DEPLOY_ROOT)/deployment/docker/"
+                if ($LASTEXITCODE -ne 0) { throw 'Could not copy initialization scripts.' }
+                $deployCommand = "chmod +x '$(DEPLOY_ROOT)/deployment/azure/deploy.sh' && '$(DEPLOY_ROOT)/deployment/azure/deploy.sh' '$(IMAGE_TAG)' '$(ACR_NAME)' '$(KEY_VAULT_NAME)' '$(DOPPLER_DEPLOY_TOKEN_SECRET)' '$(DOPPLER_APP_TOKEN_SECRET)'"
+                ssh -i $key $remoteHost $deployCommand
+                if ($LASTEXITCODE -ne 0) { throw 'Remote deployment failed.' }
 
           - task: AzureCLI@2
             displayName: External smoke test
             inputs:
               azureSubscription: $(AZURE_SERVICE_CONNECTION)
-              scriptType: bash
+              scriptType: ps
               scriptLocation: inlineScript
               inlineScript: |
-                set -euo pipefail
-                public_ip="$(az vm list-ip-addresses --resource-group "$(AZURE_RESOURCE_GROUP)" --name "$(AZURE_VM_NAME)" --query '[0].virtualMachine.network.publicIpAddresses[0].ipAddress' --output tsv)"
-                curl --fail --show-error --retry 12 --retry-delay 10 "http://${public_ip}:8085/actuator/health"
+                $ErrorActionPreference = 'Stop'
+                $response = Invoke-RestMethod -Uri 'http://$(VM_PUBLIC_IP):8085/actuator/health' -TimeoutSec 30
+                if ($response.status -ne 'UP') { throw 'Application health check did not return UP.' }
+                Write-Host "Application health: $($response.status)"
 
           - task: AzureCLI@2
             displayName: Close temporary SSH access
             condition: always()
             inputs:
               azureSubscription: $(AZURE_SERVICE_CONNECTION)
-              scriptType: bash
+              scriptType: ps
               scriptLocation: inlineScript
               inlineScript: |
-                az network nsg rule delete \
-                  --resource-group "$(AZURE_RESOURCE_GROUP)" \
-                  --nsg-name "$(AZURE_NSG_NAME)" \
-                  --name AllowPipelineDeployment \
-                  --output none || true
+                az network nsg rule delete `
+                  --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                  --nsg-name "$(AZURE_NSG_NAME)" `
+                  --name AllowPipelineDeployment `
+                  --output none
+                exit 0
 
   - stage: StopDemo
     displayName: Stop and deallocate demo VM
@@ -241,12 +269,13 @@ stages:
             displayName: Deallocate demo VM
             inputs:
               azureSubscription: $(AZURE_SERVICE_CONNECTION)
-              scriptType: bash
+              scriptType: ps
               scriptLocation: inlineScript
               inlineScript: |
-                set -euo pipefail
-                az vm deallocate \
-                  --resource-group "$(AZURE_RESOURCE_GROUP)" \
-                  --name "$(AZURE_VM_NAME)" \
+                $ErrorActionPreference = 'Stop'
+                az vm deallocate `
+                  --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                  --name "$(AZURE_VM_NAME)" `
                   --no-wait
-                echo "VM deallocation requested. Disk and public IP can still consume credit."
+                if ($LASTEXITCODE -ne 0) { throw 'VM deallocation request failed.' }
+                Write-Host 'VM deallocation requested. Disk and public IP can still consume credit.'

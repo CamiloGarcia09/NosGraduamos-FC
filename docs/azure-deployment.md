@@ -134,7 +134,7 @@ Autoriza el pipeline para utilizar el Variable Group, la Azure Service Connectio
 
 La primera versión usa un job normal de despliegue y no necesita crear un Azure DevOps Environment. Esto evita requerir permisos adicionales; los approvals se pueden incorporar en una fase posterior.
 
-Azure DevOps ofrece un job hospedado y 1.800 minutos mensuales. Si la organización todavía no tiene parallelism hospedado habilitado, solicita el grant gratuito o cambia temporalmente el pool al agente self-hosted existente.
+La organización no tiene habilitado el grant de paralelismo hospedado. El pipeline usa el agente Windows self-hosted del pool `Default`; Maven y Java 17 se ejecutan dentro del contenedor oficial de Maven para no depender de herramientas instaladas en la cuenta de servicio del agente. Se puede volver a `ubuntu-latest` cuando Microsoft apruebe el grant gratuito de 1.800 minutos mensuales.
 
 ## 6. Comportamiento del pipeline
 
