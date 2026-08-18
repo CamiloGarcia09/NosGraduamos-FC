@@ -403,14 +403,14 @@ public final class SurrealDomainEventProjectionConsumer {
         if (value.isDouble()) {
             return Double.toString(value.getDouble());
         }
-        if (value.isBigdecimal()) {
+        if (value.isBigDecimal()) {
             return value.getBigDecimal().toPlainString();
         }
         if (value.isUuid()) {
             return quote(value.getUuid().toString());
         }
-        if (value.isThing()) {
-            return quote(recordIdToString(value.getThing()));
+        if (value.isRecordId()) {
+            return quote(recordIdToString(value.getRecordId()));
         }
         if (value.isDateTime()) {
             return "d'" + value.getDateTime().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "'";
@@ -421,7 +421,7 @@ public final class SurrealDomainEventProjectionConsumer {
         if (value.isObject()) {
             return objectLiteral(value.getObject());
         }
-        return quote(value.toPrettyString());
+        return quote(value.toString());
     }
 
     private static String arrayLiteral(final Array array) {
@@ -476,8 +476,8 @@ public final class SurrealDomainEventProjectionConsumer {
         if (value.isString()) {
             return value.getString();
         }
-        if (value.isThing()) {
-            return recordIdToString(value.getThing());
+        if (value.isRecordId()) {
+            return recordIdToString(value.getRecordId());
         }
         if (value.isUuid()) {
             return value.getUuid().toString();
@@ -485,7 +485,7 @@ public final class SurrealDomainEventProjectionConsumer {
         if (value.isDateTime()) {
             return value.getDateTime().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         }
-        return value.toPrettyString();
+        return value.toString();
     }
 
     private static long longOf(final Value value) {
@@ -498,7 +498,7 @@ public final class SurrealDomainEventProjectionConsumer {
         if (value.isDouble()) {
             return (long) value.getDouble();
         }
-        if (value.isBigdecimal()) {
+        if (value.isBigDecimal()) {
             return value.getBigDecimal().longValue();
         }
         try {
@@ -564,8 +564,8 @@ public final class SurrealDomainEventProjectionConsumer {
         if (value == null || value.isNull() || value.isNone()) {
             return "";
         }
-        if (value.isThing()) {
-            return cleanIdPart(value.getThing().getId().toString());
+        if (value.isRecordId()) {
+            return cleanIdPart(value.getRecordId().getId().toString());
         }
         return RecordRef.from(stringOf(value)).map(RecordRef::id).orElse(stringOf(value));
     }

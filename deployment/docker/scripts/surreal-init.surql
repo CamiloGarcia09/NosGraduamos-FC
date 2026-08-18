@@ -1,3 +1,5 @@
+OPTION IMPORT;
+
 -- =============================================================
 -- MESSAGE UCOLAB - CQRS + EVENT SOURCING + CHANGEFEED
 -- =============================================================
@@ -15,8 +17,8 @@ DEFINE FIELD IF NOT EXISTS event_type     ON domain_events TYPE string;
 DEFINE FIELD IF NOT EXISTS aggregate_id   ON domain_events TYPE string;
 DEFINE FIELD IF NOT EXISTS aggregate_type ON domain_events TYPE string;
 DEFINE FIELD IF NOT EXISTS version        ON domain_events TYPE int;
-DEFINE FIELD OVERWRITE payload            ON domain_events FLEXIBLE TYPE object;
-DEFINE FIELD OVERWRITE metadata           ON domain_events FLEXIBLE TYPE object;
+DEFINE FIELD OVERWRITE payload            ON domain_events TYPE object FLEXIBLE;
+DEFINE FIELD OVERWRITE metadata           ON domain_events TYPE object FLEXIBLE;
 DEFINE FIELD IF NOT EXISTS created_at     ON domain_events TYPE datetime VALUE time::now();
 DEFINE FIELD IF NOT EXISTS created_by     ON domain_events TYPE option<string>;
 DEFINE FIELD IF NOT EXISTS correlation_id ON domain_events TYPE option<string>;
