@@ -43,7 +43,7 @@ public final class SendBrokerMessage implements SendMessage {
     @Override
     public void execute(MessageCodeDomain messageDomain, HttpServletResponse response) {
         if (messageDomain == null) {
-            var message = "Message domain to send to broker cannot be null.";
+            var message = catalogPort.getMessage("TCH_038");
             log.error(message);
             throw CrossWordsException.buildInfrastructure(
                     message,
@@ -70,7 +70,7 @@ public final class SendBrokerMessage implements SendMessage {
             if (message.isPresent()) {
                 stringProducer.send(message.get());
             } else {
-                var techMsg = "Failed to serialize message domain to JSON for Pulsar broker.";
+                var techMsg = catalogPort.getMessage("TCH_039");
                 log.error(techMsg);
                 throw CrossWordsException.buildInfrastructure(
                         techMsg,

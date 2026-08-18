@@ -35,7 +35,7 @@ public class AzureKeyVaultAdapter implements VaultPort {
         this.catalogPort = catalogPort;
 
         if (isEmptyOrNull(trim(urlVault))) {
-            log.error("Azure Key Vault URL is missing or empty.");
+            log.error(catalogPort.getMessage("TCH_041"));
             this.secretClient = null;
         } else {
             SecretClient client = null;
@@ -45,7 +45,7 @@ public class AzureKeyVaultAdapter implements VaultPort {
                         .credential(new DefaultAzureCredentialBuilder().build())
                         .buildClient();
             } catch (Exception ex) {
-                log.error("Failed to initialize Azure SecretClient with URL: " + urlVault, ex);
+                log.error(catalogPort.getMessage("TCH_042").formatted(urlVault), ex);
             }
             this.secretClient = client;
         }
@@ -54,7 +54,7 @@ public class AzureKeyVaultAdapter implements VaultPort {
     @Override
     public String getSecretValue(String secretName) {
         if (isEmptyOrNull(trim(secretName))) {
-            var techMsg = "Secret name parameter cannot be null or empty.";
+            var techMsg = catalogPort.getMessage("TCH_043");
             log.error(techMsg);
             throw CrossWordsException.buildInfrastructure(
                     techMsg,
@@ -64,7 +64,7 @@ public class AzureKeyVaultAdapter implements VaultPort {
         }
 
         if (this.secretClient == null) {
-            var techMsg = "Azure SecretClient is not initialized or Key Vault URL was not provided.";
+            var techMsg = catalogPort.getMessage("TCH_044");
             log.error(techMsg);
             throw CrossWordsException.buildInfrastructure(
                     techMsg,
@@ -77,7 +77,7 @@ public class AzureKeyVaultAdapter implements VaultPort {
             KeyVaultSecret secret = secretClient.getSecret(secretName);
 
             if (secret == null || isEmptyOrNull(secret.getValue())) {
-                var techMsg = "Secret with name '" + secretName + "' exists but has a null or empty value.";
+                var techMsg = catalogPort.getMessage("TCH_045").formatted(secretName);
                 log.error(techMsg);
                 throw CrossWordsException.buildInfrastructure(
                         techMsg,
@@ -87,7 +87,7 @@ public class AzureKeyVaultAdapter implements VaultPort {
             }
 
             if (secret.getProperties() != null && Boolean.FALSE.equals(secret.getProperties().isEnabled())) {
-                var techMsg = "Secret with name '" + secretName + "' is disabled in Azure Key Vault.";
+                var techMsg = catalogPort.getMessage("TCH_046").formatted(secretName);
                 log.error(techMsg);
                 throw CrossWordsException.buildInfrastructure(
                         techMsg,
@@ -99,7 +99,7 @@ public class AzureKeyVaultAdapter implements VaultPort {
             return secret.getValue();
 
         } catch (ResourceNotFoundException ex) {
-            var techMsg = "Secret '" + secretName + "' not found in Azure Key Vault (404 Not Found).";
+            var techMsg = catalogPort.getMessage("TCH_047").formatted(secretName);
             log.error(techMsg, ex);
             throw CrossWordsException.buildInfrastructure(
                     techMsg,
@@ -109,7 +109,7 @@ public class AzureKeyVaultAdapter implements VaultPort {
             );
 
         } catch (ClientAuthenticationException ex) {
-            var techMsg = "Authentication or permission failure accessing Azure Key Vault for secret: " + secretName;
+            var techMsg = catalogPort.getMessage("TCH_048").formatted(secretName);
             log.error(techMsg, ex);
             throw CrossWordsException.buildInfrastructure(
                     techMsg,
@@ -119,7 +119,7 @@ public class AzureKeyVaultAdapter implements VaultPort {
             );
 
         } catch (HttpResponseException ex) {
-            var techMsg = "HTTP error (" + ex.getResponse().getStatusCode() + ") communicating with Azure Key Vault.";
+            var techMsg = catalogPort.getMessage("TCH_049").formatted(ex.getResponse().getStatusCode());
             log.error(techMsg, ex);
             throw CrossWordsException.buildInfrastructure(
                     techMsg,
@@ -131,7 +131,7 @@ public class AzureKeyVaultAdapter implements VaultPort {
         } catch (CrossWordsException ex) {
             throw ex;
         } catch (Exception ex) {
-            var techMsg = "Unexpected error retrieving secret '" + secretName + "' from Azure Key Vault.";
+            var techMsg = catalogPort.getMessage("TCH_050").formatted(secretName);
             log.error(techMsg, ex);
             throw CrossWordsException.buildInfrastructure(
                     techMsg,

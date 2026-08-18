@@ -52,7 +52,7 @@ public final class JavaSecurityEncryptTokenAdapter implements EncryptTokenPort {
     @Override
     public String generateSignature(String data, PublicKey publicKey) {
         if (data == null || publicKey == null) {
-            var message = "Data or public key to generate signature cannot be null.";
+            var message = catalogPort.getMessage("TCH_040");
             log.error(message);
             throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage("FUN_025"), ExceptionType.TECHNICAL);
         }
