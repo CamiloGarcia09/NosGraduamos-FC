@@ -77,6 +77,10 @@ redis_hset "TCH_047" "Secret not found" "Secret '%s' not found in Azure Key Vaul
 redis_hset "TCH_048" "Key Vault auth failure" "Authentication or permission failure accessing Azure Key Vault for secret: %s" "TECHNICAL" "ERROR"
 redis_hset "TCH_049" "Key Vault HTTP error" "HTTP error (%s) communicating with Azure Key Vault." "TECHNICAL" "ERROR"
 redis_hset "TCH_050" "Key Vault unexpected error" "Unexpected error retrieving secret '%s' from Azure Key Vault." "TECHNICAL" "ERROR"
+redis_hset "TCH_051" "Redis message model retrieval failed" "Failed to retrieve message model from Redis for key: %s" "TECHNICAL" "ERROR"
+redis_hset "TCH_052" "Redis message content retrieval failed" "Failed to retrieve message content from Redis for key: %s" "TECHNICAL" "ERROR"
+redis_hset "TCH_053" "Redis message title retrieval failed" "Failed to retrieve message title from Redis for key: %s" "TECHNICAL" "ERROR"
+redis_hset "TCH_054" "Redis message save failed" "Failed to save message to Redis for key: %s" "TECHNICAL" "ERROR"
 
 # =============================================================
 # Functional Messages

@@ -47,7 +47,7 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
                     (String) entry.get("type"),
                     (String) entry.get("category"));
         } catch (Exception ex) {
-            log.error("Failed to retrieve message model from Redis for key: " + key, ex);
+            log.error(CatalogPortStaticRef.getMessage("TCH_051").formatted(key), ex);
             return null;
         }
     }
@@ -61,7 +61,7 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
             var value = (String) redisTemplate.opsForHash().get(key, "content");
             return value != null ? value : key;
         } catch (Exception ex) {
-            log.error("Failed to retrieve message content from Redis for key: " + key, ex);
+            log.error(CatalogPortStaticRef.getMessage("TCH_052").formatted(key), ex);
             return key;
         }
     }
@@ -75,7 +75,7 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
             String message = (String) redisTemplate.opsForHash().get(key, "content");
             return message != null ? message : defaultMessage;
         } catch (Exception ex) {
-            log.error("Failed to retrieve message content from Redis for key: " + key, ex);
+            log.error(CatalogPortStaticRef.getMessage("TCH_052").formatted(key), ex);
             return defaultMessage;
         }
     }
@@ -89,7 +89,7 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
             var title = (String) redisTemplate.opsForHash().get(key, "title");
             return title != null ? title : "";
         } catch (Exception ex) {
-            log.error("Failed to retrieve message title from Redis for key: " + key, ex);
+            log.error(CatalogPortStaticRef.getMessage("TCH_053").formatted(key), ex);
             return "";
         }
     }
@@ -107,7 +107,7 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
                     "type", message.type() != null ? message.type() : "",
                     "category", message.category() != null ? message.category() : ""));
         } catch (Exception ex) {
-            log.error("Failed to save message to Redis for key: " + key, ex);
+            log.error(CatalogPortStaticRef.getMessage("TCH_054").formatted(key), ex);
         }
     }
 }
