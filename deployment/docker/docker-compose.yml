@@ -214,6 +214,8 @@ services:
         condition: service_started
       surrealdb:
         condition: service_started
+      surrealdb-init:
+        condition: service_completed_successfully
       ollama-init:
         condition: service_completed_successfully
       loki:

@@ -25,6 +25,7 @@ import static co.edu.uco.infraestructure.config.InfrastructureConstant.*;
 
 @Service
 public final class JavaSecurityEncryptTokenAdapter implements EncryptTokenPort {
+
     private final LoggingPort log;
     private final CatalogPort catalogPort;
 
@@ -43,7 +44,8 @@ public final class JavaSecurityEncryptTokenAdapter implements EncryptTokenPort {
         } catch (Exception e) {
             var message = catalogPort.getMessage("TCH_026");
             log.error(message, e);
-            throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage("FUN_025"), e, ExceptionType.TECHNICAL);
+            throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage("FUN_025"), e,
+                    ExceptionType.TECHNICAL);
         }
     }
 
@@ -66,11 +68,13 @@ public final class JavaSecurityEncryptTokenAdapter implements EncryptTokenPort {
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             var message = catalogPort.getMessage("TCH_027");
             log.error(message, e);
-            throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage("FUN_025"), e, ExceptionType.TECHNICAL);
+            throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage("FUN_025"), e,
+                    ExceptionType.TECHNICAL);
         } catch (Exception e) {
             var message = catalogPort.getMessage("TCH_027");
             log.error(message, e);
-            throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage("FUN_025"), e, ExceptionType.TECHNICAL);
+            throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage("FUN_025"), e,
+                    ExceptionType.TECHNICAL);
         }
     }
 
@@ -103,4 +107,5 @@ public final class JavaSecurityEncryptTokenAdapter implements EncryptTokenPort {
         }
     }
 }
+
 

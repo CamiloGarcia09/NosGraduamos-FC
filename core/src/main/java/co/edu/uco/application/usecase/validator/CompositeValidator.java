@@ -11,13 +11,16 @@ import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 
 @Component
 public class CompositeValidator<T> implements Validator<T> {
+
     private final List<Validator<T>> validators;
     protected final CatalogPort catalogPort;
+
     @Autowired
     public CompositeValidator(List<Validator<T>> validators, CatalogPort catalogPort) {
         this.validators = validators;
         this.catalogPort = catalogPort;
     }
+
     @Override
     public void validate(T data) {
         if (validators.isEmpty()) {

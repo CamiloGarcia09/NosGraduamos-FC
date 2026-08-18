@@ -16,6 +16,7 @@ import java.util.Optional;
 
 @Component
 public final class MessageCatalogStrategy {
+
     private final CacheCatalog cacheCatalog;
     private final DatabaseCatalog databaseCatalog;
     private final CatalogPort catalogPort;
@@ -28,6 +29,7 @@ public final class MessageCatalogStrategy {
         this.catalogPort = catalogPort;
         this.log = loggerFactory.getLogger(MessageCatalogStrategy.class);
     }
+
     public SimplePage<MessageData> getMessagesWithEnvironment(String environment, SimplePageRequest request) {
         var cachedMessages = getCachedMessagesWithEnvironment(environment, request);
         if (cachedMessages.getData().isEmpty()) {
@@ -53,6 +55,7 @@ public final class MessageCatalogStrategy {
         }
         throw BusinessException.buildUserException(catalogPort.getMessage("TCH_009"));
     }
+
     public Optional<MessageData> getMessageByCodeAndEnvironment(String code, String environmentId) {
         var response = cacheCatalog.getMessageByCodeAndEnvironment(code, environmentId);
         if (response.isPresent()) {
@@ -65,6 +68,7 @@ public final class MessageCatalogStrategy {
         }
         return response;
     }
+
     private SimplePage<MessageData> getCachedMessagesWithEnvironment(String environment, SimplePageRequest request) {
         try {
             return cacheCatalog.getMessageWithEnvironment(environment, request);
@@ -73,11 +77,11 @@ public final class MessageCatalogStrategy {
             return SimplePage.of(List.of(), request.getPage(), request.getSize(), 0, 0);
         }
     }
+
     private void fillCacheWithEnvironmentMessages(SimplePage<MessageData> dbMessages, String environment) {
         dbMessages.getData().forEach(message -> cacheCatalog.addMessageWithEnvironment(message, environment));
     }
 
-    /** Returns internal system message content by code; sourced from Redis via CatalogPort. */
     public String getSystemMessageContent(String code) {
         return catalogPort.getMessage(code);
     }

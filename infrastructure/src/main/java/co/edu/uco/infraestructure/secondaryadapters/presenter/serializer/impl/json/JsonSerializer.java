@@ -9,6 +9,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.JSON_SERIALIZER_CONTENT_TYPE;
 
+
 public final class JsonSerializer extends AbstractSerializer {
     public JsonSerializer() {
         super(JSON_SERIALIZER_CONTENT_TYPE);

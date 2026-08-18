@@ -31,25 +31,21 @@ import static co.edu.uco.crosscutting.helpers.UtilUUID.getStringToUUID;
 @Component
 public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFacade {
 
-    private final HandlingCreateTokenPort handlingCreateTokenPort;
+    private final CreateTokenCompositeValidator validator;
+    private final HandlingRevokeTokenPort handlingRevokeTokenPort;
+    private final EncryptTokenPort encrypt;
     private final TokenDTOMapper tokenDTOMapper;
     private final CreateTokenSecretPort createTokenSecretPort;
-    private final CreateTokenCompositeValidator validator;
-    private final EncryptTokenPort encrypt;
-    private final HandlingRevokeTokenPort handlingRevokeTokenPort;
+    private final HandlingCreateTokenPort handlingCreateTokenPort;
     private final LoggingPort log;
     private final CatalogPort catalogPort;
 
-    public CreateTokenUseCaseFacadeImpl(
-            HandlingCreateTokenPort handlingCreateTokenPort,
-            TokenDTOMapper tokenDTOMapper,
-            EncryptTokenPort encrypt,
-            CreateTokenSecretPort createTokenSecretPort,
-            CreateTokenCompositeValidator validator,
-            HandlingRevokeTokenPort handlingRevokeTokenPort,
-            LoggingPortFactory loggerFactory,
-            CatalogPort catalogPort
-    ) {
+    public CreateTokenUseCaseFacadeImpl(HandlingCreateTokenPort handlingCreateTokenPort, TokenDTOMapper tokenDTOMapper,
+                                        EncryptTokenPort encrypt, CreateTokenSecretPort createTokenSecretPort,
+                                        CreateTokenCompositeValidator validator,
+                                        HandlingRevokeTokenPort handlingRevokeTokenPort,
+                                        LoggingPortFactory loggerFactory, CatalogPort catalogPort) {
+
         this.handlingCreateTokenPort = handlingCreateTokenPort;
         this.tokenDTOMapper = tokenDTOMapper;
         this.encrypt = encrypt;
@@ -61,12 +57,11 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
     }
 
     @Override
-    public String execute(
-            CreateTokenDTO createTokenDTO,
-            String application
-    ) {
+    public String execute(CreateTokenDTO createTokenDTO, String application) {
+
         validator.validate(createTokenDTO, application);
         handlingRevokeTokenPort.execute(createTokenDTO.getEnvironmentId(), TOKEN_STATE_ACTIVE_ID);
+
         var secretName = concatenateWithoutSeparator(
                 TOKEN_SECRET_IDENTIFIER,
                 stringToUpperCase(formatUUID(getStringToUUID(application))),
@@ -91,9 +86,11 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
                     parseDate(createTokenDTO.getExpirationDate()),
                     getStringToUUID(createTokenDTO.getEnvironmentId())
             );
+
             createTokenSecretPort.execute(secretName, UtilPairKey.encodePrivateKey(keyPairResponseDTO.getPrivateKey()));
             handlingCreateTokenPort.createToken(tokenDTOMapper.mapperDomain(tokenDTO));
             return generateSignature;
+
         }catch (Exception e){
             var message = catalogPort.getMessage("TCH_025");
             log.error(message, e);

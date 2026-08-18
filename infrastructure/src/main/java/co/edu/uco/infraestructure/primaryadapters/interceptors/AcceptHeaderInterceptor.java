@@ -21,17 +21,21 @@ import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 
 @Component
 public final class AcceptHeaderInterceptor implements HandlerInterceptor {
+
     private final LoggingPort log;
     private final SerializerRegistry serializerRegistry;
     private final CatalogPort catalogPort;
+
     public AcceptHeaderInterceptor(SerializerRegistry serializerRegistry, CatalogPort catalogPort,
                                    LoggingPortFactory loggerFactory) {
         this.log = loggerFactory.getLogger(AcceptHeaderInterceptor.class);
         this.serializerRegistry = serializerRegistry;
         this.catalogPort = catalogPort;
     }
+
     @Override
-    public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler)
+            throws Exception {
         var acceptHeader = Optional.ofNullable(request.getHeader(REQUEST_GET_HEADER_ACCEPT))
                 .orElse(MediaType.APPLICATION_JSON_VALUE);
 

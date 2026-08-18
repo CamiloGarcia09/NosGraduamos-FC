@@ -71,14 +71,14 @@ public class TokenStateSurrealRepositoryAdapterImpl implements TokenStateSurreal
         }
         try {
             String rawId = null;
-            if (value.isThing()) {
-                rawId = cleanIdPart(value.getThing().toString());
+            if (value.isRecordId()) {
+                rawId = cleanIdPart(value.getRecordId().toString());
             } else if (value.isUuid()) {
                 return value.getUuid();
             } else if (value.isString()) {
                 rawId = cleanIdPart(value.getString());
             } else {
-                rawId = cleanIdPart(value.toPrettyString());
+                rawId = cleanIdPart(value.toString());
             }
             if (rawId == null || rawId.isBlank()) {
                 return DEFAULT_UUID;
@@ -110,6 +110,6 @@ public class TokenStateSurrealRepositoryAdapterImpl implements TokenStateSurreal
         if (value == null || value.isNull() || value.isNone()) return "";
         if (value.isString()) return value.getString();
         if (value.isUuid()) return value.getUuid().toString();
-        return value.toPrettyString();
+        return value.toString();
     }
 }
