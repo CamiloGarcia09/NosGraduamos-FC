@@ -1,12 +1,12 @@
 trigger:
   branches:
     include:
-      - develop
+      - main
 
 pr:
   branches:
     include:
-      - develop
+      - main
 
 pool:
   name: Default
