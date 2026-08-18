@@ -94,13 +94,16 @@ services:
 
   pulsar:
     image: apachepulsar/pulsar:3.2.2
+    hostname: pulsar
     command: >-
       /bin/bash -c "bin/apply-config-from-env.py conf/standalone.conf &&
       bin/apply-config-from-env.py conf/client.conf &&
+      sed -i 's/^useHostNameAsBookieID=.*/useHostNameAsBookieID=true/' conf/bookkeeper.conf &&
       bin/pulsar standalone -nss -nfw"
     restart: unless-stopped
     environment:
       PULSAR_MEM: "-Xms256m -Xmx512m -XX:MaxDirectMemorySize=512m"
+      PULSAR_PREFIX_advertisedAddress: pulsar
       PULSAR_PREFIX_allowAutoTopicCreationType: partitioned
     volumes:
       - pulsar-data:/pulsar/data
@@ -109,10 +112,10 @@ services:
       - app-network
     healthcheck:
       test: ["CMD-SHELL", "bin/pulsar-admin brokers healthcheck"]
-      interval: 15s
-      timeout: 10s
-      retries: 12
-      start_period: 30s
+      interval: 20s
+      timeout: 20s
+      retries: 15
+      start_period: 45s
     mem_limit: 1536m
     cpus: 0.75
 
