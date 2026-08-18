@@ -53,7 +53,7 @@ $selectMessageSql = "SELECT code, title, content FROM message WHERE code = '$esc
 $encodedMessageCode = [System.Uri]::EscapeDataString($MessageCode)
 $encodedSourceLanguage = [System.Uri]::EscapeDataString($SourceLanguage)
 $encodedTargetLanguage = [System.Uri]::EscapeDataString($TargetLanguage)
-$uri = "$baseUrl/messageucolab/v1/application/code/$encodedMessageCode/translation?sourceLanguage=$encodedSourceLanguage&targetLanguage=$encodedTargetLanguage"
+$uri = "$baseUrl/messageucolab/v1/application/messages/$encodedMessageCode/translation?sourceLanguage=$encodedSourceLanguage&targetLanguage=$encodedTargetLanguage"
 
 Push-Location $composeDir
 try {
