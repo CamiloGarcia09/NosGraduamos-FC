@@ -212,7 +212,7 @@ stages:
                 if ($LASTEXITCODE -ne 0) { throw 'Could not create temporary NSG access.' }
 
           - task: PowerShell@2
-            displayName: Copy manifests, deploy and verify containers
+            displayName: Copy deployment files
             inputs:
               targetType: inline
               script: |
@@ -237,9 +237,28 @@ stages:
                 if ($LASTEXITCODE -ne 0) { throw 'Could not copy Azure deployment files.' }
                 scp -i $key -r deployment/docker/scripts "${remoteHost}:$(DEPLOY_ROOT)/deployment/docker/"
                 if ($LASTEXITCODE -ne 0) { throw 'Could not copy initialization scripts.' }
-                $deployCommand = "chmod +x '$(DEPLOY_ROOT)/deployment/azure/deploy.sh' && '$(DEPLOY_ROOT)/deployment/azure/deploy.sh' '$(IMAGE_TAG)' '$(ACR_NAME)' '$(KEY_VAULT_NAME)' '$(DOPPLER_DEPLOY_TOKEN_SECRET)' '$(DOPPLER_APP_TOKEN_SECRET)'"
-                ssh -i $key $remoteHost $deployCommand
+
+          - task: AzureCLI@2
+            displayName: Deploy and verify containers
+            inputs:
+              azureSubscription: $(AZURE_SERVICE_CONNECTION)
+              scriptType: ps
+              scriptLocation: inlineScript
+              inlineScript: |
+                $ErrorActionPreference = 'Stop'
+                $deployCommand = "chmod +x '$(DEPLOY_ROOT)/deployment/azure/deploy.sh' && sudo -u azureuser -H '$(DEPLOY_ROOT)/deployment/azure/deploy.sh' '$(IMAGE_TAG)' '$(ACR_NAME)' '$(KEY_VAULT_NAME)' '$(DOPPLER_DEPLOY_TOKEN_SECRET)' '$(DOPPLER_APP_TOKEN_SECRET)'"
+                $result = az vm run-command invoke `
+                  --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                  --name "$(AZURE_VM_NAME)" `
+                  --command-id RunShellScript `
+                  --scripts $deployCommand `
+                  --query 'value[0].message' `
+                  --output tsv
                 if ($LASTEXITCODE -ne 0) { throw 'Remote deployment failed.' }
+                Write-Host $result
+                if ($result -notmatch 'Deployment completed with image tag') {
+                  throw 'Remote deployment did not report success.'
+                }
 
           - task: AzureCLI@2
             displayName: External smoke test
