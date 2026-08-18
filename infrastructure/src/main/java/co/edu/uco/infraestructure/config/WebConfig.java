@@ -26,12 +26,14 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loggingConfig);
         registry.addInterceptor(acceptHeaderInterceptor)
+                .addPathPatterns("/messageucolab/v1/application/**")
                 .excludePathPatterns(
                         SWAGGER_UI_HTML,
                         SWAGGER_UI,
                         SWAGGER_RESOURCES,
                         SWAGGER_API_DOCS,
-                        SWAGGER_WEBJARS
+                        SWAGGER_WEBJARS,
+                        SWAGGER_OPENAPI_SPEC
                 );
         registry.addInterceptor(tokenHeaderInterceptor)
                 .addPathPatterns(

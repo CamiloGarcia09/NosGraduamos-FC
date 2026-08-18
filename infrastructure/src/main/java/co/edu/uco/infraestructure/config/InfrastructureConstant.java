@@ -93,6 +93,7 @@ public final class InfrastructureConstant {
     public static final String SWAGGER_RESOURCES = "/swagger-resources/**";
     public static final String SWAGGER_API_DOCS = "/v3/api-docs/**";
     public static final String SWAGGER_WEBJARS = "/webjars/**";
+    public static final String SWAGGER_OPENAPI_SPEC = "/openapi.yaml";
 
     public static final String MESSAGE_CODE_PARAMETER = "messageCode";
 

@@ -3,7 +3,25 @@ package co.edu.uco.infraestructure.primaryadapters;
 import co.edu.uco.application.primaryports.dto.token.CreateTokenDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
+import static co.edu.uco.infraestructure.config.InfrastructureConstant.FIELD_ID;
+
+@RequestMapping("${crosswords.api.path.message}")
 public interface TokenController {
-    void createToken(CreateTokenDTO tokenDTO, String applicationId, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse);
+
+    @PostMapping(
+            value = "${crosswords.api.path.token.application}",
+            consumes = "application/json",
+            produces = {"application/json", "application/yaml", "application/xml", "text/plain", "text/html"}
+    )
+    void createToken(
+            @RequestBody CreateTokenDTO tokenDTO,
+            @PathVariable(FIELD_ID) String applicationId,
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse
+    );
 }
