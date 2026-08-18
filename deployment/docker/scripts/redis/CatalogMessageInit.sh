@@ -2,12 +2,13 @@
 
 set -e
 
+export REDISCLI_AUTH="$REDISPASSWORD"
+
 echo "Waiting for Redis..."
 
 until redis-cli \
   -h "$REDISHOST" \
   -p "$REDISPORT" \
-  -a "$REDISPASSWORD" \
   PING | grep -q PONG
 do
   sleep 2
@@ -19,8 +20,8 @@ redis_hset() {
   redis-cli \
     -h "$REDISHOST" \
     -p "$REDISPORT" \
-    -a "$REDISPASSWORD" \
-    HSET "$1" code "$1" title "$2" content "$3" type "$4" category "$5"
+    HSET "$1" code "$1" title "$2" content "$3" type "$4" category "$5" \
+    >/dev/null
 }
 
 # =============================================================
@@ -235,4 +236,3 @@ redis_hset "FUN_143" "Message translation API interceptor path" "/messageucolab/
 redis_hset "FUN_144" "Inactive token state id" "123e4567-e89b-12d3-a456-426614175001" "FUNCTIONAL" "INFORMATION"
 
 echo "Message catalog loaded successfully."
-

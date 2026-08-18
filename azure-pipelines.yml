@@ -8,58 +8,59 @@ pr:
     include:
       - develop
 
+parameters:
+  - name: operation
+    displayName: Pipeline operation
+    type: string
+    default: ci
+    values:
+      - ci
+      - deploy
+      - stop
+
 pool:
-  name: Default
-  demands:
-    - Agent.OS -equals Windows_NT
+  vmImage: ubuntu-latest
 
 variables:
-  MAVEN_CACHE_FOLDER: '$(Pipeline.Workspace)\.m2\repository'
+  - group: messageucolab-cicd
+  - name: MAVEN_CACHE_FOLDER
+    value: $(Pipeline.Workspace)/.m2/repository
+  - name: IMAGE_REPOSITORY
+    value: messageucolab
+  - name: IMAGE_TAG
+    value: $(Build.SourceVersion)
+  - name: DEPLOY_ROOT
+    value: /opt/messageucolab
+  - name: DOPPLER_DEPLOY_TOKEN_SECRET
+    value: doppler-deploy-token
+  - name: DOPPLER_APP_TOKEN_SECRET
+    value: doppler-app-token
 
 stages:
-  - stage: CI
-    displayName: Continuous Integration
-
+  - stage: ValidateAndTest
+    displayName: Validate, test and build
+    condition: ne('${{ parameters.operation }}', 'stop')
     jobs:
-      - job: BuildTest
-        displayName: Build, test and validate container
-
+      - job: CI
+        displayName: Maven and container validation
         steps:
-          # 1. Checkout
           - checkout: self
             clean: true
 
-          # 2. Validar herramientas del agente
-          - task: PowerShell@2
-            displayName: Validate agent tools
+          - task: JavaToolInstaller@0
+            displayName: Use Java 17
             inputs:
-              targetType: inline
-              script: |
-                Write-Host "=== Java ==="
-                java -version
-                if ($LASTEXITCODE -ne 0) {
-                  throw "Java is not available in the agent PATH."
-                }
+              versionSpec: "17"
+              jdkArchitectureOption: x64
+              jdkSourceOption: PreInstalled
 
-                Write-Host "=== Maven ==="
-                mvn -version
-                if ($LASTEXITCODE -ne 0) {
-                  throw "Maven is not available in the agent PATH."
-                }
+          - bash: |
+              set -euo pipefail
+              java -version
+              mvn -version
+              docker version
+            displayName: Validate tools
 
-                Write-Host "=== Docker ==="
-                docker --version
-                if ($LASTEXITCODE -ne 0) {
-                  throw "Docker CLI is not available in the agent PATH."
-                }
-
-                Write-Host "=== Doppler ==="
-                doppler --version
-                if ($LASTEXITCODE -ne 0) {
-                  throw "Doppler CLI is not available in the agent PATH."
-                }
-
-          # 3. Cache Maven
           - task: Cache@2
             displayName: Cache Maven dependencies
             inputs:
@@ -68,53 +69,184 @@ stages:
                 maven | "$(Agent.OS)"
               path: $(MAVEN_CACHE_FOLDER)
 
-          # 4. Build + Tests con variables de Doppler
-          - task: PowerShell@2
-            displayName: Build and test with Doppler
-            inputs:
-              targetType: inline
-              script: |
-                doppler run -- `
-                  mvn -B clean verify `
-                  "-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)"
+          - bash: |
+              set -euo pipefail
+              mvn -B clean verify "-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)"
+            displayName: Build and test
 
-                if ($LASTEXITCODE -ne 0) {
-                  throw "Maven build or tests failed."
-                }
-            env:
-              DOPPLER_TOKEN: $(DOPPLER_TOKEN)
-
-          # 5. Publicar resultados de pruebas
           - task: PublishTestResults@2
             displayName: Publish test results
             condition: succeededOrFailed()
             inputs:
               testResultsFormat: JUnit
-              testResultsFiles: '**/surefire-reports/TEST-*.xml'
-              searchFolder: '$(System.DefaultWorkingDirectory)'
+              testResultsFiles: "**/surefire-reports/TEST-*.xml"
+              searchFolder: $(System.DefaultWorkingDirectory)
               mergeTestResults: true
               failTaskOnFailedTests: true
               failTaskOnMissingResultsFile: false
 
-          # 6. Validar que Docker Desktop / Engine esté disponible
-          - task: PowerShell@2
-            displayName: Validate Docker Engine
-            inputs:
-              targetType: inline
-              script: |
-                docker info
+          - bash: |
+              set -euo pipefail
+              docker compose --file deployment/azure/docker-compose.yml config --quiet
+            displayName: Validate Azure Docker Compose
+            env:
+              ACR_LOGIN_SERVER: example.azurecr.io
+              IMAGE_TAG: validation
+              AZURE_KEYVAULT_UCOLAB_ENDPOINT: https://example.vault.azure.net
+              DOPPLERTOKEN: validation
+              REDISPASSWORD: validation
+              PULSARTOPICNAME: persistent://public/default/validation
+              SURREALDBUSER: root
+              SURREALDBPASSWORD: validation
+              SURREALDBNAMESPACE: messageucolab
+              SURREALDBDATABASE: messageucolab
 
-                if ($LASTEXITCODE -ne 0) {
-                  throw "Docker Engine is not running."
-                }
+          - bash: |
+              set -euo pipefail
+              az bicep build --file infrastructure/azure/main.bicep --stdout >/dev/null
+            displayName: Validate Bicep
 
-          # 7. Construir imagen Docker
-          - task: Docker@2
-            displayName: Validate Docker image
+          - bash: |
+              set -euo pipefail
+              docker build --tag "$(IMAGE_REPOSITORY):ci-$(Build.BuildId)" .
+            displayName: Validate application image
+
+          - task: AzureCLI@2
+            displayName: Build and push application image
+            condition: >-
+              and(
+                succeeded(),
+                ne(variables['Build.Reason'], 'PullRequest'),
+                or(
+                  eq(variables['Build.SourceBranch'], 'refs/heads/develop'),
+                  eq('${{ parameters.operation }}', 'deploy')
+                )
+              )
             inputs:
-              command: build
-              repository: messageucolab
-              Dockerfile: '$(Build.SourcesDirectory)\Dockerfile'
-              buildContext: '$(Build.SourcesDirectory)'
-              tags: |
-                ci-$(Build.BuildId)
+              azureSubscription: $(AZURE_SERVICE_CONNECTION)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                set -euo pipefail
+                login_server="$(ACR_NAME).azurecr.io"
+                commit_image="${login_server}/$(IMAGE_REPOSITORY):$(IMAGE_TAG)"
+                build_image="${login_server}/$(IMAGE_REPOSITORY):build-$(Build.BuildId)"
+                az acr login --name "$(ACR_NAME)"
+                docker tag "$(IMAGE_REPOSITORY):ci-$(Build.BuildId)" "$commit_image"
+                docker tag "$(IMAGE_REPOSITORY):ci-$(Build.BuildId)" "$build_image"
+                docker push "$commit_image"
+                docker push "$build_image"
+
+  - stage: DeployDemo
+    displayName: Deploy demo environment
+    dependsOn: ValidateAndTest
+    condition: >-
+      and(
+        succeeded(),
+        ne(variables['Build.Reason'], 'PullRequest'),
+        eq('${{ parameters.operation }}', 'deploy')
+      )
+    jobs:
+      - job: Deploy
+        displayName: Deploy to the temporary VM
+        steps:
+          - checkout: self
+            clean: true
+
+          - task: DownloadSecureFile@1
+            name: sshKey
+            displayName: Download temporary SSH key
+            inputs:
+              secureFile: $(SSH_SECURE_FILE)
+
+          - task: AzureCLI@2
+            displayName: Start VM and open temporary SSH access
+            inputs:
+              azureSubscription: $(AZURE_SERVICE_CONNECTION)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                set -euo pipefail
+                agent_ip="$(curl --fail --silent https://api.ipify.org)"
+                az vm start --resource-group "$(AZURE_RESOURCE_GROUP)" --name "$(AZURE_VM_NAME)"
+                public_ip="$(az vm list-ip-addresses --resource-group "$(AZURE_RESOURCE_GROUP)" --name "$(AZURE_VM_NAME)" --query '[0].virtualMachine.network.publicIpAddresses[0].ipAddress' --output tsv)"
+                echo "##vso[task.setvariable variable=VM_PUBLIC_IP]${public_ip}"
+                az network nsg rule create \
+                  --resource-group "$(AZURE_RESOURCE_GROUP)" \
+                  --nsg-name "$(AZURE_NSG_NAME)" \
+                  --name AllowPipelineDeployment \
+                  --priority 100 \
+                  --access Allow \
+                  --direction Inbound \
+                  --protocol Tcp \
+                  --source-address-prefixes "${agent_ip}/32" \
+                  --source-port-ranges '*' \
+                  --destination-address-prefixes '*' \
+                  --destination-port-ranges 22 8085 \
+                  --output none
+
+          - bash: |
+              set -euo pipefail
+              key="$(sshKey.secureFilePath)"
+              host="azureuser@$(VM_PUBLIC_IP)"
+              chmod 600 "$key"
+              ssh -i "$key" -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30 "$host" \
+                "mkdir -p $(DEPLOY_ROOT)/deployment/docker"
+              scp -i "$key" -r deployment/azure "$host:$(DEPLOY_ROOT)/deployment/"
+              scp -i "$key" -r deployment/docker/scripts "$host:$(DEPLOY_ROOT)/deployment/docker/"
+              ssh -i "$key" "$host" \
+                "chmod +x '$(DEPLOY_ROOT)/deployment/azure/deploy.sh' && \
+                '$(DEPLOY_ROOT)/deployment/azure/deploy.sh' \
+                '$(IMAGE_TAG)' \
+                '$(ACR_NAME)' \
+                '$(KEY_VAULT_NAME)' \
+                '$(DOPPLER_DEPLOY_TOKEN_SECRET)' \
+                '$(DOPPLER_APP_TOKEN_SECRET)'"
+            displayName: Copy manifests, deploy and verify containers
+
+          - task: AzureCLI@2
+            displayName: External smoke test
+            inputs:
+              azureSubscription: $(AZURE_SERVICE_CONNECTION)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                set -euo pipefail
+                public_ip="$(az vm list-ip-addresses --resource-group "$(AZURE_RESOURCE_GROUP)" --name "$(AZURE_VM_NAME)" --query '[0].virtualMachine.network.publicIpAddresses[0].ipAddress' --output tsv)"
+                curl --fail --show-error --retry 12 --retry-delay 10 "http://${public_ip}:8085/actuator/health"
+
+          - task: AzureCLI@2
+            displayName: Close temporary SSH access
+            condition: always()
+            inputs:
+              azureSubscription: $(AZURE_SERVICE_CONNECTION)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az network nsg rule delete \
+                  --resource-group "$(AZURE_RESOURCE_GROUP)" \
+                  --nsg-name "$(AZURE_NSG_NAME)" \
+                  --name AllowPipelineDeployment \
+                  --output none || true
+
+  - stage: StopDemo
+    displayName: Stop and deallocate demo VM
+    dependsOn: []
+    condition: eq('${{ parameters.operation }}', 'stop')
+    jobs:
+      - job: Stop
+        displayName: Deallocate VM
+        steps:
+          - task: AzureCLI@2
+            displayName: Deallocate demo VM
+            inputs:
+              azureSubscription: $(AZURE_SERVICE_CONNECTION)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                set -euo pipefail
+                az vm deallocate \
+                  --resource-group "$(AZURE_RESOURCE_GROUP)" \
+                  --name "$(AZURE_VM_NAME)" \
+                  --no-wait
+                echo "VM deallocation requested. Disk and public IP can still consume credit."

@@ -1,0 +1,13 @@
+.git
+.github
+.idea
+.vscode
+**/target
+deployment/docker/surreal-data
+logs
+*.log
+.env
+.env.*
+!.env.example
+README.md
+ArquitecturaEjemplo.md
