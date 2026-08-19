@@ -7,6 +7,7 @@ import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.translation.MessageTranslationPort;
 import co.edu.uco.application.secondaryports.vault.VaultPort;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCode;
 import co.edu.uco.infraestructure.config.TranslationAiProperties;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 
+import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 import static co.edu.uco.crosscutting.helpers.UtilText.isEmptyOrNull;
 import static co.edu.uco.crosscutting.helpers.UtilText.trim;
 
@@ -52,10 +54,10 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
     @Override
     public MessageTranslationResponseData translate(MessageTranslationRequestData requestData) {
         if (!properties.isEnabled()) {
-            throw BusinessException.buildUserException(catalogPort.getMessage("FUN_046"));
+            throw BusinessException.buildUserException(catalogPort.getMessage(MessageCatalogCode.FUN_046));
         }
         if (isOpenAiProvider() && isEmptyOrNull(properties.getApiKey())) {
-            throw BusinessException.buildUserException(catalogPort.getMessage("FUN_047"));
+            throw BusinessException.buildUserException(catalogPort.getMessage(MessageCatalogCode.FUN_047));
         }
 
         var startedAt = System.nanoTime();
@@ -65,7 +67,7 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
             var translated = objectMapper.readValue(output, TranslationModelResponse.class);
             var elapsedMillis = Duration.ofNanos(System.nanoTime() - startedAt).toMillis();
             log.info(
-                    catalogPort.getMessage("TCH_036"),
+                    catalogPort.getMessage(MessageCatalogCode.TCH_036),
                     providerName(),
                     properties.getModelName(),
                     requestData.getCode(),
@@ -81,19 +83,19 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
             );
         } catch (Exception exception) {
             log.error(
-                    catalogPort.getMessage("TCH_037"),
+                    catalogPort.getMessage(MessageCatalogCode.TCH_037),
                     providerName(),
                     properties.getModelName(),
                     requestData.getCode(),
                     requestData.getTargetLanguage(),
                     exception
             );
-            throw BusinessException.buildUserException(catalogPort.getMessage("FUN_048"));
+            throw BusinessException.buildUserException(catalogPort.getMessage(MessageCatalogCode.FUN_048));
         }
     }
 
     private ChatModel model() {
-        if (chatModel == null) {
+        if (isNullObject(chatModel)) {
             chatModel = isOpenAiProvider() ? openAiModel() : ollamaModel();
         }
         return chatModel;
@@ -129,19 +131,19 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
 
     private String providerName() {
         return isOpenAiProvider()
-                ? catalogPort.getMessage("FUN_058")
-                : catalogPort.getMessage("FUN_059").formatted(vault.getSecretValue("TRANSLATION-AI-PROVIDER"));
+                ? catalogPort.getMessage(MessageCatalogCode.FUN_058)
+                : catalogPort.getMessage(MessageCatalogCode.FUN_059).formatted(vault.getSecretValue("TRANSLATION-AI-PROVIDER"));
     }
 
     private ChatRequest buildChatRequest(MessageTranslationRequestData requestData) {
         var responseFormat = ResponseFormat.builder()
                 .type(ResponseFormatType.JSON)
                 .jsonSchema(JsonSchema.builder()
-                        .name(catalogPort.getMessage("FUN_055"))
+                        .name(catalogPort.getMessage(MessageCatalogCode.FUN_055))
                         .rootElement(JsonObjectSchema.builder()
-                                .addStringProperty(catalogPort.getMessage("FUN_056"))
-                                .addStringProperty(catalogPort.getMessage("FUN_057"))
-                                .required(catalogPort.getMessage("FUN_056"), catalogPort.getMessage("FUN_057"))
+                                .addStringProperty(catalogPort.getMessage(MessageCatalogCode.FUN_056))
+                                .addStringProperty(catalogPort.getMessage(MessageCatalogCode.FUN_057))
+                                .required(catalogPort.getMessage(MessageCatalogCode.FUN_056), catalogPort.getMessage(MessageCatalogCode.FUN_057))
                                 .build())
                         .build())
                 .build();
@@ -153,7 +155,7 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
     }
 
     private String buildPrompt(MessageTranslationRequestData requestData) {
-        return catalogPort.getMessage("FUN_054").formatted(
+        return catalogPort.getMessage(MessageCatalogCode.FUN_054).formatted(
                 requestData.getCode(),
                 requestData.getSourceLanguage(),
                 requestData.getTargetLanguage(),

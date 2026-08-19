@@ -6,6 +6,7 @@ import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.CacheMessageRepository;
 import co.edu.uco.application.secondaryports.repository.SimplePage;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCode;
 import co.edu.uco.infraestructure.secondaryadapters.repository.data.DataMapper;
 import co.edu.uco.infraestructure.secondaryadapters.repository.redis.MessageRedis;
 import co.edu.uco.infraestructure.secondaryadapters.repository.redis.RedisRepositoryAdapter;
@@ -17,6 +18,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
+import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.CACHE_REDIS_ADAPTER;
 
 @Component(CACHE_REDIS_ADAPTER)
@@ -40,21 +42,21 @@ public final class MessageRedisAdapter implements CacheMessageRepository {
 
     @Override
     public void save(MessageData data) {
-        if (data == null) {
+        if (isNullObject(data)) {
             return;
         }
         try {
             repository.save(mapper.mapperModel(data));
         } catch (DataAccessException ex) {
-            log.error(catalogPort.getMessage("FUN_014"), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_014), ex);
         } catch (Exception ex) {
-            log.error(catalogPort.getMessage("FUN_015"), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_015), ex);
         }
     }
 
     @Override
     public void saveWithEnvironment(MessageData data, String environmentId) {
-        if (data == null) {
+        if (isNullObject(data)) {
             return;
         }
         try {
@@ -62,59 +64,59 @@ public final class MessageRedisAdapter implements CacheMessageRepository {
             messageRedis.setEnvironmentId(environmentId);
             repository.save(messageRedis);
         } catch (DataAccessException ex) {
-            log.error(catalogPort.getMessage("FUN_014"), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_014), ex);
         } catch (Exception ex) {
-            log.error(catalogPort.getMessage("FUN_015"), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_015), ex);
         }
     }
 
     @Override
     public Optional<MessageData> findById(UUID id) {
-        if (id == null) {
+        if (isNullObject(id)) {
             return Optional.empty();
         }
         try {
             return repository.findById(id).map(mapper::mapperData);
         } catch (DataAccessException ex) {
-            log.error(catalogPort.getMessage("FUN_014"), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_014), ex);
             return Optional.empty();
         } catch (Exception ex) {
-            log.error(catalogPort.getMessage("FUN_015"), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_015), ex);
             return Optional.empty();
         }
     }
 
     @Override
     public SimplePage<MessageData> findMessagesByEnvironment(String environment, Pageable pageable) {
-        if (environment == null || pageable == null) {
+        if (isNullObject(environment) || isNullObject(pageable)) {
             return SimplePage.of(Collections.emptyList(), 1, 10, 0L, 0);
         }
         try {
             return SimplePage.of(repository.findByEnvironmentId(environment, pageable)
                     .map(mapper::mapperData));
         } catch (DataAccessException ex) {
-            log.error(catalogPort.getMessage("FUN_014"), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_014), ex);
             return SimplePage.of(Collections.emptyList(), pageable.getPageNumber() + 1, pageable.getPageSize(), 0L, 0);
         } catch (Exception ex) {
-            log.error(catalogPort.getMessage("FUN_015"), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_015), ex);
             return SimplePage.of(Collections.emptyList(), pageable.getPageNumber() + 1, pageable.getPageSize(), 0L, 0);
         }
     }
 
     @Override
     public Optional<MessageData> findMessageByCodeAndEnvironment(String code, String environmentId) {
-        if (code == null || environmentId == null) {
+        if (isNullObject(code) || isNullObject(environmentId)) {
             return Optional.empty();
         }
         try {
             return repository.findByCodeAndEnvironmentId(code, environmentId)
                     .map(mapper::mapperData);
         } catch (DataAccessException ex) {
-            log.error(catalogPort.getMessage("FUN_014"), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_014), ex);
             return Optional.empty();
         } catch (Exception ex) {
-            log.error(catalogPort.getMessage("FUN_015"), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_015), ex);
             return Optional.empty();
         }
     }
-}
+}

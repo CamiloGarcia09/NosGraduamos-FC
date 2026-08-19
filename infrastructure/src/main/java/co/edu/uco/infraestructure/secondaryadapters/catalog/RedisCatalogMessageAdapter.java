@@ -5,14 +5,17 @@ import co.edu.uco.application.common.catalog.MessageCatalog;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCode;
 import jakarta.annotation.PostConstruct;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 import static co.edu.uco.crosscutting.helpers.UtilText.isEmptyOrNull;
 import static co.edu.uco.crosscutting.helpers.UtilText.trim;
+import static co.edu.uco.crosscutting.helpers.UtilText.EMPTY;
 
 @Component
 public class RedisCatalogMessageAdapter implements CatalogPort {
@@ -37,7 +40,7 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
         }
         try {
             Map<Object, Object> entry = redisTemplate.opsForHash().entries(key);
-            if (entry == null || entry.isEmpty()) {
+            if (isNullObject(entry) || entry.isEmpty()) {
                 return null;
             }
             return new MessageCatalog(
@@ -47,7 +50,7 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
                     (String) entry.get("type"),
                     (String) entry.get("category"));
         } catch (Exception ex) {
-            log.error(CatalogPortStaticRef.getMessage("TCH_051").formatted(key), ex);
+            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCode.TCH_051).formatted(key), ex);
             return null;
         }
     }
@@ -55,13 +58,13 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
     @Override
     public String getMessage(String key) {
         if (isEmptyOrNull(trim(key))) {
-            return "";
+            return EMPTY;
         }
         try {
             var value = (String) redisTemplate.opsForHash().get(key, "content");
-            return value != null ? value : key;
+            return isNullObject(value) ? key : value;
         } catch (Exception ex) {
-            log.error(CatalogPortStaticRef.getMessage("TCH_052").formatted(key), ex);
+            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCode.TCH_052).formatted(key), ex);
             return key;
         }
     }
@@ -73,9 +76,9 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
         }
         try {
             String message = (String) redisTemplate.opsForHash().get(key, "content");
-            return message != null ? message : defaultMessage;
+            return isNullObject(message) ? defaultMessage : message;
         } catch (Exception ex) {
-            log.error(CatalogPortStaticRef.getMessage("TCH_052").formatted(key), ex);
+            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCode.TCH_052).formatted(key), ex);
             return defaultMessage;
         }
     }
@@ -83,31 +86,31 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
     @Override
     public String getTitle(String key) {
         if (isEmptyOrNull(trim(key))) {
-            return "";
+            return EMPTY;
         }
         try {
             var title = (String) redisTemplate.opsForHash().get(key, "title");
-            return title != null ? title : "";
+            return isNullObject(title) ? EMPTY : title;
         } catch (Exception ex) {
-            log.error(CatalogPortStaticRef.getMessage("TCH_053").formatted(key), ex);
-            return "";
+            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCode.TCH_053).formatted(key), ex);
+            return EMPTY;
         }
     }
 
     @Override
     public void setMessage(String key, MessageCatalog message) {
-        if (isEmptyOrNull(trim(key)) || message == null) {
+        if (isEmptyOrNull(trim(key)) || isNullObject(message)) {
             return;
         }
         try {
             redisTemplate.opsForHash().putAll(key, Map.of(
-                    "code", message.code() != null ? message.code() : "",
-                    "title", message.title() != null ? message.title() : "",
-                    "content", message.content() != null ? message.content() : "",
-                    "type", message.type() != null ? message.type() : "",
-                    "category", message.category() != null ? message.category() : ""));
+                    "code",     isNullObject(message.code())     ? EMPTY : message.code(),
+                    "title",    isNullObject(message.title())    ? EMPTY : message.title(),
+                    "content",  isNullObject(message.content())  ? EMPTY : message.content(),
+                    "type",     isNullObject(message.type())     ? EMPTY : message.type(),
+                    "category", isNullObject(message.category()) ? EMPTY : message.category()));
         } catch (Exception ex) {
-            log.error(CatalogPortStaticRef.getMessage("TCH_054").formatted(key), ex);
+            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCode.TCH_054).formatted(key), ex);
         }
     }
-}
+}
