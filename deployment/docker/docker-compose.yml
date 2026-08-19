@@ -91,7 +91,7 @@ services:
       - app-network
 
   surrealdb:
-    image: surrealdb/surrealdb:v2.1.4
+    image: surrealdb/surrealdb:v3.1.4
     container_name: surrealdb-messageucolab
     user: "0:0"
     ports:
@@ -113,7 +113,7 @@ services:
       - app-network
 
   surrealdb-init:
-    image: surrealdb/surrealdb:v2.1.4
+    image: surrealdb/surrealdb:v3.1.4
     container_name: surrealdb-init-messageucolab
     depends_on:
       surrealdb:
@@ -206,7 +206,7 @@ services:
       - AZURE_TENANT_ID=${AZURE_TENANT_ID}
 
     volumes:
-      - ../../logs:/app/logs
+      - app-logs:/app/logs
     depends_on:
       redis:
         condition: service_started
@@ -268,6 +268,8 @@ volumes:
   surrealdb-data:
     driver: local
   ollama-data:
+    driver: local
+  app-logs:
     driver: local
 
 networks:

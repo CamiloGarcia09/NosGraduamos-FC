@@ -4,7 +4,7 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.vault.VaultPort;
-import co.edu.uco.crosscutting.catalog.MessageCatalogCode;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType;
 import com.azure.core.exception.ClientAuthenticationException;
@@ -37,7 +37,7 @@ public class AzureKeyVaultAdapter implements VaultPort {
         this.catalogPort = catalogPort;
 
         if (isEmptyOrNull(trim(urlVault))) {
-            log.error(catalogPort.getMessage(MessageCatalogCode.TCH_041));
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_041.getCode()));
             this.secretClient = null;
         } else {
             SecretClient client = null;
@@ -47,7 +47,7 @@ public class AzureKeyVaultAdapter implements VaultPort {
                         .credential(new DefaultAzureCredentialBuilder().build())
                         .buildClient();
             } catch (Exception ex) {
-                log.error(catalogPort.getMessage(MessageCatalogCode.TCH_042).formatted(urlVault), ex);
+                log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_042.getCode()).formatted(urlVault), ex);
             }
             this.secretClient = client;
         }
@@ -56,21 +56,21 @@ public class AzureKeyVaultAdapter implements VaultPort {
     @Override
     public String getSecretValue(String secretName) {
         if (isEmptyOrNull(trim(secretName))) {
-            var techMsg = catalogPort.getMessage(MessageCatalogCode.TCH_043);
+            var techMsg = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_043.getCode());
             log.error(techMsg);
             throw CrossWordsException.buildInfrastructure(
                     techMsg,
-                    catalogPort.getMessage(MessageCatalogCode.FUN_023),
+                    catalogPort.getMessage(MessageCatalogCodeEnum.FUN_023.getCode()),
                     ExceptionType.TECHNICAL
             );
         }
 
         if (isNullObject(this.secretClient)) {
-            var techMsg = catalogPort.getMessage(MessageCatalogCode.TCH_044);
+            var techMsg = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_044.getCode());
             log.error(techMsg);
             throw CrossWordsException.buildInfrastructure(
                     techMsg,
-                    catalogPort.getMessage(MessageCatalogCode.FUN_023),
+                    catalogPort.getMessage(MessageCatalogCodeEnum.FUN_023.getCode()),
                     ExceptionType.TECHNICAL
             );
         }
@@ -79,21 +79,21 @@ public class AzureKeyVaultAdapter implements VaultPort {
             KeyVaultSecret secret = secretClient.getSecret(secretName);
 
             if (isNullObject(secret) || isEmptyOrNull(secret.getValue())) {
-                var techMsg = catalogPort.getMessage(MessageCatalogCode.TCH_045).formatted(secretName);
+                var techMsg = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_045.getCode()).formatted(secretName);
                 log.error(techMsg);
                 throw CrossWordsException.buildInfrastructure(
                         techMsg,
-                        catalogPort.getMessage(MessageCatalogCode.FUN_023),
+                        catalogPort.getMessage(MessageCatalogCodeEnum.FUN_023.getCode()),
                         ExceptionType.TECHNICAL
                 );
             }
 
             if (!isNullObject(secret.getProperties()) && Boolean.FALSE.equals(secret.getProperties().isEnabled())) {
-                var techMsg = catalogPort.getMessage(MessageCatalogCode.TCH_046).formatted(secretName);
+                var techMsg = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_046.getCode()).formatted(secretName);
                 log.error(techMsg);
                 throw CrossWordsException.buildInfrastructure(
                         techMsg,
-                        catalogPort.getMessage(MessageCatalogCode.FUN_023),
+                        catalogPort.getMessage(MessageCatalogCodeEnum.FUN_023.getCode()),
                         ExceptionType.TECHNICAL
                 );
             }
@@ -101,31 +101,31 @@ public class AzureKeyVaultAdapter implements VaultPort {
             return secret.getValue();
 
         } catch (ResourceNotFoundException ex) {
-            var techMsg = catalogPort.getMessage(MessageCatalogCode.TCH_047).formatted(secretName);
+            var techMsg = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_047.getCode()).formatted(secretName);
             log.error(techMsg, ex);
             throw CrossWordsException.buildInfrastructure(
                     techMsg,
-                    catalogPort.getMessage(MessageCatalogCode.FUN_023),
+                    catalogPort.getMessage(MessageCatalogCodeEnum.FUN_023.getCode()),
                     ex,
                     ExceptionType.TECHNICAL
             );
 
         } catch (ClientAuthenticationException ex) {
-            var techMsg = catalogPort.getMessage(MessageCatalogCode.TCH_048).formatted(secretName);
+            var techMsg = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_048.getCode()).formatted(secretName);
             log.error(techMsg, ex);
             throw CrossWordsException.buildInfrastructure(
                     techMsg,
-                    catalogPort.getMessage(MessageCatalogCode.FUN_023),
+                    catalogPort.getMessage(MessageCatalogCodeEnum.FUN_023.getCode()),
                     ex,
                     ExceptionType.TECHNICAL
             );
 
         } catch (HttpResponseException ex) {
-            var techMsg = catalogPort.getMessage(MessageCatalogCode.TCH_049).formatted(ex.getResponse().getStatusCode());
+            var techMsg = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_049.getCode()).formatted(ex.getResponse().getStatusCode());
             log.error(techMsg, ex);
             throw CrossWordsException.buildInfrastructure(
                     techMsg,
-                    catalogPort.getMessage(MessageCatalogCode.FUN_023),
+                    catalogPort.getMessage(MessageCatalogCodeEnum.FUN_023.getCode()),
                     ex,
                     ExceptionType.TECHNICAL
             );
@@ -133,11 +133,11 @@ public class AzureKeyVaultAdapter implements VaultPort {
         } catch (CrossWordsException ex) {
             throw ex;
         } catch (Exception ex) {
-            var techMsg = catalogPort.getMessage(MessageCatalogCode.TCH_050).formatted(secretName);
+            var techMsg = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_050.getCode()).formatted(secretName);
             log.error(techMsg, ex);
             throw CrossWordsException.buildInfrastructure(
                     techMsg,
-                    catalogPort.getMessage(MessageCatalogCode.FUN_023),
+                    catalogPort.getMessage(MessageCatalogCodeEnum.FUN_023.getCode()),
                     ex,
                     ExceptionType.TECHNICAL
             );

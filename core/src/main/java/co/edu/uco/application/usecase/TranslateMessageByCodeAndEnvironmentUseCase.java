@@ -10,6 +10,7 @@ import co.edu.uco.application.usecase.handling.HandlingTranslateMessageByCodeAnd
 import co.edu.uco.application.usecase.validator.message.FindMessageCodeValidator;
 import co.edu.uco.application.usecase.validator.message.TargetLanguageValidator;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import org.springframework.stereotype.Component;
 
@@ -59,7 +60,7 @@ public final class TranslateMessageByCodeAndEnvironmentUseCase
                     .getMessageByCodeAndEnvironment(messageCode, environmentId)
                     .orElseThrow(() -> {
                         var errorMessage = String.format(
-                                messageCatalogStrategy.getSystemMessageContent("FUN_012"),
+                                messageCatalogStrategy.getSystemMessageContent(MessageCatalogCodeEnum.FUN_012.getCode()),
                                 messageCode,
                                 environmentId
                         );
@@ -99,7 +100,7 @@ public final class TranslateMessageByCodeAndEnvironmentUseCase
         } catch (CrossWordsException exception) {
             throw exception;
         } catch (Exception exception) {
-            var errorMessage = String.format(messageCatalogStrategy.getSystemMessageContent("FUN_012"), messageCode, environmentId);
+            var errorMessage = String.format(messageCatalogStrategy.getSystemMessageContent(MessageCatalogCodeEnum.FUN_012.getCode()), messageCode, environmentId);
             log.error(errorMessage, exception);
             throw BusinessException.buildUserException(errorMessage);
         }

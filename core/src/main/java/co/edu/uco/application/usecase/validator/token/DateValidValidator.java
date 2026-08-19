@@ -3,6 +3,7 @@ package co.edu.uco.application.usecase.validator.token;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.usecase.validator.Validator;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,7 @@ public final class DateValidValidator implements Validator<String> {
     @Override
     public void validate(String data) throws BusinessRuleException {
         if (containsInvalidCharacters(data)) {
-            throw BusinessRuleException.buildUserException(catalogPort.getMessage("FUN_039"));
+            throw BusinessRuleException.buildUserException(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_039.getCode()));
         }
         try {
             parseDate(data);
