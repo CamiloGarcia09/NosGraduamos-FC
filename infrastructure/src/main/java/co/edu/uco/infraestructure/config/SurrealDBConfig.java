@@ -3,7 +3,7 @@ package co.edu.uco.infraestructure.config;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import com.surrealdb.Surreal;
-import com.surrealdb.signin.Root;
+import com.surrealdb.signin.RootCredential;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -36,7 +36,7 @@ public class SurrealDBConfig {
 
         // Autenticación root
         surreal.signin(
-                new Root(
+                new RootCredential(
                         surrealDBProperties.getUsername(),
                         surrealDBProperties.getPassword()
                 )

@@ -105,9 +105,9 @@ public class TokenSurrealRepositoryAdapterImpl implements TokenSurrealRepository
 
     private static String extractIdAsString(final Value value) {
         if (value == null) return "";
-        if (value.isThing()) return cleanIdPart(value.getThing().getId().toString());
+        if (value.isRecordId()) return cleanIdPart(value.getRecordId().getId().toString());
         if (value.isString()) return value.getString();
-        return value.toPrettyString();
+        return value.toString();
     }
 
     private static String cleanIdPart(String id) {
@@ -126,7 +126,7 @@ public class TokenSurrealRepositoryAdapterImpl implements TokenSurrealRepository
         if (value == null || value.isNull() || value.isNone()) return "";
         if (value.isString()) return value.getString();
         if (value.isUuid()) return value.getUuid().toString();
-        return value.toPrettyString();
+        return value.toString();
     }
 
     private static LocalDateTime dateOf(final Value value) {

@@ -1,0 +1,220 @@
+openapi: 3.0.3
+info:
+  title: MessageUcoLab API
+  description: API para crear tokens y consultar mensajes por ambiente.
+  version: 1.0.0
+
+servers:
+  - url: /
+    description: Servidor actual
+
+security:
+  - tokenAuth: []
+
+tags:
+  - name: Tokens
+    description: Creacion de tokens de acceso.
+  - name: Mensajes
+    description: Consulta y traduccion de mensajes.
+
+paths:
+  /messageucolab/v1/application/{id}/token:
+    post:
+      tags: [Tokens]
+      summary: Crear token de aplicacion
+      description: Crea un token para autenticar solicitudes de una aplicacion en un ambiente.
+      operationId: createToken
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ApplicationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTokenRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/TokenCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /messageucolab/v1/application/messages:
+    get:
+      tags: [Mensajes]
+      summary: Listar mensajes por ambiente
+      description: Retorna los mensajes paginados del ambiente asociado al token.
+      operationId: findMessagesByEnvironment
+      security:
+        - tokenAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Numero de pagina, empezando en 1.
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          description: Cantidad de elementos por pagina.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 50
+        - name: sort
+          in: query
+          description: Direccion de ordenamiento.
+          schema:
+            type: string
+            enum: [ASC, DESC]
+            default: ASC
+        - name: columnSort
+          in: query
+          description: Campo usado para ordenar.
+          schema:
+            type: string
+            default: id
+      responses:
+        '200':
+          $ref: '#/components/responses/MessagesFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /messageucolab/v1/application/messages/{messageCode}:
+    get:
+      tags: [Mensajes]
+      summary: Buscar mensaje por codigo
+      description: Obtiene un mensaje por codigo dentro del ambiente asociado al token.
+      operationId: findMessageByCode
+      security:
+        - tokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/MessageCode'
+      responses:
+        '200':
+          $ref: '#/components/responses/MessageFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /messageucolab/v1/application/messages/{messageCode}/translation:
+    get:
+      tags: [Mensajes]
+      summary: Traducir mensaje
+      description: Traduce un mensaje del ambiente asociado al token sin guardar la traduccion.
+      operationId: translateMessageByCode
+      security:
+        - tokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/MessageCode'
+        - name: sourceLanguage
+          in: query
+          description: Idioma origen. Por defecto se detecta automaticamente.
+          schema:
+            type: string
+            default: auto
+            example: auto
+        - name: targetLanguage
+          in: query
+          required: true
+          description: Idioma destino.
+          schema:
+            type: string
+            example: en
+      responses:
+        '200':
+          $ref: '#/components/responses/MessageTranslated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Token
+      description: Token asociado a la aplicacion y al ambiente.
+
+  parameters:
+    ApplicationId:
+      name: id
+      in: path
+      required: true
+      description: Identificador unico de la aplicacion.
+      schema:
+        type: string
+        format: uuid
+        example: 123e4567-e89b-12d3-a456-426614174000
+    MessageCode:
+      name: messageCode
+      in: path
+      required: true
+      description: Codigo del mensaje.
+      schema:
+        type: string
+        example: MSG_001
+
+  responses:
+    TokenCreated:
+      description: Token creado correctamente.
+    MessagesFound:
+      description: Mensajes obtenidos correctamente.
+    MessageFound:
+      description: Mensaje encontrado.
+    MessageTranslated:
+      description: Mensaje traducido correctamente.
+    BadRequest:
+      description: Solicitud o parametros invalidos.
+    Forbidden:
+      description: Token ausente, invalido o sin autorizacion.
+    NotFound:
+      description: Recurso no encontrado.
+    NotAcceptable:
+      description: Formato de respuesta no soportado.
+    InternalServerError:
+      description: Error interno del servidor.
+
+  schemas:
+    CreateTokenRequest:
+      type: object
+      required: [expirationDate, environmentId]
+      properties:
+        expirationDate:
+          type: string
+          description: Fecha y hora de expiracion del token.
+          example: '2026-12-31T23:59:59'
+        environmentId:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174111

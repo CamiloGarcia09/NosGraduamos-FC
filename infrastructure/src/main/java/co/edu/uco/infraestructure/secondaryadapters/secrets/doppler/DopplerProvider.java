@@ -17,10 +17,12 @@ import static co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType.TECHN
 
 @Component
 public final class DopplerProvider implements SecretProviderPort {
+
     private final LoggingPort log;
     private final DopplerProperties properties;
     private final ObjectMapper mapper;
     private final CatalogPort catalogPort;
+
     public DopplerProvider(DopplerProperties properties, ObjectMapper mapper, CatalogPort catalogPort,
                            LoggingPortFactory loggerFactory) {
         this.log = loggerFactory.getLogger(DopplerProvider.class);
@@ -28,6 +30,7 @@ public final class DopplerProvider implements SecretProviderPort {
         this.mapper = mapper;
         this.catalogPort = catalogPort;
     }
+
     @Override
     public Map<String, String> findSecretToken(String secretName) {
         var client = new OkHttpClient();

@@ -14,8 +14,10 @@ import static co.edu.uco.infraestructure.config.InfrastructureConstant.CACHE_MAX
 
 @Component
 public final class DopplerSecretCacheService  implements FindTokenCachePort {
+
     private final Cache<String, Map<String, String>> dopplerSecretCache;
     private final SecretProviderPort secretProviderPort;
+
     public DopplerSecretCacheService(SecretProviderPort secretProviderPort) {
         this.secretProviderPort = secretProviderPort;
         this.dopplerSecretCache = Caffeine.newBuilder()
@@ -23,6 +25,7 @@ public final class DopplerSecretCacheService  implements FindTokenCachePort {
                 .maximumSize(CACHE_MAXIMUM_SIZE)
                 .build();
     }
+
     @Override
     public Map<String, String> getSecret(String secretName) {
         return dopplerSecretCache.get(secretName, secretProviderPort::findSecretToken);

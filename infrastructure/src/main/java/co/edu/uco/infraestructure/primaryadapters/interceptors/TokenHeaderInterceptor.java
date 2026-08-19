@@ -20,10 +20,12 @@ import static co.edu.uco.crosscutting.helpers.UtilText.isEmptyOrNull;
 
 @Component
 public final class TokenHeaderInterceptor implements HandlerInterceptor {
+
     private final SerializerRegistry serializerRegistry;
     private final VerifyAccessUseCaseFacade verifyAccessUseCaseFacade;
     private final FindEnvironmentIdTokenUseCaseFacade findEnvironmentIdTokenUseCaseFacade;
     private final CatalogPort catalogPort;
+
     public TokenHeaderInterceptor(SerializerRegistry serializerRegistry,
                                   VerifyAccessUseCaseFacade verifyAccessUseCaseFacade,
                                   FindEnvironmentIdTokenUseCaseFacade findEnvironmentIdTokenUseCaseFacade,
@@ -33,8 +35,10 @@ public final class TokenHeaderInterceptor implements HandlerInterceptor {
         this.findEnvironmentIdTokenUseCaseFacade = findEnvironmentIdTokenUseCaseFacade;
         this.catalogPort = catalogPort;
     }
+
     @Override
-    public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response,
+                             @NotNull Object handler) throws Exception {
         var token = request.getHeader(REQUEST_GET_HEADER_TOKEN);
         var acceptHeader = request.getHeader(REQUEST_GET_HEADER_ACCEPT);
 
@@ -52,6 +56,7 @@ public final class TokenHeaderInterceptor implements HandlerInterceptor {
         request.setAttribute(ENVIRONMENT_ID_ATTRIBUTE, environmentId);
         return true;
     }
+
     private void sendErrorResponse(HttpServletResponse response, String acceptHeader, String errorMessage) throws IOException {
         var serializer = serializerRegistry.getSerializerForMediaType(acceptHeader);
         Response<String> errorResponse = new Response<>(List.of(), List.of(errorMessage));

@@ -22,15 +22,18 @@ import static co.edu.uco.infraestructure.config.InfrastructureConstant.REQUEST_G
 
 @RestControllerAdvice
 public final class HttpPresenterAdapter<T> implements PresenterPort<T> {
+
     private final LoggingPort log;
     private final SerializerRegistry serializerRegistry;
     private final CatalogPort catalogPort;
+
     public HttpPresenterAdapter(SerializerRegistry serializerRegistry, CatalogPort catalogPort,
                                 LoggingPortFactory loggerFactory) {
         this.log = loggerFactory.getLogger(HttpPresenterAdapter.class);
         this.serializerRegistry = serializerRegistry;
         this.catalogPort = catalogPort;
     }
+
     @Override
     public void presentRestSuccess(
             List<T> dto,
@@ -47,10 +50,12 @@ public final class HttpPresenterAdapter<T> implements PresenterPort<T> {
             response.setContentType(serializer.getSupportedContentType());
             response.getWriter().write(formattedResponse);
             log.info(catalogPort.getMessage("TCH_021"), formattedResponse);
+
         } catch (CrossWordsException | IOException ex) {
             log.error(catalogPort.getMessage("TCH_016"), ex);
         }
     }
+
     @ExceptionHandler(CrossWordsException.class)
     public void presentCrossWordsException(
             CrossWordsException ex,
@@ -78,6 +83,7 @@ public final class HttpPresenterAdapter<T> implements PresenterPort<T> {
             throw exception;
         }
     }
+
     @ExceptionHandler(Exception.class)
     public void handleGeneralException(
             Exception ex,

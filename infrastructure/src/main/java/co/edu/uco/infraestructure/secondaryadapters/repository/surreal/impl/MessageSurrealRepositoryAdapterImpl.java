@@ -176,7 +176,7 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
                 if (count.isString()) {
                     return Long.parseLong(count.getString());
                 }
-                return Long.parseLong(count.toPrettyString());
+                return Long.parseLong(count.toString());
             } catch (final Exception e) {
                 return 0;
             }
@@ -226,9 +226,9 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
 
     private static UUID extractIdAsUUID(final Value value) {
         if (value == null) return UUID.randomUUID();
-        if (value.isThing()) {
+        if (value.isRecordId()) {
             try {
-                final String fullId = value.getThing().toString();
+                final String fullId = value.getRecordId().toString();
                 final int separator = fullId.indexOf(':');
                 if (separator > 0) {
                     final String idPart = cleanThingId(fullId.substring(separator + 1));
@@ -271,6 +271,6 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
         if (value == null || value.isNull() || value.isNone()) return "";
         if (value.isString()) return value.getString();
         if (value.isUuid()) return value.getUuid().toString();
-        return value.toPrettyString();
+        return value.toString();
     }
 }
