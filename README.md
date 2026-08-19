@@ -2,6 +2,10 @@
 
 A Spring Boot application for message handling and processing.
 
+## Azure CI/CD
+
+The Azure for Students deployment, Doppler setup, infrastructure provisioning, and pipeline operations are documented in [`docs/azure-deployment.md`](docs/azure-deployment.md).
+
 ## Prerequisites
 
 - Java 17 or higher

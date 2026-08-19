@@ -35,4 +35,14 @@ build/
 /logs/
 
 # Secrets — never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+infrastructure/azure/parameters.local.json
+infrastructure/azure/budget.local.json
+infrastructure/azure/devops-environment.local.json
+infrastructure/azure/devops-service-connection.local.json
 
