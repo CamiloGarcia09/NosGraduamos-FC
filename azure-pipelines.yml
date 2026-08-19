@@ -196,13 +196,14 @@ stages:
                 $publicIp = az vm list-ip-addresses --resource-group "$(AZURE_RESOURCE_GROUP)" --name "$(AZURE_VM_NAME)" --query '[0].virtualMachine.network.publicIpAddresses[0].ipAddress' --output tsv
                 if ($LASTEXITCODE -ne 0) { throw 'Could not obtain the VM public IP.' }
                 Write-Host "##vso[task.setvariable variable=VM_PUBLIC_IP]$publicIp"
+                $existingRules = @(az network nsg rule list `
+                  --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                  --nsg-name "$(AZURE_NSG_NAME)" `
+                  --query '[].name' `
+                  --output tsv)
+                if ($LASTEXITCODE -ne 0) { throw 'Could not list existing NSG rules.' }
                 foreach ($ruleName in @('AllowApplicationDemo', 'AllowDemoGateway')) {
-                  az network nsg rule show `
-                    --resource-group "$(AZURE_RESOURCE_GROUP)" `
-                    --nsg-name "$(AZURE_NSG_NAME)" `
-                    --name $ruleName `
-                    --output none 2>$null
-                  if ($LASTEXITCODE -eq 0) {
+                  if ($existingRules -contains $ruleName) {
                     az network nsg rule delete `
                       --resource-group "$(AZURE_RESOURCE_GROUP)" `
                       --nsg-name "$(AZURE_NSG_NAME)" `
@@ -332,12 +333,13 @@ stages:
               scriptLocation: inlineScript
               inlineScript: |
                 function Remove-NsgRule([string] $RuleName) {
-                  az network nsg rule show `
+                  $existingRules = @(az network nsg rule list `
                     --resource-group "$(AZURE_RESOURCE_GROUP)" `
                     --nsg-name "$(AZURE_NSG_NAME)" `
-                    --name $RuleName `
-                    --output none 2>$null
-                  if ($LASTEXITCODE -eq 0) {
+                    --query '[].name' `
+                    --output tsv)
+                  if ($LASTEXITCODE -ne 0) { throw 'Could not list existing NSG rules.' }
+                  if ($existingRules -contains $RuleName) {
                     az network nsg rule delete `
                       --resource-group "$(AZURE_RESOURCE_GROUP)" `
                       --nsg-name "$(AZURE_NSG_NAME)" `
@@ -368,13 +370,14 @@ stages:
               scriptLocation: inlineScript
               inlineScript: |
                 $ErrorActionPreference = 'Stop'
+                $existingRules = @(az network nsg rule list `
+                  --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                  --nsg-name "$(AZURE_NSG_NAME)" `
+                  --query '[].name' `
+                  --output tsv)
+                if ($LASTEXITCODE -ne 0) { throw 'Could not list existing NSG rules.' }
                 foreach ($ruleName in @('AllowPipelineDeployment', 'AllowApplicationDemo', 'AllowDemoGateway')) {
-                  az network nsg rule show `
-                    --resource-group "$(AZURE_RESOURCE_GROUP)" `
-                    --nsg-name "$(AZURE_NSG_NAME)" `
-                    --name $ruleName `
-                    --output none 2>$null
-                  if ($LASTEXITCODE -eq 0) {
+                  if ($existingRules -contains $ruleName) {
                     az network nsg rule delete `
                       --resource-group "$(AZURE_RESOURCE_GROUP)" `
                       --nsg-name "$(AZURE_NSG_NAME)" `
