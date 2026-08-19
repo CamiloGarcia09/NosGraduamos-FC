@@ -159,8 +159,9 @@ El script `deployment/azure/deploy.sh` realiza:
 3. Inicio de sesión de la VM en ACR mediante `AcrPull`.
 4. Ejecución de `doppler run -- docker compose ...`.
 5. Inicialización idempotente de Redis y SurrealDB.
-6. Healthcheck de `/actuator/health`.
-7. Rollback a la etiqueta anterior si la nueva aplicación no responde.
+6. Inicio de Kong como único punto de entrada público.
+7. Healthcheck de `/actuator/health` a través de Kong.
+8. Rollback a la etiqueta anterior si la nueva aplicación no responde.
 
 No se genera un archivo `.env`. Las variables quedan asociadas al contenedor de Docker y pueden ser inspeccionadas por un administrador root de la VM, que es una propiedad normal de la inyección por variables de entorno.
 
@@ -168,21 +169,31 @@ Nunca ejecutes `docker compose config` sin `--quiet` en CI o producción, porque
 
 ## 8. Acceso y operación
 
-La API se publica en:
+La API se publica automáticamente a través de Kong después de un `DEPLOY` exitoso:
 
 ```text
-http://<publicIpAddress>:8085
+http://<publicIpAddress>:8000
 ```
 
-El parámetro `allowedApiSourcePrefix` debe ser una IP `/32` siempre que sea posible. Para cambiar la IP permitida, vuelve a desplegar Bicep o actualiza la regla `AllowApplicationDemo`.
+El pipeline crea la regla NSG `AllowDemoGateway` para permitir TCP `8000` desde Internet. No es necesario editar manualmente la red de la VM. Spring Boot permanece accesible solo dentro de la red Docker por `8085` y el puerto administrativo `8001` de Kong está deshabilitado.
 
-Después de una demostración ejecuta el pipeline manualmente con `operation=STOP` y confirma en Azure Portal que la VM aparece como `Stopped (deallocated)`.
+Endpoints de operación:
+
+```text
+http://<publicIpAddress>:8000/actuator/health
+http://<publicIpAddress>:8000/swagger-ui/index.html
+http://<publicIpAddress>:8000/messageucolab/v1/application/messages
+```
+
+La API utiliza HTTP y queda disponible públicamente mientras la VM está encendida. No mantengas la demostración desplegada más tiempo del necesario.
+
+Después de una demostración ejecuta el pipeline manualmente con `operation=STOP`. El pipeline elimina `AllowDemoGateway`, desasigna la VM y evita que los endpoints continúen accesibles.
 
 Para consultar logs durante una sesión de mantenimiento:
 
 ```bash
 cd /opt/messageucolab
-docker compose -f deployment/azure/docker-compose.yml logs --tail 100 messageucolab
+docker compose -f deployment/azure/docker-compose.yml logs --tail 100 messageucolab kong
 ```
 
 No utilices `docker compose down -v`, porque elimina los datos persistentes.

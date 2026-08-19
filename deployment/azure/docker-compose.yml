@@ -123,8 +123,8 @@ services:
     image: ${ACR_LOGIN_SERVER}/messageucolab:${IMAGE_TAG}
     pull_policy: always
     restart: unless-stopped
-    ports:
-      - "8085:8085"
+    expose:
+      - "8085"
     environment:
       SPRING_PROFILES_ACTIVE: azure
       JAVA_OPTS: ${JAVA_OPTS:--Xms256m -Xmx768m -XX:+UseG1GC -XX:MaxGCPauseMillis=200}
@@ -177,6 +177,32 @@ services:
       start_period: 60s
     mem_limit: 1024m
     cpus: 0.75
+
+  kong:
+    image: kong/kong-gateway:3.5
+    restart: unless-stopped
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yaml
+      KONG_ADMIN_LISTEN: "off"
+      KONG_NGINX_WORKER_PROCESSES: "1"
+    volumes:
+      - ./kong.yaml:/etc/kong/kong.yaml:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      messageucolab:
+        condition: service_healthy
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    mem_limit: 256m
+    cpus: 0.25
 
 volumes:
   redis-data:

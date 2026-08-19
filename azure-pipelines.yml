@@ -196,6 +196,21 @@ stages:
                 $publicIp = az vm list-ip-addresses --resource-group "$(AZURE_RESOURCE_GROUP)" --name "$(AZURE_VM_NAME)" --query '[0].virtualMachine.network.publicIpAddresses[0].ipAddress' --output tsv
                 if ($LASTEXITCODE -ne 0) { throw 'Could not obtain the VM public IP.' }
                 Write-Host "##vso[task.setvariable variable=VM_PUBLIC_IP]$publicIp"
+                foreach ($ruleName in @('AllowApplicationDemo', 'AllowDemoGateway')) {
+                  az network nsg rule show `
+                    --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                    --nsg-name "$(AZURE_NSG_NAME)" `
+                    --name $ruleName `
+                    --output none 2>$null
+                  if ($LASTEXITCODE -eq 0) {
+                    az network nsg rule delete `
+                      --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                      --nsg-name "$(AZURE_NSG_NAME)" `
+                      --name $ruleName `
+                      --output none
+                    if ($LASTEXITCODE -ne 0) { throw "Could not remove stale NSG rule $ruleName." }
+                  }
+                }
                 az network nsg rule create `
                   --resource-group "$(AZURE_RESOURCE_GROUP)" `
                   --nsg-name "$(AZURE_NSG_NAME)" `
@@ -207,7 +222,7 @@ stages:
                   --source-address-prefixes "$agentIp/32" `
                   --source-port-ranges '*' `
                   --destination-address-prefixes '*' `
-                  --destination-port-ranges 22 8085 `
+                  --destination-port-ranges 22 `
                   --output none
                 if ($LASTEXITCODE -ne 0) { throw 'Could not create temporary NSG access.' }
 
@@ -262,6 +277,29 @@ stages:
                 }
 
           - task: AzureCLI@2
+            displayName: Open public API gateway access
+            inputs:
+              azureSubscription: $(AZURE_SERVICE_CONNECTION)
+              scriptType: ps
+              scriptLocation: inlineScript
+              inlineScript: |
+                $ErrorActionPreference = 'Stop'
+                az network nsg rule create `
+                  --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                  --nsg-name "$(AZURE_NSG_NAME)" `
+                  --name AllowDemoGateway `
+                  --priority 110 `
+                  --access Allow `
+                  --direction Inbound `
+                  --protocol Tcp `
+                  --source-address-prefixes Internet `
+                  --source-port-ranges '*' `
+                  --destination-address-prefixes '*' `
+                  --destination-port-ranges 8000 `
+                  --output none
+                if ($LASTEXITCODE -ne 0) { throw 'Could not open public API gateway access.' }
+
+          - task: AzureCLI@2
             displayName: External smoke test
             inputs:
               azureSubscription: $(AZURE_SERVICE_CONNECTION)
@@ -269,24 +307,50 @@ stages:
               scriptLocation: inlineScript
               inlineScript: |
                 $ErrorActionPreference = 'Stop'
-                $response = Invoke-RestMethod -Uri 'http://$(VM_PUBLIC_IP):8085/actuator/health' -TimeoutSec 30
+                $healthUri = 'http://$(VM_PUBLIC_IP):8000/actuator/health'
+                $response = $null
+                for ($attempt = 1; $attempt -le 12; $attempt++) {
+                  try {
+                    $response = Invoke-RestMethod -Uri $healthUri -TimeoutSec 15
+                    break
+                  } catch {
+                    Write-Host "Gateway health check attempt $attempt failed."
+                    Start-Sleep -Seconds 10
+                  }
+                }
                 if ($response.status -ne 'UP') { throw 'Application health check did not return UP.' }
                 Write-Host "Application health: $($response.status)"
+                Write-Host 'API gateway: http://$(VM_PUBLIC_IP):8000'
+                Write-Host 'Swagger UI: http://$(VM_PUBLIC_IP):8000/swagger-ui/index.html'
 
           - task: AzureCLI@2
-            displayName: Close temporary SSH access
+            displayName: Clean temporary network access
             condition: always()
             inputs:
               azureSubscription: $(AZURE_SERVICE_CONNECTION)
               scriptType: ps
               scriptLocation: inlineScript
               inlineScript: |
-                az network nsg rule delete `
-                  --resource-group "$(AZURE_RESOURCE_GROUP)" `
-                  --nsg-name "$(AZURE_NSG_NAME)" `
-                  --name AllowPipelineDeployment `
-                  --output none
-                exit 0
+                function Remove-NsgRule([string] $RuleName) {
+                  az network nsg rule show `
+                    --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                    --nsg-name "$(AZURE_NSG_NAME)" `
+                    --name $RuleName `
+                    --output none 2>$null
+                  if ($LASTEXITCODE -eq 0) {
+                    az network nsg rule delete `
+                      --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                      --nsg-name "$(AZURE_NSG_NAME)" `
+                      --name $RuleName `
+                      --output none
+                    if ($LASTEXITCODE -ne 0) { throw "Could not remove NSG rule $RuleName." }
+                  }
+                }
+
+                Remove-NsgRule 'AllowPipelineDeployment'
+                if ('$(Agent.JobStatus)' -ne 'Succeeded') {
+                  Remove-NsgRule 'AllowDemoGateway'
+                }
 
   - stage: StopDemo
     displayName: Stop and deallocate demo VM
@@ -304,6 +368,21 @@ stages:
               scriptLocation: inlineScript
               inlineScript: |
                 $ErrorActionPreference = 'Stop'
+                foreach ($ruleName in @('AllowPipelineDeployment', 'AllowApplicationDemo', 'AllowDemoGateway')) {
+                  az network nsg rule show `
+                    --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                    --nsg-name "$(AZURE_NSG_NAME)" `
+                    --name $ruleName `
+                    --output none 2>$null
+                  if ($LASTEXITCODE -eq 0) {
+                    az network nsg rule delete `
+                      --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                      --nsg-name "$(AZURE_NSG_NAME)" `
+                      --name $ruleName `
+                      --output none
+                    if ($LASTEXITCODE -ne 0) { throw "Could not remove NSG rule $ruleName." }
+                  }
+                }
                 az vm deallocate `
                   --resource-group "$(AZURE_RESOURCE_GROUP)" `
                   --name "$(AZURE_VM_NAME)" `

@@ -32,7 +32,7 @@ param adminUsername string = 'azureuser'
 @description('SSH public key used only for controlled maintenance and pipeline deployment.')
 param adminSshPublicKey string
 
-@description('CIDR allowed to call port 8085. Use a single address with /32 whenever possible.')
+@description('Source allowed to call the Kong gateway on port 8000. Use Internet for public demo access.')
 param allowedApiSourcePrefix string
 
 @description('Daily automatic shutdown time in 24-hour HHmm format.')
@@ -87,7 +87,7 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
           direction: 'Inbound'
           protocol: 'Tcp'
           sourcePortRange: '*'
-          destinationPortRange: '8085'
+          destinationPortRange: '8000'
           sourceAddressPrefix: allowedApiSourcePrefix
           destinationAddressPrefix: '*'
         }

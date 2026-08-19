@@ -47,11 +47,11 @@ doppler run -- docker compose --file "$COMPOSE_FILE" pull
 doppler run -- docker compose --file "$COMPOSE_FILE" up --detach redis surrealdb pulsar
 doppler run -- docker compose --file "$COMPOSE_FILE" run --rm redis-init
 doppler run -- docker compose --file "$COMPOSE_FILE" run --rm surrealdb-init
-doppler run -- docker compose --file "$COMPOSE_FILE" up --detach messageucolab
+doppler run -- docker compose --file "$COMPOSE_FILE" up --detach messageucolab kong
 
 healthy=false
 for _ in {1..30}; do
-  if curl --fail --silent http://localhost:8085/actuator/health >/dev/null; then
+  if curl --fail --silent http://localhost:8000/actuator/health >/dev/null; then
     healthy=true
     break
   fi
@@ -65,14 +65,14 @@ if [[ "$healthy" == "true" ]]; then
 fi
 
 echo "Health check failed for image tag $IMAGE_TAG" >&2
-doppler run -- docker compose --file "$COMPOSE_FILE" logs --tail 100 messageucolab >&2 || true
+doppler run -- docker compose --file "$COMPOSE_FILE" logs --tail 100 messageucolab kong >&2 || true
 
 if [[ -n "$PREVIOUS_TAG" && "$PREVIOUS_TAG" != "$IMAGE_TAG" ]]; then
   echo "Rolling back to image tag $PREVIOUS_TAG" >&2
   export IMAGE_TAG="$PREVIOUS_TAG"
   doppler run -- docker compose --file "$COMPOSE_FILE" up --detach --no-deps messageucolab
   for _ in {1..18}; do
-    if curl --fail --silent http://localhost:8085/actuator/health >/dev/null; then
+    if curl --fail --silent http://localhost:8000/actuator/health >/dev/null; then
       echo "Rollback completed with image tag $PREVIOUS_TAG" >&2
       break
     fi
