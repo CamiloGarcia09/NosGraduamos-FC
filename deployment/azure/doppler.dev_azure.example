@@ -1,0 +1,18 @@
+# Non-secret connection settings
+AZURE_KEYVAULT_UCOLAB_ENDPOINT=https://replace-with-vault.vault.azure.net
+REDISHOST=redis
+REDISPORT=6379
+REDISDATABASE=0
+PULSARURL=pulsar://pulsar:6650
+PULSARTOPICNAME=persistent://public/default/messageucolab
+SURREALDBHOST=surrealdb
+SURREALDBPORT=8005
+SURREALDBUSER=root
+SURREALDBNAMESPACE=messageucolab
+SURREALDBDATABASE=messageucolab
+TRANSLATION_AI_ENABLED=false
+TRANSLATION_AI_PROVIDER=ollama
+
+# Create strong values directly in Doppler. Never commit real values here.
+REDISPASSWORD=replace-in-doppler
+SURREALDBPASSWORD=replace-in-doppler

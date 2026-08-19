@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix": {
+      "value": "msgucolab-dev"
+    },
+    "acrName": {
+      "value": "replacewithuniqueacrname"
+    },
+    "keyVaultResourceGroupName": {
+      "value": "replace-with-key-vault-resource-group"
+    },
+    "keyVaultName": {
+      "value": "replace-with-existing-key-vault-name"
+    },
+    "adminSshPublicKey": {
+      "value": "ssh-ed25519 replace-with-your-public-key"
+    },
+    "allowedApiSourcePrefix": {
+      "value": "Internet"
+    }
+  }
+}
