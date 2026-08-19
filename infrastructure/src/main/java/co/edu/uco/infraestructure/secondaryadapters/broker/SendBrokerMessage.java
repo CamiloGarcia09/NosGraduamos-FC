@@ -5,6 +5,7 @@ import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.usecase.domain.MessageCodeDomain;
 import co.edu.uco.application.secondaryports.broker.SendMessage;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCode;
 import co.edu.uco.infraestructure.config.PulsarProperties;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType;
@@ -17,6 +18,8 @@ import org.apache.pulsar.client.api.Schema;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+
+import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 
 @Component
 public final class SendBrokerMessage implements SendMessage {
@@ -42,22 +45,22 @@ public final class SendBrokerMessage implements SendMessage {
 
     @Override
     public void execute(MessageCodeDomain messageDomain, HttpServletResponse response) {
-        if (messageDomain == null) {
-            var message = catalogPort.getMessage("TCH_038");
+        if (isNullObject(messageDomain)) {
+            var message = catalogPort.getMessage(MessageCatalogCode.TCH_038);
             log.error(message);
             throw CrossWordsException.buildInfrastructure(
                     message,
-                    catalogPort.getMessage("FUN_023"),
+                    catalogPort.getMessage(MessageCatalogCode.FUN_023),
                     ExceptionType.TECHNICAL
             );
         }
 
-        if (this.client == null) {
-            var message = catalogPort.getMessage("TCH_002");
+        if (isNullObject(this.client)) {
+            var message = catalogPort.getMessage(MessageCatalogCode.TCH_002);
             log.error(message);
             throw CrossWordsException.buildInfrastructure(
                     message,
-                    catalogPort.getMessage("FUN_023"),
+                    catalogPort.getMessage(MessageCatalogCode.FUN_023),
                     ExceptionType.TECHNICAL
             );
         }
@@ -70,34 +73,34 @@ public final class SendBrokerMessage implements SendMessage {
             if (message.isPresent()) {
                 stringProducer.send(message.get());
             } else {
-                var techMsg = catalogPort.getMessage("TCH_039");
+                var techMsg = catalogPort.getMessage(MessageCatalogCode.TCH_039);
                 log.error(techMsg);
                 throw CrossWordsException.buildInfrastructure(
                         techMsg,
-                        catalogPort.getMessage("FUN_023"),
+                        catalogPort.getMessage(MessageCatalogCode.FUN_023),
                         ExceptionType.TECHNICAL
                 );
             }
         } catch (PulsarClientException ex) {
-            var message = catalogPort.getMessage("TCH_002");
+            var message = catalogPort.getMessage(MessageCatalogCode.TCH_002);
             log.error(message, ex);
             throw CrossWordsException.buildInfrastructure(
                     message,
-                    catalogPort.getMessage("FUN_023"),
+                    catalogPort.getMessage(MessageCatalogCode.FUN_023),
                     ex,
                     ExceptionType.TECHNICAL
             );
         } catch (CrossWordsException ex) {
             throw ex;
         } catch (Exception ex) {
-            var message = catalogPort.getMessage("TCH_002");
+            var message = catalogPort.getMessage(MessageCatalogCode.TCH_002);
             log.error(message, ex);
             throw CrossWordsException.buildInfrastructure(
                     message,
-                    catalogPort.getMessage("FUN_023"),
+                    catalogPort.getMessage(MessageCatalogCode.FUN_023),
                     ex,
                     ExceptionType.TECHNICAL
             );
         }
     }
-}
+}
