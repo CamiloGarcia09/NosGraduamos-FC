@@ -142,11 +142,11 @@ El parámetro `operation` acepta:
 
 | Operación | Resultado |
 |---|---|
-| `ci` | Compila, prueba, valida y publica en ACR si la rama es `develop` |
-| `deploy` | Ejecuta CI, publica la imagen de la rama seleccionada, inicia la VM y despliega |
-| `stop` | Desasigna la VM sin compilar el proyecto |
+| `CI` | Compila, prueba, valida y publica en ACR si la rama es `develop` |
+| `DEPLOY` | Ejecuta CI, publica la imagen de la rama seleccionada, inicia la VM y despliega |
+| `STOP` | Desasigna la VM sin compilar el proyecto |
 
-Los triggers automáticos utilizan `ci`. El despliegue y la detención se ejecutan manualmente desde **Run pipeline**.
+Los triggers automáticos utilizan `CI`. El despliegue y la detención se ejecutan manualmente desde **Run pipeline**.
 
 Los pull requests nunca publican imágenes ni despliegan.
 
@@ -176,7 +176,7 @@ http://<publicIpAddress>:8085
 
 El parámetro `allowedApiSourcePrefix` debe ser una IP `/32` siempre que sea posible. Para cambiar la IP permitida, vuelve a desplegar Bicep o actualiza la regla `AllowApplicationDemo`.
 
-Después de una demostración ejecuta el pipeline manualmente con `operation=stop` y confirma en Azure Portal que la VM aparece como `Stopped (deallocated)`.
+Después de una demostración ejecuta el pipeline manualmente con `operation=STOP` y confirma en Azure Portal que la VM aparece como `Stopped (deallocated)`.
 
 Para consultar logs durante una sesión de mantenimiento:
 
@@ -189,7 +189,7 @@ No utilices `docker compose down -v`, porque elimina los datos persistentes.
 
 ## 9. Rotación de secretos
 
-Al cambiar variables en Doppler, ejecuta nuevamente `operation=deploy` para recrear el contenedor con los nuevos valores.
+Al cambiar variables en Doppler, ejecuta nuevamente `operation=DEPLOY` para recrear el contenedor con los nuevos valores.
 
 Al rotar un Service Token:
 

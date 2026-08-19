@@ -12,11 +12,11 @@ parameters:
   - name: operation
     displayName: Pipeline operation
     type: string
-    default: ci
+    default: CI
     values:
-      - ci
-      - deploy
-      - stop
+      - CI
+      - DEPLOY
+      - STOP
 
 pool:
   name: Default
@@ -41,7 +41,7 @@ variables:
 stages:
   - stage: ValidateAndTest
     displayName: Validate, test and build
-    condition: ne('${{ parameters.operation }}', 'stop')
+    condition: ne('${{ parameters.operation }}', 'STOP')
     jobs:
       - job: CI
         displayName: Maven and container validation
@@ -139,7 +139,7 @@ stages:
                 ne(variables['Build.Reason'], 'PullRequest'),
                 or(
                   eq(variables['Build.SourceBranch'], 'refs/heads/develop'),
-                  eq('${{ parameters.operation }}', 'deploy')
+                  eq('${{ parameters.operation }}', 'DEPLOY')
                 )
               )
             inputs:
@@ -167,7 +167,7 @@ stages:
       and(
         succeeded(),
         ne(variables['Build.Reason'], 'PullRequest'),
-        eq('${{ parameters.operation }}', 'deploy')
+        eq('${{ parameters.operation }}', 'DEPLOY')
       )
     jobs:
       - job: Deploy
@@ -291,7 +291,7 @@ stages:
   - stage: StopDemo
     displayName: Stop and deallocate demo VM
     dependsOn: []
-    condition: eq('${{ parameters.operation }}', 'stop')
+    condition: eq('${{ parameters.operation }}', 'STOP')
     jobs:
       - job: Stop
         displayName: Deallocate VM
