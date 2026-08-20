@@ -1,17 +1,15 @@
 package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
 import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
-import co.edu.uco.application.secondaryports.entity.MessageData;
 import co.edu.uco.application.secondaryports.entity.FunctionalityData;
 import co.edu.uco.application.secondaryports.entity.MessageCategoryData;
+import co.edu.uco.application.secondaryports.entity.MessageData;
 import co.edu.uco.application.secondaryports.entity.MessageTypeData;
 import co.edu.uco.application.secondaryports.entity.StatusMessageData;
-import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.DataBaseMessageRepository;
 import co.edu.uco.application.secondaryports.repository.SimplePage;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
-import co.edu.uco.crosscutting.helpers.UtilText;
 import com.surrealdb.Array;
 import com.surrealdb.Object;
 import com.surrealdb.Response;
@@ -20,8 +18,6 @@ import com.surrealdb.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,20 +25,15 @@ import java.util.UUID;
 import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.quote;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
-import static co.edu.uco.crosscutting.helpers.UtilUUID.DEFAULT_UUID;
 
 @Repository
-public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepository {
+public class MessageSurrealRepositoryAdapterImpl extends SurrealCatalogSupport implements DataBaseMessageRepository {
 
     private static final String SURREAL_TABLE_MESSAGE_DOCUMENT = "message_data_collection";
     private static final String SURREAL_TABLE_MESSAGE_ENVIRONMENT_READMODEL = "message_environment_readmodel";
 
-    private final LoggingPort log;
-    private final Surreal surreal;
-
     public MessageSurrealRepositoryAdapterImpl(final Surreal surreal, final LoggingPortFactory loggerFactory) {
-        this.log = loggerFactory.getLogger(MessageSurrealRepositoryAdapterImpl.class);
-        this.surreal = surreal;
+        super(surreal, loggerFactory.getLogger(MessageSurrealRepositoryAdapterImpl.class));
     }
 
     @Override
@@ -60,10 +51,10 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
         long offset = pageable.getOffset();
         int pageSize = pageable.getPageSize();
         final String environmentFilter = environmentFilter(environmentId);
-        
+
         final String countSql = "SELECT COUNT() as count FROM " + SURREAL_TABLE_MESSAGE_ENVIRONMENT_READMODEL
                 + " WHERE " + environmentFilter + ";";
-        
+
         final String dataSql = "SELECT * FROM " + SURREAL_TABLE_MESSAGE_ENVIRONMENT_READMODEL
                 + " WHERE " + environmentFilter
                 + " ORDER BY message.code ASC"
@@ -72,7 +63,7 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
         try {
             long totalElements = getCount(countSql);
             List<MessageData> messages = findMultipleMessageDocuments(dataSql);
-            
+
             int totalPages = pageSize == 0 ? 0 : (int) Math.ceil((double) totalElements / pageSize);
             return SimplePage.of(
                     messages,
@@ -105,53 +96,11 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
     }
 
     private Optional<MessageData> findOneMessageDocument(final String sql) {
-        try {
-            final Response response = surreal.query(sql);
-            if (isNullObject(response) || response.size() == 0) {
-                return Optional.empty();
-            }
-            final Value statementResult = response.take(0);
-            if (isNullObject(statementResult) || !statementResult.isArray()) {
-                return Optional.empty();
-            }
-            final Array array = statementResult.getArray();
-            if (array.len() == 0) {
-                return Optional.empty();
-            }
-            final Value first = array.get(0);
-            if (isNullObject(first) || !first.isObject()) {
-                return Optional.empty();
-            }
-            return Optional.of(toMessageDataFromDocument(first.getObject()));
-        } catch (final RuntimeException ex) {
-            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_058.getCode()).formatted(sql), ex);
-            throw ex;
-        }
+        return queryOne(sql, CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_058.getCode()).formatted(sql), this::toMessageDataFromDocument);
     }
 
     private List<MessageData> findMultipleMessageDocuments(final String sql) {
-        final List<MessageData> messages = new ArrayList<>();
-        try {
-            final Response response = surreal.query(sql);
-            if (isNullObject(response) || response.size() == 0) {
-                return messages;
-            }
-            final Value statementResult = response.take(0);
-            if (isNullObject(statementResult) || !statementResult.isArray()) {
-                return messages;
-            }
-            final Array array = statementResult.getArray();
-            for (int i = 0; i < array.len(); i++) {
-                final Value item = array.get(i);
-                if (!isNullObject(item) && item.isObject()) {
-                    messages.add(toMessageDataFromDocument(item.getObject()));
-                }
-            }
-        } catch (final RuntimeException ex) {
-            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_059.getCode()).formatted(sql), ex);
-            throw ex;
-        }
-        return messages;
+        return query(sql, CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_059.getCode()).formatted(sql), this::toMessageDataFromDocument);
     }
 
     private long getCount(final String sql) {
@@ -197,7 +146,7 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
                 + " OR environment_id = " + recordIdLiteral("environment", environmentId) + ")";
     }
 
-    private static MessageData toMessageDataFromDocument(final Object obj) {
+    private MessageData toMessageDataFromDocument(final Object obj) {
         final Object message = objectOf(obj.get("message")).orElse(obj);
         final MessageData data = MessageData.build();
         data.setId(extractIdAsUUID(message.get("id")));
@@ -227,54 +176,5 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
             return stringOf(value.getObject().get("name"));
         }
         return stringOf(value);
-    }
-
-    private static UUID extractIdAsUUID(final Value value) {
-        if (isNullObject(value)) return DEFAULT_UUID;
-        if (value.isRecordId()) {
-            try {
-                final String fullId = value.getRecordId().toString();
-                final int separator = fullId.indexOf(':');
-                if (separator > 0) {
-                    final String idPart = cleanThingId(fullId.substring(separator + 1));
-                    return UUID.fromString(idPart);
-                }
-            } catch (Exception e) {
-                return DEFAULT_UUID;
-            }
-        }
-        if (value.isString()) {
-            try {
-                final String raw = value.getString();
-                final int separator = raw.indexOf(':');
-                final String idPart = separator > 0 ? cleanThingId(raw.substring(separator + 1)) : cleanThingId(raw);
-                return UUID.fromString(idPart);
-            } catch (Exception e) {
-                return DEFAULT_UUID;
-            }
-        }
-        return DEFAULT_UUID;
-    }
-
-    private static String cleanThingId(String id) {
-        id = UtilText.getDefault(id).trim();
-        if (id.length() >= 2 && id.startsWith("`") && id.endsWith("`")) {
-            id = id.substring(1, id.length() - 1);
-        }
-        if (id.length() >= 2 && id.startsWith("\u27E8") && id.endsWith("\u27E9")) {
-            id = id.substring(1, id.length() - 1);
-        }
-        final int separator = id.indexOf(':');
-        if (separator > 0) {
-            id = id.substring(separator + 1);
-        }
-        return id.trim();
-    }
-
-    private static String stringOf(final Value value) {
-        if (isNullObject(value) || value.isNull() || value.isNone()) return "";
-        if (value.isString()) return value.getString();
-        if (value.isUuid()) return value.getUuid().toString();
-        return value.toString();
     }
 }
