@@ -46,3 +46,7 @@ infrastructure/azure/budget.local.json
 infrastructure/azure/devops-environment.local.json
 infrastructure/azure/devops-service-connection.local.json
 
+# Docker Compose local
+deployment/docker/docker-compose.yml
+deployment/azure/docker-compose.yml
+

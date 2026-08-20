@@ -1,10 +1,13 @@
 package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
+import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.entity.EnvironmentData;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
+import co.edu.uco.crosscutting.helpers.UtilText;
 import com.surrealdb.Array;
 import com.surrealdb.Object;
 import com.surrealdb.Response;
@@ -15,7 +18,9 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.UUID;
 
+import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
+import static co.edu.uco.crosscutting.helpers.UtilUUID.DEFAULT_UUID;
 
 @Repository
 public class EnvironmentSurrealRepositoryAdapterImpl implements EnvironmentRepository {
@@ -39,11 +44,11 @@ public class EnvironmentSurrealRepositoryAdapterImpl implements EnvironmentRepos
     private Optional<EnvironmentData> findOneEnvironment(final String sql) {
         try {
             final Response response = surreal.query(sql);
-            if (response == null || response.size() == 0) {
+            if (isNullObject(response) || response.size() == 0) {
                 return Optional.empty();
             }
             final Value statementResult = response.take(0);
-            if (statementResult == null || !statementResult.isArray()) {
+            if (isNullObject(statementResult) || !statementResult.isArray()) {
                 return Optional.empty();
             }
             final Array array = statementResult.getArray();
@@ -51,12 +56,12 @@ public class EnvironmentSurrealRepositoryAdapterImpl implements EnvironmentRepos
                 return Optional.empty();
             }
             final Value first = array.get(0);
-            if (first == null || !first.isObject()) {
+            if (isNullObject(first) || !first.isObject()) {
                 return Optional.empty();
             }
             return Optional.of(toEnvironmentData(first.getObject()));
         } catch (final RuntimeException ex) {
-            log.error("Error querying SurrealDB for environment. Query: {}", sql, ex);
+            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_056.getCode()).formatted(sql), ex);
             throw ex;
         }
     }
@@ -68,7 +73,7 @@ public class EnvironmentSurrealRepositoryAdapterImpl implements EnvironmentRepos
         
         final ApplicationData app = ApplicationData.build();
         final Value appIdValue = obj.get("application_id");
-        if (appIdValue != null) {
+        if (!isNullObject(appIdValue)) {
             app.setId(extractIdAsUUID(appIdValue));
         }
         data.setApplication(app);
@@ -77,7 +82,7 @@ public class EnvironmentSurrealRepositoryAdapterImpl implements EnvironmentRepos
     }
 
     private static UUID extractIdAsUUID(final Value value) {
-        if (value == null) return UUID.randomUUID();
+        if (isNullObject(value)) return DEFAULT_UUID;
         if (value.isRecordId()) {
             try {
                 final String fullId = value.getRecordId().toString();
@@ -87,7 +92,7 @@ public class EnvironmentSurrealRepositoryAdapterImpl implements EnvironmentRepos
                     return UUID.fromString(idPart);
                 }
             } catch (Exception e) {
-                return UUID.randomUUID();
+                return DEFAULT_UUID;
             }
         }
         if (value.isString()) {
@@ -97,15 +102,14 @@ public class EnvironmentSurrealRepositoryAdapterImpl implements EnvironmentRepos
                 final String idPart = separator > 0 ? cleanThingId(raw.substring(separator + 1)) : cleanThingId(raw);
                 return UUID.fromString(idPart);
             } catch (Exception e) {
-                return UUID.randomUUID();
+                return DEFAULT_UUID;
             }
         }
-        return UUID.randomUUID();
+        return DEFAULT_UUID;
     }
 
     private static String cleanThingId(String id) {
-        if (id == null) return "";
-        id = id.trim();
+        id = UtilText.getDefault(id).trim();
         if (id.length() >= 2 && id.startsWith("`") && id.endsWith("`")) {
             id = id.substring(1, id.length() - 1);
         }
@@ -120,7 +124,7 @@ public class EnvironmentSurrealRepositoryAdapterImpl implements EnvironmentRepos
     }
 
     private static String stringOf(final Value value) {
-        if (value == null || value.isNull() || value.isNone()) return "";
+        if (isNullObject(value) || value.isNull() || value.isNone()) return "";
         if (value.isString()) return value.getString();
         if (value.isUuid()) return value.getUuid().toString();
         return value.toString();

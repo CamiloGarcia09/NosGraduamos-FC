@@ -82,6 +82,17 @@ redis_hset "TCH_051" "Redis message model retrieval failed" "Failed to retrieve 
 redis_hset "TCH_052" "Redis message content retrieval failed" "Failed to retrieve message content from Redis for key: %s" "TECHNICAL" "ERROR"
 redis_hset "TCH_053" "Redis message title retrieval failed" "Failed to retrieve message title from Redis for key: %s" "TECHNICAL" "ERROR"
 redis_hset "TCH_054" "Redis message save failed" "Failed to save message to Redis for key: %s" "TECHNICAL" "ERROR"
+redis_hset "TCH_055" "Catalog static reference not initialized" "CatalogPortStaticRef is not initialized" "TECHNICAL" "ERROR"
+redis_hset "TCH_056" "Surreal environment query error" "Error querying SurrealDB for environment. Query: %s" "TECHNICAL" "ERROR"
+redis_hset "TCH_057" "Surreal messages by environment query error" "Error finding messages by environment in SurrealDB. Environment ID: %s" "TECHNICAL" "ERROR"
+redis_hset "TCH_058" "Surreal query error" "Error querying SurrealDB. Query: %s" "TECHNICAL" "ERROR"
+redis_hset "TCH_059" "Surreal multiple messages query error" "Error querying SurrealDB for multiple messages. Query: %s" "TECHNICAL" "ERROR"
+redis_hset "TCH_060" "Surreal count error" "Error counting records in SurrealDB. Query: %s" "TECHNICAL" "ERROR"
+redis_hset "TCH_061" "Surreal token save error" "Error saving token in SurrealDB. Query: %s" "TECHNICAL" "ERROR"
+redis_hset "TCH_062" "Surreal token persisted" "Token persisted into SurrealDB: %s" "TECHNICAL" "INFORMATION"
+redis_hset "TCH_063" "Surreal domain event projection" "Projecting %s SurrealDB domain event(s)" "TECHNICAL" "INFORMATION"
+redis_hset "TCH_064" "Surreal domain event projection failed" "Could not project SurrealDB domain event %s" "TECHNICAL" "WARNING"
+redis_hset "TCH_065" "Surreal domain event raw storage" "Domain event %s stored only as raw document" "TECHNICAL" "INFORMATION"
 
 # =============================================================
 # Functional Messages

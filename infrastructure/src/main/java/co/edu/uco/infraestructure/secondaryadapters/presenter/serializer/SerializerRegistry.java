@@ -4,6 +4,8 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
+import co.edu.uco.crosscutting.exceptions.CrossWordsException;
+import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -28,12 +30,12 @@ public final class SerializerRegistry {
             Optional<SerializerType> defaultSerializer = serializers.stream()
                     .filter(SerializerType::isDefault)
                     .findFirst();
-            if (defaultSerializer.isPresent()) {
-                return defaultSerializer.get();
-            } else {
-                log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_017.getCode()), mediaType);
-                return null;
-            }
+            return defaultSerializer.orElseGet(() -> {
+                var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_017.getCode());
+                log.error(message, mediaType);
+                throw CrossWordsException.buildInfrastructure(message,
+                        catalogPort.getMessage(MessageCatalogCodeEnum.FUN_023.getCode()), ExceptionType.TECHNICAL);
+            });
         });
     }
 }

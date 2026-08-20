@@ -1,7 +1,11 @@
 package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
+import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
+import co.edu.uco.crosscutting.helpers.UtilDate;
+import co.edu.uco.crosscutting.helpers.UtilText;
 import co.edu.uco.infraestructure.secondaryadapters.repository.surreal.TokenSurrealRepositoryAdapter;
 import co.edu.uco.infraestructure.secondaryadapters.repository.surreal.model.TokenSurrealModel;
 import com.surrealdb.Array;
@@ -14,6 +18,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.datetime;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.quote;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
@@ -48,10 +53,10 @@ public class TokenSurrealRepositoryAdapterImpl implements TokenSurrealRepository
 
         try {
             surreal.query(sql);
-            log.debug("Token persisted into SurrealDB: {}", model.getId());
+            log.debug(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_062.getCode()).formatted(model.getId()));
             return model;
         } catch (final RuntimeException ex) {
-            log.error("Error saving token in SurrealDB. Query: {}", sql, ex);
+            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_061.getCode()).formatted(sql), ex);
             throw ex;
         }
     }
@@ -74,11 +79,11 @@ public class TokenSurrealRepositoryAdapterImpl implements TokenSurrealRepository
 
     private Optional<TokenSurrealModel> findOne(final String sql) {
         final Response response = surreal.query(sql);
-        if (response == null || response.size() == 0) {
+        if (isNullObject(response) || response.size() == 0) {
             return Optional.empty();
         }
         final Value statementResult = response.take(0);
-        if (statementResult == null || !statementResult.isArray()) {
+        if (isNullObject(statementResult) || !statementResult.isArray()) {
             return Optional.empty();
         }
         final Array array = statementResult.getArray();
@@ -86,7 +91,7 @@ public class TokenSurrealRepositoryAdapterImpl implements TokenSurrealRepository
             return Optional.empty();
         }
         final Value first = array.get(0);
-        if (first == null || !first.isObject()) {
+        if (isNullObject(first) || !first.isObject()) {
             return Optional.empty();
         }
         return Optional.of(toModel(first.getObject()));
@@ -104,15 +109,14 @@ public class TokenSurrealRepositoryAdapterImpl implements TokenSurrealRepository
     }
 
     private static String extractIdAsString(final Value value) {
-        if (value == null) return "";
+        if (isNullObject(value)) return "";
         if (value.isRecordId()) return cleanIdPart(value.getRecordId().getId().toString());
         if (value.isString()) return value.getString();
         return value.toString();
     }
 
     private static String cleanIdPart(String id) {
-        if (id == null) return "";
-        id = id.trim();
+        id = UtilText.getDefault(id).trim();
         if (id.length() >= 2 && id.startsWith("`") && id.endsWith("`")) {
             id = id.substring(1, id.length() - 1);
         }
@@ -123,15 +127,15 @@ public class TokenSurrealRepositoryAdapterImpl implements TokenSurrealRepository
     }
 
     private static String stringOf(final Value value) {
-        if (value == null || value.isNull() || value.isNone()) return "";
+        if (isNullObject(value) || value.isNull() || value.isNone()) return "";
         if (value.isString()) return value.getString();
         if (value.isUuid()) return value.getUuid().toString();
         return value.toString();
     }
 
     private static LocalDateTime dateOf(final Value value) {
-        if (value == null || value.isNull() || value.isNone()) return LocalDateTime.now();
+        if (isNullObject(value) || value.isNull() || value.isNone()) return UtilDate.TIME;
         if (value.isDateTime()) return value.getDateTime().toLocalDateTime();
-        return LocalDateTime.now();
+        return UtilDate.TIME;
     }
 }

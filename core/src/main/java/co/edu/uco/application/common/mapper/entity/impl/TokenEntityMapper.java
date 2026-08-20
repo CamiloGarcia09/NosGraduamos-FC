@@ -4,6 +4,7 @@ import co.edu.uco.application.primaryports.dto.token.TokenDTO;
 import co.edu.uco.application.common.mapper.entity.DataMapper;
 import co.edu.uco.application.secondaryports.entity.TokenData;
 import co.edu.uco.application.usecase.domain.TokenDomain;
+import co.edu.uco.crosscutting.helpers.UtilUUID;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +26,13 @@ public final class TokenEntityMapper implements DataMapper<TokenData, TokenDomai
 
     @Override
     public TokenDTO mapperDTO(TokenData entity) {
-        return null;
+        return TokenDTO.builder()
+                .id(entity.getId())
+                .secretName(entity.getSecretName())
+                .creationDate(entity.getCreationDate())
+                .expirationDate(entity.getExpirationDate())
+                .environmentId(UtilUUID.getStringToUUID(entity.getEnvironmentId()))
+                .build();
     }
 
 }

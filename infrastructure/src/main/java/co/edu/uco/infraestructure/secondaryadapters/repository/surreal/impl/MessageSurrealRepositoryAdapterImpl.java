@@ -1,5 +1,6 @@
 package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
+import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
 import co.edu.uco.application.secondaryports.entity.MessageData;
 import co.edu.uco.application.secondaryports.entity.FunctionalityData;
 import co.edu.uco.application.secondaryports.entity.MessageCategoryData;
@@ -9,6 +10,8 @@ import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.DataBaseMessageRepository;
 import co.edu.uco.application.secondaryports.repository.SimplePage;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
+import co.edu.uco.crosscutting.helpers.UtilText;
 import com.surrealdb.Array;
 import com.surrealdb.Object;
 import com.surrealdb.Response;
@@ -23,8 +26,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.quote;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
+import static co.edu.uco.crosscutting.helpers.UtilUUID.DEFAULT_UUID;
 
 @Repository
 public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepository {
@@ -77,7 +82,7 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
                     totalPages
             );
         } catch (final RuntimeException ex) {
-            log.error("Error finding messages by environment in SurrealDB. Environment ID: {}", environmentId, ex);
+            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_057.getCode()).formatted(environmentId), ex);
             throw ex;
         }
     }
@@ -102,11 +107,11 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
     private Optional<MessageData> findOneMessageDocument(final String sql) {
         try {
             final Response response = surreal.query(sql);
-            if (response == null || response.size() == 0) {
+            if (isNullObject(response) || response.size() == 0) {
                 return Optional.empty();
             }
             final Value statementResult = response.take(0);
-            if (statementResult == null || !statementResult.isArray()) {
+            if (isNullObject(statementResult) || !statementResult.isArray()) {
                 return Optional.empty();
             }
             final Array array = statementResult.getArray();
@@ -114,12 +119,12 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
                 return Optional.empty();
             }
             final Value first = array.get(0);
-            if (first == null || !first.isObject()) {
+            if (isNullObject(first) || !first.isObject()) {
                 return Optional.empty();
             }
             return Optional.of(toMessageDataFromDocument(first.getObject()));
         } catch (final RuntimeException ex) {
-            log.error("Error querying SurrealDB. Query: {}", sql, ex);
+            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_058.getCode()).formatted(sql), ex);
             throw ex;
         }
     }
@@ -128,22 +133,22 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
         final List<MessageData> messages = new ArrayList<>();
         try {
             final Response response = surreal.query(sql);
-            if (response == null || response.size() == 0) {
+            if (isNullObject(response) || response.size() == 0) {
                 return messages;
             }
             final Value statementResult = response.take(0);
-            if (statementResult == null || !statementResult.isArray()) {
+            if (isNullObject(statementResult) || !statementResult.isArray()) {
                 return messages;
             }
             final Array array = statementResult.getArray();
             for (int i = 0; i < array.len(); i++) {
                 final Value item = array.get(i);
-                if (item != null && item.isObject()) {
+                if (!isNullObject(item) && item.isObject()) {
                     messages.add(toMessageDataFromDocument(item.getObject()));
                 }
             }
         } catch (final RuntimeException ex) {
-            log.error("Error querying SurrealDB for multiple messages. Query: {}", sql, ex);
+            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_059.getCode()).formatted(sql), ex);
             throw ex;
         }
         return messages;
@@ -152,11 +157,11 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
     private long getCount(final String sql) {
         try {
             final Response response = surreal.query(sql);
-            if (response == null || response.size() == 0) {
+            if (isNullObject(response) || response.size() == 0) {
                 return 0;
             }
             final Value statementResult = response.take(0);
-            if (statementResult == null || !statementResult.isArray()) {
+            if (isNullObject(statementResult) || !statementResult.isArray()) {
                 return 0;
             }
             final Array array = statementResult.getArray();
@@ -164,12 +169,12 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
                 return 0;
             }
             final Value first = array.get(0);
-            if (first == null || !first.isObject()) {
+            if (isNullObject(first) || !first.isObject()) {
                 return 0;
             }
             final Object obj = first.getObject();
             final Value count = obj.get("count");
-            if (count == null || count.isNull()) {
+            if (isNullObject(count) || count.isNull()) {
                 return 0;
             }
             try {
@@ -181,7 +186,7 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
                 return 0;
             }
         } catch (final RuntimeException ex) {
-            log.error("Error counting records in SurrealDB. Query: {}", sql, ex);
+            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_060.getCode()).formatted(sql), ex);
             return 0;
         }
     }
@@ -208,14 +213,14 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
     }
 
     private static Optional<Object> objectOf(final Value value) {
-        if (value == null || !value.isObject()) {
+        if (isNullObject(value) || !value.isObject()) {
             return Optional.empty();
         }
         return Optional.of(value.getObject());
     }
 
     private static String nameOf(final Value value) {
-        if (value == null || value.isNull() || value.isNone()) {
+        if (isNullObject(value) || value.isNull() || value.isNone()) {
             return "";
         }
         if (value.isObject()) {
@@ -225,7 +230,7 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
     }
 
     private static UUID extractIdAsUUID(final Value value) {
-        if (value == null) return UUID.randomUUID();
+        if (isNullObject(value)) return DEFAULT_UUID;
         if (value.isRecordId()) {
             try {
                 final String fullId = value.getRecordId().toString();
@@ -235,7 +240,7 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
                     return UUID.fromString(idPart);
                 }
             } catch (Exception e) {
-                return UUID.randomUUID();
+                return DEFAULT_UUID;
             }
         }
         if (value.isString()) {
@@ -245,15 +250,14 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
                 final String idPart = separator > 0 ? cleanThingId(raw.substring(separator + 1)) : cleanThingId(raw);
                 return UUID.fromString(idPart);
             } catch (Exception e) {
-                return UUID.randomUUID();
+                return DEFAULT_UUID;
             }
         }
-        return UUID.randomUUID();
+        return DEFAULT_UUID;
     }
 
     private static String cleanThingId(String id) {
-        if (id == null) return "";
-        id = id.trim();
+        id = UtilText.getDefault(id).trim();
         if (id.length() >= 2 && id.startsWith("`") && id.endsWith("`")) {
             id = id.substring(1, id.length() - 1);
         }
@@ -268,7 +272,7 @@ public class MessageSurrealRepositoryAdapterImpl implements DataBaseMessageRepos
     }
 
     private static String stringOf(final Value value) {
-        if (value == null || value.isNull() || value.isNone()) return "";
+        if (isNullObject(value) || value.isNull() || value.isNone()) return "";
         if (value.isString()) return value.getString();
         if (value.isUuid()) return value.getUuid().toString();
         return value.toString();

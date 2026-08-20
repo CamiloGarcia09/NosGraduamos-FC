@@ -193,6 +193,39 @@ public enum MessageCatalogCodeEnum {
     /** Error al guardar el mensaje en Redis. */
     TCH_054("TCH_054"),
 
+    /** La referencia estática al catálogo no está inicializada. */
+    TCH_055("TCH_055"),
+
+    /** Error al consultar un entorno en SurrealDB. */
+    TCH_056("TCH_056"),
+
+    /** Error al consultar los mensajes por entorno en SurrealDB. */
+    TCH_057("TCH_057"),
+
+    /** Error al ejecutar una consulta en SurrealDB. */
+    TCH_058("TCH_058"),
+
+    /** Error al consultar múltiples mensajes en SurrealDB. */
+    TCH_059("TCH_059"),
+
+    /** Error al contar registros en SurrealDB. */
+    TCH_060("TCH_060"),
+
+    /** Error al guardar el token en SurrealDB. */
+    TCH_061("TCH_061"),
+
+    /** Token persistido en SurrealDB. */
+    TCH_062("TCH_062"),
+
+    /** Proyección de eventos de dominio en SurrealDB. */
+    TCH_063("TCH_063"),
+
+    /** Error al proyectar un evento de dominio en SurrealDB. */
+    TCH_064("TCH_064"),
+
+    /** Evento de dominio almacenado solo como documento crudo. */
+    TCH_065("TCH_065"),
+
     // =========================================================================
     // Mensajes funcionales — Validación y caché
     // =========================================================================

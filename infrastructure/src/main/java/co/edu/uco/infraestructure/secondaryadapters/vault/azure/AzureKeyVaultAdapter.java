@@ -37,26 +37,7 @@ public class AzureKeyVaultAdapter implements VaultPort {
         this.catalogPort = catalogPort;
 
         if (isEmptyOrNull(trim(urlVault))) {
-            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_041.getCode()));
-            this.secretClient = null;
-        } else {
-            SecretClient client = null;
-            try {
-                client = new SecretClientBuilder()
-                        .vaultUrl(urlVault)
-                        .credential(new DefaultAzureCredentialBuilder().build())
-                        .buildClient();
-            } catch (Exception ex) {
-                log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_042.getCode()).formatted(urlVault), ex);
-            }
-            this.secretClient = client;
-        }
-    }
-
-    @Override
-    public String getSecretValue(String secretName) {
-        if (isEmptyOrNull(trim(secretName))) {
-            var techMsg = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_043.getCode());
+            var techMsg = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_041.getCode());
             log.error(techMsg);
             throw CrossWordsException.buildInfrastructure(
                     techMsg,
@@ -64,9 +45,31 @@ public class AzureKeyVaultAdapter implements VaultPort {
                     ExceptionType.TECHNICAL
             );
         }
+        this.secretClient = buildSecretClient(urlVault);
+    }
 
-        if (isNullObject(this.secretClient)) {
-            var techMsg = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_044.getCode());
+    private SecretClient buildSecretClient(String urlVault) {
+        try {
+            return new SecretClientBuilder()
+                    .vaultUrl(urlVault)
+                    .credential(new DefaultAzureCredentialBuilder().build())
+                    .buildClient();
+        } catch (Exception ex) {
+            var techMsg = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_042.getCode()).formatted(urlVault);
+            log.error(techMsg, ex);
+            throw CrossWordsException.buildInfrastructure(
+                    techMsg,
+                    catalogPort.getMessage(MessageCatalogCodeEnum.FUN_023.getCode()),
+                    ex,
+                    ExceptionType.TECHNICAL
+            );
+        }
+    }
+
+    @Override
+    public String getSecretValue(String secretName) {
+        if (isEmptyOrNull(trim(secretName))) {
+            var techMsg = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_043.getCode());
             log.error(techMsg);
             throw CrossWordsException.buildInfrastructure(
                     techMsg,
