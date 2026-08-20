@@ -82,6 +82,10 @@ redis_hset "TCH_051" "Redis message model retrieval failed" "Failed to retrieve 
 redis_hset "TCH_052" "Redis message content retrieval failed" "Failed to retrieve message content from Redis for key: %s" "TECHNICAL" "ERROR"
 redis_hset "TCH_053" "Redis message title retrieval failed" "Failed to retrieve message title from Redis for key: %s" "TECHNICAL" "ERROR"
 redis_hset "TCH_054" "Redis message save failed" "Failed to save message to Redis for key: %s" "TECHNICAL" "ERROR"
+redis_hset "TCH_055" "Parameter code is null or empty" "The parameter code cannot be null or empty." "TECHNICAL" "ERROR"
+redis_hset "TCH_056" "Unexpected parameter retrieval error" "Unexpected error retrieving parameter from catalog for code: %s" "TECHNICAL" "ERROR"
+redis_hset "TCH_057" "Technical parameter retrieval error" "Technical error retrieving parameter from catalog for code: %s" "TECHNICAL" "ERROR"
+redis_hset "TCH_058" "Parameter not found" "Parameter with code '%s' was not found in the catalog." "TECHNICAL" "ERROR"
 
 # =============================================================
 # Functional Messages

@@ -105,4 +105,7 @@ public final class InfrastructureConstant {
 
     public static final String SURREAL_TABLE_TOKEN = "token";
     public static final String SURREAL_TABLE_TOKEN_STATE = "token_state";
+
+    public static final String PARAMETER_PROPERTIES_FILE = "parameter.properties";
+
 }

@@ -194,6 +194,22 @@ public enum MessageCatalogCodeEnum {
     TCH_054("TCH_054"),
 
     // =========================================================================
+    // Mensajes técnicos — Catálogo de parámetros
+    // =========================================================================
+
+    /** El código del parámetro no puede ser nulo o vacío. */
+    TCH_055("TCH_055"),
+
+    /** Error inesperado al obtener el parámetro del catálogo. */
+    TCH_056("TCH_056"),
+
+    /** Error técnico al obtener el parámetro del catálogo. */
+    TCH_057("TCH_057"),
+
+    /** El parámetro con código '%s' no fue encontrado en el catálogo. */
+    TCH_058("TCH_058"),
+
+    // =========================================================================
     // Mensajes funcionales — Validación y caché
     // =========================================================================
 
