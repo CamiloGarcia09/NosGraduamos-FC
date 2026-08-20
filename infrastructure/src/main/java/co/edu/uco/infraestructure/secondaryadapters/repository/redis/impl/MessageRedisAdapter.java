@@ -6,7 +6,7 @@ import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.CacheMessageRepository;
 import co.edu.uco.application.secondaryports.repository.SimplePage;
-import co.edu.uco.crosscutting.catalog.MessageCatalogCode;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.infraestructure.secondaryadapters.repository.data.DataMapper;
 import co.edu.uco.infraestructure.secondaryadapters.repository.redis.MessageRedis;
 import co.edu.uco.infraestructure.secondaryadapters.repository.redis.RedisRepositoryAdapter;
@@ -48,9 +48,9 @@ public final class MessageRedisAdapter implements CacheMessageRepository {
         try {
             repository.save(mapper.mapperModel(data));
         } catch (DataAccessException ex) {
-            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_014), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_014.getCode()), ex);
         } catch (Exception ex) {
-            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_015), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_015.getCode()), ex);
         }
     }
 
@@ -64,9 +64,9 @@ public final class MessageRedisAdapter implements CacheMessageRepository {
             messageRedis.setEnvironmentId(environmentId);
             repository.save(messageRedis);
         } catch (DataAccessException ex) {
-            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_014), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_014.getCode()), ex);
         } catch (Exception ex) {
-            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_015), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_015.getCode()), ex);
         }
     }
 
@@ -78,10 +78,10 @@ public final class MessageRedisAdapter implements CacheMessageRepository {
         try {
             return repository.findById(id).map(mapper::mapperData);
         } catch (DataAccessException ex) {
-            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_014), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_014.getCode()), ex);
             return Optional.empty();
         } catch (Exception ex) {
-            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_015), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_015.getCode()), ex);
             return Optional.empty();
         }
     }
@@ -95,10 +95,10 @@ public final class MessageRedisAdapter implements CacheMessageRepository {
             return SimplePage.of(repository.findByEnvironmentId(environment, pageable)
                     .map(mapper::mapperData));
         } catch (DataAccessException ex) {
-            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_014), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_014.getCode()), ex);
             return SimplePage.of(Collections.emptyList(), pageable.getPageNumber() + 1, pageable.getPageSize(), 0L, 0);
         } catch (Exception ex) {
-            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_015), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_015.getCode()), ex);
             return SimplePage.of(Collections.emptyList(), pageable.getPageNumber() + 1, pageable.getPageSize(), 0L, 0);
         }
     }
@@ -112,10 +112,10 @@ public final class MessageRedisAdapter implements CacheMessageRepository {
             return repository.findByCodeAndEnvironmentId(code, environmentId)
                     .map(mapper::mapperData);
         } catch (DataAccessException ex) {
-            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_014), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_014.getCode()), ex);
             return Optional.empty();
         } catch (Exception ex) {
-            log.error(catalogPort.getMessage(MessageCatalogCode.FUN_015), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_015.getCode()), ex);
             return Optional.empty();
         }
     }

@@ -4,6 +4,7 @@ import co.edu.uco.application.secondaryports.entity.EnvironmentData;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -23,7 +24,7 @@ public final class ApplicationBelongsEnvironmentValidator {
         Optional<EnvironmentData> environment = repository.findById(getStringFromUUID(environmentId));
         environment.ifPresent(environmentData -> {
             if (!environmentData.getApplication().getId().equals(applicationId)) {
-                throw BusinessRuleException.buildUserException(catalogPort.getMessage("FUN_036"));
+                throw BusinessRuleException.buildUserException(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_036.getCode()));
             }
         });
     }

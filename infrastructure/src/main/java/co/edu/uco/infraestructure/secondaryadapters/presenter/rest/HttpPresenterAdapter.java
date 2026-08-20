@@ -5,7 +5,7 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.presenter.PresenterPort;
-import co.edu.uco.crosscutting.catalog.MessageCatalogCode;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.SerializerRegistry;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,10 +50,10 @@ public final class HttpPresenterAdapter<T> implements PresenterPort<T> {
             response.setStatus(HttpStatus.OK.value());
             response.setContentType(serializer.getSupportedContentType());
             response.getWriter().write(formattedResponse);
-            log.info(catalogPort.getMessage(MessageCatalogCode.TCH_021), formattedResponse);
+            log.info(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_021.getCode()), formattedResponse);
 
         } catch (CrossWordsException | IOException ex) {
-            log.error(catalogPort.getMessage(MessageCatalogCode.TCH_016), ex);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_016.getCode()), ex);
         }
     }
 
@@ -70,17 +70,17 @@ public final class HttpPresenterAdapter<T> implements PresenterPort<T> {
             var message = Optional.ofNullable(ex.getUserMessage())
                     .filter(msg -> !msg.isEmpty())
                     .orElseGet(() -> {
-                        log.error(catalogPort.getMessage(MessageCatalogCode.TCH_016), ex);
-                        return catalogPort.getMessage(MessageCatalogCode.FUN_023);
+                        log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_016.getCode()), ex);
+                        return catalogPort.getMessage(MessageCatalogCodeEnum.FUN_023.getCode());
                     });
             var responseError = new Response<>(List.of(), List.of(message));
             var formattedResponse = serializer.serialize(responseError);
             response.setStatus(HttpStatus.NOT_FOUND.value());
             response.setContentType(serializer.getSupportedContentType());
             response.getWriter().write(formattedResponse);
-            log.error(catalogPort.getMessage(MessageCatalogCode.TCH_020), formattedResponse);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_020.getCode()), formattedResponse);
         } catch (IOException | CrossWordsException exception) {
-            log.error(catalogPort.getMessage(MessageCatalogCode.TCH_019), exception);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_019.getCode()), exception);
             throw exception;
         }
     }
@@ -100,9 +100,9 @@ public final class HttpPresenterAdapter<T> implements PresenterPort<T> {
             response.setStatus(HttpStatus.BAD_REQUEST.value());
             response.setContentType(serializer.getSupportedContentType());
             response.getWriter().write(formattedResponse);
-            log.error(catalogPort.getMessage(MessageCatalogCode.TCH_020), formattedResponse);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_020.getCode()), formattedResponse);
         } catch (IOException ioEx) {
-            log.error(catalogPort.getMessage(MessageCatalogCode.TCH_019), ioEx);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_019.getCode()), ioEx);
         }
     }
 }

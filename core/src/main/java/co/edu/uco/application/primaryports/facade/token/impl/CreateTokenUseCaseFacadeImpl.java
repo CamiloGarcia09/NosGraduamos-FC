@@ -13,6 +13,7 @@ import co.edu.uco.application.usecase.handling.HandlingCreateTokenPort;
 import co.edu.uco.application.usecase.handling.HandlingRevokeTokenPort;
 import co.edu.uco.application.usecase.validator.token.CreateTokenCompositeValidator;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.helpers.UtilPairKey;
 import org.springframework.stereotype.Component;
 
@@ -71,7 +72,7 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
         var keyPairResponseDTO = encrypt.generateKeys();
 
         if(isNullObject(keyPairResponseDTO)){
-            var message = catalogPort.getMessage("TCH_024");
+            var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_024.getCode());
             log.error(message);
             throw CrossWordsException.build(message);
         }
@@ -92,7 +93,7 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
             return generateSignature;
 
         }catch (Exception e){
-            var message = catalogPort.getMessage("TCH_025");
+            var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_025.getCode());
             log.error(message, e);
             throw CrossWordsException.build(message, e);
         }

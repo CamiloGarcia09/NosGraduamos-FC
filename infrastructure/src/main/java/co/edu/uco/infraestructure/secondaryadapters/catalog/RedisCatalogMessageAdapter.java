@@ -5,7 +5,7 @@ import co.edu.uco.application.common.catalog.MessageCatalog;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
-import co.edu.uco.crosscutting.catalog.MessageCatalogCode;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import jakarta.annotation.PostConstruct;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -50,7 +50,7 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
                     (String) entry.get("type"),
                     (String) entry.get("category"));
         } catch (Exception ex) {
-            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCode.TCH_051).formatted(key), ex);
+            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_051.getCode()).formatted(key), ex);
             return null;
         }
     }
@@ -64,7 +64,7 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
             var value = (String) redisTemplate.opsForHash().get(key, "content");
             return isNullObject(value) ? key : value;
         } catch (Exception ex) {
-            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCode.TCH_052).formatted(key), ex);
+            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_052.getCode()).formatted(key), ex);
             return key;
         }
     }
@@ -78,7 +78,7 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
             String message = (String) redisTemplate.opsForHash().get(key, "content");
             return isNullObject(message) ? defaultMessage : message;
         } catch (Exception ex) {
-            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCode.TCH_052).formatted(key), ex);
+            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_052.getCode()).formatted(key), ex);
             return defaultMessage;
         }
     }
@@ -92,7 +92,7 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
             var title = (String) redisTemplate.opsForHash().get(key, "title");
             return isNullObject(title) ? EMPTY : title;
         } catch (Exception ex) {
-            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCode.TCH_053).formatted(key), ex);
+            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_053.getCode()).formatted(key), ex);
             return EMPTY;
         }
     }
@@ -110,7 +110,7 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
                     "type",     isNullObject(message.type())     ? EMPTY : message.type(),
                     "category", isNullObject(message.category()) ? EMPTY : message.category()));
         } catch (Exception ex) {
-            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCode.TCH_054).formatted(key), ex);
+            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_054.getCode()).formatted(key), ex);
         }
     }
 }

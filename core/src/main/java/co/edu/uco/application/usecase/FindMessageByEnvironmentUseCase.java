@@ -13,6 +13,7 @@ import co.edu.uco.application.usecase.handling.HandlingFindMessageEnvironmentPor
 import co.edu.uco.application.usecase.validator.message.ListMessageValidator;
 import co.edu.uco.application.usecase.validator.page.PageRequestRangeValidator;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import org.springframework.stereotype.Component;
 
@@ -45,7 +46,7 @@ public final class FindMessageByEnvironmentUseCase implements HandlingFindMessag
             throw exception;
         }
         catch (Exception exception){
-            var errorMessage = messageCatalogStrategy.getSystemMessageContent("FUN_011");
+            var errorMessage = messageCatalogStrategy.getSystemMessageContent(MessageCatalogCodeEnum.FUN_011.getCode());
             log.error(errorMessage);
             throw BusinessException.buildUserException(errorMessage);
         }

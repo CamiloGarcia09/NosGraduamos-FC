@@ -4,6 +4,7 @@ import co.edu.uco.application.primaryports.dto.page.PageRequestDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.usecase.validator.Validator;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import org.springframework.stereotype.Component;
 
 import static co.edu.uco.application.CrosswordsConstant.*;
@@ -28,24 +29,24 @@ public final class PageRequestTypeValidator implements Validator<PageRequestDTO>
     }
     private void validatePage(String page) {
         if (!isNullObject(page) && !page.isEmpty() && !validMatch(page, ONLY_NUMBERS)) {
-            throw BusinessRuleException.buildUserException(String.format(catalogPort.getMessage("FUN_033"), PAGE_ATTRIBUTE));
+            throw BusinessRuleException.buildUserException(String.format(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_033.getCode()), PAGE_ATTRIBUTE));
         }
     }
     private void validateSize(String size) {
         if (!isNullObject(size) && !size.isEmpty() && !validMatch(size, ONLY_NUMBERS)) {
-            throw BusinessRuleException.buildUserException(String.format(catalogPort.getMessage("FUN_033"), SIZE_ATTRIBUTE));
+            throw BusinessRuleException.buildUserException(String.format(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_033.getCode()), SIZE_ATTRIBUTE));
         }
     }
     private void validateColumnSort(String columnSort) {
         if (!isNullObject(columnSort) && !columnSort.isEmpty() && !validMatch(columnSort, ONLY_LETTERS)) {
             throw BusinessRuleException.buildUserException(
-                    String.format(catalogPort.getMessage("FUN_043"), COLUMN_SORT_ATTRIBUTE));
+                    String.format(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_043.getCode()), COLUMN_SORT_ATTRIBUTE));
         }
     }
     private void validateSort(String sort) {
         if (!isNullObject(sort) && !sort.isEmpty() && !validMatch(sort, ONLY_LETTERS)) {
             throw BusinessRuleException.buildUserException(
-                    String.format(catalogPort.getMessage("FUN_043"), SORT_ATTRIBUTE));
+                    String.format(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_043.getCode()), SORT_ATTRIBUTE));
         }
     }
 }

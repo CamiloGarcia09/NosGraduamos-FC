@@ -5,7 +5,7 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.secret.EncryptTokenPort;
-import co.edu.uco.crosscutting.catalog.MessageCatalogCode;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType;
 import org.springframework.stereotype.Service;
@@ -44,9 +44,9 @@ public final class JavaSecurityEncryptTokenAdapter implements EncryptTokenPort {
             var keyPair = generator.generateKeyPair();
             return new KeyPairDTO(keyPair.getPublic(), keyPair.getPrivate());
         } catch (Exception e) {
-            var message = catalogPort.getMessage(MessageCatalogCode.TCH_026);
+            var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_026.getCode());
             log.error(message, e);
-            throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage(MessageCatalogCode.FUN_025), e,
+            throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage(MessageCatalogCodeEnum.FUN_025.getCode()), e,
                     ExceptionType.TECHNICAL);
         }
     }
@@ -54,9 +54,9 @@ public final class JavaSecurityEncryptTokenAdapter implements EncryptTokenPort {
     @Override
     public String generateSignature(String data, PublicKey publicKey) {
         if (isNullObject(data) || isNullObject(publicKey)) {
-            var message = catalogPort.getMessage(MessageCatalogCode.TCH_040);
+            var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_040.getCode());
             log.error(message);
-            throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage(MessageCatalogCode.FUN_025), ExceptionType.TECHNICAL);
+            throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage(MessageCatalogCodeEnum.FUN_025.getCode()), ExceptionType.TECHNICAL);
         }
 
         try {
@@ -68,14 +68,14 @@ public final class JavaSecurityEncryptTokenAdapter implements EncryptTokenPort {
 
             return Base64.getEncoder().encodeToString(encryptedData);
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-            var message = catalogPort.getMessage(MessageCatalogCode.TCH_027);
+            var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_027.getCode());
             log.error(message, e);
-            throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage(MessageCatalogCode.FUN_025), e,
+            throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage(MessageCatalogCodeEnum.FUN_025.getCode()), e,
                     ExceptionType.TECHNICAL);
         } catch (Exception e) {
-            var message = catalogPort.getMessage(MessageCatalogCode.TCH_027);
+            var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_027.getCode());
             log.error(message, e);
-            throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage(MessageCatalogCode.FUN_025), e,
+            throw CrossWordsException.buildInfrastructure(message, catalogPort.getMessage(MessageCatalogCodeEnum.FUN_025.getCode()), e,
                     ExceptionType.TECHNICAL);
         }
     }
@@ -83,7 +83,7 @@ public final class JavaSecurityEncryptTokenAdapter implements EncryptTokenPort {
     @Override
     public Boolean access(String privateKey, String signature, String secretName) {
         if (isEmptyOrNull(trim(privateKey)) || isEmptyOrNull(trim(signature)) || isEmptyOrNull(trim(secretName))) {
-            log.error(catalogPort.getMessage(MessageCatalogCode.TCH_028), privateKey, signature, secretName);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_028.getCode()), privateKey, signature, secretName);
             return false;
         }
 
@@ -101,10 +101,10 @@ public final class JavaSecurityEncryptTokenAdapter implements EncryptTokenPort {
 
             return data.equals(secretName);
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException | IllegalArgumentException e) {
-            log.error(catalogPort.getMessage(MessageCatalogCode.TCH_028), privateKey, signature, secretName, e);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_028.getCode()), privateKey, signature, secretName, e);
             return false;
         } catch (Exception e) {
-            log.error(catalogPort.getMessage(MessageCatalogCode.TCH_028), privateKey, signature, secretName, e);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_028.getCode()), privateKey, signature, secretName, e);
             return false;
         }
     }

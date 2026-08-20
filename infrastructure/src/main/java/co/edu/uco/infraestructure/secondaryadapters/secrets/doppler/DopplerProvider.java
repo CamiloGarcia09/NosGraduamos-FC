@@ -4,7 +4,7 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.secret.SecretProviderPort;
-import co.edu.uco.crosscutting.catalog.MessageCatalogCode;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.infraestructure.config.DopplerProperties;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,21 +46,21 @@ public final class DopplerProvider implements SecretProviderPort {
 
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                var message = catalogPort.getMessage(MessageCatalogCode.TCH_030).formatted(response.code());
+                var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_030.getCode()).formatted(response.code());
                 log.error(message);
                 throw CrossWordsException.buildInfrastructure(
                         message,
-                        catalogPort.getMessage(MessageCatalogCode.FUN_025),
+                        catalogPort.getMessage(MessageCatalogCodeEnum.FUN_025.getCode()),
                         TECHNICAL
                 );
             } else {
                 var body = response.body();
                 if (isNullObject(body)) {
-                    var message = catalogPort.getMessage(MessageCatalogCode.TCH_029);
+                    var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_029.getCode());
                     log.error(message);
                     throw CrossWordsException.buildInfrastructure(
                             message,
-                            catalogPort.getMessage(MessageCatalogCode.FUN_025),
+                            catalogPort.getMessage(MessageCatalogCodeEnum.FUN_025.getCode()),
                             TECHNICAL
                     );
                 }
@@ -71,11 +71,11 @@ public final class DopplerProvider implements SecretProviderPort {
                 );
             }
         } catch (Exception e) {
-            var message = catalogPort.getMessage(MessageCatalogCode.TCH_029);
+            var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_029.getCode());
             log.error(message, e);
             throw CrossWordsException.buildInfrastructure(
                     message,
-                    catalogPort.getMessage(MessageCatalogCode.FUN_025),
+                    catalogPort.getMessage(MessageCatalogCodeEnum.FUN_025.getCode()),
                     e,
                     TECHNICAL
             );

@@ -5,7 +5,7 @@ import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.usecase.domain.MessageCodeDomain;
 import co.edu.uco.application.secondaryports.broker.SendMessage;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
-import co.edu.uco.crosscutting.catalog.MessageCatalogCode;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.infraestructure.config.PulsarProperties;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType;
@@ -46,21 +46,21 @@ public final class SendBrokerMessage implements SendMessage {
     @Override
     public void execute(MessageCodeDomain messageDomain, HttpServletResponse response) {
         if (isNullObject(messageDomain)) {
-            var message = catalogPort.getMessage(MessageCatalogCode.TCH_038);
+            var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_038.getCode());
             log.error(message);
             throw CrossWordsException.buildInfrastructure(
                     message,
-                    catalogPort.getMessage(MessageCatalogCode.FUN_023),
+                    catalogPort.getMessage(MessageCatalogCodeEnum.FUN_023.getCode()),
                     ExceptionType.TECHNICAL
             );
         }
 
         if (isNullObject(this.client)) {
-            var message = catalogPort.getMessage(MessageCatalogCode.TCH_002);
+            var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_002.getCode());
             log.error(message);
             throw CrossWordsException.buildInfrastructure(
                     message,
-                    catalogPort.getMessage(MessageCatalogCode.FUN_023),
+                    catalogPort.getMessage(MessageCatalogCodeEnum.FUN_023.getCode()),
                     ExceptionType.TECHNICAL
             );
         }
@@ -73,31 +73,31 @@ public final class SendBrokerMessage implements SendMessage {
             if (message.isPresent()) {
                 stringProducer.send(message.get());
             } else {
-                var techMsg = catalogPort.getMessage(MessageCatalogCode.TCH_039);
+                var techMsg = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_039.getCode());
                 log.error(techMsg);
                 throw CrossWordsException.buildInfrastructure(
                         techMsg,
-                        catalogPort.getMessage(MessageCatalogCode.FUN_023),
+                        catalogPort.getMessage(MessageCatalogCodeEnum.FUN_023.getCode()),
                         ExceptionType.TECHNICAL
                 );
             }
         } catch (PulsarClientException ex) {
-            var message = catalogPort.getMessage(MessageCatalogCode.TCH_002);
+            var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_002.getCode());
             log.error(message, ex);
             throw CrossWordsException.buildInfrastructure(
                     message,
-                    catalogPort.getMessage(MessageCatalogCode.FUN_023),
+                    catalogPort.getMessage(MessageCatalogCodeEnum.FUN_023.getCode()),
                     ex,
                     ExceptionType.TECHNICAL
             );
         } catch (CrossWordsException ex) {
             throw ex;
         } catch (Exception ex) {
-            var message = catalogPort.getMessage(MessageCatalogCode.TCH_002);
+            var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_002.getCode());
             log.error(message, ex);
             throw CrossWordsException.buildInfrastructure(
                     message,
-                    catalogPort.getMessage(MessageCatalogCode.FUN_023),
+                    catalogPort.getMessage(MessageCatalogCodeEnum.FUN_023.getCode()),
                     ex,
                     ExceptionType.TECHNICAL
             );

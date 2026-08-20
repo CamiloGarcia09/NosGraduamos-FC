@@ -5,6 +5,7 @@ import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.secret.CreateTokenSecretPort;
 import co.edu.uco.infraestructure.config.DopplerProperties;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType;
 import okhttp3.*;
@@ -43,21 +44,21 @@ public final class DopplerCreateToken implements CreateTokenSecretPort {
 
         try(Response response = client.newCall(request).execute()) {
             if(!response.isSuccessful()) {
-                var message = catalogPort.getMessage("TCH_030").formatted(response.code());
+                var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_030.getCode()).formatted(response.code());
                 log.error(message);
                 throw CrossWordsException.buildInfrastructure(
                         message,
-                        catalogPort.getMessage("FUN_025"),
+                        catalogPort.getMessage(MessageCatalogCodeEnum.FUN_025.getCode()),
                         ExceptionType.TECHNICAL
                 );
             }
             cacheService.invalidateCache(secretName);
         } catch (Exception e) {
-            var message = catalogPort.getMessage("TCH_029");
+            var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_029.getCode());
             log.error(message, e);
             throw CrossWordsException.buildInfrastructure(
                     message,
-                    catalogPort.getMessage("FUN_025"),
+                    catalogPort.getMessage(MessageCatalogCodeEnum.FUN_025.getCode()),
                     e,
                     ExceptionType.TECHNICAL
             );

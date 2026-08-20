@@ -4,6 +4,7 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.repository.token.FindTokenRepository;
 import co.edu.uco.application.usecase.handling.HandlingFindEnvironmentIdTokenPort;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import org.springframework.stereotype.Component;
 
 import static co.edu.uco.crosscutting.helpers.UtilText.getDefault;
@@ -25,7 +26,7 @@ public final class FindEnvironmentIdTokenUseCase implements HandlingFindEnvironm
             var tokenData = findTokenRepository.findById(token);
             return getDefault(tokenData.getEnvironmentId());
         }catch (Exception exception){
-            throw CrossWordsException.build(catalogPort.getMessage("FUN_041"));
+            throw CrossWordsException.build(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_041.getCode()));
         }
     }
 }
