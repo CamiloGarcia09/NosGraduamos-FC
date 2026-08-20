@@ -1,8 +1,11 @@
 package co.edu.uco.infraestructure.secondaryadapters.catalog;
 
 import co.edu.uco.application.common.catalog.MessageCatalog;
+import co.edu.uco.application.crosscutting.exceptions.MessageKeyCanNotBeEmptyException;
+import co.edu.uco.application.crosscutting.exceptions.MessageNotFoundException;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
+import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
@@ -64,8 +68,9 @@ class RedisCatalogMessageAdapterTest {
     }
 
     @Test
-    void getMessageModel_returnsNull_whenKeyIsEmpty() {
-        assertThat(adapter.getMessageModel(" ")).isNull();
+    void getMessageModel_throws_whenKeyIsEmpty() {
+        assertThatThrownBy(() -> adapter.getMessageModel(" "))
+                .isInstanceOf(MessageKeyCanNotBeEmptyException.class);
         verify(hashOperations, never()).entries(anyString());
     }
 
@@ -89,24 +94,27 @@ class RedisCatalogMessageAdapterTest {
     }
 
     @Test
-    void getMessageModel_returnsNull_whenEntryIsEmpty() {
+    void getMessageModel_throws_whenEntryIsEmpty() {
         when(hashOperations.entries("msg-key")).thenReturn(new HashMap<>());
 
-        assertThat(adapter.getMessageModel("msg-key")).isNull();
+        assertThatThrownBy(() -> adapter.getMessageModel("msg-key"))
+                .isInstanceOf(MessageNotFoundException.class);
     }
 
     @Test
-    void getMessageModel_returnsNull_whenEntryIsNull() {
+    void getMessageModel_throws_whenEntryIsNull() {
         when(hashOperations.entries("msg-key")).thenReturn(null);
 
-        assertThat(adapter.getMessageModel("msg-key")).isNull();
+        assertThatThrownBy(() -> adapter.getMessageModel("msg-key"))
+                .isInstanceOf(MessageNotFoundException.class);
     }
 
     @Test
-    void getMessageModel_returnsNullAndLogs_whenRedisThrows() {
+    void getMessageModel_throwsAndLogs_whenRedisThrows() {
         when(redisTemplate.opsForHash()).thenThrow(new RuntimeException("redis down"));
 
-        assertThat(adapter.getMessageModel("msg-key")).isNull();
+        assertThatThrownBy(() -> adapter.getMessageModel("msg-key"))
+                .isInstanceOf(CrossWordsException.class);
         verify(log).error(anyString(), any(Exception.class));
     }
 

@@ -42,7 +42,7 @@ class AzureKeyVaultAdapterTest {
     @BeforeEach
     void setUp() {
         when(loggerFactory.getLogger(AzureKeyVaultAdapter.class)).thenReturn(log);
-        adapter = new AzureKeyVaultAdapter("", catalogPort, loggerFactory);
+        adapter = new AzureKeyVaultAdapter("https://fake.vault.azure.net", catalogPort, loggerFactory);
     }
 
     private void injectSecretClient() throws Exception {
@@ -72,16 +72,6 @@ class AzureKeyVaultAdapterTest {
         when(catalogPort.getMessage("FUN_023")).thenReturn("user");
 
         assertThatThrownBy(() -> adapter.getSecretValue("  "))
-                .isInstanceOf(CrossWordsException.class)
-                .satisfies(ex -> assertInfrastructureError(ex, "tech", "user"));
-    }
-
-    @Test
-    void getSecretValue_throws_whenClientNotConfigured() {
-        when(catalogPort.getMessage("TCH_044")).thenReturn("tech");
-        when(catalogPort.getMessage("FUN_023")).thenReturn("user");
-
-        assertThatThrownBy(() -> adapter.getSecretValue("secret-1"))
                 .isInstanceOf(CrossWordsException.class)
                 .satisfies(ex -> assertInfrastructureError(ex, "tech", "user"));
     }

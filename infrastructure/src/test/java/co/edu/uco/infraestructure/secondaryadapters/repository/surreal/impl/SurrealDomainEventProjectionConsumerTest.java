@@ -1,5 +1,7 @@
 package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
+import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
+import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import com.surrealdb.Array;
@@ -10,6 +12,7 @@ import com.surrealdb.RecordId;
 import com.surrealdb.Response;
 import com.surrealdb.Surreal;
 import com.surrealdb.Value;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,14 +47,23 @@ class SurrealDomainEventProjectionConsumerTest {
     private LoggingPortFactory loggerFactory;
     @Mock
     private LoggingPort log;
+    @Mock
+    private CatalogPort catalogPort;
 
     private SurrealDomainEventProjectionConsumer consumer;
 
     @BeforeEach
     void setUp() {
         lenient().when(loggerFactory.getLogger(SurrealDomainEventProjectionConsumer.class)).thenReturn(log);
+        lenient().when(catalogPort.getMessage(org.mockito.ArgumentMatchers.anyString())).thenReturn("msg");
+        CatalogPortStaticRef.set(catalogPort);
         consumer = new SurrealDomainEventProjectionConsumer(surreal, 2, loggerFactory);
         lenient().doReturn(mock(Response.class)).when(surreal).query(anyString());
+    }
+
+    @AfterEach
+    void tearDown() {
+        CatalogPortStaticRef.set(null);
     }
 
     private Value stringValue(String value) {
@@ -146,7 +158,7 @@ class SurrealDomainEventProjectionConsumerTest {
 
         verify(surreal).query(contains("DELETE application_document:`app-1`"));
         verify(surreal).query(contains("SET projection_status = 'processed'"));
-        verify(log).debug("Projecting {} SurrealDB domain event(s)", 1);
+        verify(log).debug("msg");
     }
 
     @Test
@@ -329,7 +341,7 @@ class SurrealDomainEventProjectionConsumerTest {
 
         verify(surreal).query(contains("UPSERT domain_event_document:`event-1`"));
         verify(surreal).query(contains("SET projection_status = 'processed'"));
-        verify(log).debug(anyString(), anyString());
+        verify(log, org.mockito.Mockito.times(2)).debug("msg");
     }
 
     @Test
@@ -340,7 +352,7 @@ class SurrealDomainEventProjectionConsumerTest {
 
         consumer.consumePendingDomainEvents();
 
-        verify(log).warn(anyString(), anyString(), any(RuntimeException.class));
+        verify(log).warn(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any(RuntimeException.class));
         verify(surreal).query(contains("projection_status = 'failed'"));
         verify(surreal).query(contains("projection_error = 'boom'"));
     }

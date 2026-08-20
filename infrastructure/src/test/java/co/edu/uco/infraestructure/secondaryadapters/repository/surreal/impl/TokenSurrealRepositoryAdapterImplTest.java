@@ -1,5 +1,7 @@
 package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
+import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
+import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.infraestructure.secondaryadapters.repository.surreal.model.TokenSurrealModel;
@@ -10,6 +12,7 @@ import com.surrealdb.RecordId;
 import com.surrealdb.Response;
 import com.surrealdb.Surreal;
 import com.surrealdb.Value;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +32,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,13 +44,22 @@ class TokenSurrealRepositoryAdapterImplTest {
     private LoggingPortFactory loggerFactory;
     @Mock
     private LoggingPort log;
+    @Mock
+    private CatalogPort catalogPort;
 
     private TokenSurrealRepositoryAdapterImpl adapter;
 
     @BeforeEach
     void setUp() {
         when(loggerFactory.getLogger(TokenSurrealRepositoryAdapterImpl.class)).thenReturn(log);
+        lenient().when(catalogPort.getMessage(org.mockito.ArgumentMatchers.anyString())).thenReturn("msg");
+        CatalogPortStaticRef.set(catalogPort);
         adapter = new TokenSurrealRepositoryAdapterImpl(surreal, loggerFactory);
+    }
+
+    @AfterEach
+    void tearDown() {
+        CatalogPortStaticRef.set(null);
     }
 
     private Value stringValue(String value) {
@@ -126,7 +139,7 @@ class TokenSurrealRepositoryAdapterImplTest {
         assertThatThrownBy(() -> adapter.upsert(model))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("boom");
-        verify(log).error(anyString(), anyString(), any(RuntimeException.class));
+        verify(log).error(anyString(), any(RuntimeException.class));
     }
 
     @Test

@@ -9,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import static co.edu.uco.crosscutting.helpers.UtilUUID.DEFAULT_UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TokenEntityMapperTest {
@@ -44,11 +45,14 @@ class TokenEntityMapperTest {
     }
 
     @Test
-    void mapperDTO_returnsNull() {
+    void mapperDTO_mapsEmptyEntityToDTOWithDefaults() {
         TokenData data = new TokenData();
 
         TokenDTO dto = mapper.mapperDTO(data);
 
-        assertThat(dto).isNull();
+        assertThat(dto).isNotNull();
+        assertThat(dto.getId()).isEmpty();
+        assertThat(dto.getSecretName()).isEmpty();
+        assertThat(dto.getEnvironmentId()).isEqualTo(DEFAULT_UUID);
     }
 }

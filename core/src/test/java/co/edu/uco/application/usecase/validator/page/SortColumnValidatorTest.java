@@ -1,19 +1,32 @@
 package co.edu.uco.application.usecase.validator.page;
 
+import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
+import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.repository.SimplePageRequest;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class SortColumnValidatorTest {
 
+    @BeforeEach
+    void setUp() {
+        CatalogPort catalogPort = mock(CatalogPort.class);
+        when(catalogPort.getMessage(org.mockito.ArgumentMatchers.anyString())).thenReturn("mensaje");
+        when(catalogPort.getTitle(org.mockito.ArgumentMatchers.anyString())).thenReturn("titulo");
+        CatalogPortStaticRef.set(catalogPort);
+    }
+
     @AfterEach
     void tearDown() {
-        // no global state needs cleanup; instances are cached per class
+        CatalogPortStaticRef.set(null);
     }
 
     @Test

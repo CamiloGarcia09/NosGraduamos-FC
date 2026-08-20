@@ -3,6 +3,7 @@ package co.edu.uco.infraestructure.secondaryadapters.presenter.serializer;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
+import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -62,14 +64,15 @@ class SerializerRegistryTest {
     }
 
     @Test
-    void getSerializerForMediaType_returnsNullWhenNoMatchAndNoDefault() {
+    void getSerializerForMediaType_throws_whenNoMatchAndNoDefault() {
         when(jsonSerializer.supports("application/pdf")).thenReturn(false);
         when(jsonSerializer.isDefault()).thenReturn(false);
         when(xmlSerializer.supports("application/pdf")).thenReturn(false);
         when(xmlSerializer.isDefault()).thenReturn(false);
         when(catalogPort.getMessage("TCH_017")).thenReturn("no serializer");
 
-        assertThat(registry.getSerializerForMediaType("application/pdf")).isNull();
+        assertThatThrownBy(() -> registry.getSerializerForMediaType("application/pdf"))
+                .isInstanceOf(CrossWordsException.class);
         verify(log).error("no serializer", "application/pdf");
     }
 }

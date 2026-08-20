@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -16,23 +17,27 @@ class CatalogPortStaticRefTest {
     }
 
     @Test
-    void getMessage_returnsEmptyWhenNoInstance() {
-        assertThat(CatalogPortStaticRef.getMessage("KEY")).isEmpty();
+    void getMessage_throwsIllegalStateWhenNoInstance() {
+        assertThatThrownBy(() -> CatalogPortStaticRef.getMessage("KEY"))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    void getMessage_withDefault_returnsDefaultWhenNoInstance() {
-        assertThat(CatalogPortStaticRef.getMessage("KEY", "fallback")).isEqualTo("fallback");
+    void getMessage_withDefault_throwsIllegalStateWhenNoInstance() {
+        assertThatThrownBy(() -> CatalogPortStaticRef.getMessage("KEY", "fallback"))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    void getTitle_returnsEmptyWhenNoInstance() {
-        assertThat(CatalogPortStaticRef.getTitle("KEY")).isEmpty();
+    void getTitle_throwsIllegalStateWhenNoInstance() {
+        assertThatThrownBy(() -> CatalogPortStaticRef.getTitle("KEY"))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    void getMessageModel_returnsNullWhenNoInstance() {
-        assertThat(CatalogPortStaticRef.getMessageModel("KEY")).isNull();
+    void getMessageModel_throwsIllegalStateWhenNoInstance() {
+        assertThatThrownBy(() -> CatalogPortStaticRef.getMessageModel("KEY"))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test

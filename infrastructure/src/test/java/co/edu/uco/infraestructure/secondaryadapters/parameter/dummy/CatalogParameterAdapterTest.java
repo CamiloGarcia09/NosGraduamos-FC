@@ -48,7 +48,7 @@ class CatalogParameterAdapterTest {
 
     @Test
     void consultarParametro_throwsBusinessException_whenCodeIsEmpty() {
-        when(catalogPort.getMessage("TCH_055")).thenReturn("empty code");
+        when(catalogPort.getMessage("TCH_068")).thenReturn("empty code");
 
         assertThatThrownBy(() -> adapter.consultarParametro(" "))
                 .isInstanceOf(CrossWordsException.class)
@@ -57,7 +57,7 @@ class CatalogParameterAdapterTest {
 
     @Test
     void consultarParametro_throwsCrossWordsException_whenKeyNotFound() {
-        when(catalogPort.getMessage("TCH_057")).thenReturn("Parameter %s not found");
+        when(catalogPort.getMessage("TCH_068")).thenReturn("Parameter %s not found");
 
         assertThatThrownBy(() -> adapter.consultarParametro("UNKNOWN-KEY"))
                 .isInstanceOf(CrossWordsException.class)

@@ -1,5 +1,7 @@
 package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
+import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
+import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.EnvironmentData;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
@@ -10,6 +12,7 @@ import com.surrealdb.RecordId;
 import com.surrealdb.Response;
 import com.surrealdb.Surreal;
 import com.surrealdb.Value;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,13 +41,22 @@ class EnvironmentSurrealRepositoryAdapterImplTest {
     private LoggingPortFactory loggerFactory;
     @Mock
     private LoggingPort log;
+    @Mock
+    private CatalogPort catalogPort;
 
     private EnvironmentSurrealRepositoryAdapterImpl adapter;
 
     @BeforeEach
     void setUp() {
         when(loggerFactory.getLogger(EnvironmentSurrealRepositoryAdapterImpl.class)).thenReturn(log);
+        when(catalogPort.getMessage(org.mockito.ArgumentMatchers.anyString())).thenReturn("msg");
+        CatalogPortStaticRef.set(catalogPort);
         adapter = new EnvironmentSurrealRepositoryAdapterImpl(surreal, loggerFactory);
+    }
+
+    @AfterEach
+    void tearDown() {
+        CatalogPortStaticRef.set(null);
     }
 
     private Value stringValue(String value) {
@@ -187,6 +199,6 @@ class EnvironmentSurrealRepositoryAdapterImplTest {
         assertThatThrownBy(() -> adapter.findById("env-1"))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("boom");
-        verify(log).error(anyString(), anyString(), any(RuntimeException.class));
+        verify(log).error(anyString(), any(RuntimeException.class));
     }
 }

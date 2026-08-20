@@ -241,23 +241,9 @@ public enum MessageCatalogCodeEnum {
     /**Technical parameter retrieval error */
     TCH_070("TCH_070"),
 
-    /**Parameter not found" "Parameter with code '%s' was not found in the catalog. */
-    TCH_071("TCH_071"),
-    // =========================================================================
-    // Mensajes técnicos — Catálogo de parámetros
-    // =========================================================================
-
-    /** El código del parámetro no puede ser nulo o vacío. */
-    TCH_055("TCH_055"),
-
-    /** Error inesperado al obtener el parámetro del catálogo. */
-    TCH_056("TCH_056"),
-
-    /** Error técnico al obtener el parámetro del catálogo. */
-    TCH_057("TCH_057"),
-
     /** El parámetro con código '%s' no fue encontrado en el catálogo. */
-    TCH_058("TCH_058"),
+    TCH_071("TCH_071"),
+
 
     // =========================================================================
     // Mensajes funcionales — Validación y caché

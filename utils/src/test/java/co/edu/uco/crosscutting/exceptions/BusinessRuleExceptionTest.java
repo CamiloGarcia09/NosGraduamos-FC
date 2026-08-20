@@ -49,13 +49,12 @@ class BusinessRuleExceptionTest {
     }
 
     @Test
-    void sevenArgConstructor_usesSecondTypeAndLocationForGetters() {
+    void fiveArgConstructor_createsExceptionWithGivenValues() {
         BusinessRuleException exception = new BusinessRuleException(
                 "user", "technical", null,
-                ExceptionType.BUSINESS, ExceptionLocation.APPLICATION,
-                ExceptionType.TECHNICAL, ExceptionLocation.INFRASTRUCTURE);
-        assertThat(exception.getType()).isEqualTo(ExceptionType.TECHNICAL);
-        assertThat(exception.getLocation()).isEqualTo(ExceptionLocation.INFRASTRUCTURE);
+                ExceptionType.BUSINESS, ExceptionLocation.APPLICATION);
+        assertThat(exception.getType()).isEqualTo(ExceptionType.BUSINESS);
+        assertThat(exception.getLocation()).isEqualTo(ExceptionLocation.APPLICATION);
         assertThat(exception.getUserMessage()).isEqualTo("user");
     }
 
@@ -74,7 +73,7 @@ class BusinessRuleExceptionTest {
     }
 
     @Test
-    void extendsBusinessException() {
-        assertThat(BusinessRuleException.class.getSuperclass()).isEqualTo(BusinessException.class);
+    void extendsCrossWordsException() {
+        assertThat(BusinessRuleException.class.getSuperclass()).isEqualTo(CrossWordsException.class);
     }
 }

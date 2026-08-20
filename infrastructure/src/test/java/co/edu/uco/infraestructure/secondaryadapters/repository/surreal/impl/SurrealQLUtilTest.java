@@ -3,6 +3,7 @@ package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,10 +48,12 @@ class SurrealQLUtilTest {
 
     @Test
     void datetime_usesNow_whenNull() {
-        String before = LocalDateTime.now().minusMinutes(1).atOffset(java.time.ZoneOffset.UTC)
+        String before = LocalDateTime.now(ZoneOffset.UTC).minusMinutes(1)
+                .atOffset(ZoneOffset.UTC)
                 .format(java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         String result = SurrealQLUtil.datetime(null);
-        String after = LocalDateTime.now().plusMinutes(1).atOffset(java.time.ZoneOffset.UTC)
+        String after = LocalDateTime.now(ZoneOffset.UTC).plusMinutes(1)
+                .atOffset(ZoneOffset.UTC)
                 .format(java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 
         assertThat(result).startsWith("d'");

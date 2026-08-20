@@ -1,5 +1,7 @@
 package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
+import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
+import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.MessageData;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
@@ -11,6 +13,7 @@ import com.surrealdb.RecordId;
 import com.surrealdb.Response;
 import com.surrealdb.Surreal;
 import com.surrealdb.Value;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,13 +44,22 @@ class MessageSurrealRepositoryAdapterImplTest {
     private LoggingPortFactory loggerFactory;
     @Mock
     private LoggingPort log;
+    @Mock
+    private CatalogPort catalogPort;
 
     private MessageSurrealRepositoryAdapterImpl adapter;
 
     @BeforeEach
     void setUp() {
         when(loggerFactory.getLogger(MessageSurrealRepositoryAdapterImpl.class)).thenReturn(log);
+        when(catalogPort.getMessage(org.mockito.ArgumentMatchers.anyString())).thenReturn("msg");
+        CatalogPortStaticRef.set(catalogPort);
         adapter = new MessageSurrealRepositoryAdapterImpl(surreal, loggerFactory);
+    }
+
+    @AfterEach
+    void tearDown() {
+        CatalogPortStaticRef.set(null);
     }
 
     private Value stringValue(String value) {
@@ -193,8 +205,7 @@ class MessageSurrealRepositoryAdapterImplTest {
         assertThatThrownBy(() -> adapter.findById("id-1"))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("boom");
-        verify(log).error(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString(),
-                org.mockito.ArgumentMatchers.any(RuntimeException.class));
+        verify(log).error(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any(RuntimeException.class));
     }
 
     @Test
@@ -341,8 +352,7 @@ class MessageSurrealRepositoryAdapterImplTest {
         assertThatThrownBy(() -> adapter.findMessagesByEnvironment("env-1", PageRequest.of(0, 2)))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("db down");
-        verify(log).error(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.eq("env-1"),
-                org.mockito.ArgumentMatchers.any(RuntimeException.class));
+        verify(log, org.mockito.Mockito.times(2)).error(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any(RuntimeException.class));
     }
 
     @Test
