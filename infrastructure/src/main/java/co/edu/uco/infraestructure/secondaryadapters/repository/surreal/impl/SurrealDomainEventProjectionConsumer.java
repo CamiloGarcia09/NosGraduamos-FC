@@ -1,7 +1,10 @@
 package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
+import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
+import co.edu.uco.crosscutting.helpers.UtilText;
 import com.surrealdb.Array;
 import com.surrealdb.Entry;
 import com.surrealdb.RecordId;
@@ -18,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.quote;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
 
@@ -65,7 +69,7 @@ public final class SurrealDomainEventProjectionConsumer {
             return;
         }
 
-        log.debug("Projecting {} SurrealDB domain event(s)", events.size());
+        log.debug(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_063.getCode()).formatted(events.size()));
         events.forEach(this::project);
     }
 
@@ -75,7 +79,7 @@ public final class SurrealDomainEventProjectionConsumer {
             projectAggregateDocument(event);
             markProcessed(event);
         } catch (final RuntimeException exception) {
-            log.warn("Could not project SurrealDB domain event {}", event.fullId(), exception);
+            log.warn(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_064.getCode()).formatted(event.fullId()), exception);
             markFailed(event, exception);
         }
     }
@@ -87,7 +91,7 @@ public final class SurrealDomainEventProjectionConsumer {
             case "environment" -> projectEnvironment(event);
             case "message" -> projectMessage(event);
             case "message_environment" -> projectMessageEnvironment(event);
-            default -> log.debug("Domain event {} stored only as raw document", event.fullId());
+            default -> log.debug(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_065.getCode()).formatted(event.fullId()));
         }
     }
 
@@ -343,17 +347,17 @@ public final class SurrealDomainEventProjectionConsumer {
     private List<com.surrealdb.Object> queryObjects(final String sql) {
         final Response response = query(sql);
         final List<com.surrealdb.Object> values = new ArrayList<>();
-        if (response == null || response.size() == 0) {
+        if (isNullObject(response) || response.size() == 0) {
             return values;
         }
         final Value statement = response.take(0);
-        if (statement == null || !statement.isArray()) {
+        if (isNullObject(statement) || !statement.isArray()) {
             return values;
         }
         final Array array = statement.getArray();
         for (int index = 0; index < array.len(); index++) {
             final Value value = array.get(index);
-            if (value != null && value.isObject()) {
+            if (!isNullObject(value) && value.isObject()) {
                 values.add(value.getObject());
             }
         }
@@ -388,7 +392,7 @@ public final class SurrealDomainEventProjectionConsumer {
     }
 
     private static String literal(final Value value) {
-        if (value == null || value.isNull() || value.isNone()) {
+        if (isNullObject(value) || value.isNull() || value.isNone()) {
             return "NONE";
         }
         if (value.isString()) {
@@ -451,10 +455,10 @@ public final class SurrealDomainEventProjectionConsumer {
     }
 
     private static String keyLiteral(final String key) {
-        if (key != null && key.matches("[A-Za-z_][A-Za-z0-9_]*")) {
+        if (!isNullObject(key) && key.matches("[A-Za-z_][A-Za-z0-9_]*")) {
             return key;
         }
-        final String safe = key == null ? "" : key.replace("`", "");
+        final String safe = UtilText.getDefault(key).replace("`", "");
         return "`" + safe + "`";
     }
 
@@ -463,14 +467,14 @@ public final class SurrealDomainEventProjectionConsumer {
         if (!text.isBlank()) {
             return text;
         }
-        if (value != null && value.isObject()) {
+        if (!isNullObject(value) && value.isObject()) {
             return recordString(value.getObject().get("id"));
         }
         return "";
     }
 
     private static String stringOf(final Value value) {
-        if (value == null || value.isNull() || value.isNone()) {
+        if (isNullObject(value) || value.isNull() || value.isNone()) {
             return "";
         }
         if (value.isString()) {
@@ -489,7 +493,7 @@ public final class SurrealDomainEventProjectionConsumer {
     }
 
     private static long longOf(final Value value) {
-        if (value == null || value.isNull() || value.isNone()) {
+        if (isNullObject(value) || value.isNull() || value.isNone()) {
             return 0L;
         }
         if (value.isLong()) {
@@ -544,7 +548,7 @@ public final class SurrealDomainEventProjectionConsumer {
 
     private record RecordRef(String table, String id) {
         static Optional<RecordRef> from(final String recordId) {
-            if (recordId == null || recordId.isBlank()) {
+            if (isNullObject(recordId) || recordId.isBlank()) {
                 return Optional.empty();
             }
             final int separator = recordId.indexOf(':');
@@ -561,7 +565,7 @@ public final class SurrealDomainEventProjectionConsumer {
     }
 
     private static String recordIdPart(final Value value) {
-        if (value == null || value.isNull() || value.isNone()) {
+        if (isNullObject(value) || value.isNull() || value.isNone()) {
             return "";
         }
         if (value.isRecordId()) {
@@ -571,7 +575,7 @@ public final class SurrealDomainEventProjectionConsumer {
     }
 
     private static String cleanIdPart(final String id) {
-        if (id == null) {
+        if (isNullObject(id)) {
             return "";
         }
         if (id.length() >= 2 && id.startsWith("`") && id.endsWith("`")) {

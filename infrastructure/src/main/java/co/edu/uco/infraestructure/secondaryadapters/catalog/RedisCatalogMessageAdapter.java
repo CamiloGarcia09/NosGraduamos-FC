@@ -2,10 +2,15 @@ package co.edu.uco.infraestructure.secondaryadapters.catalog;
 
 import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
 import co.edu.uco.application.common.catalog.MessageCatalog;
+import co.edu.uco.application.crosscutting.exceptions.MessageKeyCanNotBeEmptyException;
+import co.edu.uco.application.crosscutting.exceptions.MessageKeyCanNotBeNullException;
+import co.edu.uco.application.crosscutting.exceptions.MessageNotFoundException;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
+import co.edu.uco.crosscutting.exceptions.CrossWordsException;
+import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType;
 import jakarta.annotation.PostConstruct;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -13,9 +18,11 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
+import static co.edu.uco.crosscutting.helpers.UtilText.EMPTY;
+import static co.edu.uco.crosscutting.helpers.UtilText.isEmpty;
+import static co.edu.uco.crosscutting.helpers.UtilText.isNull;
 import static co.edu.uco.crosscutting.helpers.UtilText.isEmptyOrNull;
 import static co.edu.uco.crosscutting.helpers.UtilText.trim;
-import static co.edu.uco.crosscutting.helpers.UtilText.EMPTY;
 
 @Component
 public class RedisCatalogMessageAdapter implements CatalogPort {
@@ -35,13 +42,16 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
 
     @Override
     public MessageCatalog getMessageModel(String key) {
-        if (isEmptyOrNull(trim(key))) {
-            return null;
+        if (isNull(key)) {
+            MessageKeyCanNotBeNullException.report();
+        }
+        if (isEmpty(trim(key))) {
+            MessageKeyCanNotBeEmptyException.report();
         }
         try {
             Map<Object, Object> entry = redisTemplate.opsForHash().entries(key);
             if (isNullObject(entry) || entry.isEmpty()) {
-                return null;
+                MessageNotFoundException.report(key);
             }
             return new MessageCatalog(
                     (String) entry.get("code"),
@@ -49,9 +59,13 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
                     (String) entry.get("content"),
                     (String) entry.get("type"),
                     (String) entry.get("category"));
+        } catch (CrossWordsException ex) {
+            throw ex;
         } catch (Exception ex) {
-            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_051.getCode()).formatted(key), ex);
-            return null;
+            var techMsg = CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_051.getCode()).formatted(key);
+            log.error(techMsg, ex);
+            throw CrossWordsException.buildInfrastructure(techMsg,
+                    CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.FUN_023.getCode()), ex, ExceptionType.TECHNICAL);
         }
     }
 

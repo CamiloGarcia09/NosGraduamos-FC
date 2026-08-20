@@ -1,0 +1,32 @@
+package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
+
+import co.edu.uco.application.secondaryports.entity.ApplicationData;
+import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
+import co.edu.uco.application.secondaryports.repository.ApplicationCatalogRepository;
+import com.surrealdb.Object;
+import com.surrealdb.Surreal;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public class ApplicationCatalogSurrealAdapter extends SurrealCatalogSupport implements ApplicationCatalogRepository {
+
+    private static final String SURREAL_TABLE_APPLICATION = "application";
+
+    public ApplicationCatalogSurrealAdapter(final Surreal surreal, final LoggingPortFactory loggerFactory) {
+        super(surreal, loggerFactory.getLogger(ApplicationCatalogSurrealAdapter.class));
+    }
+
+    @Override
+    public List<ApplicationData> findAll() {
+        return queryAll(SURREAL_TABLE_APPLICATION, "Error al consultar aplicaciones en SurrealDB: ", this::toApplicationData);
+    }
+
+    private ApplicationData toApplicationData(final Object obj) {
+        final ApplicationData data = ApplicationData.build();
+        data.setId(extractIdAsUUID(obj.get("id")));
+        data.setName(stringOf(obj.get("name")));
+        return data;
+    }
+}

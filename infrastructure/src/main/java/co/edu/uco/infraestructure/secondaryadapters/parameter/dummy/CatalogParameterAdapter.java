@@ -28,8 +28,8 @@ public class CatalogParameterAdapter implements CatalogParameterPort {
     public String consultarParametro(String codigo) {
         if (isEmptyOrNull(codigo)) {
             throw CrossWordsException.buildInfrastructure(
-                    catalogPort.getMessage(MessageCatalogCodeEnum.TCH_055.getCode()),
-                    catalogPort.getMessage(MessageCatalogCodeEnum.TCH_055.getCode()),
+                    catalogPort.getMessage(MessageCatalogCodeEnum.TCH_068.getCode()),
+                    catalogPort.getMessage(MessageCatalogCodeEnum.TCH_068.getCode()),
                     co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType.BUSINESS);
         }
 
@@ -39,7 +39,7 @@ public class CatalogParameterAdapter implements CatalogParameterPort {
             String value = PropertiesHelper.getValue(PARAMETER_PROPERTIES_FILE, trimmedCodigo);
 
             if (isEmptyOrNull(value)) {
-                var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_058.getCode()).formatted(trimmedCodigo);
+                var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_071.getCode()).formatted(trimmedCodigo);
                 log.error(message);
                 throw CrossWordsException.buildInfrastructure(message, message,
                         co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType.TECHNICAL);
@@ -50,11 +50,11 @@ public class CatalogParameterAdapter implements CatalogParameterPort {
         } catch (CrossWordsException ex) {
             throw ex;
         } catch (RuntimeException ex) {
-            var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_057.getCode()).formatted(trimmedCodigo);
+            var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_068.getCode()).formatted(trimmedCodigo);
             log.error(message, ex);
             throw CrossWordsException.buildInfrastructure(message, ex);
         } catch (Exception ex) {
-            var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_056.getCode()).formatted(trimmedCodigo);
+            var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_067.getCode()).formatted(trimmedCodigo);
             log.error(message, ex);
             throw CrossWordsException.buildInfrastructure(message, ex);
         }
