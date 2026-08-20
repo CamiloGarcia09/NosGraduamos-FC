@@ -93,6 +93,8 @@ redis_hset "TCH_062" "Surreal token persisted" "Token persisted into SurrealDB: 
 redis_hset "TCH_063" "Surreal domain event projection" "Projecting %s SurrealDB domain event(s)" "TECHNICAL" "INFORMATION"
 redis_hset "TCH_064" "Surreal domain event projection failed" "Could not project SurrealDB domain event %s" "TECHNICAL" "WARNING"
 redis_hset "TCH_065" "Surreal domain event raw storage" "Domain event %s stored only as raw document" "TECHNICAL" "INFORMATION"
+redis_hset "TCH_066" "Surreal message persist error" "Error al persistir mensaje en SurrealDB" "TECHNICAL" "ERROR"
+redis_hset "TCH_067" "Surreal message persist technical error" "Error al persistir el mensaje en la base de datos SurrealDB" "TECHNICAL" "ERROR"
 
 # =============================================================
 # Functional Messages

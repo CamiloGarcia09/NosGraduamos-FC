@@ -53,7 +53,7 @@ public final class CreateMessageUseCase implements HandlingCreateMessagePort {
                             null
                     )
             );
-            messageData.setStatus(new StatusMessageData(UtilUUID.getStringToUUID(dto.getStatusId()), dto.getStatusId()));
+            messageData.setStatus(new StatusMessageData(UtilUUID.getNewUUID(), dto.getStatusId()));
 
             createMessageRepository.createMessage(
                     messageData,

@@ -1,10 +1,13 @@
 package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
+import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
 import co.edu.uco.application.secondaryports.entity.MessageData;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.CreateMessageRepository;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
+import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionLocation;
 import co.edu.uco.crosscutting.helpers.UtilUUID;
 import com.surrealdb.Surreal;
 import org.springframework.stereotype.Repository;
@@ -70,8 +73,12 @@ public class CreateMessageSurrealAdapter implements CreateMessageRepository {
             log.info("Executing SurrealQL upsert message_environment: {}", upsertMessageEnvSql);
             surreal.query(upsertMessageEnvSql);
         } catch (Exception ex) {
-            log.error("Error al persistir mensaje en SurrealDB", ex);
-            throw BusinessException.buildTechnicalException("Error al persistir el mensaje en la base de datos SurrealDB", ex);
+            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_066.getCode()), ex);
+            throw BusinessException.buildTechnicalException(
+                    CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_067.getCode()),
+                    ex,
+                    ExceptionLocation.INFRASTRUCTURE
+            );
         }
     }
 

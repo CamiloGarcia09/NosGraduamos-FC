@@ -226,6 +226,12 @@ public enum MessageCatalogCodeEnum {
     /** Evento de dominio almacenado solo como documento crudo. */
     TCH_065("TCH_065"),
 
+    /** Error al persistir el mensaje en SurrealDB. */
+    TCH_066("TCH_066"),
+
+    /** Error técnico al persistir el mensaje en la base de datos SurrealDB. */
+    TCH_067("TCH_067"),
+
     // =========================================================================
     // Mensajes funcionales — Validación y caché
     // =========================================================================
