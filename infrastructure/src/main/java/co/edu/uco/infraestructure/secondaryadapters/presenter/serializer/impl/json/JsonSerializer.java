@@ -2,6 +2,7 @@ package co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.impl.j
 
 import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
 import co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.AbstractSerializer;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,7 +22,7 @@ public final class JsonSerializer extends AbstractSerializer {
             mapper.registerModule(new JavaTimeModule());
             return mapper.writeValueAsString(data);
         } catch (JsonProcessingException e) {
-            throw CrossWordsException.build(CatalogPortStaticRef.getMessage("TCH_018"), e);
+            throw CrossWordsException.build(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_018.getCode()), e);
         }
     }
     @Override

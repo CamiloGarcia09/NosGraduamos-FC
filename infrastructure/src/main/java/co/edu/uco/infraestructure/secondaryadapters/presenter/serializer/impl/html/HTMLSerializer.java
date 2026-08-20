@@ -2,6 +2,7 @@ package co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.impl.h
 
 import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
 import co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.AbstractSerializer;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -24,7 +25,7 @@ public final class HTMLSerializer extends AbstractSerializer {
             html.append(BODY_CLOSE_TAG).append(HTML_CLOSE_TAG);
             return html.toString();
         } catch (Exception e) {
-            throw CrossWordsException.build(CatalogPortStaticRef.getMessage("TCH_018"), e);
+            throw CrossWordsException.build(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_018.getCode()), e);
         }
     }
 }

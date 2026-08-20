@@ -8,6 +8,7 @@ import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.SimplePage;
 import co.edu.uco.application.secondaryports.repository.SimplePageRequest;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
 import org.springframework.stereotype.Component;
 
@@ -33,36 +34,36 @@ public final class MessageCatalogStrategy {
     public SimplePage<MessageData> getMessagesWithEnvironment(String environment, SimplePageRequest request) {
         var cachedMessages = getCachedMessagesWithEnvironment(environment, request);
         if (cachedMessages.getData().isEmpty()) {
-            log.info(catalogPort.getMessage("FUN_006"));
+            log.info(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_006.getCode()));
             var dbMessages = databaseCatalog.getMessageWithEnvironment(environment, request);
             if (!dbMessages.getData().isEmpty()) {
-                log.info(catalogPort.getMessage("FUN_007"));
+                log.info(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_007.getCode()));
                 fillCacheWithEnvironmentMessages(dbMessages, environment);
                 return dbMessages;
             }
-            throw BusinessException.buildUserException(catalogPort.getMessage("TCH_009"));
+            throw BusinessException.buildUserException(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_009.getCode()));
         }
 
         var dbMessages = databaseCatalog.getMessageWithEnvironment(environment, request);
         if (!dbMessages.getData().isEmpty()) {
             if (cachedMessages.getData().size() != dbMessages.getData().size()) {
-                log.info(catalogPort.getMessage("FUN_008"));
+                log.info(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_008.getCode()));
                 fillCacheWithEnvironmentMessages(dbMessages, environment);
                 return dbMessages;
             }
-            log.info(catalogPort.getMessage("FUN_009"));
+            log.info(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_009.getCode()));
             return cachedMessages;
         }
-        throw BusinessException.buildUserException(catalogPort.getMessage("TCH_009"));
+        throw BusinessException.buildUserException(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_009.getCode()));
     }
 
     public Optional<MessageData> getMessageByCodeAndEnvironment(String code, String environmentId) {
         var response = cacheCatalog.getMessageByCodeAndEnvironment(code, environmentId);
         if (response.isPresent()) {
-            log.info(catalogPort.getMessage("FUN_009"));
+            log.info(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_009.getCode()));
         }
         if (response.isEmpty()) {
-            log.info(catalogPort.getMessage("FUN_006"));
+            log.info(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_006.getCode()));
             response = databaseCatalog.getMessageByCodeAndEnvironment(code, environmentId);
             response.ifPresent(message -> cacheCatalog.addMessageWithEnvironment(message, environmentId));
         }
@@ -73,7 +74,7 @@ public final class MessageCatalogStrategy {
         try {
             return cacheCatalog.getMessageWithEnvironment(environment, request);
         } catch (Exception exception) {
-            log.error(catalogPort.getMessage("FUN_013"), exception);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_013.getCode()), exception);
             return SimplePage.of(List.of(), request.getPage(), request.getSize(), 0, 0);
         }
     }

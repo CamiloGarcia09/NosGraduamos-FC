@@ -206,7 +206,7 @@ services:
       - AZURE_TENANT_ID=${AZURE_TENANT_ID}
 
     volumes:
-      - ../../logs:/app/logs
+      - app-logs:/app/logs
     depends_on:
       redis:
         condition: service_started
@@ -268,6 +268,8 @@ volumes:
   surrealdb-data:
     driver: local
   ollama-data:
+    driver: local
+  app-logs:
     driver: local
 
 networks:

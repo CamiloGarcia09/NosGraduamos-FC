@@ -4,6 +4,7 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.repository.SimplePageRequest;
 import co.edu.uco.application.usecase.validator.Validator;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import org.springframework.stereotype.Component;
 
 import static co.edu.uco.application.CrosswordsConstant.REQUEST_PAGE_DEFAULT;
@@ -18,7 +19,7 @@ public final class PageNumberValidator implements Validator<SimplePageRequest> {
     @Override
     public void validate(SimplePageRequest data) throws BusinessRuleException {
         if (isLessThan(data.getPage(), REQUEST_PAGE_DEFAULT)) {
-            throw BusinessRuleException.buildUserException(catalogPort.getMessage("FUN_032"));
+            throw BusinessRuleException.buildUserException(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_032.getCode()));
         }
     }
 }

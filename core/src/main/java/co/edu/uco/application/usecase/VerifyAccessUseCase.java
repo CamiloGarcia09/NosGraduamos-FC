@@ -7,6 +7,7 @@ import co.edu.uco.application.secondaryports.repository.token.TokenStateReposito
 import co.edu.uco.application.secondaryports.secret.EncryptTokenPort;
 import co.edu.uco.application.usecase.handling.HandlingVerifyAccessPort;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -53,7 +54,7 @@ public final class VerifyAccessUseCase implements HandlingVerifyAccessPort {
     private void stateValid(String statusId) {
         var status = tokenStateRepository.findByStatus(statusId);
         if (!status.getName().equals(STATE_ACTIVE)) {
-            throw BusinessRuleException.buildUserException(catalogPort.getMessage("TCH_033"));
+            throw BusinessRuleException.buildUserException(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_033.getCode()));
         }
     }
 }

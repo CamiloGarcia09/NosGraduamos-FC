@@ -2,6 +2,7 @@ package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
+import co.edu.uco.crosscutting.helpers.UtilText;
 import co.edu.uco.infraestructure.secondaryadapters.repository.surreal.TokenStateSurrealRepositoryAdapter;
 import co.edu.uco.infraestructure.secondaryadapters.repository.surreal.model.StatusTokenSurrealModel;
 import com.surrealdb.Array;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
+import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.quote;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.FIELD_NAME;
@@ -46,11 +48,11 @@ public class TokenStateSurrealRepositoryAdapterImpl implements TokenStateSurreal
 
     private StatusTokenSurrealModel findOne(final String sql) {
         final Response response = surreal.query(sql);
-        if (response == null || response.size() == 0) {
+        if (isNullObject(response) || response.size() == 0) {
             return StatusTokenSurrealModel.build();
         }
         final Value statementResult = response.take(0);
-        if (statementResult == null || !statementResult.isArray()) {
+        if (isNullObject(statementResult) || !statementResult.isArray()) {
             return StatusTokenSurrealModel.build();
         }
         final Array array = statementResult.getArray();
@@ -58,7 +60,7 @@ public class TokenStateSurrealRepositoryAdapterImpl implements TokenStateSurreal
             return StatusTokenSurrealModel.build();
         }
         final Value first = array.get(0);
-        if (first == null || !first.isObject()) {
+        if (isNullObject(first) || !first.isObject()) {
             return StatusTokenSurrealModel.build();
         }
         final Object obj = first.getObject();
@@ -66,21 +68,22 @@ public class TokenStateSurrealRepositoryAdapterImpl implements TokenStateSurreal
     }
 
     private UUID extractUuid(final Value value) {
-        if (value == null || value.isNull() || value.isNone()) {
+        if (isNullObject(value) || value.isNull() || value.isNone()) {
             return DEFAULT_UUID;
         }
         try {
-            String rawId = null;
+            if (value.isUuid()) {
+                return value.getUuid();
+            }
+            final String rawId;
             if (value.isRecordId()) {
                 rawId = cleanIdPart(value.getRecordId().toString());
-            } else if (value.isUuid()) {
-                return value.getUuid();
             } else if (value.isString()) {
                 rawId = cleanIdPart(value.getString());
             } else {
                 rawId = cleanIdPart(value.toString());
             }
-            if (rawId == null || rawId.isBlank()) {
+            if (rawId.isBlank()) {
                 return DEFAULT_UUID;
             }
             return UUID.fromString(rawId);
@@ -90,8 +93,7 @@ public class TokenStateSurrealRepositoryAdapterImpl implements TokenStateSurreal
     }
 
     private static String cleanIdPart(String id) {
-        if (id == null) return "";
-        id = id.trim();
+        id = UtilText.getDefault(id).trim();
         final int separator = id.indexOf(':');
         if (separator > 0) {
             id = id.substring(separator + 1);
@@ -107,7 +109,7 @@ public class TokenStateSurrealRepositoryAdapterImpl implements TokenStateSurreal
     }
 
     private static String stringOf(final Value value) {
-        if (value == null || value.isNull() || value.isNone()) return "";
+        if (isNullObject(value) || value.isNull() || value.isNone()) return "";
         if (value.isString()) return value.getString();
         if (value.isUuid()) return value.getUuid().toString();
         return value.toString();

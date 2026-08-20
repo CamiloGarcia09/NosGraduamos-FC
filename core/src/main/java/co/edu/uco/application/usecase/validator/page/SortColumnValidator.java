@@ -4,6 +4,7 @@ import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
 import co.edu.uco.application.secondaryports.repository.SimplePageRequest;
 import co.edu.uco.application.usecase.validator.Validator;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -26,7 +27,7 @@ public final class SortColumnValidator implements Validator<SimplePageRequest> {
     public void validate(SimplePageRequest data) throws BusinessRuleException {
         if (!validColumns.contains(data.getColumnSort())) {
              throw BusinessRuleException.buildUserException(String.format(
-                     CatalogPortStaticRef.getMessage("FUN_030"),
+                     CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.FUN_030.getCode()),
                      data.getColumnSort()));
         }
     }

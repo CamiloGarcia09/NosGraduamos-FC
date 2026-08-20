@@ -3,6 +3,8 @@ package co.edu.uco.infraestructure.secondaryadapters.logging;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import org.slf4j.Logger;
 
+import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
+
 final class Slf4jLoggingAdapter implements LoggingPort {
 
     private final Logger logger;
@@ -53,6 +55,6 @@ final class Slf4jLoggingAdapter implements LoggingPort {
     }
 
     private static boolean hasArguments(Object[] arguments) {
-        return arguments != null && arguments.length > 0;
+        return !isNullObject(arguments) && arguments.length > 0;
     }
 }
