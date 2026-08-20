@@ -3,8 +3,6 @@ package co.edu.uco.crosscutting.exceptions;
 import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionLocation;
 import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType;
 
-import static co.edu.uco.crosscutting.helpers.UtilObject.getDefaultIsNullObject;
-
 public class BusinessRuleException extends CrossWordsException {
     protected BusinessRuleException(String userMessage, String technicalMessage, Exception rootException, ExceptionType type, ExceptionLocation location) {
         super(userMessage, technicalMessage, rootException, type, location);
@@ -12,12 +10,6 @@ public class BusinessRuleException extends CrossWordsException {
 
     public BusinessRuleException(String userMessage, String technicalMessage) {
         super(userMessage, technicalMessage, null, ExceptionType.BUSINESS_RULE, ExceptionLocation.APPLICATION);
-    }
-
-    public BusinessRuleException(String userMessage, String technicalMessage, Exception rootException, ExceptionType type, ExceptionLocation location, ExceptionType type1, ExceptionLocation location1) {
-        super(userMessage, technicalMessage, rootException, type, location);
-        this.type = type1;
-        this.location = location1;
     }
 
     public static BusinessRuleException buildUserException(String userMessage) {
@@ -34,21 +26,5 @@ public class BusinessRuleException extends CrossWordsException {
 
     public static BusinessRuleException buildTechnicalException(String technicalMessage, Exception rootException, ExceptionLocation location) {
         return new BusinessRuleException(null, technicalMessage, rootException, ExceptionType.TECHNICAL, location);
-    }
-
-    public ExceptionType getType() {
-        return type;
-    }
-
-    public void setType(ExceptionType type) {
-        this.type = getDefaultIsNullObject(type, ExceptionType.GENERAL);
-    }
-
-    public ExceptionLocation getLocation() {
-        return location;
-    }
-
-    public void setLocation(ExceptionLocation location) {
-        this.location = getDefaultIsNullObject(location, ExceptionLocation.GENERAL);
     }
 }
