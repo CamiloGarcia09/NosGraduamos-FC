@@ -34,3 +34,17 @@ services:
           - POST
         regex_priority: 10
         strip_path: false
+
+      - name: create-message
+        paths:
+          - /messageucolab/v1/application/message
+        methods:
+          - POST
+        strip_path: false
+
+      - name: catalog
+        paths:
+          - /messageucolab/v1/catalog
+        methods:
+          - GET
+        strip_path: false
