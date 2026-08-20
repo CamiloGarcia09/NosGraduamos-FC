@@ -40,7 +40,7 @@ class VerifyAccessUseCaseTest {
 
     private final UUID activeStateId = UUID.randomUUID();
 
-    private TokenData activeToken(String token) {
+    private TokenData activeToken() {
         TokenData data = new TokenData();
         data.setStateId(activeStateId.toString());
         data.setSecretName("secret-1");
@@ -49,7 +49,7 @@ class VerifyAccessUseCaseTest {
 
     @Test
     void verifyAccess_returnsTrue_whenAccessIsGranted() throws Exception {
-        when(findTokenRepository.findById("token")).thenReturn(activeToken("token"));
+        when(findTokenRepository.findById("token")).thenReturn(activeToken());
         StatusTokenData active = new StatusTokenData(activeStateId, "Active");
         when(tokenStateRepository.findByStatus(activeStateId.toString())).thenReturn(active);
         when(findTokenCachePort.getSecret("secret-1"))
@@ -61,7 +61,7 @@ class VerifyAccessUseCaseTest {
 
     @Test
     void verifyAccess_returnsFalse_whenEncryptionFails() throws Exception {
-        when(findTokenRepository.findById("token")).thenReturn(activeToken("token"));
+        when(findTokenRepository.findById("token")).thenReturn(activeToken());
         StatusTokenData active = new StatusTokenData(activeStateId, "Active");
         when(tokenStateRepository.findByStatus(activeStateId.toString())).thenReturn(active);
         when(findTokenCachePort.getSecret("secret-1"))
@@ -73,7 +73,7 @@ class VerifyAccessUseCaseTest {
 
     @Test
     void verifyAccess_returnsFalse_whenAccessDenied() throws Exception {
-        when(findTokenRepository.findById("token")).thenReturn(activeToken("token"));
+        when(findTokenRepository.findById("token")).thenReturn(activeToken());
         StatusTokenData active = new StatusTokenData(activeStateId, "Active");
         when(tokenStateRepository.findByStatus(activeStateId.toString())).thenReturn(active);
         when(findTokenCachePort.getSecret("secret-1"))
@@ -85,7 +85,7 @@ class VerifyAccessUseCaseTest {
 
     @Test
     void verifyAccess_throwsBusinessRuleException_whenTokenIsInactive() {
-        when(findTokenRepository.findById("token")).thenReturn(activeToken("token"));
+        when(findTokenRepository.findById("token")).thenReturn(activeToken());
         StatusTokenData inactive = new StatusTokenData(activeStateId, "Inactive");
         when(tokenStateRepository.findByStatus(activeStateId.toString())).thenReturn(inactive);
         when(catalogPort.getMessage("TCH_033")).thenReturn("Token is not active");

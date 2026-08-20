@@ -71,7 +71,7 @@ class TokenSurrealRepositoryAdapterImplTest {
         return v;
     }
 
-    private Value recordIdValue(String table, String id) {
+    private Value recordIdValue(String id) {
         Id idPart = mock(Id.class);
         when(idPart.toString()).thenReturn(id);
         RecordId recordId = mock(RecordId.class);
@@ -93,7 +93,7 @@ class TokenSurrealRepositoryAdapterImplTest {
 
     private Object tokenDocument() {
         Object doc = mock(Object.class);
-        doReturn(recordIdValue("token", "tok-1")).when(doc).get("id");
+        doReturn(recordIdValue("tok-1")).when(doc).get("id");
         doReturn(stringValue("secret")).when(doc).get("secret_name");
         doReturn(dateTimeValue(LocalDateTime.of(2025, 1, 1, 10, 0))).when(doc).get("creation_date");
         doReturn(dateTimeValue(LocalDateTime.of(2026, 1, 1, 10, 0))).when(doc).get("expiration_date");

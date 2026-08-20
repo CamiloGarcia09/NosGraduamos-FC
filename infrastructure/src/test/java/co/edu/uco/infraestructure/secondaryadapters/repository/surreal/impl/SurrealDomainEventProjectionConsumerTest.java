@@ -122,11 +122,11 @@ class SurrealDomainEventProjectionConsumerTest {
         doReturn(responseWith(events)).when(surreal).query(contains("FROM domain_events WHERE"));
     }
 
-    private void stubRecord(String recordId, Object record) {
+    private void stubRecord(String recordId, Object recordObj) {
         int separator = recordId.indexOf(':');
         String table = recordId.substring(0, separator);
         String id = recordId.substring(separator + 1);
-        doReturn(responseWith(record)).when(surreal).query(contains("FROM " + table + ":`" + id + "`"));
+        doReturn(responseWith(recordObj)).when(surreal).query(contains("FROM " + table + ":`" + id + "`"));
     }
 
     private Object catalogRecord(String name) {
