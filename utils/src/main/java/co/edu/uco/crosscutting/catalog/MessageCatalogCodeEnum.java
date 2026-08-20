@@ -232,6 +232,19 @@ public enum MessageCatalogCodeEnum {
     /** Error técnico al persistir el mensaje en la base de datos SurrealDB. */
     TCH_067("TCH_067"),
 
+    /**Parameter code is null or empty */
+    TCH_068("TCH_068"),
+
+    /**Unexpected parameter retrieval error */
+    TCH_069("TCH_069"),
+
+    /**Technical parameter retrieval error */
+    TCH_070("TCH_070"),
+
+    /** El parámetro con código '%s' no fue encontrado en el catálogo. */
+    TCH_071("TCH_071"),
+
+
     // =========================================================================
     // Mensajes funcionales — Validación y caché
     // =========================================================================

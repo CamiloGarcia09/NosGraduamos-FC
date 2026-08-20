@@ -13,7 +13,7 @@ COPY infrastructure/src infrastructure/src
 COPY core/src core/src
 COPY utils/src utils/src
 
-RUN mvn clean package -DskipTests -B
+RUN mvn clean package -B
 
 FROM eclipse-temurin:17-jre-noble
 
