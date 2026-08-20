@@ -16,6 +16,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import java.util.List;
 import java.util.Optional;
 
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.REQUEST_GET_HEADER_ACCEPT;
 import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 
@@ -42,14 +43,14 @@ public final class AcceptHeaderInterceptor implements HandlerInterceptor {
         var serializer = serializerRegistry.getSerializerForMediaType(acceptHeader);
 
         if (isNullObject(serializer) || !serializer.supports(acceptHeader)) {
-            var errorMessage = String.format(catalogPort.getMessage("TCH_022"), acceptHeader);
+            var errorMessage = String.format(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_022.getCode()), acceptHeader);
             var errorResponse = new Response<String>(List.of(), List.of(errorMessage));
             assert !isNullObject(serializer);
             var formattedError = serializer.serialize(errorResponse);
             response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
             response.setContentType(serializer.getSupportedContentType());
             response.getWriter().write(formattedError);
-            log.error(catalogPort.getMessage("TCH_023"), formattedError);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_023.getCode()), formattedError);
             return false;
         }
         return true;

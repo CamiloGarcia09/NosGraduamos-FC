@@ -4,6 +4,7 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.secret.SecretProviderPort;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.infraestructure.config.DopplerProperties;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.*;
 import static co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType.TECHNICAL;
 
@@ -42,29 +44,38 @@ public final class DopplerProvider implements SecretProviderPort {
                 .addHeader(REQUEST_GET_HEADER_AUTHORIZATION.toLowerCase(), BEARER_TOKEN.formatted(properties.getToken()))
                 .build();
 
-        try(Response response = client.newCall(request).execute()){
-            if(!response.isSuccessful()){
-                var message = catalogPort.getMessage("TCH_030").formatted(response.code());
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_030.getCode()).formatted(response.code());
                 log.error(message);
                 throw CrossWordsException.buildInfrastructure(
                         message,
-                        catalogPort.getMessage("FUN_025"),
+                        catalogPort.getMessage(MessageCatalogCodeEnum.FUN_025.getCode()),
                         TECHNICAL
                 );
-            }else {
-                assert response.body() != null;
-                var dopplerFindTokenDTO = mapper.readValue(response.body().byteStream(), DopplerFindTokenDTO.class);
+            } else {
+                var body = response.body();
+                if (isNullObject(body)) {
+                    var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_029.getCode());
+                    log.error(message);
+                    throw CrossWordsException.buildInfrastructure(
+                            message,
+                            catalogPort.getMessage(MessageCatalogCodeEnum.FUN_025.getCode()),
+                            TECHNICAL
+                    );
+                }
+                var dopplerFindTokenDTO = mapper.readValue(body.byteStream(), DopplerFindTokenDTO.class);
                 return Map.of(
                         DOPPLER_DTO_SECRET_NAME, dopplerFindTokenDTO.getName(),
                         DOPPLER_DTO_PRIVATE_KEY, dopplerFindTokenDTO.getRaw()
                 );
             }
-        }catch (Exception e){
-            var message = catalogPort.getMessage("TCH_029");
+        } catch (Exception e) {
+            var message = catalogPort.getMessage(MessageCatalogCodeEnum.TCH_029.getCode());
             log.error(message, e);
             throw CrossWordsException.buildInfrastructure(
                     message,
-                    catalogPort.getMessage("FUN_025"),
+                    catalogPort.getMessage(MessageCatalogCodeEnum.FUN_025.getCode()),
                     e,
                     TECHNICAL
             );

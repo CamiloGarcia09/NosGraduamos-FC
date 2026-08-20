@@ -15,6 +15,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import java.io.IOException;
 import java.util.List;
 
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.*;
 import static co.edu.uco.crosscutting.helpers.UtilText.isEmptyOrNull;
 
@@ -43,12 +44,12 @@ public final class TokenHeaderInterceptor implements HandlerInterceptor {
         var acceptHeader = request.getHeader(REQUEST_GET_HEADER_ACCEPT);
 
         if (isEmptyOrNull(token)) {
-            sendErrorResponse(response, acceptHeader, catalogPort.getMessage("TCH_032"));
+            sendErrorResponse(response, acceptHeader, catalogPort.getMessage(MessageCatalogCodeEnum.TCH_032.getCode()));
             return false;
         }
 
         if (!verifyAccessUseCaseFacade.execute(token)) {
-            sendErrorResponse(response, acceptHeader, catalogPort.getMessage("TCH_031"));
+            sendErrorResponse(response, acceptHeader, catalogPort.getMessage(MessageCatalogCodeEnum.TCH_031.getCode()));
             return false;
         }
 

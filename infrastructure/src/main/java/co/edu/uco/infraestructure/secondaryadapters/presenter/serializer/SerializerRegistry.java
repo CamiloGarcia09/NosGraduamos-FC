@@ -3,6 +3,7 @@ package co.edu.uco.infraestructure.secondaryadapters.presenter.serializer;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -30,7 +31,7 @@ public final class SerializerRegistry {
             if (defaultSerializer.isPresent()) {
                 return defaultSerializer.get();
             } else {
-                log.error(catalogPort.getMessage("TCH_017"), mediaType);
+                log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_017.getCode()), mediaType);
                 return null;
             }
         });

@@ -4,6 +4,7 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.repository.SimplePageRequest;
 import co.edu.uco.application.usecase.validator.Validator;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import org.springframework.stereotype.Component;
 
 import static co.edu.uco.application.CrosswordsConstant.REQUEST_PAGE_SORT_ASC;
@@ -18,7 +19,7 @@ public final class SortDirectionValidator implements Validator<SimplePageRequest
     @Override
     public void validate(SimplePageRequest data) throws BusinessRuleException {
         if (!data.getSort().equalsIgnoreCase(REQUEST_PAGE_SORT_ASC) && !data.getSort().equalsIgnoreCase(REQUEST_PAGE_SORT_DESC)) {
-            throw BusinessRuleException.buildUserException(catalogPort.getMessage("FUN_031"));
+            throw BusinessRuleException.buildUserException(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_031.getCode()));
         }
     }
 }

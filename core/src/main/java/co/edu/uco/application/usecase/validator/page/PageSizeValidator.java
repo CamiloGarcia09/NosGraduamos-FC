@@ -4,6 +4,7 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.repository.SimplePageRequest;
 import co.edu.uco.application.usecase.validator.Validator;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.helpers.UtilNumeric;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +21,7 @@ public final class PageSizeValidator implements Validator<SimplePageRequest> {
     public void validate(SimplePageRequest data) throws BusinessRuleException {
         if (!UtilNumeric.isBetweenIncludingRanges(data.getSize(), REQUEST_PAGE_DEFAULT, MAX_PAGE_SIZE)) {
             throw BusinessRuleException.buildUserException(
-                String.format(catalogPort.getMessage("FUN_029"), MAX_PAGE_SIZE));
+                String.format(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_029.getCode()), MAX_PAGE_SIZE));
         }
     }
 }

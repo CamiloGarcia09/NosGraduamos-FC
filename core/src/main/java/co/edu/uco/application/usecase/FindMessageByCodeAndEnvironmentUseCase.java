@@ -10,6 +10,7 @@ import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.usecase.handling.HandlingFindMessageByCodeAndEnvironmentPort;
 import co.edu.uco.application.usecase.validator.message.FindMessageCodeValidator;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -34,14 +35,14 @@ public final class FindMessageByCodeAndEnvironmentUseCase implements HandlingFin
             var messageDataOptional = messageCatalogStrategy
                     .getMessageByCodeAndEnvironment(messageCode, environmentId);
             var messageData = messageDataOptional.orElseThrow(() -> {
-                var errorMessage = String.format(messageCatalogStrategy.getSystemMessageContent("FUN_012"), messageCode, environmentId);
+                var errorMessage = String.format(messageCatalogStrategy.getSystemMessageContent(MessageCatalogCodeEnum.FUN_012.getCode()), messageCode, environmentId);
                 return BusinessException.buildUserException(errorMessage);
             });
             return entityMapper.mapperDTO(messageData);
         } catch (BusinessException exception) {
             throw exception;
         } catch (Exception exception) {
-            String errorMessage = String.format(messageCatalogStrategy.getSystemMessageContent("FUN_012"), messageCode, environmentId);
+            String errorMessage = String.format(messageCatalogStrategy.getSystemMessageContent(MessageCatalogCodeEnum.FUN_012.getCode()), messageCode, environmentId);
             log.error(errorMessage, exception);
             throw BusinessException.buildUserException(errorMessage);
         }

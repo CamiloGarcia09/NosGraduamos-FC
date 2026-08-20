@@ -5,6 +5,7 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
 import co.edu.uco.application.usecase.validator.Validator;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,7 +19,7 @@ public final class EnvironmentExistValidator implements Validator<CreateTokenDTO
     @Override
     public void validate(CreateTokenDTO data) throws BusinessRuleException {
         if (repository.findById(data.getEnvironmentId()).isEmpty()) {
-            throw BusinessRuleException.buildUserException(catalogPort.getMessage("FUN_035"));
+            throw BusinessRuleException.buildUserException(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_035.getCode()));
         }
     }
 }
