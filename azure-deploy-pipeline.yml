@@ -1,0 +1,299 @@
+trigger: none
+pr: none
+
+parameters:
+  - name: operation
+    displayName: Deployment operation
+    type: string
+    default: DEPLOY
+    values:
+      - DEPLOY
+      - STOP
+
+pool:
+  vmImage: ubuntu-24.04
+
+lockBehavior: sequential
+
+variables:
+  IMAGE_REPOSITORY: messageucolab
+  IMAGE_TAG: $(Build.SourceVersion)
+  DEPLOY_ROOT: /opt/messageucolab
+  DOPPLER_DEPLOY_TOKEN_SECRET: doppler-deploy-token
+  DOPPLER_APP_TOKEN_SECRET: doppler-app-token
+
+stages:
+  - stage: ValidateRequest
+    displayName: Validate deployment request
+    jobs:
+      - job: BranchGuard
+        displayName: Require protected branch
+        steps:
+          - checkout: none
+          - task: PowerShell@2
+            displayName: Validate source branch
+            inputs:
+              targetType: inline
+              script: |
+                if ('$(Build.SourceBranch)' -ne 'refs/heads/develop') {
+                  throw 'DEPLOY and STOP are only allowed from the develop branch.'
+                }
+
+  - stage: DeployDemo
+    displayName: Deploy demo environment
+    dependsOn: ValidateRequest
+    condition: and(succeeded(), eq('${{ parameters.operation }}', 'DEPLOY'))
+    variables:
+      - group: messageucolab-cicd
+    jobs:
+      - deployment: Deploy
+        displayName: Build and deploy to the temporary VM
+        environment: messageucolab-dev
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                  clean: true
+
+                - task: PowerShell@2
+                  displayName: Validate agent tools
+                  inputs:
+                    targetType: inline
+                    script: |
+                      $ErrorActionPreference = 'Stop'
+                      docker version
+                      if ($LASTEXITCODE -ne 0) { throw 'Docker Engine is not available.' }
+                      az version
+                      if ($LASTEXITCODE -ne 0) { throw 'Azure CLI is not available.' }
+                      ssh -V
+                      if ($LASTEXITCODE -ne 0) { throw 'OpenSSH is not available.' }
+
+                - task: AzureCLI@2
+                  displayName: Build and push application image
+                  inputs:
+                    azureSubscription: messageucolab-azure-wif
+                    scriptType: pscore
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      $ErrorActionPreference = 'Stop'
+                      $loginServer = "$(ACR_NAME).azurecr.io"
+                      $commitImage = "${loginServer}/$(IMAGE_REPOSITORY):$(IMAGE_TAG)"
+                      az acr login --name "$(ACR_NAME)"
+                      if ($LASTEXITCODE -ne 0) { throw 'ACR login failed.' }
+                      docker build --tag $commitImage .
+                      if ($LASTEXITCODE -ne 0) { throw 'Application image build failed.' }
+                      docker push $commitImage
+                      if ($LASTEXITCODE -ne 0) { throw 'Commit image push failed.' }
+
+                - task: DownloadSecureFile@1
+                  name: sshKey
+                  displayName: Download deployment SSH key
+                  inputs:
+                    secureFile: $(SSH_SECURE_FILE)
+
+                - task: AzureCLI@2
+                  displayName: Start VM and open temporary SSH access
+                  inputs:
+                    azureSubscription: messageucolab-azure-wif
+                    scriptType: pscore
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      $ErrorActionPreference = 'Stop'
+                      $agentIp = (Invoke-RestMethod -Uri 'https://api.ipify.org').Trim()
+                      az vm start --resource-group "$(AZURE_RESOURCE_GROUP)" --name "$(AZURE_VM_NAME)"
+                      if ($LASTEXITCODE -ne 0) { throw 'VM start failed.' }
+                      $publicIp = az vm list-ip-addresses --resource-group "$(AZURE_RESOURCE_GROUP)" --name "$(AZURE_VM_NAME)" --query '[0].virtualMachine.network.publicIpAddresses[0].ipAddress' --output tsv
+                      if ($LASTEXITCODE -ne 0) { throw 'Could not obtain the VM public IP.' }
+                      Write-Host "##vso[task.setvariable variable=VM_PUBLIC_IP]$publicIp"
+                      $existingRules = @(az network nsg rule list `
+                        --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                        --nsg-name "$(AZURE_NSG_NAME)" `
+                        --query '[].name' `
+                        --output tsv)
+                      if ($LASTEXITCODE -ne 0) { throw 'Could not list existing NSG rules.' }
+                      foreach ($ruleName in @('AllowApplicationDemo', 'AllowDemoGateway', 'AllowPipelineDeployment')) {
+                        if ($existingRules -contains $ruleName) {
+                          az network nsg rule delete `
+                            --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                            --nsg-name "$(AZURE_NSG_NAME)" `
+                            --name $ruleName `
+                            --output none
+                          if ($LASTEXITCODE -ne 0) { throw "Could not remove stale NSG rule $ruleName." }
+                        }
+                      }
+                      az network nsg rule create `
+                        --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                        --nsg-name "$(AZURE_NSG_NAME)" `
+                        --name AllowPipelineDeployment `
+                        --priority 100 `
+                        --access Allow `
+                        --direction Inbound `
+                        --protocol Tcp `
+                        --source-address-prefixes "$agentIp/32" `
+                        --source-port-ranges '*' `
+                        --destination-address-prefixes '*' `
+                        --destination-port-ranges 22 `
+                        --output none
+                      if ($LASTEXITCODE -ne 0) { throw 'Could not create temporary NSG access.' }
+
+                - task: PowerShell@2
+                  displayName: Copy deployment files
+                  inputs:
+                    targetType: inline
+                    script: |
+                      $ErrorActionPreference = 'Stop'
+                      $key = '$(sshKey.secureFilePath)'
+                      $remoteHost = 'azureuser@$(VM_PUBLIC_IP)'
+                      chmod 600 $key
+                      if ($LASTEXITCODE -ne 0) { throw 'Could not secure the SSH private key.' }
+                      ssh -i $key -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30 $remoteHost `
+                        "mkdir -p $(DEPLOY_ROOT)/deployment/docker"
+                      if ($LASTEXITCODE -ne 0) { throw 'SSH connection failed.' }
+                      scp -i $key -r deployment/azure "${remoteHost}:$(DEPLOY_ROOT)/deployment/"
+                      if ($LASTEXITCODE -ne 0) { throw 'Could not copy Azure deployment files.' }
+                      scp -i $key -r deployment/docker/scripts "${remoteHost}:$(DEPLOY_ROOT)/deployment/docker/"
+                      if ($LASTEXITCODE -ne 0) { throw 'Could not copy initialization scripts.' }
+
+                - task: AzureCLI@2
+                  displayName: Deploy and verify containers
+                  inputs:
+                    azureSubscription: messageucolab-azure-wif
+                    scriptType: pscore
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      $ErrorActionPreference = 'Stop'
+                      $deployCommand = "chmod +x '$(DEPLOY_ROOT)/deployment/azure/deploy.sh' && sudo -u azureuser -H '$(DEPLOY_ROOT)/deployment/azure/deploy.sh' '$(IMAGE_TAG)' '$(ACR_NAME)' '$(KEY_VAULT_NAME)' '$(DOPPLER_DEPLOY_TOKEN_SECRET)' '$(DOPPLER_APP_TOKEN_SECRET)'"
+                      $result = az vm run-command invoke `
+                        --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                        --name "$(AZURE_VM_NAME)" `
+                        --command-id RunShellScript `
+                        --scripts $deployCommand `
+                        --query 'value[0].message' `
+                        --output tsv
+                      if ($LASTEXITCODE -ne 0) { throw 'Remote deployment failed.' }
+                      $resultText = $result -join [Environment]::NewLine
+                      Write-Host $resultText
+                      if ($resultText -notmatch 'Deployment completed with image tag') {
+                        throw 'Remote deployment did not report success.'
+                      }
+
+                - task: AzureCLI@2
+                  displayName: Open public API gateway access
+                  inputs:
+                    azureSubscription: messageucolab-azure-wif
+                    scriptType: pscore
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      $ErrorActionPreference = 'Stop'
+                      az network nsg rule create `
+                        --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                        --nsg-name "$(AZURE_NSG_NAME)" `
+                        --name AllowDemoGateway `
+                        --priority 110 `
+                        --access Allow `
+                        --direction Inbound `
+                        --protocol Tcp `
+                        --source-address-prefixes Internet `
+                        --source-port-ranges '*' `
+                        --destination-address-prefixes '*' `
+                        --destination-port-ranges 8000 `
+                        --output none
+                      if ($LASTEXITCODE -ne 0) { throw 'Could not open public API gateway access.' }
+
+                - task: PowerShell@2
+                  displayName: External smoke test
+                  inputs:
+                    targetType: inline
+                    script: |
+                      $ErrorActionPreference = 'Stop'
+                      $healthUri = 'http://$(VM_PUBLIC_IP):8000/actuator/health'
+                      $response = $null
+                      for ($attempt = 1; $attempt -le 12; $attempt++) {
+                        try {
+                          $response = Invoke-RestMethod -Uri $healthUri -TimeoutSec 15
+                          break
+                        } catch {
+                          Write-Host "Gateway health check attempt $attempt failed."
+                          Start-Sleep -Seconds 10
+                        }
+                      }
+                      if ($response.status -ne 'UP') { throw 'Application health check did not return UP.' }
+                      Write-Host "Application health: $($response.status)"
+                      Write-Host 'API gateway: http://$(VM_PUBLIC_IP):8000'
+                      Write-Host 'Swagger UI: http://$(VM_PUBLIC_IP):8000/swagger-ui/index.html'
+
+                - task: AzureCLI@2
+                  displayName: Clean temporary network access
+                  condition: always()
+                  inputs:
+                    azureSubscription: messageucolab-azure-wif
+                    scriptType: pscore
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      function Remove-NsgRule([string] $RuleName) {
+                        $existingRules = @(az network nsg rule list `
+                          --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                          --nsg-name "$(AZURE_NSG_NAME)" `
+                          --query '[].name' `
+                          --output tsv)
+                        if ($LASTEXITCODE -ne 0) { throw 'Could not list existing NSG rules.' }
+                        if ($existingRules -contains $RuleName) {
+                          az network nsg rule delete `
+                            --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                            --nsg-name "$(AZURE_NSG_NAME)" `
+                            --name $RuleName `
+                            --output none
+                          if ($LASTEXITCODE -ne 0) { throw "Could not remove NSG rule $RuleName." }
+                        }
+                      }
+
+                      Remove-NsgRule 'AllowPipelineDeployment'
+                      if ('$(Agent.JobStatus)' -ne 'Succeeded') {
+                        Remove-NsgRule 'AllowDemoGateway'
+                      }
+
+  - stage: StopDemo
+    displayName: Stop and deallocate demo VM
+    dependsOn: ValidateRequest
+    condition: and(succeeded(), eq('${{ parameters.operation }}', 'STOP'))
+    variables:
+      - group: messageucolab-cicd
+    jobs:
+      - deployment: Stop
+        displayName: Deallocate VM
+        environment: messageucolab-dev
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: none
+                - task: AzureCLI@2
+                  displayName: Remove public access and deallocate VM
+                  inputs:
+                    azureSubscription: messageucolab-azure-wif
+                    scriptType: pscore
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      $ErrorActionPreference = 'Stop'
+                      $existingRules = @(az network nsg rule list `
+                        --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                        --nsg-name "$(AZURE_NSG_NAME)" `
+                        --query '[].name' `
+                        --output tsv)
+                      if ($LASTEXITCODE -ne 0) { throw 'Could not list existing NSG rules.' }
+                      foreach ($ruleName in @('AllowPipelineDeployment', 'AllowApplicationDemo', 'AllowDemoGateway')) {
+                        if ($existingRules -contains $ruleName) {
+                          az network nsg rule delete `
+                            --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                            --nsg-name "$(AZURE_NSG_NAME)" `
+                            --name $ruleName `
+                            --output none
+                          if ($LASTEXITCODE -ne 0) { throw "Could not remove NSG rule $ruleName." }
+                        }
+                      }
+                      az vm deallocate `
+                        --resource-group "$(AZURE_RESOURCE_GROUP)" `
+                        --name "$(AZURE_VM_NAME)" `
+                        --no-wait
+                      if ($LASTEXITCODE -ne 0) { throw 'VM deallocation request failed.' }

@@ -4,7 +4,7 @@ A Spring Boot application for message handling and processing.
 
 ## Azure CI/CD
 
-The Azure for Students deployment, Doppler setup, infrastructure provisioning, and pipeline operations are documented in [`docs/azure-deployment.md`](docs/azure-deployment.md).
+Microsoft-hosted CI and protected Azure deployment run as separate Azure DevOps pipelines. The Azure for Students deployment, Doppler setup, infrastructure provisioning, and operations are documented in [`docs/azure-deployment.md`](docs/azure-deployment.md).
 
 ## Prerequisites
 
