@@ -62,10 +62,10 @@ La clave pública se entrega a Bicep. La privada se sube posteriormente a Azure 
 
 ## 4. Desplegar infraestructura
 
-Crea un grupo de recursos en una región donde la VM seleccionada esté disponible:
+La infraestructura actual reutiliza el grupo `TrabajoGrado`. Verifica que exista antes de desplegar:
 
 ```bash
-az group create --name rg-messageucolab-dev --location eastus
+az group show --name TrabajoGrado
 ```
 
 Copia `infrastructure/azure/parameters.example.json` como `infrastructure/azure/parameters.local.json` y reemplaza los valores. El archivo local está ignorado por Git.
@@ -74,7 +74,7 @@ Valida antes de crear:
 
 ```bash
 az deployment group what-if \
-  --resource-group rg-messageucolab-dev \
+  --resource-group TrabajoGrado \
   --template-file infrastructure/azure/main.bicep \
   --parameters infrastructure/azure/parameters.local.json
 ```
@@ -83,7 +83,7 @@ Despliega:
 
 ```bash
 az deployment group create \
-  --resource-group rg-messageucolab-dev \
+  --resource-group TrabajoGrado \
   --template-file infrastructure/azure/main.bicep \
   --parameters infrastructure/azure/parameters.local.json
 ```
@@ -94,23 +94,30 @@ La VM instala Docker, Docker Compose, Azure CLI y Doppler mediante cloud-init. R
 
 ## 5. Configurar Azure DevOps
 
+La organización activa es `NosGraduamosFC` y el proyecto es [`MessageUCO`](https://dev.azure.com/NosGraduamosFC/MessageUCO). La integración usa dos pipelines sobre agentes Microsoft `ubuntu-24.04`:
+
+| Pipeline | Archivo YAML | Ejecución |
+|---|---|---|
+| `MessageUCO-CI` | `azure-pipelines.yml` | Automática para PR y cambios en `develop` |
+| `MessageUCO-CD` | `azure-deploy-pipeline.yml` | Manual para `DEPLOY` y `STOP` |
+
+Conecta ambos pipelines al repositorio GitHub `CamiloGarcia09/NosGraduamos-FC` mediante la Azure Pipelines GitHub App. El CI no utiliza Service Connections, Secure Files ni Variable Groups de despliegue.
+
 ### Azure Resource Manager Service Connection
 
-Crea una Service Connection de tipo Azure Resource Manager usando Workload Identity Federation. Limita su alcance al grupo `rg-messageucolab-dev`.
+Crea una Service Connection de tipo Azure Resource Manager usando Workload Identity Federation. Usa el nombre `messageucolab-azure-wif`; la identidad recibe roles solamente sobre el ACR `messageucolab1c6062b9`, la VM `messageucolab-dev-vm` y el NSG `messageucolab-dev-nsg` existentes en `TrabajoGrado`.
 
-La identidad necesita:
+La identidad necesita estos roles sobre recursos concretos:
 
-- Permiso para iniciar y desasignar la VM.
-- Permiso para crear y eliminar la regla temporal del NSG.
+- `Virtual Machine Contributor` sobre `messageucolab-dev-vm`.
+- `Network Contributor` sobre `messageucolab-dev-nsg`.
 - Rol `AcrPush` sobre el ACR.
 
-Para la primera demostración se puede usar `Contributor` en el grupo de recursos y `AcrPush` en ACR. Después se puede reducir a roles específicos.
-
-La identidad del pipeline no necesita acceso a Key Vault.
+La identidad del pipeline no necesita acceso a Key Vault. Autoriza esta conexión solamente para `MessageUCO-CD`; no habilites acceso para todos los pipelines.
 
 ### Secure File SSH
 
-Carga la clave privada en **Pipelines > Library > Secure files** con el nombre `messageucolab-azure` y autoriza el pipeline para utilizarla.
+Genera una clave Ed25519 exclusiva para esta organización, instala su clave pública para `azureuser` en la VM y carga la privada en **Pipelines > Library > Secure files** con el nombre `messageucolab-azure-v2`. Autoriza solamente `MessageUCO-CD`.
 
 El pipeline descarga la clave solo durante el job, obtiene la IP pública de la VM y ejecuta `scp`/`ssh` como `azureuser`.
 
@@ -122,33 +129,39 @@ Crea en Library un Variable Group llamado exactamente `messageucolab-cicd`:
 
 | Variable | Ejemplo | Secreta |
 |---|---|---|
-| `AZURE_SERVICE_CONNECTION` | nombre de Azure RM Service Connection | No |
 | `ACR_NAME` | output `acrNameOutput` | No |
-| `AZURE_RESOURCE_GROUP` | `rg-messageucolab-dev` | No |
+| `AZURE_RESOURCE_GROUP` | `TrabajoGrado` | No |
 | `AZURE_VM_NAME` | output `vmNameOutput` | No |
 | `AZURE_NSG_NAME` | output `nsgNameOutput` | No |
-| `SSH_SECURE_FILE` | `messageucolab-azure` | No |
+| `SSH_SECURE_FILE` | `messageucolab-azure-v2` | No |
 | `KEY_VAULT_NAME` | nombre del Key Vault existente | No |
 
-Autoriza el pipeline para utilizar el Variable Group, la Azure Service Connection y el Secure File.
+El nombre `messageucolab-azure-wif` queda declarado literalmente en el YAML de CD para que Azure DevOps pueda resolver y proteger la Service Connection antes de iniciar el stage. Autoriza solamente `MessageUCO-CD` para utilizar el Variable Group, la Azure Service Connection y el Secure File. No agregues tokens Doppler, contraseñas de base de datos ni otros secretos al Variable Group.
 
-La primera versión usa un job normal de despliegue y no necesita crear un Azure DevOps Environment. Esto evita requerir permisos adicionales; los approvals se pueden incorporar en una fase posterior.
+### Environment protegido
 
-La organización no tiene habilitado el grant de paralelismo hospedado. El pipeline usa el agente Windows self-hosted del pool `Default`; Maven y Java 17 se ejecutan dentro del contenedor oficial de Maven para no depender de herramientas instaladas en la cuenta de servicio del agente. Se puede volver a `ubuntu-latest` cuando Microsoft apruebe el grant gratuito de 1.800 minutos mensuales.
+Crea el Environment `messageucolab-dev` y autoriza solamente `MessageUCO-CD`. Configura una aprobación manual, control de rama para `refs/heads/develop` y un bloqueo exclusivo. El bloqueo evita que dos operaciones modifiquen simultáneamente las reglas NSG o los contenedores de la VM.
 
-## 6. Comportamiento del pipeline
+La organización dispone del grant gratuito de 1.800 minutos mensuales. Ambos pipelines usan agentes Microsoft `ubuntu-24.04`; no requieren el agente local Windows ni Docker Desktop.
 
-El parámetro `operation` acepta:
+## 6. Comportamiento de los pipelines
+
+### MessageUCO-CI
+
+Se ejecuta para todo PR hacia `develop` y para cada cambio integrado en `develop`. Compila, prueba, publica resultados JUnit y valida Docker Compose, Bicep y la construcción de la imagen. No inicia sesión en Azure ni publica imágenes.
+
+El primer run crea una caché Maven Linux. Los agentes son efímeros, por lo que las capas Docker locales no persisten; `Cache@2` restaura únicamente el repositorio Maven del job de CI.
+
+### MessageUCO-CD
+
+No tiene triggers automáticos. Debe ejecutarse manualmente desde `develop` y su parámetro `operation` acepta:
 
 | Operación | Resultado |
 |---|---|
-| `CI` | Compila, prueba, valida y publica en ACR si la rama es `develop` |
-| `DEPLOY` | Ejecuta CI, publica la imagen de la rama seleccionada, inicia la VM y despliega |
+| `DEPLOY` | Construye y publica la imagen del commit, inicia la VM y despliega |
 | `STOP` | Desasigna la VM sin compilar el proyecto |
 
-Los triggers automáticos utilizan `CI`. El despliegue y la detención se ejecutan manualmente desde **Run pipeline**.
-
-Los pull requests nunca publican imágenes ni despliegan.
+El YAML rechaza ambas operaciones fuera de `refs/heads/develop`. El Environment solicita aprobación y serializa las ejecuciones. Los pull requests nunca reciben credenciales, publican imágenes ni despliegan.
 
 ## 7. Inyección de variables
 
@@ -187,7 +200,7 @@ http://<publicIpAddress>:8000/messageucolab/v1/application/messages
 
 La API utiliza HTTP y queda disponible públicamente mientras la VM está encendida. No mantengas la demostración desplegada más tiempo del necesario.
 
-Después de una demostración ejecuta el pipeline manualmente con `operation=STOP`. El pipeline elimina `AllowDemoGateway`, desasigna la VM y evita que los endpoints continúen accesibles.
+Después de una demostración ejecuta `MessageUCO-CD` manualmente con `operation=STOP`. El pipeline elimina `AllowDemoGateway`, desasigna la VM y evita que los endpoints continúen accesibles.
 
 Para consultar logs durante una sesión de mantenimiento:
 
@@ -200,12 +213,12 @@ No utilices `docker compose down -v`, porque elimina los datos persistentes.
 
 ## 9. Rotación de secretos
 
-Al cambiar variables en Doppler, ejecuta nuevamente `operation=DEPLOY` para recrear el contenedor con los nuevos valores.
+Al cambiar variables en Doppler, ejecuta nuevamente `MessageUCO-CD` con `operation=DEPLOY` para recrear el contenedor con los nuevos valores.
 
 Al rotar un Service Token:
 
 1. Crea el token nuevo.
-2. Actualiza su secreto en Key Vault o Azure DevOps.
+2. Actualiza su secreto en Key Vault.
 3. Ejecuta y valida un despliegue.
 4. Revoca el token anterior.
 
