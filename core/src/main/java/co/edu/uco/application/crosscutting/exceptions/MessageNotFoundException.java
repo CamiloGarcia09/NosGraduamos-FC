@@ -8,19 +8,19 @@ import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType;
 
 import java.io.Serial;
 
-public final class TitleCanNotBeEmptyException extends CrossWordsException {
+public final class MessageNotFoundException extends CrossWordsException {
     @Serial
-    private static final long serialVersionUID = 41765698692188909L;
-    private TitleCanNotBeEmptyException() {
+    private static final long serialVersionUID = 1L;
+    private MessageNotFoundException(String key) {
         super(
-            CatalogPortStaticRef.getTitle(MessageCatalogCodeEnum.FUN_022.getCode()),
-            CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.FUN_022.getCode()),
+            CatalogPortStaticRef.getTitle(MessageCatalogCodeEnum.TCH_009.getCode()),
+            CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_009.getCode()).formatted(key),
             null,
             ExceptionType.BUSINESS_RULE,
             ExceptionLocation.APPLICATION
         );
     }
-    public static void report() {
-        throw new TitleCanNotBeEmptyException();
+    public static void report(String key) {
+        throw new MessageNotFoundException(key);
     }
 }
