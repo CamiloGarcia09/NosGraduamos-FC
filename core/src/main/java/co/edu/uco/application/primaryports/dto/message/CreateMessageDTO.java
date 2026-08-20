@@ -1,13 +1,17 @@
 package co.edu.uco.application.primaryports.dto.message;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import static co.edu.uco.crosscutting.helpers.UtilText.EMPTY;
 import static co.edu.uco.crosscutting.helpers.UtilText.trim;
 
 @Getter
+@Setter
 @Builder
+@AllArgsConstructor
 public final class CreateMessageDTO {
 
     private String code;
@@ -34,23 +38,6 @@ public final class CreateMessageDTO {
         setFunctionalityId(EMPTY);
         setEnvironmentId(EMPTY);
         setMessageEnvironmentStateId(EMPTY);
-    }
-
-    public CreateMessageDTO(String code, String title, String content, String typeId,
-                            String categoryId, String statusId, String applicationId,
-                            String application, String functionalityId, String environmentId,
-                            String messageEnvironmentStateId) {
-        setCode(code);
-        setTitle(title);
-        setContent(content);
-        setTypeId(typeId);
-        setCategoryId(categoryId);
-        setStatusId(statusId);
-        setApplicationId(applicationId);
-        setApplication(application);
-        setFunctionalityId(functionalityId);
-        setEnvironmentId(environmentId);
-        setMessageEnvironmentStateId(messageEnvironmentStateId);
     }
 
     public void setCode(String code) {

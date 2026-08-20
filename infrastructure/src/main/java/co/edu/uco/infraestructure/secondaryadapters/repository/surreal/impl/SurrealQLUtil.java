@@ -34,7 +34,7 @@ final class SurrealQLUtil {
 
     /** Renders a SurrealQL datetime literal in ISO-8601 / RFC 3339. */
     static String datetime(final LocalDateTime value) {
-        final LocalDateTime safe = getDefaultIsNullObject(value, LocalDateTime.now());
+        final LocalDateTime safe = getDefaultIsNullObject(value, LocalDateTime.now(ZoneOffset.UTC));
         return "d'" + safe.atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "'";
     }
 }

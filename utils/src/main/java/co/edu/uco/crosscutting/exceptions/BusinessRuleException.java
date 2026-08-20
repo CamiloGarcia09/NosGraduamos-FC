@@ -5,17 +5,13 @@ import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType;
 
 import static co.edu.uco.crosscutting.helpers.UtilObject.getDefaultIsNullObject;
 
-public class BusinessRuleException extends BusinessException {
-    private ExceptionType type;
-    private ExceptionLocation location;
+public class BusinessRuleException extends CrossWordsException {
     protected BusinessRuleException(String userMessage, String technicalMessage, Exception rootException, ExceptionType type, ExceptionLocation location) {
-        super(userMessage, technicalMessage, rootException);
-        setLocation(location);
-        setType(type);
+        super(userMessage, technicalMessage, rootException, type, location);
     }
 
     public BusinessRuleException(String userMessage, String technicalMessage) {
-        super(userMessage, technicalMessage, null, ExceptionType.BUSINESS_RULE,ExceptionLocation.APPLICATION);
+        super(userMessage, technicalMessage, null, ExceptionType.BUSINESS_RULE, ExceptionLocation.APPLICATION);
     }
 
     public BusinessRuleException(String userMessage, String technicalMessage, Exception rootException, ExceptionType type, ExceptionLocation location, ExceptionType type1, ExceptionLocation location1) {
