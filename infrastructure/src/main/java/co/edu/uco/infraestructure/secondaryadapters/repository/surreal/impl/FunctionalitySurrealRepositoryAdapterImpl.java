@@ -13,7 +13,7 @@ import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.im
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
 
 @Repository
-public final class FunctionalitySurrealRepositoryAdapterImpl extends SurrealCatalogSupport implements FunctionalityRepository {
+public class FunctionalitySurrealRepositoryAdapterImpl extends SurrealCatalogSupport implements FunctionalityRepository {
 
     private static final String SURREAL_TABLE_FUNCTIONALITY = "functionality";
     private static final String SURREAL_TABLE_APPLICATION = "application";

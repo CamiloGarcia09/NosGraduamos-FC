@@ -17,7 +17,7 @@ import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.im
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
 
 @Repository
-public final class ApplicationSurrealRepositoryAdapterImpl extends SurrealCatalogSupport implements ApplicationRepository {
+public class ApplicationSurrealRepositoryAdapterImpl extends SurrealCatalogSupport implements ApplicationRepository {
 
     private static final String SURREAL_TABLE_APPLICATION = "application";
     private static final String SURREAL_TABLE_LANGUAGE_BASE = "language_base";

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
 
 @Repository
-public final class RecordExistsCatalogSurrealAdapter extends SurrealCatalogSupport implements RecordExistsCatalogPort {
+public class RecordExistsCatalogSurrealAdapter extends SurrealCatalogSupport implements RecordExistsCatalogPort {
 
     public RecordExistsCatalogSurrealAdapter(final Surreal surreal, final LoggingPortFactory loggerFactory) {
         super(surreal, loggerFactory.getLogger(RecordExistsCatalogSurrealAdapter.class));
