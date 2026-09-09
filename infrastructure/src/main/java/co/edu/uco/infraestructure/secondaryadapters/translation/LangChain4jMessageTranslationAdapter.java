@@ -6,7 +6,6 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.translation.MessageTranslationPort;
-import co.edu.uco.application.secondaryports.vault.VaultPort;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.infraestructure.config.TranslationAiProperties;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
@@ -32,18 +31,16 @@ import static co.edu.uco.crosscutting.helpers.UtilText.trim;
 public class LangChain4jMessageTranslationAdapter implements MessageTranslationPort {
 
     private final LoggingPort log;
-    private final VaultPort vault;
     private final CatalogPort catalogPort;
     private final TranslationAiProperties properties;
     private final ObjectMapper objectMapper;
     private ChatModel chatModel;
 
     public LangChain4jMessageTranslationAdapter(
-            VaultPort vault, CatalogPort catalogPort, TranslationAiProperties properties,
+            CatalogPort catalogPort, TranslationAiProperties properties,
             ObjectMapper objectMapper, LoggingPortFactory loggerFactory
     ) {
         this.log = loggerFactory.getLogger(LangChain4jMessageTranslationAdapter.class);
-        this.vault = vault;
         this.catalogPort = catalogPort;
         this.properties = properties;
         this.objectMapper = objectMapper;
@@ -53,6 +50,12 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
 
     @Override
     public MessageTranslationResponseData translate(MessageTranslationRequestData requestData) {
+        if (isNullObject(requestData)) {
+            throw BusinessException.buildTechnicalException(
+                    catalogPort.getMessage(MessageCatalogCodeEnum.FUN_023.getCode()),
+                    catalogPort.getMessage(MessageCatalogCodeEnum.TCH_037.getCode())
+            );
+        }
         if (!properties.isEnabled()) {
             throw BusinessException.buildUserException(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_046.getCode()));
         }
@@ -66,9 +69,10 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
             var output = response.aiMessage().text();
             var translated = objectMapper.readValue(output, TranslationModelResponse.class);
             var elapsedMillis = Duration.ofNanos(System.nanoTime() - startedAt).toMillis();
+            var providerLabel = providerName();
             log.info(
                     catalogPort.getMessage(MessageCatalogCodeEnum.TCH_036.getCode()),
-                    providerName(),
+                    providerLabel,
                     properties.getModelName(),
                     requestData.getCode(),
                     requestData.getTargetLanguage(),
@@ -77,7 +81,7 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
             return MessageTranslationResponseData.create(
                     translated.translatedTitle(),
                     translated.translatedContent(),
-                    providerName(),
+                    providerLabel,
                     properties.getModelName(),
                     elapsedMillis
             );
@@ -132,7 +136,7 @@ public class LangChain4jMessageTranslationAdapter implements MessageTranslationP
     private String providerName() {
         return isOpenAiProvider()
                 ? catalogPort.getMessage(MessageCatalogCodeEnum.FUN_058.getCode())
-                : catalogPort.getMessage(MessageCatalogCodeEnum.FUN_059.getCode()).formatted(vault.getSecretValue("TRANSLATION-AI-PROVIDER"));
+                : catalogPort.getMessage(MessageCatalogCodeEnum.FUN_059.getCode()).formatted(properties.getProvider());
     }
 
     private ChatRequest buildChatRequest(MessageTranslationRequestData requestData) {

@@ -1,4 +1,4 @@
-package co.edu.uco.infraestructure.secondaryadapters.repository.redis.impl;
+package co.edu.uco.infraestructure.secondaryadapters.cache;
 
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.MessageTranslationResponseData;
@@ -6,11 +6,14 @@ import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.translation.MessageTranslationCachePort;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
-import co.edu.uco.infraestructure.secondaryadapters.repository.redis.MessageTranslationRedis;
-import co.edu.uco.infraestructure.secondaryadapters.repository.redis.MessageTranslationRedisRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+import java.util.Map;
 import java.util.Optional;
 
 import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
@@ -22,18 +25,26 @@ import static co.edu.uco.infraestructure.config.InfrastructureConstant.TRANSLATI
 
 @Component(TRANSLATION_CACHE_REDIS_ADAPTER)
 public final class MessageTranslationRedisAdapter implements MessageTranslationCachePort {
+    private static final String FIELD_TRANSLATED_TITLE = "translatedTitle";
+    private static final String FIELD_TRANSLATED_CONTENT = "translatedContent";
+    private static final String FIELD_PROVIDER = "provider";
+    private static final String FIELD_MODEL = "model";
+
     private final LoggingPort log;
     private final CatalogPort catalogPort;
-    private final MessageTranslationRedisRepository repository;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final ObjectMapper objectMapper;
 
     public MessageTranslationRedisAdapter(
-            MessageTranslationRedisRepository repository,
+            RedisTemplate<String, String> redisTemplate,
             CatalogPort catalogPort,
+            ObjectMapper objectMapper,
             LoggingPortFactory loggerFactory
     ) {
         this.log = loggerFactory.getLogger(MessageTranslationRedisAdapter.class);
         this.catalogPort = catalogPort;
-        this.repository = repository;
+        this.redisTemplate = redisTemplate;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -48,8 +59,11 @@ public final class MessageTranslationRedisAdapter implements MessageTranslationC
             return Optional.empty();
         }
         try {
-            return repository.findById(buildKey(messageCode, environmentId, sourceLanguage, targetLanguage))
-                    .map(this::toResponseData);
+            var json = redisTemplate.opsForValue().get(buildKey(messageCode, environmentId, sourceLanguage, targetLanguage));
+            if (isEmptyOrNull(json)) {
+                return Optional.empty();
+            }
+            return Optional.of(toResponseData(objectMapper.readTree(json)));
         } catch (DataAccessException ex) {
             log.error(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_014.getCode()), ex);
             return Optional.empty();
@@ -73,19 +87,17 @@ public final class MessageTranslationRedisAdapter implements MessageTranslationC
             return;
         }
         try {
-            var key = buildKey(messageCode, environmentId, sourceLanguage, targetLanguage);
-            repository.save(new MessageTranslationRedis(
-                    key,
-                    messageCode,
-                    environmentId,
-                    sourceLanguage,
-                    targetLanguage,
-                    translation.getTranslatedTitle(),
-                    translation.getTranslatedContent(),
-                    translation.getProvider(),
-                    translation.getModel(),
-                    TRANSLATION_CACHE_TTL_SECONDS
+            var json = objectMapper.writeValueAsString(Map.of(
+                    FIELD_TRANSLATED_TITLE, translation.getTranslatedTitle(),
+                    FIELD_TRANSLATED_CONTENT, translation.getTranslatedContent(),
+                    FIELD_PROVIDER, translation.getProvider(),
+                    FIELD_MODEL, translation.getModel()
             ));
+            redisTemplate.opsForValue().set(
+                    buildKey(messageCode, environmentId, sourceLanguage, targetLanguage),
+                    json,
+                    Duration.ofSeconds(TRANSLATION_CACHE_TTL_SECONDS)
+            );
         } catch (DataAccessException ex) {
             log.error(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_014.getCode()), ex);
         } catch (Exception ex) {
@@ -100,12 +112,12 @@ public final class MessageTranslationRedisAdapter implements MessageTranslationC
                 + trim(targetLanguage);
     }
 
-    private MessageTranslationResponseData toResponseData(MessageTranslationRedis entity) {
+    private MessageTranslationResponseData toResponseData(JsonNode node) {
         return MessageTranslationResponseData.create(
-                entity.getTranslatedTitle(),
-                entity.getTranslatedContent(),
-                entity.getProvider(),
-                entity.getModel(),
+                node.path(FIELD_TRANSLATED_TITLE).asText(),
+                node.path(FIELD_TRANSLATED_CONTENT).asText(),
+                node.path(FIELD_PROVIDER).asText(),
+                node.path(FIELD_MODEL).asText(),
                 0L
         );
     }

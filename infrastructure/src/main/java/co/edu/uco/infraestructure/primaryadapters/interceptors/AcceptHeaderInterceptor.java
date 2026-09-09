@@ -18,7 +18,6 @@ import java.util.Optional;
 
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.REQUEST_GET_HEADER_ACCEPT;
-import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 
 @Component
 public final class AcceptHeaderInterceptor implements HandlerInterceptor {
@@ -42,10 +41,9 @@ public final class AcceptHeaderInterceptor implements HandlerInterceptor {
 
         var serializer = serializerRegistry.getSerializerForMediaType(acceptHeader);
 
-        if (isNullObject(serializer) || !serializer.supports(acceptHeader)) {
+        if (!serializer.supports(acceptHeader)) {
             var errorMessage = String.format(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_022.getCode()), acceptHeader);
             var errorResponse = new Response<String>(List.of(), List.of(errorMessage));
-            assert !isNullObject(serializer);
             var formattedError = serializer.serialize(errorResponse);
             response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
             response.setContentType(serializer.getSupportedContentType());

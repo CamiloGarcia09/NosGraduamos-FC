@@ -93,7 +93,7 @@ public final class TranslateMessageByCodeAndEnvironmentUseCase
                     targetLanguage
             );
             if (cachedTranslation.isPresent()) {
-                log.info("Translation served from Redis cache. Snippet: code={}, sourceLanguage={}, targetLanguage={}",
+                log.info("Translation served from cache. Snippet: code={}, sourceLanguage={}, targetLanguage={}",
                         messageData.getCode(), normalizedSourceLanguage, targetLanguage);
                 return buildDto(messageData, normalizedSourceLanguage, targetLanguage, type, category,
                         functionality, cachedTranslation.get());
@@ -111,7 +111,7 @@ public final class TranslateMessageByCodeAndEnvironmentUseCase
         } catch (CrossWordsException exception) {
             throw exception;
         } catch (Exception exception) {
-            var errorMessage = String.format(messageCatalogStrategy.getSystemMessageContent(MessageCatalogCodeEnum.FUN_012.getCode()), messageCode, environmentId);
+            var errorMessage = messageCatalogStrategy.getSystemMessageContent(MessageCatalogCodeEnum.FUN_048.getCode());
             log.error(errorMessage, exception);
             throw BusinessException.buildUserException(errorMessage);
         }

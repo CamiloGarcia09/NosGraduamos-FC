@@ -48,7 +48,6 @@ public final class InfrastructureConstant {
     public static final String PRE_CLOSE_TAG = "</pre>";
 
     public static final String REDIS_HASH = "Message";
-    public static final String REDIS_HASH_TRANSLATION = "MessageTranslation";
     public static final String CACHE_REDIS_ADAPTER = "messageRedisAdapter";
     public static final String TRANSLATION_CACHE_REDIS_ADAPTER = "messageTranslationRedisAdapter";
     public static final String TRANSLATION_CACHE_KEY_SEPARATOR = "::";
