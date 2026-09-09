@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static co.edu.uco.infraestructure.config.InfrastructureConstant.ENVIRONMENT_ID_ATTRIBUTE;
+
 
 @RestController
 final class MessagesControllerImpl implements MessagesController {
@@ -43,6 +43,7 @@ final class MessagesControllerImpl implements MessagesController {
 
         @Override
         public void findByEnvironmentAndMessage(
+                        String environmentId,
                         String page,
                         String size,
                         String sort,
@@ -57,7 +58,6 @@ final class MessagesControllerImpl implements MessagesController {
                         .columnSort(columnSort)
                         .build();
                 
-                var environmentId = (String) httpServletRequest.getAttribute(ENVIRONMENT_ID_ATTRIBUTE);
                 var messageDTOSimplePage = findMessagesByEnvironmentUsecaseFacade.execute(environmentId, pageRequestDTO);
                 restPresenterPage.presentRestSuccess(List.of(messageDTOSimplePage), httpServletRequest,
                                 httpServletResponse);
