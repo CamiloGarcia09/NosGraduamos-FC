@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
+import static co.edu.uco.crosscutting.helpers.UtilText.isEmptyOrNull;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.quote;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
 
@@ -50,7 +51,7 @@ public class MessageSurrealRepositoryAdapterImpl extends SurrealCatalogSupport i
     public SimplePage<MessageData> findMessagesByEnvironment(final String environmentId, final Pageable pageable) {
         long offset = pageable.getOffset();
         int pageSize = pageable.getPageSize();
-        final String environmentFilter = environmentFilter(environmentId);
+        final String environmentFilter = isEmptyOrNull(environmentId) ? "TRUE" : environmentFilter(environmentId);
 
         final String countSql = "SELECT COUNT() as count FROM " + SURREAL_TABLE_MESSAGE_ENVIRONMENT_READMODEL
                 + " WHERE " + environmentFilter + ";";

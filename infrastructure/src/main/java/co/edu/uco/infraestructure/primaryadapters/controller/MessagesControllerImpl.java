@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-
+import static co.edu.uco.infraestructure.config.InfrastructureConstant.ENVIRONMENT_ID_ATTRIBUTE;
 
 @RestController
 final class MessagesControllerImpl implements MessagesController {
