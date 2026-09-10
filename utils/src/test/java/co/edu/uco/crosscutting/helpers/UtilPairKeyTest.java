@@ -26,8 +26,7 @@ class UtilPairKeyTest {
     @Test
     void encodePrivateKey_returnsBase64String() {
         String encoded = UtilPairKey.encodePrivateKey(keyPair.getPrivate());
-        assertThat(encoded).isNotBlank();
-        assertThat(encoded).doesNotContain("\n");
+        assertThat(encoded).isNotBlank().doesNotContain("\n");
     }
 
     @Test

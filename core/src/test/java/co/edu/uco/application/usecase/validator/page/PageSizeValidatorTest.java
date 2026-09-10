@@ -5,6 +5,8 @@ import co.edu.uco.application.secondaryports.repository.SimplePageRequest;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -19,29 +21,12 @@ class PageSizeValidatorTest {
     @Mock
     private CatalogPort catalogPort;
 
-    @Test
-    void validate_doesNotThrow_forSizeWithinRange() {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 50, 100})
+    void validate_doesNotThrow_forSizeWithinRange(int size) {
         PageSizeValidator validator = new PageSizeValidator(catalogPort);
         SimplePageRequest request = new SimplePageRequest();
-        request.setSize(50);
-
-        assertThatCode(() -> validator.validate(request)).doesNotThrowAnyException();
-    }
-
-    @Test
-    void validate_doesNotThrow_forMinimumSize() {
-        PageSizeValidator validator = new PageSizeValidator(catalogPort);
-        SimplePageRequest request = new SimplePageRequest();
-        request.setSize(1);
-
-        assertThatCode(() -> validator.validate(request)).doesNotThrowAnyException();
-    }
-
-    @Test
-    void validate_doesNotThrow_forMaximumSize() {
-        PageSizeValidator validator = new PageSizeValidator(catalogPort);
-        SimplePageRequest request = new SimplePageRequest();
-        request.setSize(100);
+        request.setSize(size);
 
         assertThatCode(() -> validator.validate(request)).doesNotThrowAnyException();
     }

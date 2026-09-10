@@ -10,7 +10,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.MDC;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -30,7 +29,7 @@ class LoggingConfigTest {
     private final LoggingConfig loggingConfig = new LoggingConfig();
 
     @Test
-    void preHandle_generatesCorrelationId_whenHeaderIsMissing() throws Exception {
+    void preHandle_generatesCorrelationId_whenHeaderIsMissing() {
         when(request.getHeader("X-Correlation-ID")).thenReturn(null);
         when(request.getRequestURI()).thenReturn("/api/test");
         when(request.getMethod()).thenReturn("GET");
@@ -44,7 +43,7 @@ class LoggingConfigTest {
     }
 
     @Test
-    void preHandle_reusesCorrelationId_whenHeaderIsPresent() throws Exception {
+    void preHandle_reusesCorrelationId_whenHeaderIsPresent() {
         when(request.getHeader("X-Correlation-ID")).thenReturn("existing-id");
         when(request.getRequestURI()).thenReturn("/api/test");
         when(request.getMethod()).thenReturn("GET");
@@ -58,7 +57,7 @@ class LoggingConfigTest {
     }
 
     @Test
-    void preHandle_setsResponseHeaders() throws Exception {
+    void preHandle_setsResponseHeaders() {
         when(request.getHeader("X-Correlation-ID")).thenReturn("id-1");
         when(request.getRequestURI()).thenReturn("/api/test");
         when(request.getMethod()).thenReturn("GET");
@@ -67,14 +66,14 @@ class LoggingConfigTest {
 
         loggingConfig.preHandle(request, response, new Object());
 
-        verify(response).setHeader(eq("X-Correlation-ID"), eq("id-1"));
+        verify(response).setHeader("X-Correlation-ID", "id-1");
         verify(response, atLeastOnce()).setHeader(anyString(), anyString());
         verify(response, atLeastOnce()).setHeader(anyString(), anyString());
         verify(response, atLeastOnce()).setHeader(anyString(), anyString());
     }
 
     @Test
-    void preHandle_setsQueryStringInMDC_whenPresent() throws Exception {
+    void preHandle_setsQueryStringInMDC_whenPresent() {
         when(request.getHeader("X-Correlation-ID")).thenReturn("id-1");
         when(request.getRequestURI()).thenReturn("/api/test");
         when(request.getMethod()).thenReturn("GET");
@@ -88,7 +87,7 @@ class LoggingConfigTest {
     }
 
     @Test
-    void preHandle_skipsQueryStringInMDC_whenEmpty() throws Exception {
+    void preHandle_skipsQueryStringInMDC_whenEmpty() {
         when(request.getHeader("X-Correlation-ID")).thenReturn("id-1");
         when(request.getRequestURI()).thenReturn("/api/test");
         when(request.getMethod()).thenReturn("GET");
@@ -102,7 +101,7 @@ class LoggingConfigTest {
     }
 
     @Test
-    void preHandle_setsCodeMessageParameterInMDC_whenPresent() throws Exception {
+    void preHandle_setsCodeMessageParameterInMDC_whenPresent() {
         when(request.getHeader("X-Correlation-ID")).thenReturn("id-1");
         when(request.getRequestURI()).thenReturn("/api/test");
         when(request.getMethod()).thenReturn("GET");
@@ -117,7 +116,7 @@ class LoggingConfigTest {
     }
 
     @Test
-    void preHandle_setsApplicationParameterInMDC_whenPresent() throws Exception {
+    void preHandle_setsApplicationParameterInMDC_whenPresent() {
         when(request.getHeader("X-Correlation-ID")).thenReturn("id-1");
         when(request.getRequestURI()).thenReturn("/api/test");
         when(request.getMethod()).thenReturn("GET");
@@ -132,7 +131,7 @@ class LoggingConfigTest {
     }
 
     @Test
-    void afterCompletion_clearsMDC() throws Exception {
+    void afterCompletion_clearsMDC() {
         MDC.put("test", "value");
         loggingConfig.afterCompletion(request, response, new Object(), null);
         assertThat(MDC.get("test")).isNull();

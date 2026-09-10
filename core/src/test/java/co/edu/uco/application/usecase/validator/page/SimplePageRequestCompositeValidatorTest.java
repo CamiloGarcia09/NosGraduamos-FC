@@ -1,9 +1,7 @@
 package co.edu.uco.application.usecase.validator.page;
 
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
-import co.edu.uco.application.usecase.validator.CompositeValidator;
 import co.edu.uco.application.usecase.validator.Validator;
-import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;

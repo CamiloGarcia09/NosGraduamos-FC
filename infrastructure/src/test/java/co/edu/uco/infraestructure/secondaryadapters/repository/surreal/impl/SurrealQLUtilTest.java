@@ -56,8 +56,7 @@ class SurrealQLUtilTest {
                 .atOffset(ZoneOffset.UTC)
                 .format(java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 
-        assertThat(result).startsWith("d'");
-        assertThat(result).endsWith("'");
+        assertThat(result).startsWith("d'").endsWith("'");
         String inner = result.substring(2, result.length() - 1);
         java.time.OffsetDateTime parsed = java.time.OffsetDateTime.parse(inner);
         assertThat(parsed.toInstant()).isAfter(java.time.OffsetDateTime.parse(before).toInstant());

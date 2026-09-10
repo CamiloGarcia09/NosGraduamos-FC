@@ -23,7 +23,6 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,6 +35,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -341,7 +341,7 @@ class SurrealDomainEventProjectionConsumerTest {
 
         verify(surreal).query(contains("UPSERT domain_event_document:`event-1`"));
         verify(surreal).query(contains("SET projection_status = 'processed'"));
-        verify(log, org.mockito.Mockito.times(2)).debug("msg");
+        verify(log, times(2)).debug("msg");
     }
 
     @Test
@@ -615,9 +615,7 @@ class SurrealDomainEventProjectionConsumerTest {
 
     @Test
     void recordRefFrom_parsesValidIdsAndRejectsInvalid() throws Exception {
-        Class<?> recordRef = Arrays.stream(SurrealDomainEventProjectionConsumer.class.getDeclaredClasses())
-                .filter(c -> c.getSimpleName().equals("RecordRef"))
-                .findFirst().orElseThrow();
+        Class<?> recordRef = Class.forName(SurrealDomainEventProjectionConsumer.class.getName() + "$RecordRef");
         Method from = recordRef.getDeclaredMethod("from", String.class);
         from.setAccessible(true);
         Method table = recordRef.getDeclaredMethod("table");
@@ -636,18 +634,16 @@ class SurrealDomainEventProjectionConsumerTest {
         assertThat(optCleaned).isPresent();
         assertThat(id.invoke(optCleaned.get())).isEqualTo("id-2");
 
-        assertThat(((java.util.Optional<?>) from.invoke(null, new java.lang.Object[]{null})).isPresent()).isFalse();
-        assertThat(((java.util.Optional<?>) from.invoke(null, "  ")).isPresent()).isFalse();
-        assertThat(((java.util.Optional<?>) from.invoke(null, "no-separator")).isPresent()).isFalse();
-        assertThat(((java.util.Optional<?>) from.invoke(null, ":id")).isPresent()).isFalse();
-        assertThat(((java.util.Optional<?>) from.invoke(null, "table:")).isPresent()).isFalse();
+        assertThat(((java.util.Optional<?>) from.invoke(null, new java.lang.Object[]{null}))).isEmpty();
+        assertThat(((java.util.Optional<?>) from.invoke(null, "  "))).isEmpty();
+        assertThat(((java.util.Optional<?>) from.invoke(null, "no-separator"))).isEmpty();
+        assertThat(((java.util.Optional<?>) from.invoke(null, ":id"))).isEmpty();
+        assertThat(((java.util.Optional<?>) from.invoke(null, "table:"))).isEmpty();
     }
 
     @Test
     void domainEventFrom_mapsFieldsAndDetectsDeletes() throws Exception {
-        Class<?> domainEvent = Arrays.stream(SurrealDomainEventProjectionConsumer.class.getDeclaredClasses())
-                .filter(c -> c.getSimpleName().equals("DomainEvent"))
-                .findFirst().orElseThrow();
+        Class<?> domainEvent = Class.forName(SurrealDomainEventProjectionConsumer.class.getName() + "$DomainEvent");
         Method from = domainEvent.getDeclaredMethod("from", Object.class);
         from.setAccessible(true);
         Method isDelete = domainEvent.getDeclaredMethod("isDelete");

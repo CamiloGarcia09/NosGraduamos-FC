@@ -47,8 +47,8 @@ class ApplicationBelongsEnvironmentValidatorTest {
         ApplicationData application = new ApplicationData(applicationId, "app");
         EnvironmentData environment = new EnvironmentData(UUID.randomUUID(), "env", application);
         when(repository.findById(environment.getId().toString())).thenReturn(Optional.of(environment));
-
-        assertThatThrownBy(() -> validator.validate(environment.getId(), UUID.randomUUID()))
+        UUID otherApplicationId = UUID.randomUUID();
+        assertThatThrownBy(() -> validator.validate(environment.getId(), otherApplicationId))
                 .isInstanceOf(BusinessRuleException.class);
     }
 

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -57,9 +56,9 @@ class Slf4jLoggingAdapterTest {
         Logger mockLogger = mock(Logger.class);
         LoggingPort adapter = new Slf4jLoggingAdapter(mockLogger);
 
-        adapter.debug("debug msg {}", "arg1", "arg2");
+        adapter.debug("debug msg {} {}", "arg1", "arg2");
 
-        verify(mockLogger).debug("debug msg {}", new Object[]{"arg1", "arg2"});
+        verify(mockLogger).debug("debug msg {} {}", new Object[]{"arg1", "arg2"});
     }
 
     @Test

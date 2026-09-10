@@ -42,7 +42,7 @@ class AcceptHeaderInterceptorTest {
     private AcceptHeaderInterceptor interceptor;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         when(loggerFactory.getLogger(AcceptHeaderInterceptor.class)).thenReturn(log);
         interceptor = new AcceptHeaderInterceptor(serializerRegistry, catalogPort, loggerFactory);
     }

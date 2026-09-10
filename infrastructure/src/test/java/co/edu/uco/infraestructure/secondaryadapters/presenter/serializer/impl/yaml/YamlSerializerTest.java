@@ -37,8 +37,9 @@ class YamlSerializerTest {
 
         String yaml = serializer.serialize(new Sample("CODE", "Titulo"));
 
-        assertThat(yaml).contains("code: \"CODE\"");
-        assertThat(yaml).contains("title: \"Titulo\"");
+        assertThat(yaml)
+                .contains("code: \"CODE\"")
+                .contains("title: \"Titulo\"");
     }
 
     @Test

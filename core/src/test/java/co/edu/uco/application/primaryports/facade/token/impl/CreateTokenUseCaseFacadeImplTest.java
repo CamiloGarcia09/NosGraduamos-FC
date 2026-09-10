@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -137,7 +138,7 @@ class CreateTokenUseCaseFacadeImplTest {
         KeyPairDTO keyPairDTO = new KeyPairDTO(keyPair.getPublic(), keyPair.getPrivate());
         when(encrypt.generateKeys()).thenReturn(keyPairDTO);
         when(encrypt.generateSignature(any(String.class), any(PublicKey.class))).thenReturn("sig");
-        org.mockito.Mockito.doThrow(new IllegalStateException("storage down"))
+        doThrow(new IllegalStateException("storage down"))
                 .when(createTokenSecretPort).execute(any(String.class), any(String.class));
         when(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_025.getCode())).thenReturn("Token creation failed");
 

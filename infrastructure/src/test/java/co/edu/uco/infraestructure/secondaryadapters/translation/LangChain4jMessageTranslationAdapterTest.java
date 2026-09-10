@@ -97,7 +97,8 @@ class LangChain4jMessageTranslationAdapterTest {
         properties.setEnabled(false);
         when(catalogPort.getMessage("FUN_046")).thenReturn("translation disabled");
 
-        assertThatThrownBy(() -> adapter.translate(request()))
+        MessageTranslationRequestData req = request();
+        assertThatThrownBy(() -> adapter.translate(req))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(ex -> assertThat(((BusinessException) ex).getUserMessage()).isEqualTo("translation disabled"));
     }
@@ -109,7 +110,8 @@ class LangChain4jMessageTranslationAdapterTest {
         properties.setApiKey(null);
         when(catalogPort.getMessage("FUN_047")).thenReturn("api key missing");
 
-        assertThatThrownBy(() -> adapter.translate(request()))
+        MessageTranslationRequestData req = request();
+        assertThatThrownBy(() -> adapter.translate(req))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(ex -> assertThat(((BusinessException) ex).getUserMessage()).isEqualTo("api key missing"));
     }
@@ -151,7 +153,8 @@ class LangChain4jMessageTranslationAdapterTest {
         when(catalogPort.getMessage("FUN_048")).thenReturn("translation failed");
         when(catalogPort.getMessage("TCH_037")).thenReturn("tch037");
 
-        assertThatThrownBy(() -> adapter.translate(request()))
+        MessageTranslationRequestData req = request();
+        assertThatThrownBy(() -> adapter.translate(req))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(ex -> assertThat(((BusinessException) ex).getUserMessage()).isEqualTo("translation failed"));
         verify(log).error(anyString(), anyString(), anyString(), anyString(), anyString(), any(RuntimeException.class));

@@ -14,7 +14,7 @@ class UtilUUIDTest {
 
     @Test
     void defaultUuid_isAllZeros() {
-        assertThat(UtilUUID.DEFAULT_UUID.toString()).isEqualTo(DEFAULT_UUID_STRING);
+        assertThat(UtilUUID.DEFAULT_UUID).hasToString(DEFAULT_UUID_STRING);
     }
 
     @Test

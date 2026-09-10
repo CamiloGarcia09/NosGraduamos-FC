@@ -39,9 +39,10 @@ class JsonSerializerTest {
 
         String json = serializer.serialize(response);
 
-        assertThat(json).contains("\"hola\"");
-        assertThat(json).startsWith("{");
-        assertThat(json).endsWith("}");
+        assertThat(json)
+                .contains("\"hola\"")
+                .startsWith("{")
+                .endsWith("}");
     }
 
     @Test

@@ -20,7 +20,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
 class CreateTokenCompositeValidatorTest {
@@ -65,7 +66,7 @@ class CreateTokenCompositeValidatorTest {
 
     @Test
     void validate_doesNotProceed_whenApplicationUuidIsInvalid() {
-        org.mockito.Mockito.doThrow(BusinessRuleException.buildUserException("invalid app"))
+        doThrow(BusinessRuleException.buildUserException("invalid app"))
                 .when(uuidValidator).validate(anyString());
         CreateTokenDTO dto = validDto();
 
@@ -76,8 +77,8 @@ class CreateTokenCompositeValidatorTest {
 
 @Test
     void validate_doesNotProceed_whenEnvironmentUuidIsInvalid() {
-        org.mockito.Mockito.doNothing().when(uuidValidator).validate(anyString());
-        org.mockito.Mockito.doThrow(BusinessRuleException.buildUserException("invalid env"))
+        doNothing().when(uuidValidator).validate(anyString());
+        doThrow(BusinessRuleException.buildUserException("invalid env"))
                 .when(uuidValidator).validate(environmentId);
         CreateTokenDTO dto = validDto();
 
@@ -88,7 +89,7 @@ class CreateTokenCompositeValidatorTest {
 
     @Test
     void validate_doesNotProceed_whenDateIsInvalid() {
-        org.mockito.Mockito.doThrow(BusinessRuleException.buildUserException("invalid date"))
+        doThrow(BusinessRuleException.buildUserException("invalid date"))
                 .when(dateValidValidator).validate(anyString());
         CreateTokenDTO dto = validDto();
 
@@ -99,7 +100,7 @@ class CreateTokenCompositeValidatorTest {
 
     @Test
     void validate_doesNotProceed_whenEnvironmentDoesNotExist() {
-        org.mockito.Mockito.doThrow(BusinessRuleException.buildUserException("env not found"))
+        doThrow(BusinessRuleException.buildUserException("env not found"))
                 .when(environmentExistValidator).validate(any(CreateTokenDTO.class));
         CreateTokenDTO dto = validDto();
 
@@ -110,7 +111,7 @@ class CreateTokenCompositeValidatorTest {
 
     @Test
     void validate_doesNotProceed_whenApplicationDoesNotBelongToEnvironment() {
-        org.mockito.Mockito.doThrow(BusinessRuleException.buildUserException("not belongs"))
+        doThrow(BusinessRuleException.buildUserException("not belongs"))
                 .when(applicationBelongsEnvironmentValidator).validate(any(UUID.class), any(UUID.class));
         CreateTokenDTO dto = validDto();
 

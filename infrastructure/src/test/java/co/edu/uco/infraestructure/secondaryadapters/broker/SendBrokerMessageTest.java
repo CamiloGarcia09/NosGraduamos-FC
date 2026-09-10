@@ -87,7 +87,8 @@ class SendBrokerMessageTest {
         when(catalogPort.getMessage("TCH_002")).thenReturn("tech");
         when(catalogPort.getMessage("FUN_023")).thenReturn("user");
 
-        assertThatThrownBy(() -> noClient.execute(messageDomain(), response))
+        MessageCodeDomain domain = messageDomain();
+        assertThatThrownBy(() -> noClient.execute(domain, response))
                 .isInstanceOf(CrossWordsException.class)
                 .satisfies(ex -> {
                     CrossWordsException cwe = (CrossWordsException) ex;
@@ -114,7 +115,8 @@ class SendBrokerMessageTest {
         when(catalogPort.getMessage("TCH_039")).thenReturn("tech");
         when(catalogPort.getMessage("FUN_023")).thenReturn("user");
 
-        assertThatThrownBy(() -> adapter.execute(messageDomain(), response))
+        MessageCodeDomain domain = messageDomain();
+        assertThatThrownBy(() -> adapter.execute(domain, response))
                 .isInstanceOf(CrossWordsException.class)
                 .satisfies(ex -> assertThat(((CrossWordsException) ex).getTechnicalMessage()).isEqualTo("tech"));
     }
@@ -127,7 +129,8 @@ class SendBrokerMessageTest {
         when(catalogPort.getMessage("TCH_002")).thenReturn("tech");
         when(catalogPort.getMessage("FUN_023")).thenReturn("user");
 
-        assertThatThrownBy(() -> adapter.execute(messageDomain(), response))
+        MessageCodeDomain domain = messageDomain();
+        assertThatThrownBy(() -> adapter.execute(domain, response))
                 .isInstanceOf(CrossWordsException.class)
                 .satisfies(ex -> assertThat(((CrossWordsException) ex).getTechnicalMessage()).isEqualTo("tech"));
     }
@@ -139,7 +142,8 @@ class SendBrokerMessageTest {
         when(catalogPort.getMessage("TCH_002")).thenReturn("tech");
         when(catalogPort.getMessage("FUN_023")).thenReturn("user");
 
-        assertThatThrownBy(() -> adapter.execute(messageDomain(), response))
+        MessageCodeDomain domain = messageDomain();
+        assertThatThrownBy(() -> adapter.execute(domain, response))
                 .isInstanceOf(CrossWordsException.class)
                 .satisfies(ex -> assertThat(((CrossWordsException) ex).getTechnicalMessage()).isEqualTo("tech"));
     }

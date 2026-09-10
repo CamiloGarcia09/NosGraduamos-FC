@@ -13,11 +13,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.PublicKey;
 import java.util.Base64;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -68,11 +68,13 @@ class JavaSecurityEncryptTokenAdapterTest {
     }
 
     @Test
-    void generateSignature_throwsCrossWordsException_whenDataIsNull() {
+    void generateSignature_throwsCrossWordsException_whenDataIsNull() throws Exception {
         when(catalogPort.getMessage("TCH_040")).thenReturn("null data");
         when(catalogPort.getMessage("FUN_025")).thenReturn("technical");
 
-        assertThatThrownBy(() -> adapter.generateSignature(null, generateKeyPair().getPublic()))
+        PublicKey publicKey = generateKeyPair().getPublic();
+
+        assertThatThrownBy(() -> adapter.generateSignature(null, publicKey))
                 .isInstanceOf(CrossWordsException.class)
                 .satisfies(ex -> {
                     CrossWordsException cwe = (CrossWordsException) ex;
@@ -82,7 +84,7 @@ class JavaSecurityEncryptTokenAdapterTest {
     }
 
     @Test
-    void generateSignature_throwsCrossWordsException_whenPublicKeyIsNull() throws Exception {
+    void generateSignature_throwsCrossWordsException_whenPublicKeyIsNull() {
         when(catalogPort.getMessage("TCH_040")).thenReturn("null key");
         when(catalogPort.getMessage("FUN_025")).thenReturn("technical");
 

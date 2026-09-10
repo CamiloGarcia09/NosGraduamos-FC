@@ -31,15 +31,16 @@ class HTMLSerializerTest {
     }
 
     @Test
-    void serialize_wrapsJsonInHtmlStructure() throws Exception {
+    void serialize_wrapsJsonInHtmlStructure() {
         record Sample(String code) {
         }
 
         String html = serializer.serialize(new Sample("CODE"));
 
-        assertThat(html).startsWith("<html><body><pre>");
-        assertThat(html).endsWith("</pre></body></html>");
-        assertThat(html).contains("\"code\" : \"CODE\"");
+        assertThat(html)
+                .startsWith("<html><body><pre>")
+                .endsWith("</pre></body></html>")
+                .contains("\"code\" : \"CODE\"");
     }
 
     @Test

@@ -43,7 +43,7 @@ class BrokerConfigTest {
     }
 
     @Test
-    void cleanup_doesNothing_whenClientIsNull() throws Exception {
+    void cleanup_doesNothing_whenClientIsNull() {
         BrokerConfig config = new BrokerConfig(pulsarProperties);
 
         assertThatCode(config::cleanup).doesNotThrowAnyException();

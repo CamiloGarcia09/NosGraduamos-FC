@@ -98,6 +98,112 @@ Por cada clase de test nueva, confirma:
       SonarCloud como code smell en el Quality Gate).
 - [ ] Sin duplicación evidente con otro test ya existente en la suite.
 
+## 5.5. Chequeos específicos de SonarCloud (issues recurrentes en este proyecto)
+
+Estos son patrones que SonarCloud marca frecuentemente en las pruebas de este
+repo — revísalos explícitamente antes de dar una clase de test por terminada:
+
+- **Asserts múltiples sueltos sobre el mismo objeto/resultado**: si hay ≥2
+  `assertEquals`/`assertThat` consecutivos verificando distintos campos de un
+  mismo objeto, agrúpalos en `assertAll(...)` o encadénalos con AssertJ
+  (`assertThat(obj).extracting(...).containsExactly(...)`). Sonar lo marca como
+  "Join these multiple assertions subject to one assertion chain."
+  ```bash
+  grep -n "assertEquals\|assertThat" ClaseTest.java
+  # si hay líneas consecutivas sobre el mismo objeto → agrupar
+  ```
+
+- **Verificación de `Optional` vacío**: nunca uses
+  `assertThat(x.isPresent()).isFalse()` — usa `assertThat(x).isNotPresent()` o
+  `.isEmpty()`. Mismo criterio para `assertTrue(x.isEmpty())` sobre un Optional.
+
+- **Comparación de tipo con `.getClass().equals(...)`**: siempre usa
+  `assertThat(obj).isInstanceOf(Clase.class)` o `assertInstanceOf` de JUnit 5,
+  nunca comparación manual de `Class`.
+  ```bash
+  grep -rn "getClass().equals\|getClass() ==" --include="*Test.java" src/test
+  ```
+
+- **`throws Exception` innecesario en la firma del método de test**: si el
+  cuerpo del test no invoca nada que declare una checked exception, el método
+  no debe declarar `throws Exception`. Revisa cada `@Test` con `throws` en su
+  firma y confirma que realmente lo necesita.
+  ```bash
+  grep -rn "void .*() throws Exception {" --include="*Test.java" src/test
+  # por cada resultado, confirmar que algo dentro del cuerpo realmente
+  # requiere esa declaración; si no, quitarla
+  ```
+
+- **Lambda de `assertThrows` con más de una invocación que puede lanzar**:
+  Sonar exige que el lambda pasado a `assertThrows(Excepcion.class, () -> {...})`
+  contenga SOLO la llamada que se espera que falle. Si el lambda tiene setup
+  adicional antes de la llamada real, sepáralo fuera del lambda.
+  ```java
+  // Mal — Sonar marca "Refactor the code of the lambda to have only one
+  // invocation possibly throwing a runtime exception."
+  assertThrows(ValidationException.class, () -> {
+      Cliente c = repository.buscar(id); // esto también puede lanzar
+      validator.validar(c);
+  });
+
+  // Bien — separa el setup, deja solo la invocación bajo prueba en el lambda
+  Cliente c = repository.buscar(id);
+  assertThrows(ValidationException.class, () -> validator.validar(c));
+  ```
+
+- **Imports estáticos para Mockito/JUnit en vez de calificados**: usa
+  `import static org.mockito.Mockito.times;` y
+  `import static org.mockito.Mockito.doThrow;` (entre otros) en vez de escribir
+  `Mockito.times(...)` o `Mockito.doThrow(...)` calificado.
+  ```bash
+  grep -rn "Mockito\.times(\|Mockito\.doThrow(\|Mockito\.verify(" --include="*Test.java" src/test
+  ```
+
+- **`eq(...)` innecesario en verificaciones de Mockito**: si TODOS los
+  argumentos de un `verify(mock).metodo(eq(a), eq(b))` usan `eq(...)`, quítalo y
+  pasa los valores directos — `eq()` solo es necesario cuando se mezcla con
+  otros matchers como `any()`.
+  ```java
+  // Mal
+  verify(repository).guardar(eq(cliente), eq(true));
+  // Bien
+  verify(repository).guardar(cliente, true);
+  ```
+
+- **Imports sin usar**: cualquier import (de Mockito, AssertJ, excepciones de
+  dominio, etc.) que no se referencie en el archivo debe eliminarse.
+  ```bash
+  # revisión manual por archivo; no hay un grep universal confiable para esto,
+  # pero cualquier import que aparezca 1 sola vez en el archivo (la línea del
+  # propio import) es candidato a sobrar
+  ```
+
+- **Aserciones específicas de AssertJ en vez de genéricas**: prefiere el
+  método dedicado de AssertJ cuando existe, en vez de reconstruirlo a mano:
+  - `assertThat(coleccion).contains(esperado)` en vez de verificar con
+    `assertTrue(coleccion.contains(esperado))`.
+  - `assertThat(obj).hasToString(esperado)` en vez de
+    `assertEquals(esperado, obj.toString())`.
+  - `assertThat(optional).isNotPresent()`/`.isEmpty()` en vez de
+    `assertFalse(optional.isPresent())`.
+
+- **Tests casi idénticos que solo cambian un valor de entrada/salida**: si hay
+  3 o más métodos `@Test` con la misma estructura y solo cambia el dato de
+  entrada/resultado esperado, conviértelos en un único `@ParameterizedTest`
+  (ver la skill `junit5-best-practices`, sección 3) en vez de mantenerlos
+  duplicados.
+
+- **Excepciones genéricas en código de PRODUCCIÓN (no de test)**: si al
+  auditar aparece un `throw new RuntimeException(...)` o `Exception` genérica
+  en `src/main`, esto está FUERA del alcance de este agente de testing —
+  repórtalo como hallazgo aparte, no lo corrijas tú mismo salvo instrucción
+  explícita, porque implica tocar lógica de negocio y la jerarquía de
+  excepciones de dominio del proyecto.
+
+Si encuentras cualquiera de estos patrones, corrígelo antes de marcar la clase
+de test con veredicto ✅ — aunque el build pase y la cobertura esté completa,
+un ❌ o ⚠️ de SonarCloud en el PR bloquea el Quality Gate igual.
+
 ## 6. Reporte de validación
 
 Al terminar, entrega un veredicto por clase de test revisada, en esta forma:

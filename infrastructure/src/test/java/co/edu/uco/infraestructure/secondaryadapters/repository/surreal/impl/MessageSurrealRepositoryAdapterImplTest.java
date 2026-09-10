@@ -26,12 +26,14 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -205,7 +207,7 @@ class MessageSurrealRepositoryAdapterImplTest {
         assertThatThrownBy(() -> adapter.findById("id-1"))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("boom");
-        verify(log).error(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any(RuntimeException.class));
+        verify(log).error(anyString(), any(RuntimeException.class));
     }
 
     @Test
@@ -349,10 +351,11 @@ class MessageSurrealRepositoryAdapterImplTest {
         doReturn(emptyResponse()).when(surreal).query(contains("COUNT()"));
         doThrow(new RuntimeException("db down")).when(surreal).query(contains("ORDER BY message.code ASC"));
 
-        assertThatThrownBy(() -> adapter.findMessagesByEnvironment("env-1", PageRequest.of(0, 2)))
+        PageRequest request = PageRequest.of(0, 2);
+        assertThatThrownBy(() -> adapter.findMessagesByEnvironment("env-1", request))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("db down");
-        verify(log, org.mockito.Mockito.times(2)).error(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any(RuntimeException.class));
+        verify(log, times(2)).error(anyString(), any(RuntimeException.class));
     }
 
     @Test

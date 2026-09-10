@@ -66,7 +66,8 @@ class TitleVOTest {
 
     @Test
     void constructor_rejectsTitleLongerThanFifty() {
-        assertThatThrownBy(() -> new TitleVO("a".repeat(51)))
+        String title = "a".repeat(51);
+        assertThatThrownBy(() -> new TitleVO(title))
                 .isInstanceOf(SizeTitleMoreThanFiftyException.class);
     }
 

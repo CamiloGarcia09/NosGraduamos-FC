@@ -34,7 +34,8 @@ class ExpirationDateValidatorTest {
     void validate_throwsBusinessRuleException_whenDateIsInThePast() {
         when(catalogPort.getMessage("FUN_037")).thenReturn("Expiration date is in the past");
 
-        assertThatThrownBy(() -> validator.validate(LocalDateTime.now().minusDays(1)))
+        LocalDateTime pastDate = LocalDateTime.now().minusDays(1);
+        assertThatThrownBy(() -> validator.validate(pastDate))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("Expiration date is in the past"));

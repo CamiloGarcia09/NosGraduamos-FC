@@ -31,7 +31,7 @@ class XMLSerializerTest {
     }
 
     @Test
-    void serialize_serializesDataToXml() throws Exception {
+    void serialize_serializesDataToXml() {
         record Sample(String code) {
         }
 
