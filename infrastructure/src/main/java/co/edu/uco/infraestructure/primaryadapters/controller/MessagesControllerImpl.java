@@ -43,6 +43,7 @@ final class MessagesControllerImpl implements MessagesController {
 
         @Override
         public void findByEnvironmentAndMessage(
+                        String environmentId,
                         String page,
                         String size,
                         String sort,
@@ -57,7 +58,6 @@ final class MessagesControllerImpl implements MessagesController {
                         .columnSort(columnSort)
                         .build();
                 
-                var environmentId = (String) httpServletRequest.getAttribute(ENVIRONMENT_ID_ATTRIBUTE);
                 var messageDTOSimplePage = findMessagesByEnvironmentUsecaseFacade.execute(environmentId, pageRequestDTO);
                 restPresenterPage.presentRestSuccess(List.of(messageDTOSimplePage), httpServletRequest,
                                 httpServletResponse);
