@@ -25,7 +25,7 @@ public class MessageCategoryCatalogSurrealAdapter extends SurrealCatalogSupport 
 
     private MessageCategoryData toMessageCategoryData(final Object obj) {
         final MessageCategoryData data = MessageCategoryData.build();
-        data.setId(extractIdAsUUID(obj.get("id")));
+        data.setId(extractCatalogId(obj.get("id")));
         data.setName(stringOf(obj.get("name")));
         return data;
     }

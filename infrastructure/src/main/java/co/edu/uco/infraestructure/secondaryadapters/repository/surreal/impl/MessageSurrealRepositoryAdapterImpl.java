@@ -1,6 +1,7 @@
 package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
 import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
+import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.entity.FunctionalityData;
 import co.edu.uco.application.secondaryports.entity.MessageCategoryData;
 import co.edu.uco.application.secondaryports.entity.MessageData;
@@ -22,8 +23,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static co.edu.uco.crosscutting.helpers.UtilDate.TIME;
 import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 import static co.edu.uco.crosscutting.helpers.UtilText.isEmptyOrNull;
+import static co.edu.uco.crosscutting.helpers.UtilUUID.DEFAULT_UUID;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.quote;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
 
@@ -155,10 +158,11 @@ public class MessageSurrealRepositoryAdapterImpl extends SurrealCatalogSupport i
         data.setTitle(stringOf(message.get("title")));
         data.setContent(stringOf(message.get("content")));
         data.setApplication(stringOf(message.get("application")));
-        data.setType(MessageTypeData.build(nameOf(message.get("type"))));
-        data.setCategory(MessageCategoryData.build(nameOf(message.get("category"))));
-        data.setStatus(new StatusMessageData(UUID.randomUUID(), nameOf(message.get("status"))));
-        data.setFunctionality(FunctionalityData.build(nameOf(message.get("functionality"))));
+        data.setType(new MessageTypeData(catalogIdOf(message.get("type")), nameOf(message.get("type"))));
+        data.setCategory(new MessageCategoryData(catalogIdOf(message.get("category")), nameOf(message.get("category"))));
+        data.setStatus(new StatusMessageData(catalogIdOf(message.get("status")), nameOf(message.get("status"))));
+        data.setFunctionality(new FunctionalityData(catalogIdOf(message.get("functionality")),
+                nameOf(message.get("functionality")), ApplicationData.build(), TIME, TIME));
         return data;
     }
 
@@ -167,6 +171,13 @@ public class MessageSurrealRepositoryAdapterImpl extends SurrealCatalogSupport i
             return Optional.empty();
         }
         return Optional.of(value.getObject());
+    }
+
+    private static UUID catalogIdOf(final Value value) {
+        if (isNullObject(value) || !value.isObject()) {
+            return DEFAULT_UUID;
+        }
+        return extractCatalogId(value.getObject().get("id"));
     }
 
     private static String nameOf(final Value value) {

@@ -25,7 +25,7 @@ public class MessageTypeCatalogSurrealAdapter extends SurrealCatalogSupport impl
 
     private MessageTypeData toMessageTypeData(final Object obj) {
         final MessageTypeData data = MessageTypeData.build();
-        data.setId(extractIdAsUUID(obj.get("id")));
+        data.setId(extractCatalogId(obj.get("id")));
         data.setName(stringOf(obj.get("name")));
         return data;
     }
