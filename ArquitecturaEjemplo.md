@@ -382,10 +382,10 @@ y en SurrealDB (`surreal-init.surql`, `surreal-seed.dev.surql`).
 
 - Driver síncrono oficial `com.surrealdb.Surreal` (bean en `SurrealDBConfig`, WebSocket RPC).
 - No hay ORM ni JPA: las consultas son **SurrealQL** construidas con helpers seguros:
-  - `SurrealCatalogSupport` (clase abstracta): `queryAll/query/queryOne`, `RowMapper<T>`,
-    `extractIdAsUUID`, `cleanThingId`, `stringOf`.
-  - `SurrealQLUtil`: `quote()`, `recordIdLiteral()`, `datetime()` (no se usa `queryBind` porque el
-    binding nativo no está disponible en este SDK).
+    - `SurrealCatalogSupport` (clase abstracta): `queryAll/query/queryOne`, `RowMapper<T>`,
+      `extractIdAsUUID`, `cleanThingId`, `stringOf`.
+    - `SurrealQLUtil`: `quote()`, `recordIdLiteral()`, `datetime()` (no se usa `queryBind` porque el
+      binding nativo no está disponible en este SDK).
 - **Modelos** `model/`: `MessageSurrealModel`, `EnvironmentSurrealModel`, `TokenSurrealModel`,
   `StatusTokenSurrealModel` (POJOs con normalization en setters).
 - **Mappers** `data/`: interfaz `DataMapper<D,A>` (`mapperData`/`mapperModel`).
@@ -394,10 +394,10 @@ y en SurrealDB (`surreal-init.surql`, `surreal-seed.dev.surql`).
 - **CQRS + Event Sourcing de proyecciones**: `SurrealDomainEventProjectionConsumer`
   (`@Scheduled`, cada ~2s, lote de 100) consume la tabla `domain_events` y **proyecta read models**
   denormalizados:
-  - `application_document`, `environment_document`,
-  - `message_data_collection` (mensaje denormalizado con catálogos),
-  - `message_environment_readmodel` (mensaje + ambiente).
-  - Deletes detectados por sufijo `_DELETED`; marca `projected`/`failed` + `projection_error`.
+    - `application_document`, `environment_document`,
+    - `message_data_collection` (mensaje denormalizado con catálogos),
+    - `message_environment_readmodel` (mensaje + ambiente).
+    - Deletes detectados por sufijo `_DELETED`; marca `projected`/`failed` + `projection_error`.
 - Tablas/colecciones (referencia en `InfrastructureConstant`): `token`, `token_state`,
   `message_environment`, `environment`, `application`, `message`, `message_type`,
   `message_category`, `message_state`, `message_environment_state`, `functionality`,
@@ -424,13 +424,13 @@ y en SurrealDB (`surreal-init.surql`, `surreal-seed.dev.surql`).
 ## Tokens: encriptación, secretos y verificación
 
 - **Encriptación** (`JavaSecurityEncryptTokenAdapter`, puerto `EncryptTokenPort`):
-  - `generateKeys()` → RSA 2048 bits.
-  - `generateSignature(data, publicKey)` → cifra con `RSA/ECB/OAEPWithSHA-256AndMGF1Padding` (Base64).
-  - `access(privateKey, signature, secretName)` → descifra con la clave privada y compara con secretName.
+    - `generateKeys()` → RSA 2048 bits.
+    - `generateSignature(data, publicKey)` → cifra con `RSA/ECB/OAEPWithSHA-256AndMGF1Padding` (Base64).
+    - `access(privateKey, signature, secretName)` → descifra con la clave privada y compara con secretName.
 - **Secretos Doppler**:
-  - `DopplerProvider` (puerto `SecretProviderPort`): GET a la API de Doppler (`Authorization: Bearer`).
-  - `DopplerSecretCacheService` (puerto `FindTokenCachePort`): caché Caffeine 15 min / 500 entradas.
-  - `DopplerCreateToken` (puerto `CreateTokenSecretPort`): POST del change request a Doppler + invalida caché.
+    - `DopplerProvider` (puerto `SecretProviderPort`): GET a la API de Doppler (`Authorization: Bearer`).
+    - `DopplerSecretCacheService` (puerto `FindTokenCachePort`): caché Caffeine 15 min / 500 entradas.
+    - `DopplerCreateToken` (puerto `CreateTokenSecretPort`): POST del change request a Doppler + invalida caché.
 - **Azure Key Vault** (`AzureKeyVaultAdapter`, puerto `VaultPort`): `SecretClient` con
   `DefaultAzureCredentialBuilder`; rechaza secretos deshabilitados; errores mapeados a TCH_047..TCH_050.
 
@@ -439,9 +439,9 @@ y en SurrealDB (`surreal-init.surql`, `surreal-seed.dev.surql`).
 `LangChain4jMessageTranslationAdapter` (puerto `MessageTranslationPort`):
 
 - Instancia el modelo **lazy** según `translation.ai.provider`:
-  - **ollama** (default): `OllamaChatModel` con `baseUrl` (`http://ollama:11434` en prod) y
-    `modelName` (`llama3.2`).
-  - **openai**: `OpenAiChatModel` con apiKey.
+    - **ollama** (default): `OllamaChatModel` con `baseUrl` (`http://ollama:11434` en prod) y
+      `modelName` (`llama3.2`).
+    - **openai**: `OpenAiChatModel` con apiKey.
 - Usa `ResponseFormat` tipo JSON schema (`translatedTitle`/`translatedContent`).
 - Prompt armado con el catálogo (`FUN_054`). Devuelve `MessageTranslationResponseData` con
   proveedor, modelo y latencia. Si `translation.ai.enabled=false` → `FUN_046`.
@@ -514,11 +514,11 @@ Además, los interceptores escriben sus propios errores (403 token, 406 Accept).
 - `InfrastructureConstant`: constantes de colecciones, campos, headers, algoritmos, caché,
   patrones de interceptor y prefijos de properties.
 - Principales `@ConfigurationProperties`:
-  - `surreal` (`SurrealDBProperties`): host, port, user, password, namespace, database, maxConnections.
-  - `pulsar` (`PulsarProperties`): serviceUrl, topicName.
-  - `doppler` (`DopplerProperties`): token, request, urlConfigSecretsPost/Get.
-  - `translation.ai` (`TranslationAiProperties`): enabled, provider, apiKey, baseUrl, modelName,
-    temperature, maxRetries, timeoutSeconds.
+    - `surreal` (`SurrealDBProperties`): host, port, user, password, namespace, database, maxConnections.
+    - `pulsar` (`PulsarProperties`): serviceUrl, topicName.
+    - `doppler` (`DopplerProperties`): token, request, urlConfigSecretsPost/Get.
+    - `translation.ai` (`TranslationAiProperties`): enabled, provider, apiKey, baseUrl, modelName,
+      temperature, maxRetries, timeoutSeconds.
 - Configuraciones: `SurrealDBConfig` (cliente `Surreal`), `RedisConfig` (`@EnableRedisRepositories` +
   `RedisTemplate`), `BrokerConfig` (PulsarClient), `SerializerConfig` (5 serializers),
   `WebConfig` (interceptores), `LoggingConfig` (correlación).

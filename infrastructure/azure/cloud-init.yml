@@ -32,4 +32,4 @@ runcmd:
   - apt-get update && apt-get install -y doppler
   - systemctl restart docker
 
-final_message: "MessageUcoLab VM bootstrap completed"
+final_message: "Inicialización de la máquina virtual de MessageUcoLab completada"

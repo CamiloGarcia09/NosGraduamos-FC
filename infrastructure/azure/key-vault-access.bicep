@@ -1,6 +1,9 @@
 targetScope = 'resourceGroup'
 
+@description('Nombre del Key Vault existente.')
 param keyVaultName string
+
+@description('Identificador de la entidad de seguridad que recibirá acceso de lectura a los secretos.')
 param principalId string
 
 var keyVaultSecretsUserRoleDefinitionId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')

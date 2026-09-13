@@ -17,29 +17,29 @@ variables:
 
 stages:
   - stage: ValidateAndTest
-    displayName: Validate, test and build
+    displayName: Validar, probar y compilar
     jobs:
       - job: CI
-        displayName: Maven and container validation
+        displayName: Validación de Maven y contenedores
         steps:
           - checkout: self
             clean: true
 
           - task: PowerShell@2
-            displayName: Validate agent tools
+            displayName: Validar herramientas del agente
             inputs:
               targetType: inline
               script: |
                 $ErrorActionPreference = 'Stop'
                 docker version
-                if ($LASTEXITCODE -ne 0) { throw 'Docker Engine is not available.' }
+                if ($LASTEXITCODE -ne 0) { throw 'Docker Engine no está disponible.' }
                 az version
-                if ($LASTEXITCODE -ne 0) { throw 'Azure CLI is not available.' }
+                if ($LASTEXITCODE -ne 0) { throw 'Azure CLI no está disponible.' }
                 ssh -V
-                if ($LASTEXITCODE -ne 0) { throw 'OpenSSH is not available.' }
+                if ($LASTEXITCODE -ne 0) { throw 'OpenSSH no está disponible.' }
 
           - task: Cache@2
-            displayName: Cache Maven dependencies
+            displayName: Almacenar en caché las dependencias de Maven
             inputs:
               key: 'maven | "$(Agent.OS)" | **/pom.xml'
               restoreKeys: |
@@ -47,7 +47,7 @@ stages:
               path: $(MAVEN_CACHE_FOLDER)
 
           - task: PowerShell@2
-            displayName: Build and test with Java 17 container
+            displayName: Compilar y probar con un contenedor de Java 17
             inputs:
               targetType: inline
               script: |
@@ -59,10 +59,10 @@ stages:
                   --workdir /workspace `
                   maven:3.9.9-eclipse-temurin-17-noble `
                   mvn -B clean verify
-                if ($LASTEXITCODE -ne 0) { throw 'Maven build or tests failed.' }
+                if ($LASTEXITCODE -ne 0) { throw 'La compilación o las pruebas de Maven fallaron.' }
 
           - task: PublishTestResults@2
-            displayName: Publish test results
+            displayName: Publicar resultados de las pruebas
             condition: succeededOrFailed()
             inputs:
               testResultsFormat: JUnit
@@ -73,12 +73,12 @@ stages:
               failTaskOnMissingResultsFile: false
 
           - task: PowerShell@2
-            displayName: Validate Azure Docker Compose
+            displayName: Validar Docker Compose de Azure
             inputs:
               targetType: inline
               script: |
                 docker compose --file deployment/azure/docker-compose.yml config --quiet
-                if ($LASTEXITCODE -ne 0) { throw 'Azure Docker Compose is invalid.' }
+                if ($LASTEXITCODE -ne 0) { throw 'El archivo Docker Compose de Azure no es válido.' }
             env:
               ACR_LOGIN_SERVER: example.azurecr.io
               IMAGE_TAG: validation
@@ -92,17 +92,17 @@ stages:
               SURREALDBDATABASE: messageucolab
 
           - task: PowerShell@2
-            displayName: Validate Bicep
+            displayName: Validar Bicep
             inputs:
               targetType: inline
               script: |
                 az bicep build --file infrastructure/azure/main.bicep --stdout | Out-Null
-                if ($LASTEXITCODE -ne 0) { throw 'Bicep validation failed.' }
+                if ($LASTEXITCODE -ne 0) { throw 'La validación de Bicep falló.' }
 
           - task: PowerShell@2
-            displayName: Validate application image
+            displayName: Validar imagen de la aplicación
             inputs:
               targetType: inline
               script: |
                 docker build --tag "$(IMAGE_REPOSITORY):ci-$(Build.BuildId)" .
-                if ($LASTEXITCODE -ne 0) { throw 'Application image build failed.' }
+                if ($LASTEXITCODE -ne 0) { throw 'La compilación de la imagen de la aplicación falló.' }
