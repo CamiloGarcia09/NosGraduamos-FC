@@ -46,3 +46,5 @@ infrastructure/azure/local/budget.local.json
 infrastructure/azure/local/devops-environment.local.json
 infrastructure/azure/local/devops-service-connection.local.json
 
+build.log
+
