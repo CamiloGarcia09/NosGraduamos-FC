@@ -33,8 +33,8 @@ services:
   redis-init:
     image: redis:7.4-alpine
     environment:
-      REDISHOST: redis
-      REDISPORT: 6379
+      REDISHOST: ${REDISHOST}
+      REDISPORT: ${REDISPORT}
       REDISPASSWORD: ${REDISPASSWORD}
     volumes:
       - ../docker/scripts/redis/CatalogMessageInit.sh:/init/CatalogMessageInit.sh:ro
@@ -132,14 +132,14 @@ services:
       DOPPLERTOKEN: ${DOPPLERTOKEN}
       DOPPLER_PROJECT: ${DOPPLER_PROJECT:-messageucolab}
       DOPPLER_CONFIG: ${DOPPLER_CONFIG:-dev_azure}
-      REDISHOST: redis
-      REDISPORT: 6379
+      REDISHOST: ${REDISHOST}
+      REDISPORT: ${REDISPORT}
       REDISPASSWORD: ${REDISPASSWORD}
       REDISDATABASE: ${REDISDATABASE:-0}
-      PULSARURL: pulsar://pulsar:6650
+      PULSARURL: ${PULSARURL}
       PULSARTOPICNAME: ${PULSARTOPICNAME}
-      SURREALDBHOST: surrealdb
-      SURREALDBPORT: 8005
+      SURREALDBHOST: ${SURREALDBHOST}
+      SURREALDBPORT: ${SURREALDBPORT}
       SURREALDBUSER: ${SURREALDBUSER}
       SURREALDBPASSWORD: ${SURREALDBPASSWORD}
       SURREALDBNAMESPACE: ${SURREALDBNAMESPACE}

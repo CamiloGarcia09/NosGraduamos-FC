@@ -1,44 +1,44 @@
 targetScope = 'resourceGroup'
 
-@description('Azure region used by the deployment.')
+@description('Región de Azure utilizada por el despliegue.')
 param location string = resourceGroup().location
 
-@description('Short lowercase prefix used for resource names.')
+@description('Prefijo corto en minúsculas utilizado para los nombres de los recursos.')
 @minLength(3)
 @maxLength(18)
 param namePrefix string
 
-@description('Globally unique Azure Container Registry name.')
+@description('Nombre globalmente único de Azure Container Registry.')
 param acrName string
 
-@description('Existing Key Vault subscription. Defaults to the current subscription.')
+@description('Suscripción donde se encuentra el Key Vault existente. De forma predeterminada, se utiliza la suscripción actual.')
 param keyVaultSubscriptionId string = subscription().subscriptionId
 
-@description('Resource group containing the existing Key Vault.')
+@description('Grupo de recursos que contiene el Key Vault existente.')
 param keyVaultResourceGroupName string
 
-@description('Name of the existing Key Vault.')
+@description('Nombre del Key Vault existente.')
 param keyVaultName string
 
-@description('Set to false when the existing Key Vault uses access policies instead of Azure RBAC.')
+@description('Establecer en false cuando el Key Vault existente utilice directivas de acceso en lugar de Azure RBAC.')
 param assignKeyVaultRbacRole bool = true
 
-@description('Linux VM size. Standard_B2s is the initial demo recommendation.')
+@description('Tamaño de la máquina virtual Linux. Standard_B2s es la recomendación inicial para la demostración.')
 param vmSize string = 'Standard_B2s'
 
-@description('Administrator username. Password authentication is disabled.')
+@description('Nombre del usuario administrador. La autenticación mediante contraseña está deshabilitada.')
 param adminUsername string = 'azureuser'
 
-@description('SSH public key used only for controlled maintenance and pipeline deployment.')
+@description('Clave SSH pública utilizada únicamente para mantenimiento controlado y despliegues desde el pipeline.')
 param adminSshPublicKey string
 
-@description('Source allowed to call the Kong gateway on port 8000. Use Internet for public demo access.')
+@description('Origen autorizado para acceder a la puerta de enlace Kong por el puerto 8000. Utilizar Internet para permitir el acceso público a la demostración.')
 param allowedApiSourcePrefix string
 
-@description('Daily automatic shutdown time in 24-hour HHmm format.')
+@description('Hora diaria de apagado automático en formato HHmm de 24 horas.')
 param autoShutdownTime string = '2300'
 
-@description('IANA-compatible Windows time zone used by Azure auto-shutdown.')
+@description('Zona horaria de Windows compatible con IANA utilizada por el apagado automático de Azure.')
 param autoShutdownTimeZone string = 'SA Pacific Standard Time'
 
 var vmName = '${namePrefix}-vm'

@@ -41,8 +41,8 @@ build/
 *.pem
 *.key
 *.pfx
-infrastructure/azure/parameters.local.json
-infrastructure/azure/budget.local.json
-infrastructure/azure/devops-environment.local.json
-infrastructure/azure/devops-service-connection.local.json
+infrastructure/azure/local/parameters.local.json
+infrastructure/azure/local/budget.local.json
+infrastructure/azure/local/devops-environment.local.json
+infrastructure/azure/local/devops-service-connection.local.json
 
