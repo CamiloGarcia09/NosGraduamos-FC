@@ -123,6 +123,30 @@ public abstract class SurrealCatalogSupport {
         return id.trim();
     }
 
+    protected static UUID extractCatalogId(final Value value) {
+        if (isNullObject(value)) return DEFAULT_UUID;
+        final String raw;
+        if (value.isRecordId()) {
+            raw = value.getRecordId().toString();
+        } else if (value.isString()) {
+            raw = value.getString();
+        } else {
+            raw = value.toString();
+        }
+        final String idPart;
+        final int separator = raw.indexOf(':');
+        if (separator > 0) {
+            idPart = cleanThingId(raw.substring(separator + 1));
+        } else {
+            idPart = cleanThingId(raw);
+        }
+        try {
+            return UUID.fromString(idPart);
+        } catch (final Exception ignored) {
+            return UUID.nameUUIDFromBytes(raw.getBytes());
+        }
+    }
+
     protected static String stringOf(final Value value) {
         if (isNullObject(value) || value.isNull() || value.isNone()) return "";
         if (value.isString()) return value.getString();

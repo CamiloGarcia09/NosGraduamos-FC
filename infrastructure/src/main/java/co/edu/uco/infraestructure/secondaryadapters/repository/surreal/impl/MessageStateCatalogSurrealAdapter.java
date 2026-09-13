@@ -25,7 +25,7 @@ public class MessageStateCatalogSurrealAdapter extends SurrealCatalogSupport imp
 
     private StatusMessageData toStatusMessageData(final Object obj) {
         final StatusMessageData data = StatusMessageData.build();
-        data.setId(extractIdAsUUID(obj.get("id")));
+        data.setId(extractCatalogId(obj.get("id")));
         data.setName(stringOf(obj.get("name")));
         return data;
     }
