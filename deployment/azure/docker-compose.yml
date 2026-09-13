@@ -84,7 +84,7 @@ services:
       - ${SURREALDBDATABASE}
       - /init/surreal-init.surql
     volumes:
-      - ../docker/scripts/surreal-init.surql:/init/surreal-init.surql:ro
+      - ../docker/scripts/surreal/surreal-init.surql:/init/surreal-init.surql:ro
     restart: "no"
     depends_on:
       surrealdb:

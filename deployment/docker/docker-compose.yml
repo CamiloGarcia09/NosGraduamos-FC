@@ -1,6 +1,7 @@
 services:
   grafana:
     image: grafana/grafana:latest
+    container_name: grafana
     ports:
       - "${GRAFANAPORT}:${GRAFANAPORT}"
     environment:
@@ -12,6 +13,7 @@ services:
 
   loki:
     image: grafana/loki:latest
+    container_name: loki
     environment:
       LOKIPORT: ${LOKIPORT}
       LOKIPORTALERT: ${LOKIPORTALERT}
@@ -26,19 +28,21 @@ services:
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.40.0
+    container_name: otel-collector
     environment:
       LOKIPORT: ${LOKIPORT}
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
     ports:
-      - "${GRPC_OTELPORT}:${GRPC_OTELPORT}"
-      - "${HTTP_OTELPORT}:${HTTP_OTELPORT}"
+      - "14317:${GRPC_OTELPORT}"
+      - "14318:${HTTP_OTELPORT}"
     networks:
       - observability-network
 
   prometheus:
     image: prom/prometheus:latest
+    container_name: prometheus
     environment:
       MESSAGEUCOLAB_PORT: ${MESSAGEUCOLAB_PORT}
     entrypoint:
@@ -92,7 +96,7 @@ services:
 
   surrealdb:
     image: surrealdb/surrealdb:v3.1.4
-    container_name: surrealdb-messageucolab
+    container_name: surrealdb
     user: "0:0"
     ports:
       - "${SURREALDBPORT}:${SURREALDBPORT}"
@@ -114,7 +118,7 @@ services:
 
   surrealdb-init:
     image: surrealdb/surrealdb:v3.1.4
-    container_name: surrealdb-init-messageucolab
+    container_name: surrealdb-message-structure-init
     depends_on:
       surrealdb:
         condition: service_healthy
@@ -131,7 +135,7 @@ services:
       - ${SURREALDBNAMESPACE}
       - --database
       - ${SURREALDBDATABASE}
-      - /init/surreal-init.surql
+      - /init/surreal/surreal-init.surql
     volumes:
       - ./scripts:/init:ro
     restart: "no"
@@ -178,7 +182,7 @@ services:
 
   ollama-init:
     image: ollama/ollama:latest
-    container_name: ollama-init
+    container_name: ollama-model-init
     depends_on:
       ollama:
         condition: service_healthy
@@ -238,7 +242,7 @@ services:
 
   pulsar:
     image: apachepulsar/pulsar:3.2.2
-    container_name: pulsar-standalone
+    container_name: pulsar
     command: >
       /bin/bash -c " 
       bin/apply-config-from-env.py conf/standalone.conf && 
