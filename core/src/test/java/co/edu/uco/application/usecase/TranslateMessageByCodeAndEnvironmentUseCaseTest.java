@@ -9,6 +9,7 @@ import co.edu.uco.application.secondaryports.entity.MessageTranslationResponseDa
 import co.edu.uco.application.secondaryports.entity.MessageTypeData;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
+import co.edu.uco.application.secondaryports.translation.MessageTranslationCachePort;
 import co.edu.uco.application.secondaryports.translation.MessageTranslationPort;
 import co.edu.uco.application.usecase.validator.message.FindMessageCodeValidator;
 import co.edu.uco.application.usecase.validator.message.TargetLanguageValidator;
@@ -26,7 +27,11 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,6 +42,8 @@ class TranslateMessageByCodeAndEnvironmentUseCaseTest {
     private MessageCatalogStrategy messageCatalogStrategy;
     @Mock
     private MessageTranslationPort messageTranslationPort;
+    @Mock
+    private MessageTranslationCachePort messageTranslationCachePort;
     @Mock
     private FindMessageCodeValidator findMessageCodeValidator;
     @Mock
@@ -52,8 +59,8 @@ class TranslateMessageByCodeAndEnvironmentUseCaseTest {
     void setUp() {
         when(loggerFactory.getLogger(TranslateMessageByCodeAndEnvironmentUseCase.class)).thenReturn(log);
         useCase = new TranslateMessageByCodeAndEnvironmentUseCase(
-                messageCatalogStrategy, messageTranslationPort, findMessageCodeValidator,
-                targetLanguageValidator, loggerFactory);
+                messageCatalogStrategy, messageTranslationPort, messageTranslationCachePort,
+                findMessageCodeValidator, targetLanguageValidator, loggerFactory);
     }
 
     private MessageData messageWithData() {
@@ -76,18 +83,20 @@ class TranslateMessageByCodeAndEnvironmentUseCaseTest {
                 .thenReturn(Optional.of(message));
         MessageTranslationResponseData response = MessageTranslationResponseData.create(
                 "Translated Title", "Translated Content", "ollama", "llama3.2", 120L);
-        when(messageTranslationPort.translate(org.mockito.ArgumentMatchers.any(MessageTranslationRequestData.class)))
+        when(messageTranslationPort.translate(any(MessageTranslationRequestData.class)))
                 .thenReturn(response);
 
         TranslatedMessageDTO result = useCase.execute("CODE", "env", "", "en");
 
-        assertThat(result.code()).isEqualTo("CODE");
-        assertThat(result.sourceLanguage()).isEqualTo("auto");
-        assertThat(result.targetLanguage()).isEqualTo("en");
-        assertThat(result.translatedTitle()).isEqualTo("Translated Title");
-        assertThat(result.translationProvider()).isEqualTo("ollama");
-        assertThat(result.translationElapsedMs()).isEqualTo(120L);
-        assertThat(result.dynamicTranslation()).isTrue();
+        assertAll(
+                () -> assertThat(result.code()).isEqualTo("CODE"),
+                () -> assertThat(result.sourceLanguage()).isEqualTo("auto"),
+                () -> assertThat(result.targetLanguage()).isEqualTo("en"),
+                () -> assertThat(result.translatedTitle()).isEqualTo("Translated Title"),
+                () -> assertThat(result.translationProvider()).isEqualTo("ollama"),
+                () -> assertThat(result.translationElapsedMs()).isEqualTo(120L),
+                () -> assertThat(result.dynamicTranslation()).isTrue());
+        verify(messageTranslationCachePort).saveTranslation(eq("CODE"), eq("env"), eq("auto"), eq("en"), eq(response));
     }
 
     @Test
@@ -97,12 +106,32 @@ class TranslateMessageByCodeAndEnvironmentUseCaseTest {
                 .thenReturn(Optional.of(message));
         MessageTranslationResponseData response = MessageTranslationResponseData.create(
                 "t", "c", "ollama", "m", 1L);
-        when(messageTranslationPort.translate(org.mockito.ArgumentMatchers.any(MessageTranslationRequestData.class)))
+        when(messageTranslationPort.translate(any(MessageTranslationRequestData.class)))
                 .thenReturn(response);
 
         TranslatedMessageDTO result = useCase.execute("CODE", "env", "  es ", "en");
 
         assertThat(result.sourceLanguage()).isEqualTo("es");
+    }
+
+    @Test
+    void execute_servesTranslationFromCache_whenCacheHit() {
+        MessageData message = messageWithData();
+        when(messageCatalogStrategy.getMessageByCodeAndEnvironment("CODE", "env"))
+                .thenReturn(Optional.of(message));
+        MessageTranslationResponseData cached = MessageTranslationResponseData.create(
+                "Cached Title", "Cached Content", "ollama", "llama3.2", 5L);
+        when(messageTranslationCachePort.findTranslation("CODE", "env", "es", "en"))
+                .thenReturn(Optional.of(cached));
+
+        TranslatedMessageDTO result = useCase.execute("CODE", "env", "es", "en");
+
+        assertAll(
+                () -> assertThat(result.translatedTitle()).isEqualTo("Cached Title"),
+                () -> assertThat(result.translatedContent()).isEqualTo("Cached Content"),
+                () -> assertThat(result.translationElapsedMs()).isEqualTo(5L));
+        verify(messageTranslationPort, never()).translate(any());
+        verify(messageTranslationCachePort).findTranslation("CODE", "env", "es", "en");
     }
 
     @Test
@@ -123,18 +152,18 @@ class TranslateMessageByCodeAndEnvironmentUseCaseTest {
         MessageData message = messageWithData();
         when(messageCatalogStrategy.getMessageByCodeAndEnvironment("CODE", "env"))
                 .thenReturn(Optional.of(message));
-        when(messageTranslationPort.translate(org.mockito.ArgumentMatchers.any(MessageTranslationRequestData.class)))
+        when(messageTranslationPort.translate(any(MessageTranslationRequestData.class)))
                 .thenThrow(new IllegalStateException("translation down"));
-        when(messageCatalogStrategy.getSystemMessageContent(MessageCatalogCodeEnum.FUN_012.getCode()))
-                .thenReturn("Message %s not found in environment %s");
+        when(messageCatalogStrategy.getSystemMessageContent(MessageCatalogCodeEnum.FUN_048.getCode()))
+                .thenReturn("Error translating message");
 
         assertThatThrownBy(() -> useCase.execute("CODE", "env", "es", "en"))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(ex -> assertThat(((BusinessException) ex).getUserMessage())
-                        .isEqualTo("Message CODE not found in environment env"));
+                        .isEqualTo("Error translating message"));
 
         ArgumentCaptor<Exception> captor = ArgumentCaptor.forClass(Exception.class);
-        verify(log).error(org.mockito.ArgumentMatchers.eq("Message CODE not found in environment env"), captor.capture());
+        verify(log).error(eq("Error translating message"), captor.capture());
         assertThat(captor.getValue()).isInstanceOf(IllegalStateException.class);
     }
 

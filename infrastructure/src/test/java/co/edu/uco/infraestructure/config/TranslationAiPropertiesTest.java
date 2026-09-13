@@ -12,7 +12,7 @@ class TranslationAiPropertiesTest {
 
         assertThat(properties.isEnabled()).isTrue();
         assertThat(properties.getProvider()).isEqualTo("ollama");
-        assertThat(properties.getBaseUrl()).isEqualTo("http://host.docker.internal:11434");
+        assertThat(properties.getBaseUrl()).isEqualTo("http://ollama:11434");
         assertThat(properties.getModelName()).isEqualTo("llama3.2");
         assertThat(properties.getTemperature()).isEqualTo(0.1);
         assertThat(properties.getMaxRetries()).isZero();

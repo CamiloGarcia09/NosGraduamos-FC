@@ -2,16 +2,17 @@ package co.edu.uco.application.usecase.validator.page;
 
 import co.edu.uco.application.primaryports.dto.page.PageRequestDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -20,77 +21,83 @@ class PageRequestTypeValidatorTest {
     @Mock
     private CatalogPort catalogPort;
 
-    @InjectMocks
     private PageRequestTypeValidator validator;
 
-    @Test
-    void validate_returnsWithoutError_whenDataIsNull() {
-        assertThatCode(() -> validator.validate(null)).doesNotThrowAnyException();
+    @BeforeEach
+    void setUp() {
+        validator = new PageRequestTypeValidator(catalogPort);
     }
 
     @Test
-    void validate_doesNotThrow_forValidPageRequest() {
+    void validate_acceptsNullData() {
+        assertDoesNotThrow(() -> validator.validate(null));
+    }
+
+    @Test
+    void validate_acceptsNumericPageAndSizeAndAlphabeticSort() {
         PageRequestDTO dto = PageRequestDTO.builder()
                 .page("1")
-                .size("20")
+                .size("50")
                 .columnSort("id")
                 .sort("ASC")
                 .build();
-        assertThatCode(() -> validator.validate(dto)).doesNotThrowAnyException();
+
+        assertDoesNotThrow(() -> validator.validate(dto));
     }
 
     @Test
-    void validate_doesNotThrow_whenPageFieldsAreNullOrEmpty() {
+    void validate_acceptsEmptyFields() {
         PageRequestDTO dto = PageRequestDTO.builder()
                 .page("")
-                .size(null)
+                .size("")
                 .columnSort("")
-                .sort(null)
+                .sort("")
                 .build();
-        assertThatCode(() -> validator.validate(dto)).doesNotThrowAnyException();
+
+        assertDoesNotThrow(() -> validator.validate(dto));
     }
 
     @Test
-    void validate_throwsBusinessRuleException_whenPageIsNotNumeric() {
-        when(catalogPort.getMessage("FUN_033")).thenReturn("Attribute %s must contain only numbers");
-        PageRequestDTO dto = PageRequestDTO.builder().page("abc").size("20").columnSort("id").sort("ASC").build();
+    void validate_throwsBusinessRule_whenPageIsNotNumeric() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_033.getCode())).thenReturn("El atributo %s debe ser numerico");
+        PageRequestDTO dto = PageRequestDTO.builder().page("abc").build();
 
         assertThatThrownBy(() -> validator.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("Attribute page must contain only numbers"));
+                        .isEqualTo("El atributo page debe ser numerico"));
     }
 
     @Test
-    void validate_throwsBusinessRuleException_whenSizeIsNotNumeric() {
-        when(catalogPort.getMessage("FUN_033")).thenReturn("Attribute %s must contain only numbers");
-        PageRequestDTO dto = PageRequestDTO.builder().page("1").size("abc").columnSort("id").sort("ASC").build();
+    void validate_throwsBusinessRule_whenSizeIsNotNumeric() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_033.getCode())).thenReturn("El atributo %s debe ser numerico");
+        PageRequestDTO dto = PageRequestDTO.builder().size("abc").build();
 
         assertThatThrownBy(() -> validator.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("Attribute size must contain only numbers"));
+                        .isEqualTo("El atributo size debe ser numerico"));
     }
 
     @Test
-    void validate_throwsBusinessRuleException_whenColumnSortIsNotLetters() {
-        when(catalogPort.getMessage("FUN_043")).thenReturn("Attribute %s must contain only letters");
-        PageRequestDTO dto = PageRequestDTO.builder().page("1").size("20").columnSort("id123").sort("ASC").build();
+    void validate_throwsBusinessRule_whenColumnSortIsNotAlphabetic() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_043.getCode())).thenReturn("El atributo %s debe ser alfabetico");
+        PageRequestDTO dto = PageRequestDTO.builder().columnSort("123").build();
 
         assertThatThrownBy(() -> validator.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("Attribute columnSort must contain only letters"));
+                        .isEqualTo("El atributo columnSort debe ser alfabetico"));
     }
 
     @Test
-    void validate_throwsBusinessRuleException_whenSortIsNotLetters() {
-        when(catalogPort.getMessage("FUN_043")).thenReturn("Attribute %s must contain only letters");
-        PageRequestDTO dto = PageRequestDTO.builder().page("1").size("20").columnSort("id").sort("ASC1").build();
+    void validate_throwsBusinessRule_whenSortIsNotAlphabetic() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_043.getCode())).thenReturn("El atributo %s debe ser alfabetico");
+        PageRequestDTO dto = PageRequestDTO.builder().sort("123").build();
 
         assertThatThrownBy(() -> validator.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("Attribute sort must contain only letters"));
+                        .isEqualTo("El atributo sort debe ser alfabetico"));
     }
 }

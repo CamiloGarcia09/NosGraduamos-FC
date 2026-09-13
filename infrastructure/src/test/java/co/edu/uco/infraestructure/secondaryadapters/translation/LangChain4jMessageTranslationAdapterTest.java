@@ -5,7 +5,6 @@ import co.edu.uco.application.secondaryports.entity.MessageTranslationRequestDat
 import co.edu.uco.application.secondaryports.entity.MessageTranslationResponseData;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
-import co.edu.uco.application.secondaryports.vault.VaultPort;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
 import co.edu.uco.infraestructure.config.TranslationAiProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,6 +22,7 @@ import java.lang.reflect.Field;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -32,8 +32,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class LangChain4jMessageTranslationAdapterTest {
 
-    @Mock
-    private VaultPort vaultPort;
     @Mock
     private CatalogPort catalogPort;
     @Mock
@@ -52,7 +50,7 @@ class LangChain4jMessageTranslationAdapterTest {
     @BeforeEach
     void setUp() {
         when(loggerFactory.getLogger(LangChain4jMessageTranslationAdapter.class)).thenReturn(log);
-        adapter = new LangChain4jMessageTranslationAdapter(vaultPort, catalogPort, properties, objectMapper, loggerFactory);
+        adapter = new LangChain4jMessageTranslationAdapter(catalogPort, properties, objectMapper, loggerFactory);
     }
 
     private MessageTranslationRequestData request() {
@@ -132,11 +130,35 @@ class LangChain4jMessageTranslationAdapterTest {
 
         MessageTranslationResponseData result = adapter.translate(request());
 
-        assertThat(result.getTranslatedTitle()).isEqualTo("Hola");
-        assertThat(result.getTranslatedContent()).isEqualTo("Mundo");
-        assertThat(result.getProvider()).isEqualTo("OpenAI");
-        assertThat(result.getModel()).isEqualTo("gpt-4o-mini");
-        assertThat(result.getElapsedMillis()).isGreaterThanOrEqualTo(0);
+        assertAll(
+                () -> assertThat(result.getTranslatedTitle()).isEqualTo("Hola"),
+                () -> assertThat(result.getTranslatedContent()).isEqualTo("Mundo"),
+                () -> assertThat(result.getProvider()).isEqualTo("OpenAI"),
+                () -> assertThat(result.getModel()).isEqualTo("gpt-4o-mini"),
+                () -> assertThat(result.getElapsedMillis()).isGreaterThanOrEqualTo(0));
+        verify(log).info(anyString(), anyString(), anyString(), anyString(), anyString(), anyLong());
+    }
+
+    @Test
+    void translate_returnsTranslatedData_whenOllamaProvider() throws Exception {
+        properties.setEnabled(true);
+        properties.setProvider("ollama");
+        properties.setModelName("llama3");
+        injectChatModel(chatModelReturning(chatResponse));
+        stubSchemaMessages();
+
+        when(chatResponse.aiMessage()).thenReturn(aiMessage);
+        when(aiMessage.text()).thenReturn("{\"translatedTitle\":\"Hola\",\"translatedContent\":\"Mundo\"}");
+        when(catalogPort.getMessage("FUN_059")).thenReturn("ollama: %s");
+        when(catalogPort.getMessage("TCH_036")).thenReturn("translated");
+
+        MessageTranslationResponseData result = adapter.translate(request());
+
+        assertAll(
+                () -> assertThat(result.getTranslatedTitle()).isEqualTo("Hola"),
+                () -> assertThat(result.getTranslatedContent()).isEqualTo("Mundo"),
+                () -> assertThat(result.getProvider()).isEqualTo("ollama: ollama"),
+                () -> assertThat(result.getModel()).isEqualTo("llama3"));
         verify(log).info(anyString(), anyString(), anyString(), anyString(), anyString(), anyLong());
     }
 

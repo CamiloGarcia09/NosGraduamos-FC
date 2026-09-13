@@ -20,6 +20,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -58,21 +61,20 @@ class MessagesControllerImplTest {
 
     @Test
     void findByEnvironmentAndMessage_buildsPageRequestAndPresentsResult() {
-        when(request.getAttribute("environmentId")).thenReturn("env-1");
         SimplePage<MessageDTO> page = SimplePage.of(List.of(), 1, 10, 0, 0);
-        when(findMessagesByEnvironmentUsecaseFacade.execute(
-                org.mockito.ArgumentMatchers.eq("env-1"), org.mockito.ArgumentMatchers.any(PageRequestDTO.class)))
+        when(findMessagesByEnvironmentUsecaseFacade.execute(eq("env-1"), any(PageRequestDTO.class)))
                 .thenReturn(page);
 
-        controller.findByEnvironmentAndMessage("1", "10", "asc", "code", request, response);
+        controller.findByEnvironmentAndMessage("env-1", "1", "10", "asc", "code", request, response);
 
         ArgumentCaptor<PageRequestDTO> captor = ArgumentCaptor.forClass(PageRequestDTO.class);
-        verify(findMessagesByEnvironmentUsecaseFacade).execute(org.mockito.ArgumentMatchers.eq("env-1"), captor.capture());
+        verify(findMessagesByEnvironmentUsecaseFacade).execute(eq("env-1"), captor.capture());
         PageRequestDTO captured = captor.getValue();
-        assertThat(captured.getPage()).isEqualTo("1");
-        assertThat(captured.getSize()).isEqualTo("10");
-        assertThat(captured.getSort()).isEqualTo("asc");
-        assertThat(captured.getColumnSort()).isEqualTo("code");
+        assertAll(
+                () -> assertThat(captured.getPage()).isEqualTo("1"),
+                () -> assertThat(captured.getSize()).isEqualTo("10"),
+                () -> assertThat(captured.getSort()).isEqualTo("asc"),
+                () -> assertThat(captured.getColumnSort()).isEqualTo("code"));
         verify(restPresenterPage).presentRestSuccess(List.of(page), request, response);
     }
 

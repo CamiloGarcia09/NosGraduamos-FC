@@ -76,6 +76,7 @@ class MessageSurrealRepositoryAdapterImplTest {
     private Value nameValue(String name) {
         Object obj = mock(Object.class);
         doReturn(stringValue(name)).when(obj).get("name");
+        doReturn(recordIdValue("catalog", UUID.randomUUID().toString())).when(obj).get("id");
         Value v = mock(Value.class);
         when(v.isNull()).thenReturn(false);
         when(v.isNone()).thenReturn(false);

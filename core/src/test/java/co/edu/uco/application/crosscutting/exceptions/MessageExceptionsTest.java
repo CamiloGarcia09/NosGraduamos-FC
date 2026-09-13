@@ -62,4 +62,25 @@ class MessageExceptionsTest {
                 .isInstanceOf(SizeContentMoreThanOneHundred.class)
                 .isInstanceOf(CrossWordsException.class);
     }
+
+    @Test
+    void messageNotFound_report_throwsMessageNotFoundException() {
+        assertThatThrownBy(() -> MessageNotFoundException.report("MSG-001"))
+                .isInstanceOf(MessageNotFoundException.class)
+                .isInstanceOf(CrossWordsException.class);
+    }
+
+    @Test
+    void messageKeyCanNotBeEmpty_report_throwsMessageKeyCanNotBeEmptyException() {
+        assertThatThrownBy(MessageKeyCanNotBeEmptyException::report)
+                .isInstanceOf(MessageKeyCanNotBeEmptyException.class)
+                .isInstanceOf(CrossWordsException.class);
+    }
+
+    @Test
+    void messageKeyCanNotBeNull_report_throwsMessageKeyCanNotBeNullException() {
+        assertThatThrownBy(MessageKeyCanNotBeNullException::report)
+                .isInstanceOf(MessageKeyCanNotBeNullException.class)
+                .isInstanceOf(CrossWordsException.class);
+    }
 }

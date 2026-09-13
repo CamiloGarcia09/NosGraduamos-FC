@@ -18,6 +18,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -88,15 +89,11 @@ class AcceptHeaderInterceptorTest {
     }
 
     @Test
-    void preHandle_returnsFalse_whenSerializerIsNull() throws Exception {
+    void preHandle_throwsNullPointerException_whenSerializerIsNull() throws Exception {
         when(request.getHeader("Accept")).thenReturn("application/pdf");
         when(serializerRegistry.getSerializerForMediaType("application/pdf")).thenReturn(null);
-        when(catalogPort.getMessage("TCH_022")).thenReturn("Content type %s is not supported");
 
-        try {
-            interceptor.preHandle(request, response, new Object());
-        } catch (AssertionError | NullPointerException expected) {
-            assertThat(expected).isNotNull();
-        }
+        assertThatThrownBy(() -> interceptor.preHandle(request, response, new Object()))
+                .isInstanceOf(NullPointerException.class);
     }
 }

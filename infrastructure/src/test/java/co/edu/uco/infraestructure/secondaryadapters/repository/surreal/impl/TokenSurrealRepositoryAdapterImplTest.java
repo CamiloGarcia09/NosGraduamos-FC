@@ -258,4 +258,44 @@ class TokenSurrealRepositoryAdapterImplTest {
 
         assertThat(adapter.findTokenSurrealModelByEnvironmentIdAndStateId("env-1", "st-1")).isEmpty();
     }
+
+    @Test
+    void findTokenSurrealModelById_handlesMissingIdAndOtherDateValue() {
+        Object doc = mock(Object.class);
+        doReturn(null).when(doc).get("id");
+        doReturn(stringValue("secret")).when(doc).get("secret_name");
+        Value otherType = mock(Value.class);
+        when(otherType.isNull()).thenReturn(false);
+        when(otherType.isNone()).thenReturn(false);
+        doReturn(otherType).when(doc).get("creation_date");
+        doReturn(dateTimeValue(LocalDateTime.of(2026, 1, 1, 10, 0))).when(doc).get("expiration_date");
+        doReturn(stringValue("env-3")).when(doc).get("environment_id");
+        doReturn(stringValue("st-3")).when(doc).get("state_id");
+        doReturn(responseWithOne(doc)).when(surreal).query(anyString());
+
+        Optional<TokenSurrealModel> result = adapter.findTokenSurrealModelById("tok-3");
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isEmpty();
+        assertThat(result.get().getCreationDate()).isNotNull();
+    }
+
+    @Test
+    void findTokenSurrealModelById_returnsToStringId_whenIdIsOtherType() {
+        Object doc = mock(Object.class);
+        Value other = mock(Value.class);
+        when(other.toString()).thenReturn("raw-id");
+        doReturn(other).when(doc).get("id");
+        doReturn(stringValue("secret")).when(doc).get("secret_name");
+        doReturn(dateTimeValue(LocalDateTime.of(2025, 1, 1, 10, 0))).when(doc).get("creation_date");
+        doReturn(dateTimeValue(LocalDateTime.of(2026, 1, 1, 10, 0))).when(doc).get("expiration_date");
+        doReturn(stringValue("env-4")).when(doc).get("environment_id");
+        doReturn(stringValue("st-4")).when(doc).get("state_id");
+        doReturn(responseWithOne(doc)).when(surreal).query(anyString());
+
+        Optional<TokenSurrealModel> result = adapter.findTokenSurrealModelById("tok-4");
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isEqualTo("raw-id");
+    }
 }
