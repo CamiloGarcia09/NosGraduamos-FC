@@ -12,6 +12,7 @@ import com.surrealdb.Value;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
@@ -92,8 +93,10 @@ public class TokenSurrealRepositoryAdapterImpl extends SurrealCatalogSupport imp
     }
 
     private static LocalDateTime dateOf(final Value value) {
-        if (isNullObject(value) || value.isNull() || value.isNone()) return UtilDate.TIME;
-        if (value.isDateTime()) return value.getDateTime().toLocalDateTime();
-        return UtilDate.TIME;
+        if (isNullObject(value) || value.isNull() || value.isNone()) return UtilDate.nowUtc();
+        if (value.isDateTime()) {
+            return value.getDateTime().withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+        }
+        return UtilDate.nowUtc();
     }
 }

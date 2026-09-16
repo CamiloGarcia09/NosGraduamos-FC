@@ -126,6 +126,7 @@ services:
     expose:
       - "8085"
     environment:
+      TZ: UTC
       SPRING_PROFILES_ACTIVE: azure
       JAVA_OPTS: ${JAVA_OPTS:--Xms256m -Xmx768m -XX:+UseG1GC -XX:MaxGCPauseMillis=200}
       AZURE_KEYVAULT_UCOLAB_ENDPOINT: ${AZURE_KEYVAULT_UCOLAB_ENDPOINT}

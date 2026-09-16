@@ -27,8 +27,8 @@ public final class TokenData {
     public TokenData() {
         setId(UtilText.EMPTY);
         setSecretName(UtilText.EMPTY);
-        setCreationDate(UtilDate.TIME);
-        setExpirationDate(UtilDate.TIME);
+        setCreationDate(UtilDate.nowUtc());
+        setExpirationDate(UtilDate.nowUtc());
         setEnvironmentId(UtilText.EMPTY);
         setStateId(UtilText.EMPTY);
     }

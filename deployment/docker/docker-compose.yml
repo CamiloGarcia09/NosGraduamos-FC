@@ -201,16 +201,14 @@ services:
     ports:
       - "${MESSAGEUCOLAB_PORT}:${MESSAGEUCOLAB_PORT}"
     environment:
+      - TZ=UTC
       - LOG_PATH=/app/logs
       - LOKI_URL=http://loki:${LOKIPORT}
-
       - DOPPLERTOKEN=${DOPPLERTOKEN}
-
       - AZURE_KEYVAULT_UCOLAB_ENDPOINT=${AZURE_KEYVAULT_UCOLAB_ENDPOINT}
       - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
       - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
       - AZURE_TENANT_ID=${AZURE_TENANT_ID}
-
     volumes:
       - app-logs:/app/logs
     depends_on:
@@ -234,7 +232,7 @@ services:
       - app-network
       - pulsar-network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${MESSAGEUCOLAB_PORT}/actuator/health"]
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:${MESSAGEUCOLAB_PORT}/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3

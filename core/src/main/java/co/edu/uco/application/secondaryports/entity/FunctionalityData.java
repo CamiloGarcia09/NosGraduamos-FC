@@ -9,7 +9,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static co.edu.uco.crosscutting.helpers.UtilDate.TIME;
+import static co.edu.uco.crosscutting.helpers.UtilDate.nowUtc;
 import static co.edu.uco.crosscutting.helpers.UtilText.EMPTY;
 import static co.edu.uco.crosscutting.helpers.UtilText.trim;
 import static co.edu.uco.crosscutting.helpers.UtilUUID.getDefaultUUID;
@@ -24,8 +24,8 @@ public final class FunctionalityData {
     public FunctionalityData() {
         setId(UUID.randomUUID());
         setName(EMPTY);
-        setStartDate(TIME);
-        setEndDate(TIME);
+        setStartDate(nowUtc());
+        setEndDate(nowUtc());
     }
     public FunctionalityData(UUID id, String name, ApplicationData application, LocalDateTime startDate, LocalDateTime endDate) {
         setId(id);
@@ -50,5 +50,7 @@ public final class FunctionalityData {
     public static FunctionalityData build() {
         return new FunctionalityData();
     }
-    public static FunctionalityData build(String name) { return new FunctionalityData(UtilUUID.getNewUUID(), name, ApplicationData.build(), TIME, TIME);}
+    public static FunctionalityData build(String name) {
+        return new FunctionalityData(UtilUUID.getNewUUID(), name, ApplicationData.build(), nowUtc(), nowUtc());
+    }
 }

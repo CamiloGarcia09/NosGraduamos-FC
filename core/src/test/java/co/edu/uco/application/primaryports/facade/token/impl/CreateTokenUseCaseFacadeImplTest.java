@@ -3,6 +3,7 @@ package co.edu.uco.application.primaryports.facade.token.impl;
 import co.edu.uco.application.common.mapper.dto.impl.TokenDTOMapper;
 import co.edu.uco.application.primaryports.dto.keypair.KeyPairDTO;
 import co.edu.uco.application.primaryports.dto.token.CreateTokenDTO;
+import co.edu.uco.application.primaryports.dto.token.TokenDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
@@ -10,6 +11,7 @@ import co.edu.uco.application.secondaryports.secret.CreateTokenSecretPort;
 import co.edu.uco.application.secondaryports.secret.EncryptTokenPort;
 import co.edu.uco.application.usecase.handling.HandlingCreateTokenPort;
 import co.edu.uco.application.usecase.handling.HandlingRevokeTokenPort;
+import co.edu.uco.application.usecase.domain.TokenDomain;
 import co.edu.uco.application.usecase.validator.token.CreateTokenCompositeValidator;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
@@ -23,12 +25,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,6 +61,7 @@ class CreateTokenUseCaseFacadeImplTest {
     private CatalogPort catalogPort;
 
     private CreateTokenUseCaseFacadeImpl facade;
+    private final Clock clock = Clock.fixed(Instant.parse("2025-01-15T15:30:45Z"), ZoneOffset.ofHours(-5));
 
     private final String applicationId = "123e4567-e89b-12d3-a456-426614174000";
     private final String environmentId = "123e4567-e89b-12d3-a456-426614174100";
@@ -64,13 +71,13 @@ class CreateTokenUseCaseFacadeImplTest {
         when(loggerFactory.getLogger(CreateTokenUseCaseFacadeImpl.class)).thenReturn(log);
         facade = new CreateTokenUseCaseFacadeImpl(
                 handlingCreateTokenPort, tokenDTOMapper, encrypt, createTokenSecretPort,
-                validator, handlingRevokeTokenPort, loggerFactory, catalogPort);
+                validator, handlingRevokeTokenPort, loggerFactory, catalogPort, clock);
     }
 
     private CreateTokenDTO validDto() {
         CreateTokenDTO dto = new CreateTokenDTO();
         dto.setEnvironmentId(environmentId);
-        dto.setExpirationDate(LocalDateTime.now().plusDays(30).toString());
+        dto.setExpirationDate("2025-02-01T10:00:00-05:00");
         return dto;
     }
 
@@ -88,6 +95,8 @@ class CreateTokenUseCaseFacadeImplTest {
         when(encrypt.generateKeys()).thenReturn(keyPairDTO);
         String signature = "signature-123";
         when(encrypt.generateSignature(any(String.class), any(PublicKey.class))).thenReturn(signature);
+        TokenDomain tokenDomain = mock(TokenDomain.class);
+        when(tokenDTOMapper.mapperDomain(any())).thenReturn(tokenDomain);
 
         String result = facade.execute(dto, applicationId);
 
@@ -102,7 +111,14 @@ class CreateTokenUseCaseFacadeImplTest {
                 .contains("123E4567_E89B_12D3_A456_426614174000")
                 .contains("123E4567_E89B_12D3_A456_426614174100");
 
-        verify(handlingCreateTokenPort).createToken(any());
+        ArgumentCaptor<TokenDTO> tokenCaptor = ArgumentCaptor.forClass(TokenDTO.class);
+        verify(tokenDTOMapper).mapperDomain(tokenCaptor.capture());
+        assertThat(tokenCaptor.getValue())
+                .extracting(TokenDTO::getCreationDate, TokenDTO::getExpirationDate)
+                .containsExactly(
+                        LocalDateTime.of(2025, 1, 15, 15, 30, 45),
+                        LocalDateTime.of(2025, 2, 1, 15, 0));
+        verify(handlingCreateTokenPort).createToken(tokenDomain);
     }
 
     @Test

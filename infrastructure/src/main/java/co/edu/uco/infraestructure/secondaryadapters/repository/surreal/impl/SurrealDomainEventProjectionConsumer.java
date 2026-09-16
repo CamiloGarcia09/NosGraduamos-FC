@@ -16,6 +16,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.format.DateTimeFormatter;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -417,7 +418,8 @@ public final class SurrealDomainEventProjectionConsumer {
             return quote(recordIdToString(value.getRecordId()));
         }
         if (value.isDateTime()) {
-            return "d'" + value.getDateTime().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "'";
+            return "d'" + value.getDateTime().withZoneSameInstant(ZoneOffset.UTC)
+                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "'";
         }
         if (value.isArray()) {
             return arrayLiteral(value.getArray());
@@ -487,7 +489,8 @@ public final class SurrealDomainEventProjectionConsumer {
             return value.getUuid().toString();
         }
         if (value.isDateTime()) {
-            return value.getDateTime().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            return value.getDateTime().withZoneSameInstant(ZoneOffset.UTC)
+                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         }
         return value.toString();
     }

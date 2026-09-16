@@ -83,11 +83,15 @@ class TokenSurrealRepositoryAdapterImplTest {
     }
 
     private Value dateTimeValue(LocalDateTime dateTime) {
+        return dateTimeValue(ZonedDateTime.of(dateTime, ZoneOffset.UTC));
+    }
+
+    private Value dateTimeValue(ZonedDateTime dateTime) {
         Value v = mock(Value.class);
         when(v.isNull()).thenReturn(false);
         when(v.isNone()).thenReturn(false);
         when(v.isDateTime()).thenReturn(true);
-        when(v.getDateTime()).thenReturn(ZonedDateTime.of(dateTime, ZoneOffset.UTC));
+        when(v.getDateTime()).thenReturn(dateTime);
         return v;
     }
 
@@ -156,6 +160,28 @@ class TokenSurrealRepositoryAdapterImplTest {
         assertThat(model.getExpirationDate()).isEqualTo(LocalDateTime.of(2026, 1, 1, 10, 0));
         assertThat(model.getEnvironmentId()).isEqualTo("env-1");
         assertThat(model.getStateId()).isEqualTo("st-1");
+    }
+
+    @Test
+    void findTokenSurrealModelById_normalizesZonedDateTimesToUtc() {
+        Object doc = mock(Object.class);
+        doReturn(recordIdValue("tok-offset")).when(doc).get("id");
+        doReturn(stringValue("secret")).when(doc).get("secret_name");
+        ZonedDateTime sourceDate = ZonedDateTime.of(
+                LocalDateTime.of(2025, 1, 1, 10, 30), ZoneOffset.ofHours(-5));
+        doReturn(dateTimeValue(sourceDate)).when(doc).get("creation_date");
+        doReturn(dateTimeValue(sourceDate.plusDays(1))).when(doc).get("expiration_date");
+        doReturn(stringValue("env-1")).when(doc).get("environment_id");
+        doReturn(stringValue("st-1")).when(doc).get("state_id");
+        doReturn(responseWithOne(doc)).when(surreal).query(anyString());
+
+        TokenSurrealModel result = adapter.findTokenSurrealModelById("tok-offset").orElseThrow();
+
+        assertThat(result)
+                .extracting(TokenSurrealModel::getCreationDate, TokenSurrealModel::getExpirationDate)
+                .containsExactly(
+                        LocalDateTime.of(2025, 1, 1, 15, 30),
+                        LocalDateTime.of(2025, 1, 2, 15, 30));
     }
 
     @Test

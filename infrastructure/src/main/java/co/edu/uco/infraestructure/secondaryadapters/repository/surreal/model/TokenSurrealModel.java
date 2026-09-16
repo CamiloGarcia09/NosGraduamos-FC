@@ -4,8 +4,8 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-import static co.edu.uco.crosscutting.helpers.UtilDate.TIME;
 import static co.edu.uco.crosscutting.helpers.UtilDate.getDefaultTimeIfNull;
+import static co.edu.uco.crosscutting.helpers.UtilDate.nowUtc;
 import static co.edu.uco.crosscutting.helpers.UtilText.EMPTY;
 import static co.edu.uco.crosscutting.helpers.UtilText.trim;
 
@@ -32,8 +32,8 @@ public final class TokenSurrealModel {
     public TokenSurrealModel() {
         setId(EMPTY);
         setSecretName(EMPTY);
-        setCreationDate(TIME);
-        setExpirationDate(TIME);
+        setCreationDate(nowUtc());
+        setExpirationDate(nowUtc());
         setEnvironmentId(EMPTY);
         setStateId(EMPTY);
     }
