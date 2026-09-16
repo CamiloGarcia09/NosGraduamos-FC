@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
-import static co.edu.uco.crosscutting.helpers.UtilObject.getDefaultIsNullObject;
+import static co.edu.uco.crosscutting.helpers.UtilDate.nowUtc;
 import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 import static co.edu.uco.crosscutting.helpers.UtilText.getDefault;
 
@@ -34,7 +34,7 @@ final class SurrealQLUtil {
 
     /** Renders a SurrealQL datetime literal in ISO-8601 / RFC 3339. */
     static String datetime(final LocalDateTime value) {
-        final LocalDateTime safe = getDefaultIsNullObject(value, LocalDateTime.now(ZoneOffset.UTC));
+        final LocalDateTime safe = isNullObject(value) ? nowUtc() : value;
         return "d'" + safe.atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "'";
     }
 }

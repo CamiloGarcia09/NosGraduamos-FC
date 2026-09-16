@@ -404,6 +404,31 @@ y en SurrealDB (`surreal-init.surql`, `surreal-seed.dev.surql`).
   `environment_type`, `parameter`, `represent_parameter`, `domain_events`, y los read models.
 - Requiere SurrealDB montado con el esquema de `deployment/docker/scripts/surreal-init.surql`.
 
+### Política temporal UTC
+
+- La aplicación utiliza **UTC (`UTC+00:00`)** como zona horaria única para lógica de negocio,
+  serialización, persistencia y logs. `CrossWordApplication` fija la zona por defecto antes de iniciar
+  Spring; el `Dockerfile` refuerza esta política con `TZ=UTC` y `-Duser.timezone=UTC`, y los Compose
+  local y Azure declaran `TZ: UTC` para el contenedor de la aplicación.
+- Mientras el modelo mantenga campos `LocalDateTime`, su contrato interno es representar siempre una
+  fecha y hora ya normalizada a UTC. `UtilDate.nowUtc()` reemplaza el antiguo valor estático de hora y
+  `TimeConfig` expone un `Clock.systemUTC()` inyectable para lógica dependiente del tiempo y pruebas
+  deterministas.
+- Las entradas de API conservan compatibilidad: una fecha sin offset, como
+  `2026-12-31T23:59:59`, se interpreta como UTC; una fecha con `Z` o con offset, como
+  `2026-12-31T18:59:59-05:00`, se convierte al instante UTC equivalente. OpenAPI documenta estos
+  campos como `date-time` RFC 3339.
+- `SurrealQLUtil.datetime()` escribe fechas normalizadas como literales RFC 3339 terminados en `Z`.
+  Los valores leídos mediante el SDK de SurrealDB y los timestamps copiados a proyecciones se convierten
+  a UTC antes de usarse. Los campos generados por el esquema con `time::now()` continúan siendo la fuente
+  de los timestamps de auditoría.
+- Este cambio aplica a escrituras nuevas. Los registros históricos no se desplazan automáticamente,
+  porque un valor antiguo sin información confiable sobre su zona de origen no puede corregirse de forma
+  segura mediante una migración global.
+- `logback-spring.xml` y `logback-azure.xml` emiten timestamps ISO-8601 con offset UTC (`Z`). La rotación
+  diaria de archivos también ocurre a medianoche UTC. El horario de apagado automático de la VM en Azure
+  permanece en hora de Colombia porque es una programación operativa independiente de la aplicación.
+
 ## Caché — Redis (`secondaryadapters/repository/redis` y `catalog`)
 
 - **Caché de lectura de mensajes** (`MessageRedisAdapter`, puerto `CacheMessageRepository`):
@@ -604,8 +629,12 @@ La verificación en cada request: `VerifyAccessUseCase` (estado y expiración) +
 
 ```bash
 cd deployment/docker
-docker compose up -d
+doppler run -- docker compose up -d --build
 ```
+
+El directorio debe tener configurado el proyecto y ambiente de Doppler correspondientes. Doppler aporta
+las variables que Docker Compose necesita para crear los servicios y las credenciales de acceso a Azure;
+la aplicación obtiene el resto de su configuración desde Azure Key Vault durante el arranque.
 
 Servicios: SurrealDB (`surrealdb/surrealdb:v3.1.4`, con `surreal-init.surql` y seed),
 Redis (con seed del catálogo), Pulsar 3.2.2, Kong Gateway 3.5 (declarativo), Ollama (con pull del
@@ -628,8 +657,8 @@ modelo), Grafana, Loki, OpenTelemetry Collector y Prometheus.
 
 - JUnit 5 + Mockito + AssertJ. Los tests de core son unitarios; los de infrastructure también
   cubren adaptadores, serializers, mappers, interceptors, controllers y el projection consumer.
-- Suite actual (estado verificado con JDK 17): **732 tests en verde** — core 297, infrastructure 255,
-  utils 180.
+- Suite actual (estado verificado con JDK 17): **952 tests en verde** — core 428, infrastructure 340,
+  utils 184.
 - JaCoCo 0.8.12 configurado en el `pom.xml` raíz: agente en `prepare-agent` y reporte en `verify`
   (`infrastructure/target/site/jacoco/index.html`).
 - Comando: `./mvnw clean verify` (usa Maven 3.9.9 vía wrapper; el JDK de build debe ser **17**).

@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static co.edu.uco.crosscutting.helpers.UtilDate.TIME;
+import static co.edu.uco.crosscutting.helpers.UtilDate.nowUtc;
 import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 import static co.edu.uco.crosscutting.helpers.UtilText.isEmptyOrNull;
 import static co.edu.uco.crosscutting.helpers.UtilUUID.DEFAULT_UUID;
@@ -162,7 +162,7 @@ public class MessageSurrealRepositoryAdapterImpl extends SurrealCatalogSupport i
         data.setCategory(new MessageCategoryData(catalogIdOf(message.get("category")), nameOf(message.get("category"))));
         data.setStatus(new StatusMessageData(catalogIdOf(message.get("status")), nameOf(message.get("status"))));
         data.setFunctionality(new FunctionalityData(catalogIdOf(message.get("functionality")),
-                nameOf(message.get("functionality")), ApplicationData.build(), TIME, TIME));
+                nameOf(message.get("functionality")), ApplicationData.build(), nowUtc(), nowUtc()));
         return data;
     }
 

@@ -5,8 +5,8 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static co.edu.uco.crosscutting.helpers.UtilDate.TIME;
 import static co.edu.uco.crosscutting.helpers.UtilDate.getDefaultTimeIfNull;
+import static co.edu.uco.crosscutting.helpers.UtilDate.nowUtc;
 import static co.edu.uco.crosscutting.helpers.UtilText.EMPTY;
 import static co.edu.uco.crosscutting.helpers.UtilText.trim;
 import static co.edu.uco.crosscutting.helpers.UtilUUID.getDefaultUUID;
@@ -53,8 +53,8 @@ public final class MessageSurrealModel {
         setStatusId(EMPTY);
         setApplication(EMPTY);
         setFunctionalityId(EMPTY);
-        setCreatedAt(TIME);
-        setUpdatedAt(TIME);
+        setCreatedAt(nowUtc());
+        setUpdatedAt(nowUtc());
     }
 
     public void setId(UUID id) {

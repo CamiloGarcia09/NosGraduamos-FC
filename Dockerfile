@@ -30,6 +30,7 @@ RUN mkdir -p /app/logs && chown -R app:app /app
 COPY --from=build --chown=app:app /app/infrastructure/target/infrastructure-*.jar app.jar
 
 ENV JAVA_OPTS="-Xms256m -Xmx768m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+ENV TZ=UTC
 
 EXPOSE 8085
 
@@ -38,4 +39,4 @@ USER app
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl --fail --silent http://localhost:8085/actuator/health || exit 1
 
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -Duser.timezone=UTC -jar app.jar"]

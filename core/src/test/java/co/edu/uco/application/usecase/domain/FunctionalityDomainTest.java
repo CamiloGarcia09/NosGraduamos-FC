@@ -1,9 +1,9 @@
 package co.edu.uco.application.usecase.domain;
 
-import co.edu.uco.crosscutting.helpers.UtilDate;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,10 +25,12 @@ class FunctionalityDomainTest {
 
     @Test
     void setters_applyDefaultsWhenNull() {
+        LocalDateTime before = LocalDateTime.now(ZoneOffset.UTC);
         FunctionalityDomain domain = FunctionalityDomain.create(UUID.randomUUID(), "name", null, null);
+        LocalDateTime after = LocalDateTime.now(ZoneOffset.UTC);
 
-        assertThat(domain.getStartDate()).isEqualTo(UtilDate.TIME);
-        assertThat(domain.getEndDate()).isEqualTo(UtilDate.TIME);
+        assertThat(domain.getStartDate()).isBetween(before, after);
+        assertThat(domain.getEndDate()).isBetween(before, after);
     }
 
     @Test

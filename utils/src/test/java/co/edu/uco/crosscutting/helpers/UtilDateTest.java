@@ -2,10 +2,14 @@ package co.edu.uco.crosscutting.helpers;
 
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,7 +52,30 @@ class UtilDateTest {
 
     @Test
     void getDefaultTimeIfNull_returnsTime_whenValueIsNull() {
-        assertThat(UtilDate.getDefaultTimeIfNull(null)).isEqualTo(UtilDate.TIME);
+        LocalDateTime before = LocalDateTime.now(ZoneOffset.UTC);
+
+        LocalDateTime result = UtilDate.getDefaultTimeIfNull(null);
+
+        LocalDateTime after = LocalDateTime.now(ZoneOffset.UTC);
+        assertThat(result).isBetween(before, after);
+    }
+
+    @Test
+    void nowUtc_usesUtcInstantFromInjectedClock() {
+        Clock clock = Clock.fixed(Instant.parse("2025-01-15T15:30:45Z"), ZoneOffset.ofHours(-5));
+
+        LocalDateTime result = UtilDate.nowUtc(clock);
+
+        assertThat(result).isEqualTo(LocalDateTime.of(2025, 1, 15, 15, 30, 45));
+    }
+
+    @Test
+    void nowUtc_returnsCurrentUtcTime() {
+        LocalDateTime before = LocalDateTime.now(ZoneOffset.UTC);
+
+        LocalDateTime result = UtilDate.nowUtc();
+
+        assertThat(result).isBetween(before, LocalDateTime.now(ZoneOffset.UTC));
     }
 
     @Test
@@ -114,20 +141,20 @@ class UtilDateTest {
 
     @Test
     void currentDate_returnsToday() {
-        assertThat(UtilDate.currentDate()).isEqualTo(LocalDate.now());
+        assertThat(UtilDate.currentDate()).isEqualTo(LocalDate.now(ZoneOffset.UTC));
     }
 
     @Test
     void getLocalDateADate_convertsCorrectly() {
         LocalDate localDate = LocalDate.of(2023, 6, 15);
         Date converted = UtilDate.getLocalDateADate(localDate);
-        assertThat(converted.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()).isEqualTo(localDate);
+        assertThat(converted.toInstant()).isEqualTo(Instant.parse("2023-06-15T00:00:00Z"));
     }
 
     @Test
     void getDateALocalDate_convertsCorrectly() {
         LocalDate localDate = LocalDate.of(2023, 6, 15);
-        Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date date = Date.from(Instant.parse("2023-06-15T23:30:00Z"));
         assertThat(UtilDate.getDateALocalDate(date)).isEqualTo(localDate);
     }
 
@@ -135,6 +162,7 @@ class UtilDateTest {
     void getLocalDataTimeADate_convertsCorrectly() {
         LocalDateTime dateTime = LocalDateTime.of(2023, 6, 15, 10, 30);
         Date converted = UtilDate.getLocalDataTimeADate(dateTime);
+        assertThat(converted.toInstant()).isEqualTo(Instant.parse("2023-06-15T10:30:00Z"));
         assertThat(UtilDate.getDateALocalDateTime(converted)).isEqualTo(dateTime);
     }
 
@@ -148,6 +176,15 @@ class UtilDateTest {
     void parseDate_parsesDateWithFractionalSeconds() {
         LocalDateTime result = UtilDate.parseDate("2023-06-15T10:30:00.123");
         assertThat(result.getNano()).isEqualTo(123_000_000);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "2023-06-15T10:30:00Z, 2023-06-15T10:30:00",
+            "2023-06-15T10:30:00-05:00, 2023-06-15T15:30:00"
+    })
+    void parseDate_normalizesOffsetDateTimeToUtc(String input, String expected) {
+        assertThat(UtilDate.parseDate(input)).isEqualTo(LocalDateTime.parse(expected));
     }
 
     @Test

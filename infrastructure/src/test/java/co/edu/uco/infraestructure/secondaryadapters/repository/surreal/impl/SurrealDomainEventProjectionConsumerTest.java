@@ -431,9 +431,10 @@ class SurrealDomainEventProjectionConsumerTest {
 
         Value dateTime = plainValue();
         when(dateTime.isDateTime()).thenReturn(true);
-        when(dateTime.getDateTime()).thenReturn(ZonedDateTime.of(2025, 1, 1, 10, 30, 0, 0, ZoneOffset.UTC));
+        when(dateTime.getDateTime()).thenReturn(
+                ZonedDateTime.of(2025, 1, 1, 10, 30, 0, 0, ZoneOffset.ofHours(-5)));
         assertThat(invokeStatic("literal", new Class[]{Value.class}, new java.lang.Object[]{dateTime}))
-                .isEqualTo("d'2025-01-01T10:30:00Z'");
+                .isEqualTo("d'2025-01-01T15:30:00Z'");
 
         Value arrayValue = plainValue();
         when(arrayValue.isArray()).thenReturn(true);
@@ -542,9 +543,10 @@ class SurrealDomainEventProjectionConsumerTest {
 
         Value dateTime = plainValue();
         when(dateTime.isDateTime()).thenReturn(true);
-        when(dateTime.getDateTime()).thenReturn(ZonedDateTime.of(2025, 1, 1, 10, 30, 0, 0, ZoneOffset.UTC));
+        when(dateTime.getDateTime()).thenReturn(
+                ZonedDateTime.of(2025, 1, 1, 10, 30, 0, 0, ZoneOffset.ofHours(-5)));
         assertThat(invokeStatic("stringOf", new Class[]{Value.class}, new java.lang.Object[]{dateTime}))
-                .isEqualTo("2025-01-01T10:30:00Z");
+                .isEqualTo("2025-01-01T15:30:00Z");
 
         Value fallback = plainValue();
         when(fallback.toString()).thenReturn("raw");

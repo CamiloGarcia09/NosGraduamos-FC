@@ -1,9 +1,9 @@
 package co.edu.uco.application.usecase.domain.aggregate.entities;
 
-import co.edu.uco.crosscutting.helpers.UtilDate;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,10 +51,11 @@ class FunctionalityEntityTest {
     @Test
     void setStartDate_usesDefaultTimeWhenNull() {
         FunctionalityEntity entity = new FunctionalityEntity();
+        LocalDateTime before = LocalDateTime.now(ZoneOffset.UTC);
 
         entity.setStartDate(null);
 
-        assertThat(entity.getStartDate()).isEqualTo(UtilDate.TIME);
+        assertThat(entity.getStartDate()).isBetween(before, LocalDateTime.now(ZoneOffset.UTC));
     }
 
     @Test
@@ -70,10 +71,11 @@ class FunctionalityEntityTest {
     @Test
     void setEndDate_usesDefaultTimeWhenNull() {
         FunctionalityEntity entity = new FunctionalityEntity();
+        LocalDateTime before = LocalDateTime.now(ZoneOffset.UTC);
 
         entity.setEndDate(null);
 
-        assertThat(entity.getEndDate()).isEqualTo(UtilDate.TIME);
+        assertThat(entity.getEndDate()).isBetween(before, LocalDateTime.now(ZoneOffset.UTC));
     }
 
     @Test

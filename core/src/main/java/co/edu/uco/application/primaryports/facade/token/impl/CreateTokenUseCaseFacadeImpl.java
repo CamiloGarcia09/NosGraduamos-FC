@@ -17,7 +17,9 @@ import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.helpers.UtilPairKey;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Clock;
+
+import static co.edu.uco.crosscutting.helpers.UtilDate.nowUtc;
 
 import static co.edu.uco.application.CrosswordsConstant.TOKEN_SECRET_IDENTIFIER;
 
@@ -40,12 +42,13 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
     private final HandlingCreateTokenPort handlingCreateTokenPort;
     private final LoggingPort log;
     private final CatalogPort catalogPort;
+    private final Clock clock;
 
     public CreateTokenUseCaseFacadeImpl(HandlingCreateTokenPort handlingCreateTokenPort, TokenDTOMapper tokenDTOMapper,
                                         EncryptTokenPort encrypt, CreateTokenSecretPort createTokenSecretPort,
                                         CreateTokenCompositeValidator validator,
                                         HandlingRevokeTokenPort handlingRevokeTokenPort,
-                                        LoggingPortFactory loggerFactory, CatalogPort catalogPort) {
+                                        LoggingPortFactory loggerFactory, CatalogPort catalogPort, Clock clock) {
 
         this.handlingCreateTokenPort = handlingCreateTokenPort;
         this.tokenDTOMapper = tokenDTOMapper;
@@ -55,6 +58,7 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
         this.handlingRevokeTokenPort = handlingRevokeTokenPort;
         this.log = loggerFactory.getLogger(CreateTokenUseCaseFacadeImpl.class);
         this.catalogPort = catalogPort;
+        this.clock = clock;
     }
 
     @Override
@@ -83,7 +87,7 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
             var tokenDTO = new TokenDTO(
                     generateSignature,
                     secretName,
-                    LocalDateTime.now(),
+                    nowUtc(clock),
                     parseDate(createTokenDTO.getExpirationDate()),
                     getStringToUUID(createTokenDTO.getEnvironmentId())
             );

@@ -212,8 +212,9 @@ components:
       properties:
         expirationDate:
           type: string
-          description: Fecha y hora de expiracion del token.
-          example: '2026-12-31T23:59:59'
+          format: date-time
+          description: Fecha y hora de expiracion. Sin offset se interpreta como UTC; cualquier offset se normaliza a UTC.
+          example: '2026-12-31T23:59:59Z'
         environmentId:
           type: string
           format: uuid

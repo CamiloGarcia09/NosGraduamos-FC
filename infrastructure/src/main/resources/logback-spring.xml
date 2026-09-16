@@ -7,7 +7,7 @@
             <pattern>
                 {
                 "correlationId": "%X{X-Correlation-ID}",
-                "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS}",
+                "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSSXXX,UTC}",
                 "level": "%level",
                 "thread": "%thread",
                 "logger": "%logger",
@@ -29,7 +29,7 @@
     <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH:-/app/logs}/application.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_PATH:-/app/logs}/application-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${LOG_PATH:-/app/logs}/application-%d{yyyy-MM-dd,UTC}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
             <totalSizeCap>20GB</totalSizeCap>
         </rollingPolicy>
@@ -37,7 +37,7 @@
             <pattern>
                 {
                 "correlationId": "%X{X-Correlation-ID}",
-                "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS}",
+                "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSSXXX,UTC}",
                 "level": "%level",
                 "thread": "%thread",
                 "logger": "%logger",
@@ -72,7 +72,7 @@
                     queryString   = %X{QUERY_STRING},
                     codeMessage   = %X{codeMessage},
                     application   = %X{application},
-                    timestamp     = %date{yyyy-MM-dd'T'HH:mm:ss.SSS}
+                    timestamp     = %date{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}
                 </structuredMetadataPattern>
             </label>
 
