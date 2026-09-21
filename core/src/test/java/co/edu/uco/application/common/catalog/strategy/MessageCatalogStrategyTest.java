@@ -9,7 +9,7 @@ import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.SimplePage;
 import co.edu.uco.application.secondaryports.repository.SimplePageRequest;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
-import co.edu.uco.crosscutting.exceptions.BusinessException;
+import co.edu.uco.crosscutting.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -94,8 +94,8 @@ class MessageCatalogStrategyTest {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_009.getCode())).thenReturn("no messages");
 
         assertThatThrownBy(() -> strategy.getMessagesWithEnvironment("env", request))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(ex -> assertThat(((BusinessException) ex).getUserMessage()).isEqualTo("no messages"));
+                .isInstanceOf(NotFoundException.class)
+                .satisfies(ex -> assertThat(((NotFoundException) ex).getUserMessage()).isEqualTo("no messages"));
     }
 
     @Test
@@ -145,8 +145,8 @@ class MessageCatalogStrategyTest {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_009.getCode())).thenReturn("no messages");
 
         assertThatThrownBy(() -> strategy.getMessagesWithEnvironment("env", request))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(ex -> assertThat(((BusinessException) ex).getUserMessage()).isEqualTo("no messages"));
+                .isInstanceOf(NotFoundException.class)
+                .satisfies(ex -> assertThat(((NotFoundException) ex).getUserMessage()).isEqualTo("no messages"));
     }
 
     @Test
@@ -161,8 +161,8 @@ class MessageCatalogStrategyTest {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_009.getCode())).thenReturn("no messages");
 
         assertThatThrownBy(() -> strategy.getMessagesWithEnvironment("env", request))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(ex -> assertThat(((BusinessException) ex).getUserMessage()).isEqualTo("no messages"));
+                .isInstanceOf(NotFoundException.class)
+                .satisfies(ex -> assertThat(((NotFoundException) ex).getUserMessage()).isEqualTo("no messages"));
 
         ArgumentCaptor<Exception> exceptionCaptor = ArgumentCaptor.forClass(Exception.class);
         verify(log).error(org.mockito.ArgumentMatchers.eq("cache error"), exceptionCaptor.capture());

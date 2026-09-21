@@ -9,7 +9,7 @@ import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.SimplePage;
 import co.edu.uco.application.secondaryports.repository.SimplePageRequest;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
-import co.edu.uco.crosscutting.exceptions.BusinessException;
+import co.edu.uco.crosscutting.exceptions.NotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -41,7 +41,7 @@ public final class MessageCatalogStrategy {
                 fillCacheWithEnvironmentMessages(dbMessages, environment);
                 return dbMessages;
             }
-            throw BusinessException.buildUserException(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_009.getCode()));
+            throw NotFoundException.buildUserException(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_009.getCode()).formatted(environment));
         }
 
         var dbMessages = databaseCatalog.getMessageWithEnvironment(environment, request);
@@ -54,7 +54,7 @@ public final class MessageCatalogStrategy {
             log.info(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_009.getCode()));
             return cachedMessages;
         }
-        throw BusinessException.buildUserException(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_009.getCode()));
+        throw NotFoundException.buildUserException(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_009.getCode()).formatted(environment));
     }
 
     public Optional<MessageData> getMessageByCodeAndEnvironment(String code, String environmentId) {

@@ -4,7 +4,7 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.TokenData;
 import co.edu.uco.application.secondaryports.repository.token.FindTokenRepository;
 import co.edu.uco.application.secondaryports.repository.token.TokenRepository;
-import co.edu.uco.crosscutting.exceptions.BusinessException;
+import co.edu.uco.crosscutting.exceptions.NotFoundException;
 import co.edu.uco.infraestructure.secondaryadapters.repository.data.TokenSurrealMapper;
 import co.edu.uco.infraestructure.secondaryadapters.repository.surreal.TokenSurrealRepositoryAdapter;
 import co.edu.uco.infraestructure.secondaryadapters.repository.surreal.model.TokenSurrealModel;
@@ -67,13 +67,16 @@ class TokenSurrealAdapterTest {
     }
 
     @Test
-    void findById_throwsBusinessException_whenNotFound() {
+    void findById_throwsNotFoundException_whenNotFound() {
         when(tokenSurrealRepositoryAdapter.findTokenSurrealModelById("id-1")).thenReturn(Optional.empty());
-        when(catalogPort.getMessage("FUN_049")).thenReturn("Token not found: ");
+        when(catalogPort.getMessage("FUN_049")).thenReturn("Token not found: %s");
 
         assertThatThrownBy(() -> adapter.findById("id-1"))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(ex -> assertThat(((BusinessException) ex).getUserMessage()).isEqualTo("Token not found: id-1"));
+                .isInstanceOf(NotFoundException.class)
+                .satisfies(ex -> {
+                    assertThat(((NotFoundException) ex).getUserMessage()).isEqualTo("Token not found: id-1");
+                    assertThat(((NotFoundException) ex).getCode()).isEqualTo("TOKEN_NOT_FOUND");
+                });
     }
 
     @Test

@@ -16,6 +16,8 @@ public class CrossWordsException extends RuntimeException {
     private Exception rootException;
     private ExceptionType type;
     private ExceptionLocation location;
+    private int httpStatus;
+    private String code;
 
     public CrossWordsException(String userMessage, String technicalMessage, Exception rootException) {
         super();
@@ -24,6 +26,7 @@ public class CrossWordsException extends RuntimeException {
         setRootException(rootException);
         setType(ExceptionType.GENERAL);
         setLocation(ExceptionLocation.GENERAL);
+        setHttpStatusByType(this.type);
     }
 
     public static CrossWordsException build(String technicalMessage) {
@@ -55,6 +58,7 @@ public class CrossWordsException extends RuntimeException {
         setRootException(rootException);
         setLocation(location);
         setType(type);
+        setHttpStatusByType(this.type);
     }
 
     public String getUserMessage() {
@@ -70,6 +74,15 @@ public class CrossWordsException extends RuntimeException {
         return location;
     }
     public ExceptionType getType() { return type; }
+    public int getHttpStatus() { return httpStatus; }
+    public String getCode() { return code; }
+
+    public void setHttpStatus(int httpStatus) {
+        this.httpStatus = httpStatus;
+    }
+    public void setCode(String code) {
+        this.code = trim(code);
+    }
 
     private void setUserMessage(String userMessage) {
         this.userMessage = trim(userMessage);
@@ -82,4 +95,13 @@ public class CrossWordsException extends RuntimeException {
         this.type = getDefaultIsNullObject(type, ExceptionType.GENERAL);
     }
     public void setLocation(ExceptionLocation location) { this.location = getDefaultIsNullObject(location, ExceptionLocation.GENERAL);}
+
+    private void setHttpStatusByType(ExceptionType type) {
+        this.httpStatus = switch (type) {
+            case TECHNICAL -> 500;
+            case BUSINESS -> 400;
+            case BUSINESS_RULE -> 422;
+            case GENERAL -> 500;
+        };
+    }
 }

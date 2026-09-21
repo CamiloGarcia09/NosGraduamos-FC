@@ -4,7 +4,7 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.TokenData;
 import co.edu.uco.application.secondaryports.repository.token.FindTokenRepository;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
-import co.edu.uco.crosscutting.exceptions.CrossWordsException;
+import co.edu.uco.crosscutting.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -49,12 +49,15 @@ class FindEnvironmentIdTokenUseCaseTest {
     }
 
     @Test
-    void execute_throwsCrossWordsException_whenTokenNotFound() {
+    void execute_throwsNotFoundException_whenTokenNotFound() {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_041.getCode())).thenReturn("Token not found");
         when(findTokenRepository.findById("missing")).thenReturn(null);
 
         assertThatThrownBy(() -> useCase.execute("missing"))
-                .isInstanceOf(CrossWordsException.class)
-                .satisfies(ex -> assertThat(((CrossWordsException) ex).getTechnicalMessage()).isEqualTo("Token not found"));
+                .isInstanceOf(NotFoundException.class)
+                .satisfies(ex -> {
+                    assertThat(((NotFoundException) ex).getUserMessage()).isEqualTo("Token not found");
+                    assertThat(((NotFoundException) ex).getCode()).isEqualTo(FindEnvironmentIdTokenUseCase.TOKEN_NOT_FOUND);
+                });
     }
 }
