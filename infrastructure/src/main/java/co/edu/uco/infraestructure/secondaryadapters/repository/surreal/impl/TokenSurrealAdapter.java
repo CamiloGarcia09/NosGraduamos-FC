@@ -7,7 +7,7 @@ import co.edu.uco.application.secondaryports.repository.token.TokenRepository;
 import co.edu.uco.infraestructure.secondaryadapters.repository.data.TokenSurrealMapper;
 import co.edu.uco.infraestructure.secondaryadapters.repository.surreal.TokenSurrealRepositoryAdapter;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
-import co.edu.uco.crosscutting.exceptions.BusinessException;
+import co.edu.uco.crosscutting.exceptions.NotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -38,7 +38,14 @@ public final class TokenSurrealAdapter implements TokenRepository, FindTokenRepo
     public TokenData findById(final String id) {
         return tokenSurrealRepositoryAdapter.findTokenSurrealModelById(id)
                 .map(mapper::mapperData)
-                .orElseThrow(() -> BusinessException.buildUserException(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_049.getCode()) + id));
+                .orElseThrow(() -> buildNotFoundException(id));
+    }
+
+    private NotFoundException buildNotFoundException(final String id) {
+        var notFound = NotFoundException.buildUserException(
+                catalogPort.getMessage(MessageCatalogCodeEnum.FUN_049.getCode()).formatted(id));
+        notFound.setCode("TOKEN_NOT_FOUND");
+        return notFound;
     }
 
     @Override

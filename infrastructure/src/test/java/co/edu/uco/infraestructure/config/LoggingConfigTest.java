@@ -1,12 +1,16 @@
 package co.edu.uco.infraestructure.config;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,6 +31,19 @@ class LoggingConfigTest {
     private HttpSession session;
 
     private final LoggingConfig loggingConfig = new LoggingConfig();
+
+    private ListAppender<ILoggingEvent> attachListAppender() {
+        var root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(LoggingConfig.class);
+        var appender = new ListAppender<ILoggingEvent>();
+        appender.start();
+        root.addAppender(appender);
+        return appender;
+    }
+
+    @AfterEach
+    void clearMdc() {
+        MDC.clear();
+    }
 
     @Test
     void preHandle_generatesCorrelationId_whenHeaderIsMissing() {
@@ -135,5 +152,44 @@ class LoggingConfigTest {
         MDC.put("test", "value");
         loggingConfig.afterCompletion(request, response, new Object(), null);
         assertThat(MDC.get("test")).isNull();
+    }
+
+    @Test
+    void afterCompletion_setsStatusAndDuration_whenStartTimePresent() {
+        when(request.getAttribute("LOGGING_START_TIME")).thenReturn(System.currentTimeMillis() - 100L);
+        when(response.getStatus()).thenReturn(201);
+        ListAppender<ILoggingEvent> appender = attachListAppender();
+
+        loggingConfig.afterCompletion(request, response, new Object(), null);
+
+        assertThat(appender.list).anyMatch(event -> event.getFormattedMessage().contains("201"));
+        assertThat(appender.list).allMatch(event -> event.getMDCPropertyMap().containsKey("HTTP_STATUS"));
+        assertThat(appender.list).allMatch(event -> event.getMDCPropertyMap().containsKey("DURATION_MS"));
+        assertThat(MDC.get("HTTP_STATUS")).isNull();
+    }
+
+    @Test
+    void afterCompletion_logsStatus_whenNoStartTime() {
+        when(request.getAttribute("LOGGING_START_TIME")).thenReturn(null);
+        when(response.getStatus()).thenReturn(200);
+        ListAppender<ILoggingEvent> appender = attachListAppender();
+
+        loggingConfig.afterCompletion(request, response, new Object(), null);
+
+        assertThat(appender.list).anyMatch(event -> event.getFormattedMessage().contains("200"));
+        assertThat(appender.list).allMatch(event -> !event.getMDCPropertyMap().containsKey("DURATION_MS"));
+        assertThat(MDC.get("HTTP_STATUS")).isNull();
+    }
+
+    @Test
+    void afterCompletion_withException_stillClearsMDC() {
+        when(request.getAttribute("LOGGING_START_TIME")).thenReturn(null);
+        when(response.getStatus()).thenReturn(500);
+        ListAppender<ILoggingEvent> appender = attachListAppender();
+
+        loggingConfig.afterCompletion(request, response, new Object(), new RuntimeException("boom"));
+
+        assertThat(appender.list).anyMatch(event -> event.getFormattedMessage().contains("exception"));
+        assertThat(MDC.get("HTTP_STATUS")).isNull();
     }
 }

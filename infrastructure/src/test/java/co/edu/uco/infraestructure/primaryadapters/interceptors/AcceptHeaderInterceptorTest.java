@@ -1,6 +1,6 @@
 package co.edu.uco.infraestructure.primaryadapters.interceptors;
 
-import co.edu.uco.application.secondaryports.Response;
+import co.edu.uco.application.secondaryports.ErrorResponse;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
@@ -69,11 +69,12 @@ class AcceptHeaderInterceptorTest {
     @Test
     void preHandle_writesErrorAndReturnsFalse_whenSerializerDoesNotSupportHeader() throws Exception {
         when(request.getHeader("Accept")).thenReturn("application/pdf");
+        when(request.getRequestURI()).thenReturn("/api/test");
         when(serializerRegistry.getSerializerForMediaType("application/pdf")).thenReturn(serializer);
         when(serializer.supports("application/pdf")).thenReturn(false);
         when(catalogPort.getMessage("TCH_022")).thenReturn("Content type %s is not supported");
-        when(serializer.serialize(new Response<String>(java.util.List.of(), java.util.List.of("Content type application/pdf is not supported"))))
-                .thenReturn("{\"error\":\"not supported\"}");
+        when(serializer.serialize(org.mockito.ArgumentMatchers.any(ErrorResponse.class)))
+                .thenReturn("{\"errors\":[{\"code\":\"NOT_ACCEPTABLE\",\"message\":\"not supported\"}]}");
         when(serializer.getSupportedContentType()).thenReturn("application/json");
         StringWriter writer = new StringWriter();
         when(response.getWriter()).thenReturn(new PrintWriter(writer));
@@ -85,7 +86,7 @@ class AcceptHeaderInterceptorTest {
         verify(response).setStatus(406);
         verify(response).setContentType("application/json");
         assertThat(writer.toString()).contains("not supported");
-        verify(log).error("error written", "{\"error\":\"not supported\"}");
+        verify(log).error("error written", "{\"errors\":[{\"code\":\"NOT_ACCEPTABLE\",\"message\":\"not supported\"}]}");
     }
 
     @Test

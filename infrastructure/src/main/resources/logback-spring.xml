@@ -11,7 +11,9 @@
                 "level": "%level",
                 "thread": "%thread",
                 "logger": "%logger",
-                "message": "%message"
+                "message": "%message",
+                "httpStatus": "%X{HTTP_STATUS}",
+                "durationMs": "%X{DURATION_MS}"
                 }
             </pattern>
         </encoder>
@@ -24,28 +26,6 @@
 <!--            <pattern>TS=%X{TS} [%X{THREAD}] APP=%X{APP} LEVEL=%-5level CLASS=%X{CLASS} TRACEID=%X{TRACEID} | %msg%n</pattern>-->
 <!--        </encoder>-->
 <!--    </appender>-->
-
-    <!-- Rolling File Appender (logs locales en JSON) -->
-    <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_PATH:-/app/logs}/application.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_PATH:-/app/logs}/application-%d{yyyy-MM-dd,UTC}.log</fileNamePattern>
-            <maxHistory>30</maxHistory>
-            <totalSizeCap>20GB</totalSizeCap>
-        </rollingPolicy>
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>
-                {
-                "correlationId": "%X{X-Correlation-ID}",
-                "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSSXXX,UTC}",
-                "level": "%level",
-                "thread": "%thread",
-                "logger": "%logger",
-                "message": "%message"
-                }
-            </pattern>
-        </encoder>
-    </appender>
 
     <!-- Loki Appender (usando loki4j, en JSON) -->
     <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
@@ -72,12 +52,14 @@
                     queryString   = %X{QUERY_STRING},
                     codeMessage   = %X{codeMessage},
                     application   = %X{application},
+                    httpStatus    = %X{HTTP_STATUS},
+                    durationMs    = %X{DURATION_MS},
                     timestamp     = %date{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}
                 </structuredMetadataPattern>
             </label>
 
             <message>
-                <pattern>%msg</pattern>
+                <pattern>%msg%n%ex</pattern>
             </message>
         </format>
 
@@ -87,21 +69,18 @@
     <!-- Logger para MongoDB Driver (solo ERROR en consola y archivo, Loki también si quieres) -->
     <logger name="org.mongodb.driver" level="ERROR" additivity="false">
         <appender-ref ref="CONSOLE" />
-        <appender-ref ref="ROLLING" />
         <appender-ref ref="LOKI" />
     </logger>
 
     <!-- Logger general -->
     <logger name="me.mourjo" level="DEBUG">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="ROLLING"/>
         <appender-ref ref="LOKI"/>
     </logger>
 
     <!-- Root Logger -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="ROLLING"/>
         <appender-ref ref="LOKI"/>
     </root>
 </configuration>

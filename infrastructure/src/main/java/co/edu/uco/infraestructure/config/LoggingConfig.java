@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -23,9 +24,11 @@ public final class LoggingConfig implements HandlerInterceptor {
     private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter
             .ofPattern(PATTERN_TIMESTAMP_FORMAT)
             .withZone(ZoneOffset.UTC);
+    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(LoggingConfig.class);
 
     @Override
     public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) {
+        request.setAttribute(LOGGING_START_TIME, System.currentTimeMillis());
         var correlationId = request.getHeader(CORRELATION_ID);
         if (isEmptyOrNull(correlationId)) {
             correlationId = UUID.randomUUID().toString();
@@ -54,6 +57,19 @@ public final class LoggingConfig implements HandlerInterceptor {
     }
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+        var status = String.valueOf(response.getStatus());
+        MDC.put(LOGGING_HTTP_STATUS, status);
+
+        Object start = request.getAttribute(LOGGING_START_TIME);
+        if (start instanceof Long startTime) {
+            MDC.put(LOGGING_DURATION_MS, String.valueOf(System.currentTimeMillis() - startTime));
+        }
+
+        if (ex != null) {
+            LOG.error("Request completed with status {} and exception", status, ex);
+        } else {
+            LOG.info("Request completed with status {}", status);
+        }
         MDC.clear();
     }
 }

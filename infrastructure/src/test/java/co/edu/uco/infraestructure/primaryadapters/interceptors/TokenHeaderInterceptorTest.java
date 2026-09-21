@@ -2,8 +2,9 @@ package co.edu.uco.infraestructure.primaryadapters.interceptors;
 
 import co.edu.uco.application.primaryports.facade.token.FindEnvironmentIdTokenUseCaseFacade;
 import co.edu.uco.application.primaryports.facade.token.VerifyAccessUseCaseFacade;
-import co.edu.uco.application.secondaryports.Response;
+import co.edu.uco.application.secondaryports.ErrorResponse;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
+import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
 import co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.SerializerRegistry;
 import co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.SerializerType;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +19,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,9 +51,10 @@ class TokenHeaderInterceptorTest {
 
     private void stubErrorResponse(String acceptHeader) throws Exception {
         when(serializerRegistry.getSerializerForMediaType(acceptHeader)).thenReturn(serializer);
-        when(serializer.serialize(org.mockito.ArgumentMatchers.any(Response.class)))
-                .thenReturn("{\"error\":\"forbidden\"}");
+        when(serializer.serialize(any(ErrorResponse.class)))
+                .thenReturn("{\"errors\":[{\"code\":\"FORBIDDEN\",\"message\":\"forbidden\"}]}");
         when(serializer.getSupportedContentType()).thenReturn("application/json");
+        when(request.getRequestURI()).thenReturn("/api/v1/message");
         when(response.getWriter()).thenReturn(new PrintWriter(new StringWriter()));
     }
 
@@ -68,10 +71,24 @@ class TokenHeaderInterceptorTest {
     }
 
     @Test
-    void preHandle_returnsFalse_whenTokenIsMissing() throws Exception {
+    void preHandle_returnsFalse_with401_whenTokenIsMissing() throws Exception {
         when(request.getHeader("Token")).thenReturn(" ");
         when(request.getHeader("Accept")).thenReturn("application/json");
         when(catalogPort.getMessage("TCH_032")).thenReturn("Token is required");
+        stubErrorResponse("application/json");
+
+        boolean result = interceptor.preHandle(request, response, new Object());
+
+        assertThat(result).isFalse();
+        verify(response).setStatus(401);
+    }
+
+    @Test
+    void preHandle_returnsFalse_with403_whenAccessDenied() throws Exception {
+        when(request.getHeader("Token")).thenReturn("invalid-token");
+        when(request.getHeader("Accept")).thenReturn("application/json");
+        when(verifyAccessUseCaseFacade.execute("invalid-token")).thenReturn(false);
+        when(catalogPort.getMessage("TCH_031")).thenReturn("Access denied");
         stubErrorResponse("application/json");
 
         boolean result = interceptor.preHandle(request, response, new Object());
@@ -81,11 +98,11 @@ class TokenHeaderInterceptorTest {
     }
 
     @Test
-    void preHandle_returnsFalse_whenAccessDenied() throws Exception {
-        when(request.getHeader("Token")).thenReturn("invalid-token");
+    void preHandle_returnsFalse_with403_whenTokenVerificationThrows() throws Exception {
+        when(request.getHeader("Token")).thenReturn("expired-token");
         when(request.getHeader("Accept")).thenReturn("application/json");
-        when(verifyAccessUseCaseFacade.execute("invalid-token")).thenReturn(false);
-        when(catalogPort.getMessage("TCH_031")).thenReturn("Access denied");
+        when(verifyAccessUseCaseFacade.execute("expired-token"))
+                .thenThrow(BusinessRuleException.buildUserException("Token is not active"));
         stubErrorResponse("application/json");
 
         boolean result = interceptor.preHandle(request, response, new Object());

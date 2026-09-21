@@ -240,7 +240,7 @@ curl http://localhost:8000/messageucolab/v1/application/{id}/token
 
 ## Monitoring and Logging
 
-- Application logs are pushed to Loki and persisted in the `app-logs` and `loki-data` Docker volumes (independent of the application lifecycle)
+- Application logs are pushed to Loki and persisted in the `loki-data` Docker volume (independent of the application lifecycle)
 - The application exposes Prometheus metrics at `http://localhost:8085/actuator/prometheus`
 - Access to monitoring interfaces:
   - Grafana: `http://localhost:3000` (user: admin, password: admin)

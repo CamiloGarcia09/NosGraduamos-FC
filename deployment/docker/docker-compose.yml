@@ -202,15 +202,12 @@ services:
       - "${MESSAGEUCOLAB_PORT}:${MESSAGEUCOLAB_PORT}"
     environment:
       - TZ=UTC
-      - LOG_PATH=/app/logs
       - LOKI_URL=http://loki:${LOKIPORT}
       - DOPPLERTOKEN=${DOPPLERTOKEN}
       - AZURE_KEYVAULT_UCOLAB_ENDPOINT=${AZURE_KEYVAULT_UCOLAB_ENDPOINT}
       - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
       - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
       - AZURE_TENANT_ID=${AZURE_TENANT_ID}
-    volumes:
-      - app-logs:/app/logs
     depends_on:
       redis:
         condition: service_started
@@ -272,8 +269,6 @@ volumes:
   surrealdb-data:
     driver: local
   ollama-data:
-    driver: local
-  app-logs:
     driver: local
 
 networks:

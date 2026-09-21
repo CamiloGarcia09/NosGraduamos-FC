@@ -2,8 +2,9 @@ package co.edu.uco.infraestructure.primaryadapters.interceptors;
 
 import co.edu.uco.application.primaryports.facade.token.FindEnvironmentIdTokenUseCaseFacade;
 import co.edu.uco.application.primaryports.facade.token.VerifyAccessUseCaseFacade;
-import co.edu.uco.application.secondaryports.Response;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
+import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
+import co.edu.uco.infraestructure.secondaryadapters.presenter.rest.ErrorResponseFactory;
 import co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.SerializerRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Optional;
 
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.*;
@@ -44,12 +45,13 @@ public final class TokenHeaderInterceptor implements HandlerInterceptor {
         var acceptHeader = request.getHeader(REQUEST_GET_HEADER_ACCEPT);
 
         if (isEmptyOrNull(token)) {
-            sendErrorResponse(response, acceptHeader, catalogPort.getMessage(MessageCatalogCodeEnum.TCH_032.getCode()));
+            sendErrorResponse(request, response, acceptHeader,
+                    HttpStatus.UNAUTHORIZED.value(),
+                    catalogPort.getMessage(MessageCatalogCodeEnum.TCH_032.getCode()));
             return false;
         }
 
-        if (!verifyAccessUseCaseFacade.execute(token)) {
-            sendErrorResponse(response, acceptHeader, catalogPort.getMessage(MessageCatalogCodeEnum.TCH_031.getCode()));
+        if (!isValidToken(token, request, response, acceptHeader)) {
             return false;
         }
 
@@ -58,11 +60,35 @@ public final class TokenHeaderInterceptor implements HandlerInterceptor {
         return true;
     }
 
-    private void sendErrorResponse(HttpServletResponse response, String acceptHeader, String errorMessage) throws IOException {
+    private boolean isValidToken(String token, HttpServletRequest request, HttpServletResponse response,
+                                 String acceptHeader) throws IOException {
+        try {
+            if (!verifyAccessUseCaseFacade.execute(token)) {
+                sendErrorResponse(request, response, acceptHeader,
+                        HttpStatus.FORBIDDEN.value(),
+                        catalogPort.getMessage(MessageCatalogCodeEnum.TCH_031.getCode()));
+                return false;
+            }
+            return true;
+        } catch (BusinessRuleException ex) {
+            var message = Optional.ofNullable(ex.getUserMessage())
+                    .filter(msg -> !msg.isEmpty())
+                    .orElseGet(() -> catalogPort.getMessage(MessageCatalogCodeEnum.TCH_031.getCode()));
+            sendErrorResponse(request, response, acceptHeader, HttpStatus.FORBIDDEN.value(), message);
+            return false;
+        }
+    }
+
+    private void sendErrorResponse(HttpServletRequest request, HttpServletResponse response,
+                                   String acceptHeader, int status, String errorMessage) throws IOException {
         var serializer = serializerRegistry.getSerializerForMediaType(acceptHeader);
-        Response<String> errorResponse = new Response<>(List.of(), List.of(errorMessage));
+        var errorResponse = ErrorResponseFactory.build(
+                ErrorResponseFactory.codeForStatus(status),
+                errorMessage,
+                request
+        );
         String formattedError = serializer.serialize(errorResponse);
-        response.setStatus(HttpStatus.FORBIDDEN.value());
+        response.setStatus(status);
         response.setContentType(serializer.getSupportedContentType());
         response.getWriter().write(formattedError);
     }

@@ -57,6 +57,9 @@ public final class InfrastructureConstant {
     public static final String LOGGING_HTTP_METHOD = "HTTP_METHOD";
     public static final String LOGGING_SESSION_ID = "JSESSIONID";
     public static final String LOGGING_QUERY_STRING = "QUERY_STRING";
+    public static final String LOGGING_HTTP_STATUS = "HTTP_STATUS";
+    public static final String LOGGING_DURATION_MS = "DURATION_MS";
+    public static final String LOGGING_START_TIME = "LOGGING_START_TIME";
     public static final String LOGGING_PARAMETER_APPLICATION_NAME = "MessageUcoLab";
     public static final String LOGGING_PARAMETER_CODE_MESSAGE = "codeMessage";
     public static final String LOGGING_PARAMETER_APPLICATION = "application";
