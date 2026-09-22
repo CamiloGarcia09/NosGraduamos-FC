@@ -3,6 +3,7 @@ package co.edu.uco.application.usecase;
 import co.edu.uco.application.primaryports.dto.application.CreateApplicationDTO;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
+import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.repository.ApplicationRepository;
 import co.edu.uco.application.usecase.validator.application.CreateApplicationCompositeValidator;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
@@ -11,10 +12,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -23,8 +26,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.UUID;
+
 @ExtendWith(MockitoExtension.class)
 class CreateApplicationUseCaseTest {
+
+    private static final String ORGANIZATION_ID = "123e4567-e89b-12d3-a456-426614174000";
 
     @Mock
     private ApplicationRepository applicationRepository;
@@ -46,6 +53,7 @@ class CreateApplicationUseCaseTest {
     private CreateApplicationDTO validDto() {
         return CreateApplicationDTO.builder()
                 .name("Message App")
+                .organizationId(ORGANIZATION_ID)
                 .languageId("lang-1")
                 .startDate("2025-01-01T00:00:00")
                 .endDate("2025-12-31T23:59:59")
@@ -56,11 +64,19 @@ class CreateApplicationUseCaseTest {
     @Test
     void createApplication_persistsApplicationAndLogs() {
         CreateApplicationDTO dto = validDto();
+        ArgumentCaptor<ApplicationData> applicationCaptor = ArgumentCaptor.forClass(ApplicationData.class);
 
         useCase.createApplication(dto);
 
         verify(validator).validate(dto);
-        verify(applicationRepository).create(any(), eq("lang-1"), any(), any(), eq("state-1"));
+        verify(applicationRepository).create(applicationCaptor.capture(), eq("lang-1"), any(), any(), eq("state-1"));
+        ApplicationData capturedApplication = applicationCaptor.getValue();
+        assertSoftly(softly -> {
+            softly.assertThat(capturedApplication.getName()).isEqualTo("Message App");
+            softly.assertThat(capturedApplication.getOrganization().getId())
+                    .isEqualTo(UUID.fromString(ORGANIZATION_ID));
+            softly.assertThat(capturedApplication.getOrganization().getName()).isEmpty();
+        });
         verify(log).info("Application created successfully with name: {}", "Message App");
     }
 

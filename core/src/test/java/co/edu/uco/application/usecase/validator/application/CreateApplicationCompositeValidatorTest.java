@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.InOrder;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
@@ -21,7 +22,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
 class CreateApplicationCompositeValidatorTest {
@@ -32,18 +38,22 @@ class CreateApplicationCompositeValidatorTest {
     private RecordExistsCatalogPort recordExistsCatalogPort;
     @Mock
     private ApplicationRepository applicationRepository;
+    @Mock
+    private CreateApplicationOrganizationExistsRule organizationExistsRule;
 
     private CreateApplicationCompositeValidator validator;
 
     @BeforeEach
     void setUp() {
         validator = new CreateApplicationCompositeValidator(
-                catalogPort, recordExistsCatalogPort, applicationRepository, new DateValidValidator(catalogPort));
+                catalogPort, recordExistsCatalogPort, applicationRepository, new DateValidValidator(catalogPort),
+                organizationExistsRule);
     }
 
     private CreateApplicationDTO validDto() {
         return CreateApplicationDTO.builder()
                 .name("Message App")
+                .organizationId("123e4567-e89b-12d3-a456-426614174000")
                 .languageId("lang-1")
                 .startDate("2025-01-01T00:00:00")
                 .endDate("2025-12-31T23:59:59")
@@ -57,6 +67,33 @@ class CreateApplicationCompositeValidatorTest {
         when(applicationRepository.findByName("Message App")).thenReturn(Optional.empty());
 
         assertDoesNotThrow(() -> validator.validate(validDto()));
+    }
+
+    @Test
+    void validate_invokesOrganizationRuleBeforeCatalogAndDuplicateChecks() {
+        when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
+        when(applicationRepository.findByName("Message App")).thenReturn(Optional.empty());
+        CreateApplicationDTO dto = validDto();
+
+        validator.validate(dto);
+
+        InOrder validationOrder = inOrder(organizationExistsRule, recordExistsCatalogPort, applicationRepository);
+        validationOrder.verify(organizationExistsRule).validate(dto);
+        validationOrder.verify(recordExistsCatalogPort).exists(any(), eq("lang-1"));
+        validationOrder.verify(recordExistsCatalogPort).exists(any(), eq("state-1"));
+        validationOrder.verify(applicationRepository).findByName("Message App");
+    }
+
+    @Test
+    void validate_shortCircuitsSubsequentChecks_whenOrganizationRuleFails() {
+        CreateApplicationDTO dto = validDto();
+        BusinessRuleException failure = BusinessRuleException.buildUserException("Organización inválida");
+        doThrow(failure).when(organizationExistsRule).validate(dto);
+
+        assertThatThrownBy(() -> validator.validate(dto)).isSameAs(failure);
+
+        verify(organizationExistsRule).validate(dto);
+        verifyNoInteractions(recordExistsCatalogPort, applicationRepository);
     }
 
     @Test

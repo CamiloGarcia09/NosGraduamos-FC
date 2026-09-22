@@ -3,6 +3,7 @@ package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
+import co.edu.uco.application.usecase.domain.aggregate.entities.OrganizationEntity;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
 import com.surrealdb.Array;
 import com.surrealdb.Object;
@@ -22,6 +23,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -29,6 +31,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicationSurrealRepositoryAdapterImplTest {
@@ -66,10 +69,11 @@ class ApplicationSurrealRepositoryAdapterImplTest {
         return v;
     }
 
-    private Object applicationDocument(String uuid, String name) {
+    private Object applicationDocument(String uuid, String name, String organizationId) {
         Object doc = mock(Object.class);
         doReturn(recordIdValue("application", uuid)).when(doc).get("id");
         doReturn(stringValue(name)).when(doc).get("name");
+        doReturn(recordIdValue("organization", organizationId)).when(doc).get("organization_id");
         return doc;
     }
 
@@ -98,13 +102,16 @@ class ApplicationSurrealRepositoryAdapterImplTest {
     @Test
     void findByName_returnsApplication_whenDocumentFound() {
         String uuid = UUID.randomUUID().toString();
-        doReturn(responseWithOne(applicationDocument(uuid, "App"))).when(surreal).query(anyString());
+        String organizationId = UUID.randomUUID().toString();
+        doReturn(responseWithOne(applicationDocument(uuid, "App", organizationId))).when(surreal).query(anyString());
 
         Optional<ApplicationData> result = adapter.findByName("App");
 
-        assertThat(result).isPresent();
-        assertThat(result.get().getName()).isEqualTo("App");
-        assertThat(result.get().getId()).isEqualTo(UUID.fromString(uuid));
+        assertThat(result).hasValueSatisfying(application -> assertSoftly(softly -> {
+            softly.assertThat(application.getName()).isEqualTo("App");
+            softly.assertThat(application.getId()).isEqualTo(UUID.fromString(uuid));
+            softly.assertThat(application.getOrganization().getId()).isEqualTo(UUID.fromString(organizationId));
+        }));
     }
 
     @Test
@@ -129,14 +136,25 @@ class ApplicationSurrealRepositoryAdapterImplTest {
     }
 
     @Test
-    void create_persistsApplication() {
-        ApplicationData application = ApplicationData.build();
-        application.setName("App");
+    void create_persistsApplicationWithOrganizationUsingExactUpsert() {
+        UUID applicationId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+        UUID organizationId = UUID.fromString("223e4567-e89b-12d3-a456-426614174000");
+        OrganizationEntity organization = new OrganizationEntity();
+        organization.setId(organizationId);
+        organization.setName("UCO");
+        ApplicationData application = ApplicationData.build(applicationId, "App", organization);
+        LocalDateTime startDate = LocalDateTime.of(2025, 1, 1, 10, 15, 30);
+        LocalDateTime endDate = LocalDateTime.of(2025, 12, 31, 18, 45, 0);
+        String expectedUpsert = "UPSERT application:`123e4567-e89b-12d3-a456-426614174000` CONTENT { "
+                + "name: 'App', organization_id: organization:`223e4567-e89b-12d3-a456-426614174000`, "
+                + "language_id: language_base:`lang-1`, start_date: d'2025-01-01T10:15:30Z', "
+                + "end_date: d'2025-12-31T18:45:00Z', state_id: application_state:`state-1` };";
 
-        adapter.create(application, "lang-1", LocalDateTime.now(), LocalDateTime.now(), "state-1");
+        adapter.create(application, "lang-1", startDate, endDate, "state-1");
 
-        verify(surreal).query(anyString());
-        verify(log).info(anyString(), anyString());
+        verify(surreal).query(expectedUpsert);
+        verify(log).info("Executing SurrealQL upsert application: {}", expectedUpsert);
+        verifyNoMoreInteractions(surreal);
     }
 
     @Test

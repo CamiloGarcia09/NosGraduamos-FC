@@ -3,6 +3,8 @@ package co.edu.uco.infraestructure.primaryadapters.controller;
 import co.edu.uco.application.primaryports.dto.catalog.CatalogItemDTO;
 import co.edu.uco.application.primaryports.facade.catalog.FindCatalogUseCaseFacade;
 import co.edu.uco.application.secondaryports.presenter.PresenterPort;
+import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
+import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,14 +14,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.time.Instant;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static co.edu.uco.infraestructure.config.InfrastructureConstant.EXTERNAL_IDENTITY_ATTRIBUTE;
 
 @ExtendWith(MockitoExtension.class)
 class CatalogControllerImplTest {
+
+    private static final ExternalIdentity IDENTITY = new ExternalIdentity(
+            "issuer", "subject", null, PrincipalType.HUMAN, Instant.MAX);
 
     @Mock
     private FindCatalogUseCaseFacade findCatalogUseCaseFacade;
@@ -40,27 +47,30 @@ class CatalogControllerImplTest {
     @Test
     void getApplications_presentsFacadeResult() {
         List<CatalogItemDTO> list = List.of(CatalogItemDTO.create("1", "App"));
-        when(findCatalogUseCaseFacade.findApplications()).thenReturn(list);
+        when(request.getAttribute(EXTERNAL_IDENTITY_ATTRIBUTE)).thenReturn(IDENTITY);
+        when(findCatalogUseCaseFacade.findApplications(IDENTITY)).thenReturn(list);
 
         controller.getApplications(request, response);
 
-        verify(findCatalogUseCaseFacade).findApplications();
+        verify(findCatalogUseCaseFacade).findApplications(IDENTITY);
         verify(restPresenter).presentRestSuccess(eq(list), any(HttpServletRequest.class), any(HttpServletResponse.class));
     }
 
     @Test
     void getEnvironmentsByApplication_presentsFacadeResult() {
+        when(request.getAttribute(EXTERNAL_IDENTITY_ATTRIBUTE)).thenReturn(IDENTITY);
         controller.getEnvironmentsByApplication("app-1", request, response);
 
-        verify(findCatalogUseCaseFacade).findEnvironmentsByApplication("app-1");
+        verify(findCatalogUseCaseFacade).findEnvironmentsByApplication("app-1", IDENTITY);
         verify(restPresenter).presentRestSuccess(any(), any(HttpServletRequest.class), any(HttpServletResponse.class));
     }
 
     @Test
     void getFunctionalitiesByApplication_presentsFacadeResult() {
+        when(request.getAttribute(EXTERNAL_IDENTITY_ATTRIBUTE)).thenReturn(IDENTITY);
         controller.getFunctionalitiesByApplication("app-1", request, response);
 
-        verify(findCatalogUseCaseFacade).findFunctionalitiesByApplication("app-1");
+        verify(findCatalogUseCaseFacade).findFunctionalitiesByApplication("app-1", IDENTITY);
         verify(restPresenter).presentRestSuccess(any(), any(HttpServletRequest.class), any(HttpServletResponse.class));
     }
 

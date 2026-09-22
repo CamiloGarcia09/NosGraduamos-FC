@@ -35,6 +35,6 @@ class MessageCatalogCodeEnumTest {
     @Test
     void functionalCodes_followFunPrefix() {
         assertThat(MessageCatalogCodeEnum.FUN_001.getCode()).isEqualTo("FUN_001");
-        assertThat(MessageCatalogCodeEnum.FUN_017.getCode()).isEqualTo("FUN_017");
+        assertThat(MessageCatalogCodeEnum.FUN_153.getCode()).isEqualTo("FUN_153");
     }
 }

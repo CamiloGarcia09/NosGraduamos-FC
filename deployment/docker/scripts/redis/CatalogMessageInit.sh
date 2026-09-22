@@ -270,5 +270,12 @@ redis_hset "FUN_143" "Message translation API interceptor path" "/messageucolab/
 redis_hset "FUN_144" "Inactive token state id" "123e4567-e89b-12d3-a456-426614175001" "FUNCTIONAL" "INFORMATION"
 redis_hset "FUN_145" "Environment not authorized" "The requested environment does not match the environment authorized by the token." "FUNCTIONAL" "ERROR"
 redis_hset "FUN_146" "Functionality outside application" "The functionality does not belong to the specified application." "FUNCTIONAL" "ERROR"
+redis_hset "FUN_147" "Organization name required" "The organization name is required." "FUNCTIONAL" "ERROR"
+redis_hset "FUN_148" "Organization name too long" "The organization name cannot exceed 50 characters." "FUNCTIONAL" "ERROR"
+redis_hset "FUN_149" "Organization name duplicated" "An organization with the provided name already exists." "FUNCTIONAL" "ERROR"
+redis_hset "FUN_150" "Organization id required" "The organization id is required." "FUNCTIONAL" "ERROR"
+redis_hset "FUN_151" "Organization not found" "The organization associated with the application does not exist." "FUNCTIONAL" "ERROR"
+redis_hset "FUN_152" "Authentication required" "Authentication is required to access this resource." "FUNCTIONAL" "ERROR"
+redis_hset "FUN_153" "Permission denied" "Permission denied for the requested resource." "FUNCTIONAL" "ERROR"
 
 echo "Message catalog loaded successfully."

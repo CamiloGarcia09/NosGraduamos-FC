@@ -15,15 +15,26 @@ Contexto activo        -> determina: en que organizacion, aplicacion y ambiente 
 
 El token emitido por el proveedor se recibira y validara sin modificarlo, enriquecerlo ni reemplazarlo para transportar el contexto de MessageUcoLab.
 
+## LEY DE ARQUITECTURA DEL PROYECTO
+
+> **LEY INNEGOCIABLE:** Todo codigo nuevo debe seguir primero la arquitectura, estructura, nomenclatura, paquetes, jerarquias, patrones y convenciones ya existentes en este proyecto. Antes de crear una clase se debe localizar y revisar su equivalente funcional dentro del repositorio y reproducir ese patron. No se introduciran alternativas genericas, estructuras diferentes, `record`, nuevas abstracciones ni decisiones de estilo aunque sean tecnicamente validas si no corresponden con la arquitectura actual, salvo autorizacion explicita del responsable del proyecto.
+
+Aplicacion obligatoria de esta ley:
+
+- Las entidades de dominio deben conservar la convencion `*Entity`, ubicarse en `usecase.domain.aggregate.entities` y extender la jerarquia existente cuando corresponda, como `Entity<UUID>`.
+- Los puertos, casos de uso, validadores, DTO, adaptadores, modelos de persistencia y pruebas deben respetar la ubicacion y forma de sus equivalentes actuales.
+- Antes de implementar cada incremento se deben inspeccionar clases analogas del proyecto; la consistencia arquitectonica prevalece sobre preferencias externas o soluciones genericas.
+- Cualquier excepcion a esta ley requiere aprobacion explicita antes de modificar codigo.
+
 ## Estado general
 
 | Campo | Valor |
 |---|---|
 | Ultima actualizacion | 2026-09-22 |
 | Estado global | Implementacion gradual en curso |
-| Fase actual | Fase 3 - Modelar organizaciones y autorizacion (parcial) |
-| Proxima implementacion | Implementar el modelo y adaptador SurrealDB de Organizacion contra el puerto ya definido |
-| Bloqueo actual | Ninguno para continuar la persistencia de Organizacion; faltan datos del proveedor para la integracion real de la Fase 6 |
+| Fase actual | Fase 4 - Implementar contexto activo (pendiente) |
+| Proxima implementacion | Definir el comportamiento de sesiones simultaneas y modelar el contexto activo |
+| Bloqueo actual | Se debe decidir el alcance por sesion o identidad antes de implementar la Fase 4; antes de desplegar la relacion obligatoria en una base existente se requiere backfill o recreacion del volumen |
 
 ### Convenciones de estado
 
@@ -51,6 +62,11 @@ El token emitido por el proveedor se recibira y validara sin modificarlo, enriqu
 - Inicialmente se asumira un contexto activo por identidad. La estrategia para sesiones simultaneas se revisara antes de implementar la Fase 4.
 - Durante la convivencia, la ausencia de `Authorization` permite continuar con el flujo legado; si el header se envia, debe ser un Bearer valido o la peticion recibe `401`.
 - El simulador de identidad externa permanece deshabilitado por defecto y todos sus datos se suministran mediante configuracion externa.
+- Toda Aplicacion nueva debe pertenecer a una Organizacion existente; no se asignara una organizacion artificial por defecto a datos historicos.
+- Las bases existentes con aplicaciones sin `organization_id` requieren un backfill explicito o recreacion del volumen antes de aplicar el esquema obligatorio.
+- Los permisos asignados a una Organizacion se heredan por sus Aplicaciones y Ambientes; los asignados a una Aplicacion se heredan por sus Ambientes; los asignados a un Ambiente no conceden permiso sobre toda la Aplicacion.
+- Las asignaciones son aditivas y no se modelan denegaciones explicitas en la Fase 3.
+- Durante la convivencia, los catalogos jerarquicos conservan el comportamiento legado sin identidad externa; con identidad externa filtran recursos por `CONTEXT_SELECT` y rechazan con `403` los accesos fuera del alcance autorizado.
 
 ## Estado actual del sistema
 
@@ -69,7 +85,7 @@ Riesgos conocidos que deben atenderse antes o durante la migracion:
 - El listado de mensajes puede quedar accesible sin la proteccion esperada.
 - Algunas consultas pueden aceptar un ambiente enviado por el cliente.
 - La creacion de mensajes puede usar aplicacion y ambiente recibidos en el body sin compararlos correctamente con el contexto autorizado.
-- No existe un modelo de organizaciones, usuarios, membresias, roles o permisos de negocio.
+- El modelo de autorizacion ya existe, pero su administracion mediante endpoints permanece fuera del alcance completado.
 - Los logs que exponian tokens, cuerpos HTTP o material criptografico fueron saneados en la Fase 1.
 - El proveedor real sigue pendiente; el simulador externo solo se habilita mediante la propiedad explicita de desarrollo.
 
@@ -102,7 +118,7 @@ Respuestas esperadas:
 | 0 | Definir contrato de seguridad | `PARCIAL` | Responsabilidades y contrato con el proveedor definidos |
 | 1 | Asegurar el flujo actual | `COMPLETADA` | El token existente no permite cruzar ambientes ni exponer secretos |
 | 2 | Introducir identidad externa simulada | `COMPLETADA` | Un bearer token identifica al principal sin contener contexto |
-| 3 | Modelar organizaciones y autorizacion | `PARCIAL` | MessageUcoLab decide a que recursos accede cada identidad |
+| 3 | Modelar organizaciones y autorizacion | `COMPLETADA` | MessageUcoLab decide a que recursos accede cada identidad |
 | 4 | Implementar contexto activo | `PENDIENTE` | El backend recuerda y valida el contexto seleccionado |
 | 5 | Migrar operaciones al contexto | `PENDIENTE` | Los casos de uso dejan de confiar en IDs controlados por el cliente |
 | 6 | Integrar el proveedor real | `PENDIENTE` | El adaptador real reemplaza al simulador |
@@ -189,7 +205,7 @@ Una peticion puede convertirse en una identidad estable mediante un token simula
 
 ## Fase 3 - Modelar organizaciones y autorizacion
 
-**Estado:** `PARCIAL`
+**Estado:** `COMPLETADA`
 
 ### Modelo inicial esperado
 
@@ -218,24 +234,24 @@ RoleAssignment con alcance
 
 #### Avance incremental
 
-- [x] Crear el modelo de dominio inmutable de Organizacion en `core`.
+- [x] Crear `OrganizationEntity` dentro de la jerarquia de entidades de dominio en `core`.
 - [x] Definir el puerto de persistencia de Organizacion en `core`.
-- [ ] Implementar el modelo, mapper y adaptador de Organizacion para SurrealDB.
-- [ ] Crear el caso de uso y las reglas de validacion para registrar organizaciones.
+- [x] Implementar el modelo, mapper y adaptador de Organizacion para SurrealDB.
+- [x] Crear el caso de uso y las reglas de validacion para registrar organizaciones.
 
-- [ ] Crear la entidad y persistencia de Organizacion.
-- [ ] Asociar cada Aplicacion con una Organizacion.
-- [ ] Persistir identidades externas por `issuer + subject`.
-- [ ] Modelar membresias, roles, permisos y asignaciones con alcance.
-- [ ] Crear puertos de consulta de autorizaciones en `core`.
-- [ ] Implementar politicas de autorizacion como reglas de negocio.
-- [ ] Diferenciar consistentemente `401` y `403`.
-- [ ] Filtrar catalogos segun los recursos autorizados.
-- [ ] Probar acceso permitido y denegado entre organizaciones y aplicaciones.
+- [x] Crear la entidad y persistencia de Organizacion.
+- [x] Asociar cada Aplicacion con una Organizacion.
+- [x] Persistir identidades externas por `issuer + subject`.
+- [x] Modelar membresias, roles, permisos y asignaciones con alcance.
+- [x] Crear puertos de consulta de autorizaciones en `core`.
+- [x] Implementar politicas de autorizacion como reglas de negocio.
+- [x] Diferenciar consistentemente `401` y `403`.
+- [x] Filtrar catalogos segun los recursos autorizados.
+- [x] Probar acceso permitido y denegado entre organizaciones y aplicaciones.
 
 ### Criterio de salida
 
-MessageUcoLab puede responder si una identidad tiene un permiso sobre una organizacion, aplicacion o ambiente sin depender de roles internos del proveedor.
+- [x] MessageUcoLab puede responder si una identidad tiene un permiso sobre una organizacion, aplicacion o ambiente sin depender de roles internos del proveedor.
 
 ## Fase 4 - Implementar contexto activo
 
@@ -407,9 +423,86 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - `infrastructure/src/test/java/co/edu/uco/infraestructure/primaryadapters/interceptors/ExternalIdentityInterceptorTest.java`: verifica Bearer valido y malformado, rechazo `401` y convivencia sin header externo.
 - `infrastructure/src/test/java/co/edu/uco/infraestructure/config/ExternalIdentityWebConfigTest.java`: verifica el registro del interceptor para la API v1.
 - `infrastructure/src/test/java/co/edu/uco/infraestructure/secondaryadapters/security/SecurityAdapterTest.java`: retirado con el adaptador obsoleto.
-- `core/src/main/java/co/edu/uco/application/usecase/domain/organization/Organization.java`: modelo inmutable de Organizacion con identificador UUID y nombre normalizado.
+- `core/src/main/java/co/edu/uco/application/usecase/domain/aggregate/entities/ExternalIdentityEntity.java`: entidad persistente de identidad externa con llave compuesta `issuer + subject`, correo informativo y tipo de principal.
+- `core/src/main/java/co/edu/uco/application/secondaryports/repository/ExternalIdentityRepository.java`: puerto de consulta por `issuer + subject` y persistencia de identidades externas.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/model/ExternalIdentitySurrealModel.java`: representacion persistente de ExternalIdentity con campos `issuer`, `subject`, `email` y `principal_type`.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/data/ExternalIdentitySurrealMapper.java`: conversion entre `ExternalIdentityEntity` y `ExternalIdentitySurrealModel`.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/impl/ExternalIdentitySurrealRepositoryAdapterImpl.java`: adaptador con consulta por `issuer + subject`, create, update y manejo de `NONE` para email nulo.
+- `deployment/docker/scripts/surreal/surreal-init.surql`: tabla `external_identity` SCHEMAFULL, campos, indice unico compuesto `(issuer, subject)` y campos de auditoria.
+- `core/src/test/java/co/edu/uco/application/usecase/domain/aggregate/entities/ExternalIdentityEntityTest.java`: cobertura de identificador, normalizacion de issuer/subject/email, aceptacion de null email y tipos de principal.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/model/ExternalIdentitySurrealModelTest.java`: cobertura de construccion, normalizacion, null email y valores por defecto.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/secondaryadapters/repository/data/ExternalIdentitySurrealMapperTest.java`: cobertura del mapeo bidireccional con HUMAN, SERVICE y roundtrip.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/impl/ExternalIdentitySurrealRepositoryAdapterImplTest.java`: cobertura de find por issuer+subject, create con escape de slash y comilla, update con campos exactos, logs saneados y excepcion tecnica.
+- `core/src/main/java/co/edu/uco/application/usecase/domain/aggregate/entities/OrganizationEntity.java`: entidad de Organizacion integrada con la jerarquia `Entity<UUID>` del proyecto.
 - `core/src/main/java/co/edu/uco/application/secondaryports/repository/OrganizationRepository.java`: puerto de creacion y consulta de organizaciones por identificador o nombre.
-- `core/src/test/java/co/edu/uco/application/usecase/domain/organization/OrganizationTest.java`: cobertura de creacion, normalizacion y valores por defecto sin dependencias de frameworks.
+- `core/src/test/java/co/edu/uco/application/usecase/domain/aggregate/entities/OrganizationEntityTest.java`: cobertura de identificador, nombre normalizado y valores por defecto sin dependencias de frameworks.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/model/OrganizationSurrealModel.java`: representacion persistente de Organizacion siguiendo los modelos SurrealDB existentes.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/data/OrganizationSurrealMapper.java`: conversion explicita entre el modelo SurrealDB y `OrganizationEntity`.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/impl/OrganizationSurrealRepositoryAdapterImpl.java`: adaptador del puerto de Organizacion con consulta por identificador, consulta por nombre y persistencia.
+- `deployment/docker/scripts/surreal/surreal-init.surql`: definicion `SCHEMAFULL` de `organization`, campos de auditoria e indice unico por nombre.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/model/OrganizationSurrealModelTest.java`: cobertura de construccion, normalizacion y valores por defecto del modelo persistente.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/secondaryadapters/repository/data/OrganizationSurrealMapperTest.java`: cobertura del mapeo bidireccional de Organizacion.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/impl/OrganizationSurrealRepositoryAdapterImplTest.java`: cobertura de consultas, escape SurrealQL, persistencia, logs saneados y error tecnico.
+- `core/src/main/java/co/edu/uco/application/primaryports/dto/organization/CreateOrganizationDTO.java`: entrada normalizada para registrar organizaciones.
+- `core/src/main/java/co/edu/uco/application/primaryports/facade/organization/CreateOrganizationUseCaseFacade.java`: puerto primario del registro de Organizacion.
+- `core/src/main/java/co/edu/uco/application/primaryports/facade/organization/impl/CreateOrganizationUseCaseFacadeImpl.java`: delegacion hacia el puerto interno de manejo.
+- `core/src/main/java/co/edu/uco/application/usecase/handling/HandlingCreateOrganizationPort.java`: contrato interno del caso de uso.
+- `core/src/main/java/co/edu/uco/application/usecase/CreateOrganizationUseCase.java`: validacion, construccion de `OrganizationEntity`, persistencia y traduccion de errores tecnicos.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/organization/CreateOrganizationCompositeValidator.java`: composicion ordenada de reglas y rechazo de entradas nulas.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/organization/CreateOrganizationNameRule.java`: contrato de validacion del nombre.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/organization/CreateOrganizationNameRuleImpl.java`: obligatoriedad y longitud maxima del nombre.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/organization/CreateOrganizationUniqueNameRule.java`: contrato de unicidad del nombre.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/organization/CreateOrganizationUniqueNameRuleImpl.java`: rechazo de organizaciones duplicadas mediante el puerto de persistencia.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/config/UseCaseRuleConfig.java`: composicion Spring de reglas, composite, caso de uso y facade fuera de `core`.
+- `utils/src/main/java/co/edu/uco/crosscutting/catalog/MessageCatalogCodeEnum.java`: codigos `FUN_147`, `FUN_148` y `FUN_149` para las reglas de Organizacion.
+- `deployment/docker/scripts/redis/CatalogMessageInit.sh`: mensajes funcionales de nombre requerido, longitud maxima y duplicidad.
+- `core/src/test/java/co/edu/uco/application/primaryports/dto/organization/CreateOrganizationDTOTest.java`: cobertura de valores por defecto, normalizacion y builder.
+- `core/src/test/java/co/edu/uco/application/primaryports/facade/organization/impl/CreateOrganizationUseCaseFacadeImplTest.java`: delegacion y propagacion de errores de dominio.
+- `core/src/test/java/co/edu/uco/application/usecase/CreateOrganizationUseCaseTest.java`: persistencia, UUID generado, limites, excepciones tipadas y logs saneados.
+- `core/src/test/java/co/edu/uco/application/usecase/validator/organization/CreateOrganizationCompositeValidatorTest.java`: orden, entrada nula y cortocircuito de reglas.
+- `core/src/test/java/co/edu/uco/application/usecase/validator/organization/CreateOrganizationNameRuleImplTest.java`: nombres validos, ausentes y limites de longitud.
+- `core/src/test/java/co/edu/uco/application/usecase/validator/organization/CreateOrganizationUniqueNameRuleImplTest.java`: nombre disponible, normalizado y duplicado.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/config/UseCaseRuleConfigTest.java`: conexion de los cinco beans nuevos con puertos simulados.
+- `utils/src/test/java/co/edu/uco/crosscutting/catalog/MessageCatalogCodeEnumTest.java`: verificacion del ultimo codigo funcional de Organizacion.
+- `core/src/main/java/co/edu/uco/application/primaryports/dto/application/CreateApplicationDTO.java`: incorpora `organizationId` como parte obligatoria del contrato de creacion.
+- `core/src/main/java/co/edu/uco/application/secondaryports/entity/ApplicationData.java`: referencia tipada a `OrganizationEntity` preservando constructores parciales existentes.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/application/CreateApplicationOrganizationExistsRule.java`: contrato de validacion de la Organizacion asociada.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/application/CreateApplicationOrganizationExistsRuleImpl.java`: valida presencia, formato UUID y existencia mediante `OrganizationRepository`.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/application/CreateApplicationCompositeValidator.java`: integra la regla de Organizacion antes de catalogos y duplicidad.
+- `core/src/main/java/co/edu/uco/application/usecase/CreateApplicationUseCase.java`: construye la Aplicacion con su `OrganizationEntity` validada.
+- `core/src/main/java/co/edu/uco/application/primaryports/facade/application/impl/CreateApplicationUseCaseFacadeImpl.java`: retira la anotacion Spring para mantener la composicion en infraestructura.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/config/UseCaseRuleConfig.java`: compone regla, composite, caso de uso y facade de Aplicacion mediante beans explicitos.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/impl/ApplicationSurrealRepositoryAdapterImpl.java`: persiste y recupera `organization_id` como referencia SurrealDB.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/impl/ApplicationCatalogSurrealAdapter.java`: conserva la referencia de Organizacion al consultar aplicaciones.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/impl/SurrealDomainEventProjectionConsumer.java`: proyecta identificador y datos basicos de Organizacion en `application_document`.
+- `deployment/docker/scripts/surreal/surreal-init.surql`: relacion obligatoria `application.organization_id`, indices y campo de la proyeccion documental.
+- `utils/src/main/java/co/edu/uco/crosscutting/catalog/MessageCatalogCodeEnum.java`: codigos `FUN_150` y `FUN_151` para Organizacion requerida e inexistente.
+- `deployment/docker/scripts/redis/CatalogMessageInit.sh`: mensajes funcionales de la relacion Aplicacion-Organizacion.
+- `core/src/test/java/co/edu/uco/application/secondaryports/entity/ApplicationDataTest.java`: asociacion tipada y compatibilidad de constructores parciales.
+- `core/src/test/java/co/edu/uco/application/usecase/validator/application/CreateApplicationOrganizationExistsRuleImplTest.java`: presencia, UUID, existencia y cortocircuitos de la regla.
+- `core/src/test/java/co/edu/uco/application/primaryports/dto/application/CreateApplicationDTOTest.java`: valores por defecto y normalizacion de `organizationId`.
+- `core/src/test/java/co/edu/uco/application/usecase/validator/application/CreateApplicationCompositeValidatorTest.java`: orden y cortocircuito de la nueva regla.
+- `core/src/test/java/co/edu/uco/application/usecase/CreateApplicationUseCaseTest.java`: propagacion del identificador de Organizacion a la entidad persistida.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/impl/ApplicationSurrealRepositoryAdapterImplTest.java`: mapeo y `UPSERT` exacto con `organization_id`.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/impl/ApplicationCatalogSurrealAdapterTest.java`: consulta de catalogo con referencia de Organizacion valida y malformada.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/impl/SurrealDomainEventProjectionConsumerTest.java`: proyeccion de `organization_id` y Organizacion embebida.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/config/UseCaseRuleConfigTest.java`: composicion completa del flujo de creacion de Aplicacion.
+- `core/src/main/java/co/edu/uco/application/usecase/domain/aggregate/entities/MembershipEntity.java`: relacion de una identidad externa con una Organizacion.
+- `core/src/main/java/co/edu/uco/application/usecase/domain/aggregate/entities/RoleEntity.java`: rol de negocio independiente del proveedor de identidad.
+- `core/src/main/java/co/edu/uco/application/usecase/domain/aggregate/entities/PermissionEntity.java`: permiso tipado de negocio.
+- `core/src/main/java/co/edu/uco/application/usecase/domain/aggregate/entities/RoleAssignmentEntity.java`: asignacion de rol con alcance de Organizacion, Aplicacion o Ambiente.
+- `core/src/main/java/co/edu/uco/application/usecase/domain/security/PermissionCode.java`: catalogo tipado de los siete permisos iniciales.
+- `core/src/main/java/co/edu/uco/application/usecase/domain/security/AuthorizationScopeType.java`: tipos de alcance de autorizacion.
+- `core/src/main/java/co/edu/uco/application/secondaryports/security/AuthorizationQueryPort.java`: puerto para consultar permisos y recursos autorizados sin depender de SurrealDB.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/authorization/AuthorizationRule.java` y `AuthorizationRuleImpl.java`: politica de negocio que diferencia ausencia de identidad (`401`) y falta de permiso (`403`).
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/impl/AuthorizationQuerySurrealAdapter.java`: resolucion de permisos por `issuer + subject`, membresia, rol, permiso y alcance heredado.
+- `core/src/main/java/co/edu/uco/application/usecase/FindCatalogUseCase.java`: filtrado de Aplicaciones y Ambientes y proteccion del catalogo de Funcionalidades para identidades externas.
+- `core/src/main/java/co/edu/uco/application/usecase/handling/HandlingFindCatalogPort.java`, `core/src/main/java/co/edu/uco/application/primaryports/facade/catalog/FindCatalogUseCaseFacade.java` y su implementacion: propagacion tipada de identidad hacia los catalogos jerarquicos.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/primaryadapters/controller/CatalogControllerImpl.java`: entrega la identidad resuelta al facade sin implementar autorizacion en el controller.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/config/UseCaseRuleConfig.java`: composicion Spring de la regla, caso de uso y facade de catalogos fuera de `core`.
+- `deployment/docker/scripts/surreal/surreal-init.surql`: tablas, relaciones e indices de membresias, roles, permisos, relaciones rol-permiso y asignaciones con alcance; carga de permisos iniciales.
+- `utils/src/main/java/co/edu/uco/crosscutting/catalog/MessageCatalogCodeEnum.java` y `deployment/docker/scripts/redis/CatalogMessageInit.sh`: mensajes `FUN_152` y `FUN_153` para autenticacion requerida y permiso denegado.
+- Pruebas de autorizacion: cobertura de entidades y enums, regla `401`/`403`, herencia de alcances, aislamiento entre organizaciones y aplicaciones, filtrado de catalogos, propagacion HTTP, composicion Spring y consultas SurrealQL.
 
 ### Pruebas ejecutadas
 
@@ -435,17 +528,51 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - Suite `infrastructure`: 371 pruebas, 0 fallos, 0 errores y 0 omitidas.
 - JaCoCo posterior a la Fase 2: los controles de cobertura de linea y rama, configurados con minimo de 80 %, se cumplieron en todos los modulos.
 - Auditoria de identidad externa: pruebas sin asserts triviales ni deshabilitados, `core` libre de frameworks, excepciones `UnauthorizedException`, activacion condicional real, ramas Bearer y cuerpo HTTP `401` verificados.
-- Pruebas focalizadas de Organizacion: 3 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Pruebas focalizadas de Organizacion: 4 pruebas, 0 fallos, 0 errores y 0 omitidas.
 - Reactor completo posterior al primer incremento de la Fase 3 con `clean verify`: `utils`, `core` e `infrastructure` finalizaron correctamente.
 - Suite `utils`: 186 pruebas, 0 fallos, 0 errores y 0 omitidas.
-- Suite `core`: 452 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `core`: 453 pruebas, 0 fallos, 0 errores y 0 omitidas.
 - Suite `infrastructure`: 371 pruebas, 0 fallos, 0 errores y 0 omitidas.
 - JaCoCo posterior al primer incremento de la Fase 3: los controles de cobertura de linea y rama, configurados con minimo de 80 %, se cumplieron en todos los modulos.
-- Auditoria de `OrganizationTest`: AAA, asserts no triviales, cobertura completa del modelo y ausencia de Spring o adaptadores concretos en `core`.
+- Auditoria de `OrganizationEntityTest`: AAA, asserts no triviales, cobertura completa del modelo y ausencia de Spring o adaptadores concretos en `core`.
+- Pruebas focalizadas de persistencia de Organizacion: 14 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Reactor completo posterior al segundo incremento de la Fase 3 con `clean verify`: `utils`, `core` e `infrastructure` finalizaron correctamente.
+- Suite `utils`: 186 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `core`: 453 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `infrastructure`: 381 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- JaCoCo posterior al segundo incremento de la Fase 3: `utils` 94.07 % de lineas y 96.97 % de ramas; `core` 97.78 % de lineas y 90.58 % de ramas; `infrastructure` 88.67 % de lineas y 81.33 % de ramas.
+- Auditoria de persistencia de Organizacion: pruebas AAA sin asserts triviales ni deshabilitados, cliente SurrealDB simulado, consultas y mapeos verificados, excepcion `BusinessException` especifica y cobertura completa de las clases nuevas.
+- Pruebas focalizadas del registro de Organizacion: 35 ejecuciones, 0 fallos, 0 errores y 0 omitidas entre `utils`, `core` e `infrastructure`.
+- Reactor completo posterior al tercer incremento de la Fase 3 con `clean verify`: `utils`, `core` e `infrastructure` finalizaron correctamente.
+- Suite `utils`: 186 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `core`: 479 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `infrastructure`: 386 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- JaCoCo posterior al tercer incremento de la Fase 3: `utils` 94.11 % de lineas y 96.97 % de ramas; `core` 97.85 % de lineas y 90.85 % de ramas; `infrastructure` 88.70 % de lineas y 81.33 % de ramas.
+- Auditoria del registro de Organizacion: pruebas AAA sin asserts triviales ni deshabilitados, `core` sin Spring ni adaptadores concretos, reglas probadas individualmente, composite con orden y cortocircuito, excepciones de dominio y tecnica verificadas, y configuracion probada con puertos simulados.
+- Pruebas focalizadas de la relacion Aplicacion-Organizacion: 78 ejecuciones, 0 fallos, 0 errores y 0 omitidas entre `utils`, `core` e `infrastructure`.
+- Reactor completo posterior al cuarto incremento de la Fase 3 con `clean verify`: `utils`, `core` e `infrastructure` finalizaron correctamente.
+- Suite `utils`: 186 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `core`: 493 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `infrastructure`: 393 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- JaCoCo posterior al cuarto incremento de la Fase 3: `utils` 94.13 % de lineas y 96.97 % de ramas; `core` 97.89 % de lineas y 90.97 % de ramas; `infrastructure` 89.02 % de lineas y 81.33 % de ramas.
+- Auditoria de Aplicacion-Organizacion: reglas probadas individualmente, orden y cortocircuito del composite, puertos simulados, SurrealQL exacto, proyeccion documental verificada, excepciones especificas y ausencia de dependencias de infraestructura en pruebas de `core`.
+- Pruebas focalizadas de persistencia de identidad externa: 29 ejecuciones, 0 fallos, 0 errores y 0 omitidas entre `core` e `infrastructure`.
+- Reactor completo posterior al quinto incremento de la Fase 3 con `clean verify`: `utils`, `core` e `infrastructure` finalizaron correctamente.
+- Suite `utils`: 186 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `core`: 503 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `infrastructure`: 412 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- JaCoCo posterior al quinto incremento de la Fase 3: los controles de cobertura de linea y rama, configurados con minimo de 80 %, se cumplieron en todos los modulos.
+- Auditoria de persistencia de identidad externa: pruebas AAA sin asserts triviales ni deshabilitados, `core` sin Spring ni adaptadores concretos, escape SurrealQL verificado, email NONE/null manejado, update restringido a email y principal_type, logs sin datos sensibles, excepciones `BusinessException` INFRASTRUCTURE verificadas.
+- Reactor completo al finalizar la Fase 3 con `clean verify`: `utils`, `core` e `infrastructure` finalizaron correctamente.
+- Suite `utils`: 186 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `core`: 537 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `infrastructure`: 423 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- JaCoCo al finalizar la Fase 3: `utils` 94.15 % de lineas y 96.97 % de ramas; `core` 98.00 % de lineas y 91.39 % de ramas; `infrastructure` 89.40 % de lineas y 81.26 % de ramas.
+- Auditoria final de autorizacion: pruebas AAA sin asserts triviales ni deshabilitados, regla probada directamente con excepciones tipadas, puertos simulados en `core`, cliente SurrealDB simulado en infraestructura, consultas y herencia de alcance verificadas, y Quality Gate de cobertura cumplido en los tres modulos.
 
 ### Pendiente inmediato
 
-Continuar la Fase 3 con el modelo, mapper y adaptador SurrealDB de Organizacion, sin iniciar todavia membresias, roles o permisos.
+Iniciar la Fase 4 definiendo primero el comportamiento de varias pestanas o dispositivos para una misma identidad. El endpoint REST de registro de organizaciones permanece pendiente hasta definir su permiso o politica de aprovisionamiento. Antes de desplegar los nuevos esquemas sobre datos existentes se debe ejecutar un backfill con la Organizacion correcta, provisionar membresias y asignaciones iniciales, o recrear el volumen de desarrollo.
 
 ## Historial de cambios
 
@@ -459,4 +586,10 @@ Continuar la Fase 3 con el modelo, mapper y adaptador SurrealDB de Organizacion,
 | 2026-09-21 | Fase 1 | Se eliminan tokens, material criptografico, consultas de token y cuerpos HTTP de los logs | Fase 1 `EN CURSO`; saneamiento de logs completado |
 | 2026-09-21 | Fase 1 | Se tipan los rechazos de autenticacion como `401` y los de contexto como `403` | Fase 1 `COMPLETADA`; todos los criterios de salida verificados |
 | 2026-09-22 | Fase 2 | Se crea la identidad externa y su puerto, se reemplaza el token fijo por resolucion simulada explicita y se admite `Authorization: Bearer` sin retirar el header legado | Fase 2 `COMPLETADA`; identidad sin contexto verificada |
-| 2026-09-22 | Fase 3 | Se crea el modelo inmutable de Organizacion y su puerto de persistencia en `core`, dejando SurrealDB y autorizacion para incrementos posteriores | Fase 3 `PARCIAL`; contrato de Organizacion completado |
+| 2026-09-22 | Fase 3 | Se crea `OrganizationEntity` siguiendo la jerarquia `Entity<UUID>` y su puerto de persistencia en `core`, dejando SurrealDB y autorizacion para incrementos posteriores | Fase 3 `PARCIAL`; contrato de Organizacion completado |
+| 2026-09-22 | Fase 3 | Se implementan el esquema, modelo, mapper y adaptador SurrealDB de Organizacion con pruebas unitarias y verificacion completa del reactor | Fase 3 `PARCIAL`; persistencia de Organizacion completada |
+| 2026-09-22 | Fase 3 | Se implementan DTO, facade, caso de uso, reglas de nombre y unicidad, composicion Spring y catalogo para registrar organizaciones; el indice de nombre se refuerza como unico | Fase 3 `PARCIAL`; registro de Organizacion completado |
+| 2026-09-22 | Fase 3 | Se asocia obligatoriamente cada nueva Aplicacion con una Organizacion validada, persistida y proyectada, preservando referencias parciales internas y documentando la migracion de datos existentes | Fase 3 `PARCIAL`; jerarquia Organizacion-Aplicacion completada |
+| 2026-09-22 | Gobierno arquitectonico | Se establece como ley innegociable replicar la arquitectura y convenciones existentes antes de introducir cualquier clase o patron nuevo | Regla permanente y transversal a todas las fases |
+| 2026-09-22 | Fase 3 | Se implementa la entidad `ExternalIdentityEntity`, el puerto `ExternalIdentityRepository`, el esquema SurrealDB con indice unico compuesto `(issuer, subject)`, modelo, mapper, adaptador y pruebas unitarias completas de la persistencia de identidades externas | Fase 3 `PARCIAL`; persistencia de identidades externas completada |
+| 2026-09-22 | Fase 3 | Se modelan membresias, roles, permisos y asignaciones con alcance; se implementan el puerto y adaptador de consulta, la politica `401`/`403`, la herencia de alcances y el filtrado de catalogos con pruebas de aislamiento y verificacion completa del reactor | Fase 3 `COMPLETADA`; autorizacion de negocio verificada |

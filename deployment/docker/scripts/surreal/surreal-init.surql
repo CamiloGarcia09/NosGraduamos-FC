@@ -87,6 +87,54 @@ UPSERT application_state:inactive CONTENT {
 };
 
 -- =============================================================
+-- ORGANIZATION
+-- =============================================================
+
+DEFINE TABLE IF NOT EXISTS organization SCHEMAFULL CHANGEFEED 7d;
+
+DEFINE FIELD IF NOT EXISTS name
+ON organization TYPE string;
+
+DEFINE FIELD IF NOT EXISTS version
+ON organization TYPE int VALUE 1;
+
+DEFINE FIELD IF NOT EXISTS created_at
+ON organization TYPE datetime VALUE time::now();
+
+DEFINE FIELD IF NOT EXISTS updated_at
+ON organization TYPE datetime VALUE time::now();
+
+DEFINE INDEX IF NOT EXISTS organization_name_idx
+ON organization FIELDS name UNIQUE;
+
+-- =============================================================
+-- EXTERNAL IDENTITY
+-- =============================================================
+
+DEFINE TABLE IF NOT EXISTS external_identity SCHEMAFULL;
+
+DEFINE FIELD IF NOT EXISTS issuer
+ON external_identity TYPE string;
+
+DEFINE FIELD IF NOT EXISTS subject
+ON external_identity TYPE string;
+
+DEFINE FIELD IF NOT EXISTS email
+ON external_identity TYPE option<string>;
+
+DEFINE FIELD IF NOT EXISTS principal_type
+ON external_identity TYPE string;
+
+DEFINE FIELD IF NOT EXISTS created_at
+ON external_identity TYPE datetime VALUE time::now();
+
+DEFINE FIELD IF NOT EXISTS updated_at
+ON external_identity TYPE datetime VALUE time::now();
+
+DEFINE INDEX IF NOT EXISTS external_identity_issuer_subject_idx
+ON external_identity FIELDS issuer, subject UNIQUE;
+
+-- =============================================================
 -- APPLICATION
 -- =============================================================
 
@@ -97,6 +145,9 @@ ON application TYPE option<string>;
 
 DEFINE FIELD IF NOT EXISTS name
 ON application TYPE string;
+
+DEFINE FIELD IF NOT EXISTS organization_id
+ON application TYPE record<organization>;
 
 DEFINE FIELD IF NOT EXISTS language_id
 ON application TYPE record<language_base>;
@@ -121,6 +172,9 @@ ON application TYPE datetime VALUE time::now();
 
 DEFINE INDEX IF NOT EXISTS application_name_idx
 ON application FIELDS name;
+
+DEFINE INDEX IF NOT EXISTS application_organization_idx
+ON application FIELDS organization_id;
 
 DEFINE INDEX IF NOT EXISTS application_language_state_idx
 ON application FIELDS language_id, state_id;
@@ -262,6 +316,110 @@ ON environment FIELDS application_id;
 
 DEFINE INDEX IF NOT EXISTS environment_type_state_idx
 ON environment FIELDS type_id, state_id;
+
+-- =============================================================
+-- AUTHORIZATION
+-- =============================================================
+
+DEFINE TABLE IF NOT EXISTS membership SCHEMAFULL;
+
+DEFINE FIELD IF NOT EXISTS identity_id
+ON membership TYPE record<external_identity>;
+
+DEFINE FIELD IF NOT EXISTS organization_id
+ON membership TYPE record<organization>;
+
+DEFINE FIELD IF NOT EXISTS created_at
+ON membership TYPE datetime VALUE time::now();
+
+DEFINE INDEX IF NOT EXISTS membership_identity_organization_idx
+ON membership FIELDS identity_id, organization_id UNIQUE;
+
+DEFINE INDEX IF NOT EXISTS membership_organization_idx
+ON membership FIELDS organization_id;
+
+DEFINE TABLE IF NOT EXISTS permission SCHEMAFULL;
+
+DEFINE FIELD IF NOT EXISTS code
+ON permission TYPE string;
+
+DEFINE INDEX IF NOT EXISTS permission_code_idx
+ON permission FIELDS code UNIQUE;
+
+UPSERT permission:context_select CONTENT { code: "CONTEXT_SELECT" };
+UPSERT permission:message_read CONTENT { code: "MESSAGE_READ" };
+UPSERT permission:message_create CONTENT { code: "MESSAGE_CREATE" };
+UPSERT permission:message_translate CONTENT { code: "MESSAGE_TRANSLATE" };
+UPSERT permission:application_create CONTENT { code: "APPLICATION_CREATE" };
+UPSERT permission:environment_create CONTENT { code: "ENVIRONMENT_CREATE" };
+UPSERT permission:functionality_create CONTENT { code: "FUNCTIONALITY_CREATE" };
+
+DEFINE TABLE IF NOT EXISTS role SCHEMAFULL;
+
+DEFINE FIELD IF NOT EXISTS name
+ON role TYPE string;
+
+DEFINE FIELD IF NOT EXISTS created_at
+ON role TYPE datetime VALUE time::now();
+
+DEFINE INDEX IF NOT EXISTS role_name_idx
+ON role FIELDS name UNIQUE;
+
+DEFINE TABLE IF NOT EXISTS role_permission SCHEMAFULL;
+
+DEFINE FIELD IF NOT EXISTS role_id
+ON role_permission TYPE record<role>;
+
+DEFINE FIELD IF NOT EXISTS permission_id
+ON role_permission TYPE record<permission>;
+
+DEFINE INDEX IF NOT EXISTS role_permission_role_permission_idx
+ON role_permission FIELDS role_id, permission_id UNIQUE;
+
+DEFINE INDEX IF NOT EXISTS role_permission_permission_idx
+ON role_permission FIELDS permission_id;
+
+DEFINE TABLE IF NOT EXISTS role_assignment SCHEMAFULL;
+
+DEFINE FIELD IF NOT EXISTS membership_id
+ON role_assignment TYPE record<membership>;
+
+DEFINE FIELD IF NOT EXISTS role_id
+ON role_assignment TYPE record<role>;
+
+DEFINE FIELD IF NOT EXISTS scope_type
+ON role_assignment TYPE string ASSERT $value IN ["ORGANIZATION", "APPLICATION", "ENVIRONMENT"];
+
+DEFINE FIELD IF NOT EXISTS organization_id
+ON role_assignment TYPE option<record<organization>>;
+
+DEFINE FIELD IF NOT EXISTS application_id
+ON role_assignment TYPE option<record<application>>;
+
+DEFINE FIELD IF NOT EXISTS environment_id
+ON role_assignment TYPE option<record<environment>>;
+
+DEFINE FIELD IF NOT EXISTS created_at
+ON role_assignment TYPE datetime VALUE time::now();
+
+DEFINE INDEX IF NOT EXISTS role_assignment_membership_idx
+ON role_assignment FIELDS membership_id;
+
+DEFINE INDEX IF NOT EXISTS role_assignment_role_idx
+ON role_assignment FIELDS role_id;
+
+DEFINE INDEX IF NOT EXISTS role_assignment_organization_scope_idx
+ON role_assignment FIELDS organization_id;
+
+DEFINE INDEX IF NOT EXISTS role_assignment_application_scope_idx
+ON role_assignment FIELDS application_id;
+
+DEFINE INDEX IF NOT EXISTS role_assignment_environment_scope_idx
+ON role_assignment FIELDS environment_id;
+
+DEFINE INDEX IF NOT EXISTS role_assignment_unique_idx
+ON role_assignment FIELDS membership_id, role_id, scope_type,
+    organization_id, application_id, environment_id UNIQUE;
 
 -- =============================================================
 -- ENVIRONMENT EVENTS
@@ -1023,6 +1181,9 @@ ON application_document TYPE option<string>;
 DEFINE FIELD IF NOT EXISTS application_id
 ON application_document TYPE option<string>;
 
+DEFINE FIELD IF NOT EXISTS organization_id
+ON application_document TYPE option<string>;
+
 DEFINE FIELD IF NOT EXISTS projection_version
 ON application_document TYPE option<number>;
 
@@ -1031,6 +1192,9 @@ ON application_document TYPE option<datetime>;
 
 DEFINE INDEX IF NOT EXISTS application_document_id_idx
 ON application_document FIELDS application_id;
+
+DEFINE INDEX IF NOT EXISTS application_document_organization_idx
+ON application_document FIELDS organization_id;
 
 DEFINE INDEX IF NOT EXISTS application_document_state_name_idx
 ON application_document FIELDS state.name;

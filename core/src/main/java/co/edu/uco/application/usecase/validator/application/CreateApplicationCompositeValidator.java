@@ -8,9 +8,7 @@ import co.edu.uco.application.secondaryports.repository.ReferenceCatalog;
 import co.edu.uco.application.usecase.validator.impl.CompositeValidatorSupport;
 import co.edu.uco.application.usecase.validator.token.DateValidValidator;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
-import org.springframework.stereotype.Component;
 
-@Component
 public final class CreateApplicationCompositeValidator extends CompositeValidatorSupport {
 
     private static final String MESSAGE_NAME_REQUIRED = "El nombre de la aplicación es requerido.";
@@ -24,19 +22,24 @@ public final class CreateApplicationCompositeValidator extends CompositeValidato
     private static final String MESSAGE_NAME_DUPLICATED = "Ya existe una aplicación con el nombre proporcionado.";
 
     private final DateValidValidator dateValidValidator;
+    private final CreateApplicationOrganizationExistsRule organizationExistsRule;
 
     public CreateApplicationCompositeValidator(CatalogPort catalogPort,
                                                RecordExistsCatalogPort recordExistsCatalogPort,
                                                ApplicationRepository applicationRepository,
-                                               DateValidValidator dateValidValidator) {
+                                               DateValidValidator dateValidValidator,
+                                               CreateApplicationOrganizationExistsRule organizationExistsRule) {
         super(catalogPort, recordExistsCatalogPort, applicationRepository);
         this.dateValidValidator = dateValidValidator;
+        this.organizationExistsRule = organizationExistsRule;
     }
 
     public void validate(CreateApplicationDTO dto) {
         validateNotNull(dto);
 
         validateRequiredName(dto.getName(), MESSAGE_NAME_REQUIRED, MESSAGE_NAME_MAX_LENGTH);
+
+        organizationExistsRule.validate(dto);
 
         validateCatalogReference(dto.getLanguageId(), ReferenceCatalog.LANGUAGE_BASE,
                 MESSAGE_LANGUAGE_REQUIRED, MESSAGE_LANGUAGE_NOT_EXISTS);

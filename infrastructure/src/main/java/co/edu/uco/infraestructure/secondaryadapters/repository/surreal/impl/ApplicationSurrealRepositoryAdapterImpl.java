@@ -3,6 +3,7 @@ package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.ApplicationRepository;
+import co.edu.uco.application.usecase.domain.aggregate.entities.OrganizationEntity;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
 import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionLocation;
 import com.surrealdb.Object;
@@ -20,6 +21,7 @@ import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.im
 public class ApplicationSurrealRepositoryAdapterImpl extends SurrealCatalogSupport implements ApplicationRepository {
 
     private static final String SURREAL_TABLE_APPLICATION = "application";
+    private static final String SURREAL_TABLE_ORGANIZATION = "organization";
     private static final String SURREAL_TABLE_LANGUAGE_BASE = "language_base";
     private static final String SURREAL_TABLE_APPLICATION_STATE = "application_state";
 
@@ -44,8 +46,10 @@ public class ApplicationSurrealRepositoryAdapterImpl extends SurrealCatalogSuppo
     public void create(final ApplicationData application, final String languageId, final LocalDateTime startDate,
                        final LocalDateTime endDate, final String stateId) {
         final String upsertSql = "UPSERT " + recordIdLiteral(SURREAL_TABLE_APPLICATION, application.getId().toString())
-                + " CONTENT { "
-                + "name: " + quote(application.getName()) + ", "
+                 + " CONTENT { "
+                 + "name: " + quote(application.getName()) + ", "
+                + "organization_id: " + recordIdLiteral(
+                        SURREAL_TABLE_ORGANIZATION, application.getOrganization().getId().toString()) + ", "
                 + "language_id: " + recordIdLiteral(SURREAL_TABLE_LANGUAGE_BASE, languageId) + ", "
                 + "start_date: " + datetime(startDate) + ", "
                 + "end_date: " + datetime(endDate) + ", "
@@ -65,6 +69,10 @@ public class ApplicationSurrealRepositoryAdapterImpl extends SurrealCatalogSuppo
         final ApplicationData data = ApplicationData.build();
         data.setId(extractIdAsUUID(obj.get("id")));
         data.setName(stringOf(obj.get("name")));
+        final OrganizationEntity organization = new OrganizationEntity();
+        organization.setId(extractIdAsUUID(obj.get("organization_id")));
+        organization.setName("");
+        data.setOrganization(organization);
         return data;
     }
 }

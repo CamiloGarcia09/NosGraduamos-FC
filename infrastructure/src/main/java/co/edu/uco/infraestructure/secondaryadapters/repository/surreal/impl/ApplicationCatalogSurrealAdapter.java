@@ -3,6 +3,7 @@ package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.ApplicationCatalogRepository;
+import co.edu.uco.application.usecase.domain.aggregate.entities.OrganizationEntity;
 import com.surrealdb.Object;
 import com.surrealdb.Surreal;
 import org.springframework.stereotype.Repository;
@@ -27,6 +28,10 @@ public class ApplicationCatalogSurrealAdapter extends SurrealCatalogSupport impl
         final ApplicationData data = ApplicationData.build();
         data.setId(extractIdAsUUID(obj.get("id")));
         data.setName(stringOf(obj.get("name")));
+        final OrganizationEntity organization = new OrganizationEntity();
+        organization.setId(extractIdAsUUID(obj.get("organization_id")));
+        organization.setName("");
+        data.setOrganization(organization);
         return data;
     }
 }

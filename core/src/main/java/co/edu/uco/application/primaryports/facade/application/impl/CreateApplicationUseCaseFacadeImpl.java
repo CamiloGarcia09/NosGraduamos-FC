@@ -3,9 +3,7 @@ package co.edu.uco.application.primaryports.facade.application.impl;
 import co.edu.uco.application.primaryports.dto.application.CreateApplicationDTO;
 import co.edu.uco.application.primaryports.facade.application.CreateApplicationUseCaseFacade;
 import co.edu.uco.application.usecase.handling.HandlingCreateApplicationPort;
-import org.springframework.stereotype.Component;
 
-@Component
 public final class CreateApplicationUseCaseFacadeImpl implements CreateApplicationUseCaseFacade {
 
     private final HandlingCreateApplicationPort handlingCreateApplicationPort;

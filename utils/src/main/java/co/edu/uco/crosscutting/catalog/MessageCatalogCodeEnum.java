@@ -682,7 +682,28 @@ public enum MessageCatalogCodeEnum {
     FUN_145("FUN_145"),
 
     /** La funcionalidad no pertenece a la aplicación indicada. */
-    FUN_146("FUN_146");
+    FUN_146("FUN_146"),
+
+    /** El nombre de la organización es requerido. */
+    FUN_147("FUN_147"),
+
+    /** El nombre de la organización supera la longitud permitida. */
+    FUN_148("FUN_148"),
+
+    /** Ya existe una organización con el nombre indicado. */
+    FUN_149("FUN_149"),
+
+    /** El identificador de la organización es requerido. */
+    FUN_150("FUN_150"),
+
+    /** La organización asociada a la aplicación no existe. */
+    FUN_151("FUN_151"),
+
+    /** Se requiere autenticación para acceder al recurso. */
+    FUN_152("FUN_152"),
+
+    /** La identidad no tiene permiso para acceder al recurso. */
+    FUN_153("FUN_153");
 
     // =========================================================================
 
