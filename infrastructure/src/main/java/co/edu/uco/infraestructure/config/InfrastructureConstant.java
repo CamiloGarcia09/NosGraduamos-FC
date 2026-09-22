@@ -26,6 +26,7 @@ public final class InfrastructureConstant {
     public static final String FIELD_TYPE_ID = "type_id";
     public static final String FIELD_APPLICATION_ID = "application_id";
     public static final String ENVIRONMENT_ID_ATTRIBUTE = "environmentId";
+    public static final String EXTERNAL_IDENTITY_ATTRIBUTE = "externalIdentity";
     public static final String TOKEN_ENTITY = "token_data";
     public static final String TOKEN_STATE_ACTIVE_ID = "123e4567-e89b-12d3-a456-426614175000";
     public static final String TOKEN_STATE_INACTIVE_ID = "123e4567-e89b-12d3-a456-426614175001";

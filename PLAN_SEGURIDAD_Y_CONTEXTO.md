@@ -1,3 +1,4 @@
+
 # Plan de seguridad, autorizacion y contexto activo
 
 ## Proposito
@@ -18,11 +19,11 @@ El token emitido por el proveedor se recibira y validara sin modificarlo, enriqu
 
 | Campo | Valor |
 |---|---|
-| Ultima actualizacion | 2026-09-21 |
+| Ultima actualizacion | 2026-09-22 |
 | Estado global | Implementacion gradual en curso |
-| Fase actual | Fase 2 - Introducir identidad externa simulada (pendiente de inicio) |
-| Proxima implementacion | Crear el modelo de identidad externa y su puerto de resolucion simulado |
-| Bloqueo actual | Ninguno para iniciar la Fase 2; faltan datos del proveedor para la integracion real |
+| Fase actual | Fase 3 - Modelar organizaciones y autorizacion (parcial) |
+| Proxima implementacion | Implementar el modelo y adaptador SurrealDB de Organizacion contra el puerto ya definido |
+| Bloqueo actual | Ninguno para continuar la persistencia de Organizacion; faltan datos del proveedor para la integracion real de la Fase 6 |
 
 ### Convenciones de estado
 
@@ -48,10 +49,12 @@ El token emitido por el proveedor se recibira y validara sin modificarlo, enriqu
 - SurrealDB sera la fuente persistente del ultimo contexto y Redis permitira su consulta rapida.
 - La migracion sera gradual para no interrumpir las consultas que dependen del token actual.
 - Inicialmente se asumira un contexto activo por identidad. La estrategia para sesiones simultaneas se revisara antes de implementar la Fase 4.
+- Durante la convivencia, la ausencia de `Authorization` permite continuar con el flujo legado; si el header se envia, debe ser un Bearer valido o la peticion recibe `401`.
+- El simulador de identidad externa permanece deshabilitado por defecto y todos sus datos se suministran mediante configuracion externa.
 
 ## Estado actual del sistema
 
-El flujo existente no usa realmente el `SecurityAdapter` simulado. Actualmente existe otro mecanismo propietario que:
+El flujo propietario continua activo para mantener compatibilidad y ahora convive con la resolucion opcional de identidad externa simulada. El mecanismo legado:
 
 1. Genera tokens con RSA.
 2. Persiste informacion del token en SurrealDB.
@@ -68,7 +71,7 @@ Riesgos conocidos que deben atenderse antes o durante la migracion:
 - La creacion de mensajes puede usar aplicacion y ambiente recibidos en el body sin compararlos correctamente con el contexto autorizado.
 - No existe un modelo de organizaciones, usuarios, membresias, roles o permisos de negocio.
 - Los logs que exponian tokens, cuerpos HTTP o material criptografico fueron saneados en la Fase 1.
-- El adaptador simulado se habilita por defecto si falta configuracion y actualmente no participa en el flujo efectivo.
+- El proveedor real sigue pendiente; el simulador externo solo se habilita mediante la propiedad explicita de desarrollo.
 
 ## Flujo objetivo
 
@@ -98,8 +101,8 @@ Respuestas esperadas:
 |---|---|---|---|
 | 0 | Definir contrato de seguridad | `PARCIAL` | Responsabilidades y contrato con el proveedor definidos |
 | 1 | Asegurar el flujo actual | `COMPLETADA` | El token existente no permite cruzar ambientes ni exponer secretos |
-| 2 | Introducir identidad externa simulada | `PENDIENTE` | Un bearer token identifica al principal sin contener contexto |
-| 3 | Modelar organizaciones y autorizacion | `PENDIENTE` | MessageUcoLab decide a que recursos accede cada identidad |
+| 2 | Introducir identidad externa simulada | `COMPLETADA` | Un bearer token identifica al principal sin contener contexto |
+| 3 | Modelar organizaciones y autorizacion | `PARCIAL` | MessageUcoLab decide a que recursos accede cada identidad |
 | 4 | Implementar contexto activo | `PENDIENTE` | El backend recuerda y valida el contexto seleccionado |
 | 5 | Migrar operaciones al contexto | `PENDIENTE` | Los casos de uso dejan de confiar en IDs controlados por el cliente |
 | 6 | Integrar el proveedor real | `PENDIENTE` | El adaptador real reemplaza al simulador |
@@ -166,19 +169,19 @@ Existe un contrato documentado con el proveedor que permite validar tokens sin a
 
 ## Fase 2 - Introducir identidad externa simulada
 
-**Estado:** `PENDIENTE`
+**Estado:** `COMPLETADA`
 
 ### Alcance
 
-- [ ] Crear en `core` un modelo de identidad sin dependencias web o de Spring.
-- [ ] Crear un puerto para validar y resolver una identidad externa.
-- [ ] Hacer que el resultado incluya `issuer`, `subject`, correo, tipo de principal y expiracion.
-- [ ] Reemplazar conceptualmente la generacion del adaptador simulado por validacion de identidad.
-- [ ] Activar el simulador solamente mediante perfil o propiedad explicita de desarrollo.
-- [ ] Recibir el token externo mediante `Authorization: Bearer`.
-- [ ] Evitar que el bearer token aparezca en logs o claves de cache.
-- [ ] Mantener temporalmente el header `Token` para consumidores del flujo legado.
-- [ ] Probar token simulado valido, invalido y expirado.
+- [x] Crear en `core` un modelo de identidad sin dependencias web o de Spring.
+- [x] Crear un puerto para validar y resolver una identidad externa.
+- [x] Hacer que el resultado incluya `issuer`, `subject`, correo, tipo de principal y expiracion.
+- [x] Reemplazar conceptualmente la generacion del adaptador simulado por validacion de identidad.
+- [x] Activar el simulador solamente mediante perfil o propiedad explicita de desarrollo.
+- [x] Recibir el token externo mediante `Authorization: Bearer`.
+- [x] Evitar que el bearer token aparezca en logs o claves de cache.
+- [x] Mantener temporalmente el header `Token` para consumidores del flujo legado.
+- [x] Probar token simulado valido, invalido y expirado.
 
 ### Criterio de salida
 
@@ -186,7 +189,7 @@ Una peticion puede convertirse en una identidad estable mediante un token simula
 
 ## Fase 3 - Modelar organizaciones y autorizacion
 
-**Estado:** `PENDIENTE`
+**Estado:** `PARCIAL`
 
 ### Modelo inicial esperado
 
@@ -212,6 +215,13 @@ RoleAssignment con alcance
 - `FUNCTIONALITY_CREATE`
 
 ### Alcance
+
+#### Avance incremental
+
+- [x] Crear el modelo de dominio inmutable de Organizacion en `core`.
+- [x] Definir el puerto de persistencia de Organizacion en `core`.
+- [ ] Implementar el modelo, mapper y adaptador de Organizacion para SurrealDB.
+- [ ] Crear el caso de uso y las reglas de validacion para registrar organizaciones.
 
 - [ ] Crear la entidad y persistencia de Organizacion.
 - [ ] Asociar cada Aplicacion con una Organizacion.
@@ -382,6 +392,24 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - `utils/src/test/java/co/edu/uco/crosscutting/exceptions/UnauthorizedExceptionTest.java`: verifica mensaje, tipo, ubicacion y estado `401`.
 - `utils/src/test/java/co/edu/uco/crosscutting/exceptions/ForbiddenExceptionTest.java`: verifica mensaje, tipo, ubicacion y estado `403`.
 - `infrastructure/src/test/java/co/edu/uco/infraestructure/primaryadapters/interceptors/TokenHeaderInterceptorTest.java`: verifica `401` en todos los rechazos del token legado.
+- `core/src/main/java/co/edu/uco/application/usecase/domain/security/ExternalIdentity.java`: identidad externa inmutable con emisor, sujeto, correo, tipo de principal y expiracion, sin contexto de negocio.
+- `core/src/main/java/co/edu/uco/application/usecase/domain/security/PrincipalType.java`: tipos iniciales de principal humano y servicio.
+- `core/src/main/java/co/edu/uco/application/secondaryports/security/ExternalIdentityResolverPort.java`: puerto independiente del proveedor para validar y resolver identidades.
+- `core/src/main/java/co/edu/uco/application/secondaryports/security/SecurityPort.java`: retirado junto con el contrato obsoleto de generacion de tokens simulados.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/security/SimulatedExternalIdentityAdapter.java`: resolucion simulada, validacion de token y expiracion UTC sin registrar ni cachear credenciales.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/security/SecurityAdapter.java`: retirado junto con el token fijo y su activacion por defecto.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/primaryadapters/interceptors/ExternalIdentityInterceptor.java`: lectura estricta de `Authorization: Bearer`, respuesta `401` y almacenamiento exclusivo de la identidad resuelta en la peticion.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/config/ExternalIdentityWebConfig.java`: registro condicional del interceptor de identidad para la API v1.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/config/InfrastructureConstant.java`: nombre estable del atributo HTTP de identidad externa.
+- `infrastructure/src/main/resources/application.properties`: simulador deshabilitado por defecto y configuracion mediante variables externas.
+- `core/src/test/java/co/edu/uco/application/usecase/domain/security/ExternalIdentityTest.java`: verifica todos los atributos del principal y la ausencia de contexto en el modelo.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/secondaryadapters/security/SimulatedExternalIdentityAdapterTest.java`: verifica activacion explicita, token valido, invalido, vacio, expirado y limite exacto de expiracion.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/primaryadapters/interceptors/ExternalIdentityInterceptorTest.java`: verifica Bearer valido y malformado, rechazo `401` y convivencia sin header externo.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/config/ExternalIdentityWebConfigTest.java`: verifica el registro del interceptor para la API v1.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/secondaryadapters/security/SecurityAdapterTest.java`: retirado con el adaptador obsoleto.
+- `core/src/main/java/co/edu/uco/application/usecase/domain/organization/Organization.java`: modelo inmutable de Organizacion con identificador UUID y nombre normalizado.
+- `core/src/main/java/co/edu/uco/application/secondaryports/repository/OrganizationRepository.java`: puerto de creacion y consulta de organizaciones por identificador o nombre.
+- `core/src/test/java/co/edu/uco/application/usecase/domain/organization/OrganizationTest.java`: cobertura de creacion, normalizacion y valores por defecto sin dependencias de frameworks.
 
 ### Pruebas ejecutadas
 
@@ -400,10 +428,24 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - Auditoria de creacion: las pruebas usan puertos simulados, excepciones de dominio y cubren completamente las lineas y ramas de la nueva regla de contexto.
 - Auditoria de logs: las pruebas verifican argumentos concretos del `LoggingPort`, mockean SurrealDB y no dependen de infraestructura real; no contienen asserts triviales ni pruebas deshabilitadas.
 - Auditoria HTTP: las pruebas verifican estados reales, excepciones especificas de la jerarquia y puertos simulados; no usan infraestructura concreta ni asserts triviales.
+- Pruebas focalizadas de identidad externa: 19 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Reactor completo posterior a la Fase 2 con `clean verify`: `utils`, `core` e `infrastructure` finalizaron correctamente.
+- Suite `utils`: 186 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `core`: 449 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `infrastructure`: 371 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- JaCoCo posterior a la Fase 2: los controles de cobertura de linea y rama, configurados con minimo de 80 %, se cumplieron en todos los modulos.
+- Auditoria de identidad externa: pruebas sin asserts triviales ni deshabilitados, `core` libre de frameworks, excepciones `UnauthorizedException`, activacion condicional real, ramas Bearer y cuerpo HTTP `401` verificados.
+- Pruebas focalizadas de Organizacion: 3 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Reactor completo posterior al primer incremento de la Fase 3 con `clean verify`: `utils`, `core` e `infrastructure` finalizaron correctamente.
+- Suite `utils`: 186 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `core`: 452 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `infrastructure`: 371 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- JaCoCo posterior al primer incremento de la Fase 3: los controles de cobertura de linea y rama, configurados con minimo de 80 %, se cumplieron en todos los modulos.
+- Auditoria de `OrganizationTest`: AAA, asserts no triviales, cobertura completa del modelo y ausencia de Spring o adaptadores concretos en `core`.
 
 ### Pendiente inmediato
 
-Iniciar la Fase 2 con el modelo de identidad externa en `core` y un puerto de resolucion que no incluya organizacion, aplicacion ni ambiente en el token.
+Continuar la Fase 3 con el modelo, mapper y adaptador SurrealDB de Organizacion, sin iniciar todavia membresias, roles o permisos.
 
 ## Historial de cambios
 
@@ -416,3 +458,5 @@ Iniciar la Fase 2 con el modelo de identidad externa en `core` y un puerto de re
 | 2026-09-21 | Fase 1 | Se comparan contextos mediante UUID, se mueve la composicion Spring a infraestructura y se completa la cobertura de la regla | Fase 1 `EN CURSO`; aislamiento de escritura auditado |
 | 2026-09-21 | Fase 1 | Se eliminan tokens, material criptografico, consultas de token y cuerpos HTTP de los logs | Fase 1 `EN CURSO`; saneamiento de logs completado |
 | 2026-09-21 | Fase 1 | Se tipan los rechazos de autenticacion como `401` y los de contexto como `403` | Fase 1 `COMPLETADA`; todos los criterios de salida verificados |
+| 2026-09-22 | Fase 2 | Se crea la identidad externa y su puerto, se reemplaza el token fijo por resolucion simulada explicita y se admite `Authorization: Bearer` sin retirar el header legado | Fase 2 `COMPLETADA`; identidad sin contexto verificada |
+| 2026-09-22 | Fase 3 | Se crea el modelo inmutable de Organizacion y su puerto de persistencia en `core`, dejando SurrealDB y autorizacion para incrementos posteriores | Fase 3 `PARCIAL`; contrato de Organizacion completado |
