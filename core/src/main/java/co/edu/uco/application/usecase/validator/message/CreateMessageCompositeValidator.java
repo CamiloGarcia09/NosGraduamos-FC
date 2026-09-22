@@ -13,12 +13,14 @@ import static co.edu.uco.crosscutting.helpers.UtilText.isEmptyOrNull;
 public final class CreateMessageCompositeValidator {
 
     private final CatalogPort catalogPort;
+    private final CreateMessageContextRule contextRule;
 
-    public CreateMessageCompositeValidator(CatalogPort catalogPort) {
+    public CreateMessageCompositeValidator(CatalogPort catalogPort, CreateMessageContextRule contextRule) {
         this.catalogPort = catalogPort;
+        this.contextRule = contextRule;
     }
 
-    public void validate(CreateMessageDTO dto) {
+    public void validate(CreateMessageDTO dto, String authenticatedEnvironmentId) {
         if (isNullObject(dto)) {
             throw BusinessRuleException.buildUserException(
                     catalogPort.getMessage(MessageCatalogCodeEnum.FUN_010.getCode())
@@ -78,5 +80,7 @@ public final class CreateMessageCompositeValidator {
         if (isEmptyOrNull(dto.getFunctionalityId())) {
             throw BusinessRuleException.buildUserException("El id de la funcionalidad es requerido.");
         }
+
+        contextRule.validate(dto, authenticatedEnvironmentId);
     }
 }

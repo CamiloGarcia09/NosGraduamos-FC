@@ -66,9 +66,9 @@ class CreateMessageUseCaseTest {
     void createMessage_persistsMessageAndLogs() {
         CreateMessageDTO dto = validDto();
 
-        useCase.createMessage(dto);
+        useCase.createMessage(dto, "env-1");
 
-        verify(validator).validate(dto);
+        verify(validator).validate(dto, "env-1");
         verify(createMessageRepository).createMessage(any(), eq("env-1"), eq("state-1"));
         verify(log).info("Message created successfully with code: {}", "MSG-001");
     }
@@ -77,9 +77,9 @@ class CreateMessageUseCaseTest {
     void createMessage_propagatesValidationError() {
         CreateMessageDTO dto = validDto();
         doThrow(BusinessRuleException.buildUserException("Invalid message"))
-                .when(validator).validate(dto);
+                .when(validator).validate(dto, "env-1");
 
-        assertThatThrownBy(() -> useCase.createMessage(dto))
+        assertThatThrownBy(() -> useCase.createMessage(dto, "env-1"))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("Invalid message"));
@@ -91,7 +91,7 @@ class CreateMessageUseCaseTest {
         CreateMessageDTO dto = validDto();
         doThrow(new RuntimeException("db down")).when(createMessageRepository).createMessage(any(), anyString(), anyString());
 
-        assertThatThrownBy(() -> useCase.createMessage(dto))
+        assertThatThrownBy(() -> useCase.createMessage(dto, "env-1"))
                 .isInstanceOf(CrossWordsException.class)
                 .satisfies(ex -> assertThat(((CrossWordsException) ex).getTechnicalMessage())
                         .isEqualTo("Error al crear el mensaje"));
@@ -104,7 +104,7 @@ class CreateMessageUseCaseTest {
         doThrow(BusinessRuleException.buildUserException("conflict"))
                 .when(createMessageRepository).createMessage(any(), anyString(), anyString());
 
-        assertThatThrownBy(() -> useCase.createMessage(dto))
+        assertThatThrownBy(() -> useCase.createMessage(dto, "env-1"))
                 .isInstanceOf(BusinessRuleException.class);
     }
 }

@@ -4,7 +4,8 @@ import co.edu.uco.application.primaryports.facade.token.FindEnvironmentIdTokenUs
 import co.edu.uco.application.primaryports.facade.token.VerifyAccessUseCaseFacade;
 import co.edu.uco.application.secondaryports.ErrorResponse;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
-import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
+import co.edu.uco.crosscutting.exceptions.NotFoundException;
+import co.edu.uco.crosscutting.exceptions.UnauthorizedException;
 import co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.SerializerRegistry;
 import co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.SerializerType;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,7 +53,7 @@ class TokenHeaderInterceptorTest {
     private void stubErrorResponse(String acceptHeader) throws Exception {
         when(serializerRegistry.getSerializerForMediaType(acceptHeader)).thenReturn(serializer);
         when(serializer.serialize(any(ErrorResponse.class)))
-                .thenReturn("{\"errors\":[{\"code\":\"FORBIDDEN\",\"message\":\"forbidden\"}]}");
+                .thenReturn("{\"errors\":[{\"code\":\"UNAUTHORIZED\",\"message\":\"unauthorized\"}]}");
         when(serializer.getSupportedContentType()).thenReturn("application/json");
         when(request.getRequestURI()).thenReturn("/api/v1/message");
         when(response.getWriter()).thenReturn(new PrintWriter(new StringWriter()));
@@ -84,7 +85,7 @@ class TokenHeaderInterceptorTest {
     }
 
     @Test
-    void preHandle_returnsFalse_with403_whenAccessDenied() throws Exception {
+    void preHandle_returnsFalse_with401_whenAccessDenied() throws Exception {
         when(request.getHeader("Token")).thenReturn("invalid-token");
         when(request.getHeader("Accept")).thenReturn("application/json");
         when(verifyAccessUseCaseFacade.execute("invalid-token")).thenReturn(false);
@@ -94,20 +95,36 @@ class TokenHeaderInterceptorTest {
         boolean result = interceptor.preHandle(request, response, new Object());
 
         assertThat(result).isFalse();
-        verify(response).setStatus(403);
+        verify(response).setStatus(401);
     }
 
     @Test
-    void preHandle_returnsFalse_with403_whenTokenVerificationThrows() throws Exception {
+    void preHandle_returnsFalse_with401_whenTokenVerificationThrows() throws Exception {
         when(request.getHeader("Token")).thenReturn("expired-token");
         when(request.getHeader("Accept")).thenReturn("application/json");
         when(verifyAccessUseCaseFacade.execute("expired-token"))
-                .thenThrow(BusinessRuleException.buildUserException("Token is not active"));
+                .thenThrow(UnauthorizedException.buildUserException("Token is not active"));
         stubErrorResponse("application/json");
 
         boolean result = interceptor.preHandle(request, response, new Object());
 
         assertThat(result).isFalse();
-        verify(response).setStatus(403);
+        verify(response).setStatus(401);
+    }
+
+    @Test
+    void preHandle_returnsFalse_with401_whenTokenDisappearsBeforeResolvingEnvironment() throws Exception {
+        when(request.getHeader("Token")).thenReturn("revoked-token");
+        when(request.getHeader("Accept")).thenReturn("application/json");
+        when(verifyAccessUseCaseFacade.execute("revoked-token")).thenReturn(true);
+        when(findEnvironmentIdTokenUseCaseFacade.execute("revoked-token"))
+                .thenThrow(NotFoundException.buildUserException("Token not found"));
+        when(catalogPort.getMessage("TCH_031")).thenReturn("Invalid token");
+        stubErrorResponse("application/json");
+
+        boolean result = interceptor.preHandle(request, response, new Object());
+
+        assertThat(result).isFalse();
+        verify(response).setStatus(401);
     }
 }

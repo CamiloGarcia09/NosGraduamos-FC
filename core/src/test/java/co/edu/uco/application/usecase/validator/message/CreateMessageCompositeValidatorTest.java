@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -20,12 +21,14 @@ class CreateMessageCompositeValidatorTest {
 
     @Mock
     private CatalogPort catalogPort;
+    @Mock
+    private CreateMessageContextRule contextRule;
 
     private CreateMessageCompositeValidator validator;
 
     @BeforeEach
     void setUp() {
-        validator = new CreateMessageCompositeValidator(catalogPort);
+        validator = new CreateMessageCompositeValidator(catalogPort, contextRule);
     }
 
     private CreateMessageDTO validDto() {
@@ -41,14 +44,18 @@ class CreateMessageCompositeValidatorTest {
 
     @Test
     void validate_acceptsValidDto() {
-        assertDoesNotThrow(() -> validator.validate(validDto()));
+        CreateMessageDTO dto = validDto();
+
+        assertDoesNotThrow(() -> validator.validate(dto, "env-1"));
+
+        verify(contextRule).validate(dto, "env-1");
     }
 
     @Test
     void validate_throwsBusinessRule_whenDtoIsNull() {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_010.getCode())).thenReturn("Datos no validos");
 
-        assertThatThrownBy(() -> validator.validate(null))
+        assertThatThrownBy(() -> validator.validate(null, "env-1"))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("Datos no validos"));
@@ -60,7 +67,7 @@ class CreateMessageCompositeValidatorTest {
         CreateMessageDTO dto = validDto();
         dto.setCode("");
 
-        assertThatThrownBy(() -> validator.validate(dto))
+        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("El codigo es requerido"));
@@ -72,7 +79,7 @@ class CreateMessageCompositeValidatorTest {
         CreateMessageDTO dto = validDto();
         dto.setTitle("");
 
-        assertThatThrownBy(() -> validator.validate(dto))
+        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("El titulo es requerido"));
@@ -84,7 +91,7 @@ class CreateMessageCompositeValidatorTest {
         CreateMessageDTO dto = validDto();
         dto.setTitle("Short");
 
-        assertThatThrownBy(() -> validator.validate(dto))
+        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("Titulo corto"));
@@ -96,7 +103,7 @@ class CreateMessageCompositeValidatorTest {
         CreateMessageDTO dto = validDto();
         dto.setTitle("a".repeat(51));
 
-        assertThatThrownBy(() -> validator.validate(dto))
+        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("Titulo largo"));
@@ -108,7 +115,7 @@ class CreateMessageCompositeValidatorTest {
         CreateMessageDTO dto = validDto();
         dto.setContent("");
 
-        assertThatThrownBy(() -> validator.validate(dto))
+        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("El contenido es requerido"));
@@ -120,7 +127,7 @@ class CreateMessageCompositeValidatorTest {
         CreateMessageDTO dto = validDto();
         dto.setContent("Short");
 
-        assertThatThrownBy(() -> validator.validate(dto))
+        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("Contenido corto"));
@@ -132,7 +139,7 @@ class CreateMessageCompositeValidatorTest {
         CreateMessageDTO dto = validDto();
         dto.setContent("a".repeat(101));
 
-        assertThatThrownBy(() -> validator.validate(dto))
+        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("Contenido largo"));
@@ -143,7 +150,7 @@ class CreateMessageCompositeValidatorTest {
         CreateMessageDTO dto = validDto();
         dto.setApplicationId("");
 
-        assertThatThrownBy(() -> validator.validate(dto))
+        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("El id de la aplicación es requerido."));
@@ -154,7 +161,7 @@ class CreateMessageCompositeValidatorTest {
         CreateMessageDTO dto = validDto();
         dto.setEnvironmentId("");
 
-        assertThatThrownBy(() -> validator.validate(dto))
+        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("El id del entorno es requerido."));
@@ -165,7 +172,7 @@ class CreateMessageCompositeValidatorTest {
         CreateMessageDTO dto = validDto();
         dto.setFunctionalityId("");
 
-        assertThatThrownBy(() -> validator.validate(dto))
+        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("El id de la funcionalidad es requerido."));

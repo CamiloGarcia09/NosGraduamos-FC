@@ -17,10 +17,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -271,6 +273,21 @@ class MessageSurrealRepositoryAdapterImplTest {
         assertThat(page.getTotalPages()).isEqualTo(2);
         assertThat(page.getData()).hasSize(1);
         assertThat(page.getData().get(0).getCode()).isEqualTo("CODE-4");
+    }
+
+    @Test
+    void findMessagesByEnvironment_doesNotUseGlobalFilter_whenEnvironmentIsMissing() {
+        doReturn(emptyResponse()).when(surreal).query(anyString());
+
+        adapter.findMessagesByEnvironment(null, PageRequest.of(0, 2));
+
+        ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
+        verify(surreal, times(2)).query(queryCaptor.capture());
+        List<String> queries = queryCaptor.getAllValues();
+        assertThat(queries)
+                .allSatisfy(query -> assertThat(query)
+                        .contains("environment_id")
+                        .doesNotContain("WHERE TRUE"));
     }
 
 

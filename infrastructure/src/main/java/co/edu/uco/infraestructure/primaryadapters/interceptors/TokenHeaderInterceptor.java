@@ -3,7 +3,8 @@ package co.edu.uco.infraestructure.primaryadapters.interceptors;
 import co.edu.uco.application.primaryports.facade.token.FindEnvironmentIdTokenUseCaseFacade;
 import co.edu.uco.application.primaryports.facade.token.VerifyAccessUseCaseFacade;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
-import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
+import co.edu.uco.crosscutting.exceptions.NotFoundException;
+import co.edu.uco.crosscutting.exceptions.UnauthorizedException;
 import co.edu.uco.infraestructure.secondaryadapters.presenter.rest.ErrorResponseFactory;
 import co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.SerializerRegistry;
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,8 +56,15 @@ public final class TokenHeaderInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        var environmentId = findEnvironmentIdTokenUseCaseFacade.execute(token);
-        request.setAttribute(ENVIRONMENT_ID_ATTRIBUTE, environmentId);
+        try {
+            var environmentId = findEnvironmentIdTokenUseCaseFacade.execute(token);
+            request.setAttribute(ENVIRONMENT_ID_ATTRIBUTE, environmentId);
+        } catch (NotFoundException exception) {
+            sendErrorResponse(request, response, acceptHeader,
+                    HttpStatus.UNAUTHORIZED.value(),
+                    catalogPort.getMessage(MessageCatalogCodeEnum.TCH_031.getCode()));
+            return false;
+        }
         return true;
     }
 
@@ -65,16 +73,16 @@ public final class TokenHeaderInterceptor implements HandlerInterceptor {
         try {
             if (!verifyAccessUseCaseFacade.execute(token)) {
                 sendErrorResponse(request, response, acceptHeader,
-                        HttpStatus.FORBIDDEN.value(),
+                        HttpStatus.UNAUTHORIZED.value(),
                         catalogPort.getMessage(MessageCatalogCodeEnum.TCH_031.getCode()));
                 return false;
             }
             return true;
-        } catch (BusinessRuleException ex) {
+        } catch (UnauthorizedException ex) {
             var message = Optional.ofNullable(ex.getUserMessage())
                     .filter(msg -> !msg.isEmpty())
                     .orElseGet(() -> catalogPort.getMessage(MessageCatalogCodeEnum.TCH_031.getCode()));
-            sendErrorResponse(request, response, acceptHeader, HttpStatus.FORBIDDEN.value(), message);
+            sendErrorResponse(request, response, acceptHeader, HttpStatus.UNAUTHORIZED.value(), message);
             return false;
         }
     }

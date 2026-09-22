@@ -351,7 +351,7 @@ public enum MessageCatalogCodeEnum {
     /** El entorno no existe. */
     FUN_035("FUN_035"),
 
-    /** La aplicación a la que se asocia el entorno no existe. */
+    /** El entorno no pertenece a la aplicación indicada. */
     FUN_036("FUN_036"),
 
     /** La fecha de expiración debe ser una fecha mayor a hoy. */
@@ -676,7 +676,13 @@ public enum MessageCatalogCodeEnum {
     FUN_143("FUN_143"),
 
     /** Id del estado de token inactivo. */
-    FUN_144("FUN_144");
+    FUN_144("FUN_144"),
+
+    /** El entorno solicitado no coincide con el entorno autenticado. */
+    FUN_145("FUN_145"),
+
+    /** La funcionalidad no pertenece a la aplicación indicada. */
+    FUN_146("FUN_146");
 
     // =========================================================================
 

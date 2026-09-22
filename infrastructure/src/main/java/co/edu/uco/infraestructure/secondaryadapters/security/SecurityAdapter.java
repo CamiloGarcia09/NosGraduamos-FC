@@ -29,7 +29,7 @@ public final class SecurityAdapter implements SecurityPort {
     @Override
     public boolean validateAccessToken(String token) {
         boolean valid = BURNED_ACCESS_TOKEN.equals(token);
-        log.info("Validando token quemado: [%s] -> %s".formatted(token, valid));
+        log.info("Validando token quemado -> %s".formatted(valid));
         return valid;
     }
 }

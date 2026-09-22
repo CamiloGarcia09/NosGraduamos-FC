@@ -186,7 +186,7 @@ de mensaje. Puede ser usado por core e infrastructure.
 2. Los interceptores se ejecutan según la ruta:
      - LoggingConfig           -> crea/usurpa X-Correlation-ID, MDC, headers de respuesta
      - AcceptHeaderInterceptor -> valida el header Accept contra SerializerRegistry (406 si no soporta)
-     - TokenHeaderInterceptor  -> valida el header Token (403) y resuelve environmentId (atributo de request)
+     - TokenHeaderInterceptor  -> valida el header Token (401 si falta o es invalido) y resuelve environmentId (atributo de request)
 3. Controller(Impl) invoca la facade (puerto primario):  facade.execute(dto)
 4. FacadeImpl delega en el contrato Handling*Port
 5. UseCase (que implementa Handling*Port) ejecuta:
@@ -493,7 +493,7 @@ Respuesta base `Response` (datos + lista de mensajes) serializada según el head
 - `LoggingConfig` (`HandlerInterceptor` global): X-Correlation-ID, MDC (URI, método, query, sesión),
   headers de respuesta `X-Correlation-ID`, `TS`, `THREAD`, `APP=MessageUcoLab`. Limpia el MDC al final.
 - `AcceptHeaderInterceptor` (`/messageucolab/v1/**`, sin swagger): valida el header Accept.
-- `TokenHeaderInterceptor` (rutas de mensajes/token): exige header `Token` (403 si falta/vacío o
+- `TokenHeaderInterceptor` (rutas de mensajes/token): exige header `Token` (401 si falta/vacío o
   token inválido), ejecuta `VerifyAccessUseCaseFacade` y `FindEnvironmentIdTokenUseCaseFacade` para
   resolver el `environmentId` y dejarlo como atributo de request.
 
@@ -507,7 +507,11 @@ Los controllers de catálogo están exentos del token (solo pasan por Accept y l
 CrossWordsException extends RuntimeException
   userMessage, technicalMessage, rootException, type (ExceptionType), location (ExceptionLocation)
   |-- BusinessException      (type BUSINESS, location APPLICATION)   + buildUserException / buildTechnicalException
-  `-- BusinessRuleException  (type BUSINESS_RULE, location APPLICATION)
+  |-- BusinessRuleException  (type BUSINESS_RULE, location APPLICATION)
+  |     |-- UnauthorizedException (HTTP 401)
+  |     `-- ForbiddenException    (HTTP 403)
+  |-- NotFoundException      (HTTP 404)
+  `-- ConflictException      (HTTP 409)
 ```
 
 Enums: `ExceptionType{ TECHNICAL, BUSINESS, BUSINESS_RULE, GENERAL }`,
@@ -526,11 +530,12 @@ SizeTitleMoreThanFiftyException, SizeContentLessThanTenException, SizeContentMor
 **No existe una clase `GlobalExceptionHandler`.** La traducción la hace `HttpPresenterAdapter`
 (`@RestControllerAdvice` en `secondaryadapters/presenter/rest`):
 
-- `@ExceptionHandler(CrossWordsException.class)` → `Response([], [mensaje])` con **HTTP 404**
-  (usa el serializer según Accept; si no hay userMessage usa FUN_023).
-- `@ExceptionHandler(Exception.class)` → mensaje crudo con **HTTP 400**.
+- `@ExceptionHandler(CrossWordsException.class)` → `Response([], [mensaje])` con el estado HTTP
+  definido por la excepción (usa el serializer según Accept; si no hay `userMessage` usa FUN_023).
+- `@ExceptionHandler(Exception.class)` → mensaje genérico con **HTTP 500**.
+- Cuerpo ilegible → **HTTP 400**; media type no aceptable → **HTTP 406**.
 
-Además, los interceptores escriben sus propios errores (403 token, 406 Accept).
+Además, los interceptores escriben sus propios errores (401 token, 406 Accept).
 
 ## Configuración y arranque
 

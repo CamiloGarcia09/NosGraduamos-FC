@@ -60,12 +60,13 @@ class MessagesControllerImplTest {
     }
 
     @Test
-    void findByEnvironmentAndMessage_buildsPageRequestAndPresentsResult() {
+    void findByEnvironmentAndMessage_usesAuthenticatedEnvironmentAndPresentsResult() {
+        when(request.getAttribute("environmentId")).thenReturn("env-1");
         SimplePage<MessageDTO> page = SimplePage.of(List.of(), 1, 10, 0, 0);
         when(findMessagesByEnvironmentUsecaseFacade.execute(eq("env-1"), any(PageRequestDTO.class)))
                 .thenReturn(page);
 
-        controller.findByEnvironmentAndMessage("env-1", "1", "10", "asc", "code", request, response);
+        controller.findByEnvironmentAndMessage("1", "10", "asc", "code", request, response);
 
         ArgumentCaptor<PageRequestDTO> captor = ArgumentCaptor.forClass(PageRequestDTO.class);
         verify(findMessagesByEnvironmentUsecaseFacade).execute(eq("env-1"), captor.capture());

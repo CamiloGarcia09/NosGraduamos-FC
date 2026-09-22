@@ -17,7 +17,6 @@ public interface MessagesController {
             produces = {"application/json", "application/yaml", "application/xml", "text/plain", "text/html"}
     )
     void findByEnvironmentAndMessage(
-            @RequestParam(value = "environmentId", required = false) String environmentId,
             @RequestParam(value = "page", required = false) String page,
             @RequestParam(value = "size", required = false) String size,
             @RequestParam(value = "sort", required = false) String sort,

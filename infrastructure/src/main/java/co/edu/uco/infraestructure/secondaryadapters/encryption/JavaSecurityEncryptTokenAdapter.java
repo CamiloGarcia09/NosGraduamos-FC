@@ -83,7 +83,7 @@ public final class JavaSecurityEncryptTokenAdapter implements EncryptTokenPort {
     @Override
     public Boolean access(String privateKey, String signature, String secretName) {
         if (isEmptyOrNull(trim(privateKey)) || isEmptyOrNull(trim(signature)) || isEmptyOrNull(trim(secretName))) {
-            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_028.getCode()), privateKey, signature, secretName);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_028.getCode()));
             return false;
         }
 
@@ -101,10 +101,10 @@ public final class JavaSecurityEncryptTokenAdapter implements EncryptTokenPort {
 
             return data.equals(secretName);
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException | IllegalArgumentException e) {
-            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_028.getCode()), privateKey, signature, secretName, e);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_028.getCode()), e);
             return false;
         } catch (Exception e) {
-            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_028.getCode()), privateKey, signature, secretName, e);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_028.getCode()), e);
             return false;
         }
     }

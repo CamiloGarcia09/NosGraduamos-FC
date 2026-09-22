@@ -46,10 +46,10 @@ public class TokenSurrealRepositoryAdapterImpl extends SurrealCatalogSupport imp
 
         try {
             surreal.query(sql);
-            log.debug(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_062.getCode()).formatted(model.getId()));
+            log.debug(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_062.getCode()));
             return model;
         } catch (final RuntimeException ex) {
-            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_061.getCode()).formatted(sql), ex);
+            log.error(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_061.getCode()), ex);
             throw ex;
         }
     }
@@ -71,7 +71,7 @@ public class TokenSurrealRepositoryAdapterImpl extends SurrealCatalogSupport imp
     }
 
     private Optional<TokenSurrealModel> findOne(final String sql) {
-        return queryOne(sql, "Error al consultar token en SurrealDB: " + sql, this::toModel);
+        return queryOne(sql, "Error al consultar token en SurrealDB", this::toModel);
     }
 
     private TokenSurrealModel toModel(final Object obj) {

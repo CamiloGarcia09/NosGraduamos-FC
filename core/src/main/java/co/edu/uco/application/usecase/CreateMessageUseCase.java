@@ -33,8 +33,8 @@ public final class CreateMessageUseCase implements HandlingCreateMessagePort {
     }
 
     @Override
-    public void createMessage(CreateMessageDTO dto) {
-        validator.validate(dto);
+    public void createMessage(CreateMessageDTO dto, String authenticatedEnvironmentId) {
+        validator.validate(dto, authenticatedEnvironmentId);
 
         try {
             var messageData = new MessageData(
@@ -57,7 +57,7 @@ public final class CreateMessageUseCase implements HandlingCreateMessagePort {
 
             createMessageRepository.createMessage(
                     messageData,
-                    dto.getEnvironmentId(),
+                    authenticatedEnvironmentId,
                     dto.getMessageEnvironmentStateId()
             );
 

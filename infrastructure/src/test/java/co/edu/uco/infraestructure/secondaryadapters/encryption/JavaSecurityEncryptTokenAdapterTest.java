@@ -18,7 +18,10 @@ import java.util.Base64;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -129,27 +132,34 @@ class JavaSecurityEncryptTokenAdapterTest {
 
     @Test
     void access_returnsFalse_whenArgumentsAreEmpty() {
+        when(catalogPort.getMessage("TCH_028")).thenReturn("access error");
+
         Boolean result = adapter.access(" ", " ", " ");
 
         assertThat(result).isFalse();
+        verify(log).error("access error");
     }
 
     @Test
     void access_returnsFalse_whenSignatureIsInvalidBase64() throws Exception {
         KeyPair keyPair = generateKeyPair();
+        when(catalogPort.getMessage("TCH_028")).thenReturn("access error");
 
         Boolean result = adapter.access(privateKeyBase64(keyPair), "!!!not-base64!!!", "my-secret");
 
         assertThat(result).isFalse();
+        verify(log).error(eq("access error"), any(IllegalArgumentException.class));
     }
 
     @Test
     void access_returnsFalse_whenPrivateKeyIsInvalidBase64() throws Exception {
         KeyPair keyPair = generateKeyPair();
         String signature = adapter.generateSignature("my-secret", keyPair.getPublic());
+        when(catalogPort.getMessage("TCH_028")).thenReturn("access error");
 
         Boolean result = adapter.access("!!!not-base64!!!", signature, "my-secret");
 
         assertThat(result).isFalse();
+        verify(log).error(eq("access error"), any(IllegalArgumentException.class));
     }
 }

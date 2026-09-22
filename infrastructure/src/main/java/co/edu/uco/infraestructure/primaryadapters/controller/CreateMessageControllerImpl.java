@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static co.edu.uco.infraestructure.config.InfrastructureConstant.ENVIRONMENT_ID_ATTRIBUTE;
+
 @RestController
 final class CreateMessageControllerImpl implements CreateMessageController {
 
@@ -24,8 +26,9 @@ final class CreateMessageControllerImpl implements CreateMessageController {
 
     @Override
     public void createMessage(CreateMessageDTO createMessageDTO, HttpServletRequest httpServletRequest,
-                              HttpServletResponse httpServletResponse) {
-        createMessageUseCaseFacade.execute(createMessageDTO);
+                               HttpServletResponse httpServletResponse) {
+        var environmentId = (String) httpServletRequest.getAttribute(ENVIRONMENT_ID_ATTRIBUTE);
+        createMessageUseCaseFacade.execute(createMessageDTO, environmentId);
         restPresenter.presentRestSuccess(List.of("Mensaje creado exitosamente"), httpServletRequest, httpServletResponse);
     }
 }

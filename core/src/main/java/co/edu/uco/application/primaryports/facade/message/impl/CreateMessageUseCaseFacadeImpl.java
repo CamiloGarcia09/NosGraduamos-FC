@@ -15,7 +15,7 @@ public final class CreateMessageUseCaseFacadeImpl implements CreateMessageUseCas
     }
 
     @Override
-    public void execute(CreateMessageDTO createMessageDTO) {
-        handlingCreateMessagePort.createMessage(createMessageDTO);
+    public void execute(CreateMessageDTO createMessageDTO, String authenticatedEnvironmentId) {
+        handlingCreateMessagePort.createMessage(createMessageDTO, authenticatedEnvironmentId);
     }
 }
