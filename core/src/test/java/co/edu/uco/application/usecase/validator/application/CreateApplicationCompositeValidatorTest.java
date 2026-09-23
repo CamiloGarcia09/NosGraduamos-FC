@@ -5,7 +5,6 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.repository.ApplicationRepository;
 import co.edu.uco.application.secondaryports.repository.RecordExistsCatalogPort;
-import co.edu.uco.application.usecase.validator.token.DateValidValidator;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +37,7 @@ class CreateApplicationCompositeValidatorTest {
     @BeforeEach
     void setUp() {
         validator = new CreateApplicationCompositeValidator(
-                catalogPort, recordExistsCatalogPort, applicationRepository, new DateValidValidator(catalogPort));
+                catalogPort, recordExistsCatalogPort, applicationRepository);
     }
 
     private CreateApplicationDTO validDto() {
@@ -71,6 +70,9 @@ class CreateApplicationCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenNameIsEmpty() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_145.getCode()))
+                .thenReturn("El nombre de la aplicación es requerido.");
+
         assertThatThrownBy(() -> validator.validate(new CreateApplicationDTO()))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
@@ -79,6 +81,8 @@ class CreateApplicationCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenNameExceedsMaxLength() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_146.getCode()))
+                .thenReturn("El nombre de la aplicación no puede superar los 50 caracteres.");
         CreateApplicationDTO dto = validDto();
         dto.setName("a".repeat(51));
 
@@ -90,6 +94,8 @@ class CreateApplicationCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenLanguageIdIsEmpty() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_147.getCode()))
+                .thenReturn("El idioma de la aplicación es requerido.");
         CreateApplicationDTO dto = validDto();
         dto.setLanguageId("");
 
@@ -101,6 +107,8 @@ class CreateApplicationCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenLanguageDoesNotExist() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_148.getCode()))
+                .thenReturn("El idioma de la aplicación no existe.");
         when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(false);
         CreateApplicationDTO dto = validDto();
 
@@ -112,6 +120,8 @@ class CreateApplicationCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenStartDateIsEmpty() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_149.getCode()))
+                .thenReturn("La fecha de inicio de la aplicación es requerida.");
         when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
         CreateApplicationDTO dto = validDto();
         dto.setStartDate("");
@@ -124,6 +134,8 @@ class CreateApplicationCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenStartDateIsAfterEndDate() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_173.getCode()))
+                .thenReturn("La fecha de inicio no puede ser posterior a la fecha de fin.");
         when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
         CreateApplicationDTO dto = validDto();
         dto.setStartDate("2026-12-31T23:59:59");
@@ -137,6 +149,8 @@ class CreateApplicationCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenStateIdIsEmpty() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_151.getCode()))
+                .thenReturn("El estado de la aplicación es requerido.");
         when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
         CreateApplicationDTO dto = validDto();
         dto.setStateId("");
@@ -149,6 +163,8 @@ class CreateApplicationCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenStateDoesNotExist() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_152.getCode()))
+                .thenReturn("El estado de la aplicación no existe.");
         when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true, false);
         CreateApplicationDTO dto = validDto();
 
@@ -160,6 +176,8 @@ class CreateApplicationCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenNameAlreadyExists() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_153.getCode()))
+                .thenReturn("Ya existe una aplicación con el nombre proporcionado.");
         when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
         when(applicationRepository.findByName("Message App"))
                 .thenReturn(Optional.of(new ApplicationData()));

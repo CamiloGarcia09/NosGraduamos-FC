@@ -12,6 +12,7 @@ import co.edu.uco.application.secondaryports.secret.EncryptTokenPort;
 import co.edu.uco.application.usecase.handling.HandlingCreateTokenPort;
 import co.edu.uco.application.usecase.handling.HandlingRevokeTokenPort;
 import co.edu.uco.application.usecase.validator.token.CreateTokenCompositeValidator;
+import co.edu.uco.application.usecase.validator.token.TokenValidationContext;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.helpers.UtilPairKey;
@@ -64,7 +65,7 @@ public final class CreateTokenUseCaseFacadeImpl implements CreateTokenUseCaseFac
     @Override
     public String execute(CreateTokenDTO createTokenDTO, String application) {
 
-        validator.validate(createTokenDTO, application);
+        validator.validate(new TokenValidationContext(createTokenDTO, application));
         handlingRevokeTokenPort.execute(createTokenDTO.getEnvironmentId(), TOKEN_STATE_ACTIVE_ID);
 
         var secretName = concatenateWithoutSeparator(
