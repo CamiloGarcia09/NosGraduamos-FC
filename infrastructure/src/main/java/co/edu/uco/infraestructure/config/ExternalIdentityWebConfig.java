@@ -23,6 +23,7 @@ public class ExternalIdentityWebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(externalIdentityInterceptor)
-                .addPathPatterns("/messageucolab/v1/**");
+                .addPathPatterns("/messageucolab/v1/**")
+                .order(-100);
     }
 }

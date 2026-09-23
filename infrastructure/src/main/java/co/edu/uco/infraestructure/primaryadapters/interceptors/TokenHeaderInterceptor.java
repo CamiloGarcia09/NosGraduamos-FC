@@ -42,6 +42,9 @@ public final class TokenHeaderInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response,
                              @NotNull Object handler) throws Exception {
+        if (request.getAttribute(EXTERNAL_IDENTITY_ATTRIBUTE) != null) {
+            return true;
+        }
         var token = request.getHeader(REQUEST_GET_HEADER_TOKEN);
         var acceptHeader = request.getHeader(REQUEST_GET_HEADER_ACCEPT);
 

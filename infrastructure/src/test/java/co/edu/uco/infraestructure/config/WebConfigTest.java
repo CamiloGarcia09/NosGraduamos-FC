@@ -43,6 +43,13 @@ class WebConfigTest {
         when(acceptHeaderRegistration.addPathPatterns("/messageucolab/v1/**"))
                 .thenReturn(acceptHeaderRegistration);
         when(registry.addInterceptor(tokenHeaderInterceptor)).thenReturn(tokenHeaderRegistration);
+        when(tokenHeaderRegistration.addPathPatterns(
+                WEB_CONFIG_API_MESSAGE,
+                WEB_CONFIG_API_APPLICATION,
+                WEB_CONFIG_API_MESSAGE_LIST,
+                WEB_CONFIG_API_MESSAGE_CODE,
+                WEB_CONFIG_API_MESSAGE_CODE_TRANSLATION,
+                WEB_CONFIG_API_CREATE_MESSAGE)).thenReturn(tokenHeaderRegistration);
 
         new WebConfig(loggingConfig, acceptHeaderInterceptor, tokenHeaderInterceptor).addInterceptors(registry);
 
@@ -53,5 +60,6 @@ class WebConfigTest {
                 WEB_CONFIG_API_MESSAGE_CODE,
                 WEB_CONFIG_API_MESSAGE_CODE_TRANSLATION,
                 WEB_CONFIG_API_CREATE_MESSAGE);
+        verify(tokenHeaderRegistration).order(0);
     }
 }

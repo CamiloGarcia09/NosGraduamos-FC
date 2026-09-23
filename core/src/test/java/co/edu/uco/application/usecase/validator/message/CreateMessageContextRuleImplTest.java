@@ -75,6 +75,17 @@ class CreateMessageContextRuleImplTest {
         assertThatCode(() -> rule.validate(dto, ENVIRONMENT_ID)).doesNotThrowAnyException();
     }
 
+    @Test
+    void validate_acceptsContext_whenBodyEnvironmentIdIsAbsent() {
+        CreateMessageDTO dto = validDto();
+        dto.setEnvironmentId("");
+        when(environmentRepository.findById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment(APPLICATION_ID)));
+        when(functionalityCatalogRepository.findAllByApplicationId(APPLICATION_ID))
+                .thenReturn(List.of(functionality(FUNCTIONALITY_ID, APPLICATION_ID)));
+
+        assertThatCode(() -> rule.validate(dto, ENVIRONMENT_ID)).doesNotThrowAnyException();
+    }
+
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = " ")

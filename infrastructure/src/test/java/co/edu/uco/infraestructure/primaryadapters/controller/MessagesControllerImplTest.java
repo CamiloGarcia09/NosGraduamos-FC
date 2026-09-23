@@ -8,6 +8,9 @@ import co.edu.uco.application.primaryports.facade.message.FindMessagesByEnvironm
 import co.edu.uco.application.primaryports.facade.message.TranslateMessageByCodeAndEnvironmentUseCaseFacade;
 import co.edu.uco.application.secondaryports.presenter.PresenterPort;
 import co.edu.uco.application.secondaryports.repository.SimplePage;
+import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
+import co.edu.uco.application.usecase.domain.security.MessageAccessContext;
+import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -28,6 +32,9 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MessagesControllerImplTest {
+
+    private static final ExternalIdentity IDENTITY = new ExternalIdentity(
+            "issuer", "subject", null, PrincipalType.HUMAN, Instant.MAX);
 
     @Mock
     private FindMessagesByEnvironmentUsecaseFacade findMessagesByEnvironmentUsecaseFacade;
@@ -63,15 +70,18 @@ class MessagesControllerImplTest {
     void findByEnvironmentAndMessage_usesAuthenticatedEnvironmentAndPresentsResult() {
         when(request.getAttribute("environmentId")).thenReturn("env-1");
         SimplePage<MessageDTO> page = SimplePage.of(List.of(), 1, 10, 0, 0);
-        when(findMessagesByEnvironmentUsecaseFacade.execute(eq("env-1"), any(PageRequestDTO.class)))
+        when(findMessagesByEnvironmentUsecaseFacade.execute(any(MessageAccessContext.class), any(PageRequestDTO.class)))
                 .thenReturn(page);
 
         controller.findByEnvironmentAndMessage("1", "10", "asc", "code", request, response);
 
         ArgumentCaptor<PageRequestDTO> captor = ArgumentCaptor.forClass(PageRequestDTO.class);
-        verify(findMessagesByEnvironmentUsecaseFacade).execute(eq("env-1"), captor.capture());
+        ArgumentCaptor<MessageAccessContext> contextCaptor = ArgumentCaptor.forClass(MessageAccessContext.class);
+        verify(findMessagesByEnvironmentUsecaseFacade).execute(contextCaptor.capture(), captor.capture());
         PageRequestDTO captured = captor.getValue();
         assertAll(
+                () -> assertThat(contextCaptor.getValue().legacyEnvironmentId()).isEqualTo("env-1"),
+                () -> assertThat(contextCaptor.getValue().externalIdentity()).isNull(),
                 () -> assertThat(captured.getPage()).isEqualTo("1"),
                 () -> assertThat(captured.getSize()).isEqualTo("10"),
                 () -> assertThat(captured.getSort()).isEqualTo("asc"),
@@ -83,10 +93,14 @@ class MessagesControllerImplTest {
     void findByCodeMessageAndEnvironment_presentsSingleMessage() {
         when(request.getAttribute("environmentId")).thenReturn("env-1");
         MessageDTO dto = MessageDTO.create("CODE", "Title", "Content", "TYPE", "CAT", "APP", "FUNC");
-        when(findMessageByCodeAndEnvironmentUseCaseFacade.execute("CODE", "env-1")).thenReturn(dto);
+        when(findMessageByCodeAndEnvironmentUseCaseFacade.execute(eq("CODE"), any(MessageAccessContext.class)))
+                .thenReturn(dto);
 
         controller.findByCodeMessageAndEnvironment("CODE", request, response);
 
+        ArgumentCaptor<MessageAccessContext> contextCaptor = ArgumentCaptor.forClass(MessageAccessContext.class);
+        verify(findMessageByCodeAndEnvironmentUseCaseFacade).execute(eq("CODE"), contextCaptor.capture());
+        assertThat(contextCaptor.getValue().legacyEnvironmentId()).isEqualTo("env-1");
         verify(restPresenter).presentRestSuccess(List.of(dto), request, response);
     }
 
@@ -95,11 +109,33 @@ class MessagesControllerImplTest {
         when(request.getAttribute("environmentId")).thenReturn("env-1");
         TranslatedMessageDTO dto = TranslatedMessageDTO.create("CODE", "es", "en", "T", "C", "TT", "TC",
                 "TYPE", "CAT", "APP", "FUNC", "provider", "model", 10);
-        when(translateMessageByCodeAndEnvironmentUseCaseFacade.execute("CODE", "env-1", "es", "en"))
+        when(translateMessageByCodeAndEnvironmentUseCaseFacade.execute(
+                eq("CODE"), any(MessageAccessContext.class), eq("es"), eq("en")))
                 .thenReturn(dto);
 
         controller.translateByCodeMessageAndEnvironment("CODE", "es", "en", request, response);
 
+        ArgumentCaptor<MessageAccessContext> contextCaptor = ArgumentCaptor.forClass(MessageAccessContext.class);
+        verify(translateMessageByCodeAndEnvironmentUseCaseFacade)
+                .execute(eq("CODE"), contextCaptor.capture(), eq("es"), eq("en"));
+        assertThat(contextCaptor.getValue().legacyEnvironmentId()).isEqualTo("env-1");
         verify(translationPresenter).presentRestSuccess(List.of(dto), request, response);
+    }
+
+    @Test
+    void findByCodeMessageAndEnvironment_propagatesExternalIdentityAlongsideLegacyAttribute() {
+        when(request.getAttribute("environmentId")).thenReturn("legacy-env");
+        when(request.getAttribute("externalIdentity")).thenReturn(IDENTITY);
+        MessageDTO dto = MessageDTO.create("CODE", "Title", "Content", "TYPE", "CAT", "APP", "FUNC");
+        when(findMessageByCodeAndEnvironmentUseCaseFacade.execute(eq("CODE"), any(MessageAccessContext.class)))
+                .thenReturn(dto);
+
+        controller.findByCodeMessageAndEnvironment("CODE", request, response);
+
+        ArgumentCaptor<MessageAccessContext> contextCaptor = ArgumentCaptor.forClass(MessageAccessContext.class);
+        verify(findMessageByCodeAndEnvironmentUseCaseFacade).execute(eq("CODE"), contextCaptor.capture());
+        assertThat(contextCaptor.getValue())
+                .extracting(MessageAccessContext::legacyEnvironmentId, MessageAccessContext::externalIdentity)
+                .containsExactly("legacy-env", IDENTITY);
     }
 }

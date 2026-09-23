@@ -7,6 +7,9 @@ import co.edu.uco.application.secondaryports.entity.MessageData;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.usecase.domain.MessageDomain;
+import co.edu.uco.application.usecase.domain.security.MessageAccessContext;
+import co.edu.uco.application.usecase.domain.security.PermissionCode;
+import co.edu.uco.application.usecase.security.MessageEnvironmentResolver;
 import co.edu.uco.application.usecase.validator.message.FindMessageCodeValidator;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
@@ -21,11 +24,14 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class FindMessageByCodeAndEnvironmentUseCaseTest {
+
+    private static final MessageAccessContext ACCESS_CONTEXT = new MessageAccessContext("env", null);
 
     @Mock
     private MessageCatalogStrategy messageCatalogStrategy;
@@ -33,6 +39,8 @@ class FindMessageByCodeAndEnvironmentUseCaseTest {
     private FindMessageCodeValidator findMessageCodeValidator;
     @Mock
     private DataMapper<MessageData, MessageDomain, MessageDTO> entityMapper;
+    @Mock
+    private MessageEnvironmentResolver environmentResolver;
     @Mock
     private LoggingPortFactory loggerFactory;
     @Mock
@@ -44,7 +52,8 @@ class FindMessageByCodeAndEnvironmentUseCaseTest {
     void setUp() {
         when(loggerFactory.getLogger(FindMessageByCodeAndEnvironmentUseCase.class)).thenReturn(log);
         useCase = new FindMessageByCodeAndEnvironmentUseCase(
-                messageCatalogStrategy, findMessageCodeValidator, entityMapper, loggerFactory);
+                messageCatalogStrategy, findMessageCodeValidator, entityMapper, environmentResolver, loggerFactory);
+        when(environmentResolver.resolve(ACCESS_CONTEXT, PermissionCode.MESSAGE_READ)).thenReturn("env");
     }
 
     @Test
@@ -55,7 +64,7 @@ class FindMessageByCodeAndEnvironmentUseCaseTest {
                 .thenReturn(Optional.of(message));
         when(entityMapper.mapperDTO(message)).thenReturn(dto);
 
-        MessageDTO result = useCase.execute("CODE", "env");
+        MessageDTO result = useCase.execute("CODE", ACCESS_CONTEXT);
 
         assertThat(result).isSameAs(dto);
     }
@@ -67,7 +76,7 @@ class FindMessageByCodeAndEnvironmentUseCaseTest {
         when(messageCatalogStrategy.getSystemMessageContent(MessageCatalogCodeEnum.FUN_012.getCode()))
                 .thenReturn("Message %s not found in environment %s");
 
-        assertThatThrownBy(() -> useCase.execute("CODE", "env"))
+        assertThatThrownBy(() -> useCase.execute("CODE", ACCESS_CONTEXT))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(ex -> assertThat(((BusinessException) ex).getUserMessage())
                         .isEqualTo("Message CODE not found in environment env"));
@@ -80,13 +89,13 @@ class FindMessageByCodeAndEnvironmentUseCaseTest {
         when(messageCatalogStrategy.getSystemMessageContent(MessageCatalogCodeEnum.FUN_012.getCode()))
                 .thenReturn("Message %s not found in environment %s");
 
-        assertThatThrownBy(() -> useCase.execute("CODE", "env"))
+        assertThatThrownBy(() -> useCase.execute("CODE", ACCESS_CONTEXT))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(ex -> assertThat(((BusinessException) ex).getUserMessage())
                         .isEqualTo("Message CODE not found in environment env"));
 
         ArgumentCaptor<Exception> exceptionCaptor = ArgumentCaptor.forClass(Exception.class);
-        verify(log).error(org.mockito.ArgumentMatchers.eq("Message CODE not found in environment env"), exceptionCaptor.capture());
+        verify(log).error(eq("Message CODE not found in environment env"), exceptionCaptor.capture());
         assertThat(exceptionCaptor.getValue()).isInstanceOf(IllegalStateException.class);
     }
 }

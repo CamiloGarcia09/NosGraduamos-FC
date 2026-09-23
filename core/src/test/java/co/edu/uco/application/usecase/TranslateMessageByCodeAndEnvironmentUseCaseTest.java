@@ -13,6 +13,9 @@ import co.edu.uco.application.secondaryports.translation.MessageTranslationCache
 import co.edu.uco.application.secondaryports.translation.MessageTranslationPort;
 import co.edu.uco.application.usecase.validator.message.FindMessageCodeValidator;
 import co.edu.uco.application.usecase.validator.message.TargetLanguageValidator;
+import co.edu.uco.application.usecase.domain.security.MessageAccessContext;
+import co.edu.uco.application.usecase.domain.security.PermissionCode;
+import co.edu.uco.application.usecase.security.MessageEnvironmentResolver;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
@@ -31,12 +34,15 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TranslateMessageByCodeAndEnvironmentUseCaseTest {
+
+    private static final MessageAccessContext ACCESS_CONTEXT = new MessageAccessContext("env", null);
 
     @Mock
     private MessageCatalogStrategy messageCatalogStrategy;
@@ -49,6 +55,8 @@ class TranslateMessageByCodeAndEnvironmentUseCaseTest {
     @Mock
     private TargetLanguageValidator targetLanguageValidator;
     @Mock
+    private MessageEnvironmentResolver environmentResolver;
+    @Mock
     private LoggingPortFactory loggerFactory;
     @Mock
     private LoggingPort log;
@@ -60,7 +68,8 @@ class TranslateMessageByCodeAndEnvironmentUseCaseTest {
         when(loggerFactory.getLogger(TranslateMessageByCodeAndEnvironmentUseCase.class)).thenReturn(log);
         useCase = new TranslateMessageByCodeAndEnvironmentUseCase(
                 messageCatalogStrategy, messageTranslationPort, messageTranslationCachePort,
-                findMessageCodeValidator, targetLanguageValidator, loggerFactory);
+                findMessageCodeValidator, targetLanguageValidator, environmentResolver, loggerFactory);
+        lenient().when(environmentResolver.resolve(ACCESS_CONTEXT, PermissionCode.MESSAGE_TRANSLATE)).thenReturn("env");
     }
 
     private MessageData messageWithData() {
@@ -86,7 +95,7 @@ class TranslateMessageByCodeAndEnvironmentUseCaseTest {
         when(messageTranslationPort.translate(any(MessageTranslationRequestData.class)))
                 .thenReturn(response);
 
-        TranslatedMessageDTO result = useCase.execute("CODE", "env", "", "en");
+        TranslatedMessageDTO result = useCase.execute("CODE", ACCESS_CONTEXT, "", "en");
 
         assertAll(
                 () -> assertThat(result.code()).isEqualTo("CODE"),
@@ -109,7 +118,7 @@ class TranslateMessageByCodeAndEnvironmentUseCaseTest {
         when(messageTranslationPort.translate(any(MessageTranslationRequestData.class)))
                 .thenReturn(response);
 
-        TranslatedMessageDTO result = useCase.execute("CODE", "env", "  es ", "en");
+        TranslatedMessageDTO result = useCase.execute("CODE", ACCESS_CONTEXT, "  es ", "en");
 
         assertThat(result.sourceLanguage()).isEqualTo("es");
     }
@@ -124,7 +133,7 @@ class TranslateMessageByCodeAndEnvironmentUseCaseTest {
         when(messageTranslationCachePort.findTranslation("CODE", "env", "es", "en"))
                 .thenReturn(Optional.of(cached));
 
-        TranslatedMessageDTO result = useCase.execute("CODE", "env", "es", "en");
+        TranslatedMessageDTO result = useCase.execute("CODE", ACCESS_CONTEXT, "es", "en");
 
         assertAll(
                 () -> assertThat(result.translatedTitle()).isEqualTo("Cached Title"),
@@ -141,7 +150,7 @@ class TranslateMessageByCodeAndEnvironmentUseCaseTest {
         when(messageCatalogStrategy.getSystemMessageContent(MessageCatalogCodeEnum.FUN_012.getCode()))
                 .thenReturn("Message %s not found in environment %s");
 
-        assertThatThrownBy(() -> useCase.execute("CODE", "env", "es", "en"))
+        assertThatThrownBy(() -> useCase.execute("CODE", ACCESS_CONTEXT, "es", "en"))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(ex -> assertThat(((BusinessException) ex).getUserMessage())
                         .isEqualTo("Message CODE not found in environment env"));
@@ -157,7 +166,7 @@ class TranslateMessageByCodeAndEnvironmentUseCaseTest {
         when(messageCatalogStrategy.getSystemMessageContent(MessageCatalogCodeEnum.FUN_048.getCode()))
                 .thenReturn("Error translating message");
 
-        assertThatThrownBy(() -> useCase.execute("CODE", "env", "es", "en"))
+        assertThatThrownBy(() -> useCase.execute("CODE", ACCESS_CONTEXT, "es", "en"))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(ex -> assertThat(((BusinessException) ex).getUserMessage())
                         .isEqualTo("Error translating message"));
@@ -172,7 +181,7 @@ class TranslateMessageByCodeAndEnvironmentUseCaseTest {
         doThrow(BusinessRuleException.buildUserException("Invalid message code"))
                 .when(findMessageCodeValidator).validate("CODE");
 
-        assertThatThrownBy(() -> useCase.execute("CODE", "env", "es", "en"))
+        assertThatThrownBy(() -> useCase.execute("CODE", ACCESS_CONTEXT, "es", "en"))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("Invalid message code"));
@@ -183,7 +192,7 @@ class TranslateMessageByCodeAndEnvironmentUseCaseTest {
         doThrow(BusinessRuleException.buildUserException("Invalid target language"))
                 .when(targetLanguageValidator).validate("en");
 
-        assertThatThrownBy(() -> useCase.execute("CODE", "env", "es", "en"))
+        assertThatThrownBy(() -> useCase.execute("CODE", ACCESS_CONTEXT, "es", "en"))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("Invalid target language"));

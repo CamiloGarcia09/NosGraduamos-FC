@@ -703,7 +703,28 @@ public enum MessageCatalogCodeEnum {
     FUN_152("FUN_152"),
 
     /** La identidad no tiene permiso para acceder al recurso. */
-    FUN_153("FUN_153");
+    FUN_153("FUN_153"),
+
+    /** No se ha seleccionado un contexto activo. */
+    FUN_154("FUN_154"),
+
+    /** Los identificadores del contexto son requeridos. */
+    FUN_155("FUN_155"),
+
+    /** La organización seleccionada no existe. */
+    FUN_156("FUN_156"),
+
+    /** La aplicación seleccionada no existe. */
+    FUN_157("FUN_157"),
+
+    /** El entorno seleccionado no existe. */
+    FUN_158("FUN_158"),
+
+    /** La aplicación no pertenece a la organización seleccionada. */
+    FUN_159("FUN_159"),
+
+    /** El entorno no pertenece a la aplicación seleccionada. */
+    FUN_160("FUN_160");
 
     // =========================================================================
 

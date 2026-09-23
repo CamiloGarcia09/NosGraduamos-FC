@@ -37,6 +37,12 @@ public class ApplicationSurrealRepositoryAdapterImpl extends SurrealCatalogSuppo
     }
 
     @Override
+    public Optional<ApplicationData> findById(final String id) {
+        final String sql = "SELECT * FROM " + recordIdLiteral(SURREAL_TABLE_APPLICATION, id) + " LIMIT 1;";
+        return queryOne(sql, "Error al consultar aplicación por id en SurrealDB: " + sql, this::toApplicationData);
+    }
+
+    @Override
     public boolean existsById(final String id) {
         final String sql = "SELECT * FROM " + recordIdLiteral(SURREAL_TABLE_APPLICATION, id) + " LIMIT 1;";
         return queryOne(sql, "Error al validar aplicación en SurrealDB: " + sql, obj -> obj).isPresent();

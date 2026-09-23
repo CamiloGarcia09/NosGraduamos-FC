@@ -318,6 +318,39 @@ DEFINE INDEX IF NOT EXISTS environment_type_state_idx
 ON environment FIELDS type_id, state_id;
 
 -- =============================================================
+-- ACTIVE CONTEXT
+-- =============================================================
+
+DEFINE TABLE IF NOT EXISTS active_context SCHEMAFULL;
+
+DEFINE FIELD IF NOT EXISTS external_identity_id
+ON active_context TYPE record<external_identity>;
+
+DEFINE FIELD IF NOT EXISTS organization_id
+ON active_context TYPE record<organization>;
+
+DEFINE FIELD IF NOT EXISTS application_id
+ON active_context TYPE record<application>;
+
+DEFINE FIELD IF NOT EXISTS environment_id
+ON active_context TYPE record<environment>;
+
+DEFINE FIELD IF NOT EXISTS updated_at
+ON active_context TYPE datetime VALUE time::now();
+
+DEFINE INDEX IF NOT EXISTS active_context_external_identity_idx
+ON active_context FIELDS external_identity_id UNIQUE;
+
+DEFINE INDEX IF NOT EXISTS active_context_organization_idx
+ON active_context FIELDS organization_id;
+
+DEFINE INDEX IF NOT EXISTS active_context_application_idx
+ON active_context FIELDS application_id;
+
+DEFINE INDEX IF NOT EXISTS active_context_environment_idx
+ON active_context FIELDS environment_id;
+
+-- =============================================================
 -- AUTHORIZATION
 -- =============================================================
 

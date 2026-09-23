@@ -12,6 +12,9 @@ import co.edu.uco.application.secondaryports.translation.MessageTranslationPort;
 import co.edu.uco.application.usecase.handling.HandlingTranslateMessageByCodeAndEnvironmentPort;
 import co.edu.uco.application.usecase.validator.message.FindMessageCodeValidator;
 import co.edu.uco.application.usecase.validator.message.TargetLanguageValidator;
+import co.edu.uco.application.usecase.domain.security.MessageAccessContext;
+import co.edu.uco.application.usecase.domain.security.PermissionCode;
+import co.edu.uco.application.usecase.security.MessageEnvironmentResolver;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
@@ -30,6 +33,7 @@ public final class TranslateMessageByCodeAndEnvironmentUseCase
     private final MessageTranslationCachePort messageTranslationCachePort;
     private final FindMessageCodeValidator findMessageCodeValidator;
     private final TargetLanguageValidator targetLanguageValidator;
+    private final MessageEnvironmentResolver environmentResolver;
     private final LoggingPort log;
 
     public TranslateMessageByCodeAndEnvironmentUseCase(
@@ -38,6 +42,7 @@ public final class TranslateMessageByCodeAndEnvironmentUseCase
             MessageTranslationCachePort messageTranslationCachePort,
             FindMessageCodeValidator findMessageCodeValidator,
             TargetLanguageValidator targetLanguageValidator,
+            MessageEnvironmentResolver environmentResolver,
             LoggingPortFactory loggerFactory
     ) {
         this.messageCatalogStrategy = messageCatalogStrategy;
@@ -45,19 +50,21 @@ public final class TranslateMessageByCodeAndEnvironmentUseCase
         this.messageTranslationCachePort = messageTranslationCachePort;
         this.findMessageCodeValidator = findMessageCodeValidator;
         this.targetLanguageValidator = targetLanguageValidator;
+        this.environmentResolver = environmentResolver;
         this.log = loggerFactory.getLogger(TranslateMessageByCodeAndEnvironmentUseCase.class);
     }
 
     @Override
     public TranslatedMessageDTO execute(
             String messageCode,
-            String environmentId,
+            MessageAccessContext context,
             String sourceLanguage,
             String targetLanguage
     ) {
         try {
             findMessageCodeValidator.validate(messageCode);
             targetLanguageValidator.validate(targetLanguage);
+            var environmentId = environmentResolver.resolve(context, PermissionCode.MESSAGE_TRANSLATE);
 
             var normalizedSourceLanguage = isEmptyOrNull(sourceLanguage)
                     ? DEFAULT_SOURCE_LANGUAGE

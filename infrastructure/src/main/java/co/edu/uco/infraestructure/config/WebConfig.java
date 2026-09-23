@@ -43,6 +43,7 @@ public class WebConfig implements WebMvcConfigurer {
                         WEB_CONFIG_API_MESSAGE_CODE,
                         WEB_CONFIG_API_MESSAGE_CODE_TRANSLATION,
                         WEB_CONFIG_API_CREATE_MESSAGE
-                );
+                )
+                .order(0);
     }
 }

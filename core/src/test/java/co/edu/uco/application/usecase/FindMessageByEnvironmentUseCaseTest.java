@@ -9,6 +9,9 @@ import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.SimplePage;
 import co.edu.uco.application.secondaryports.repository.SimplePageRequest;
 import co.edu.uco.application.usecase.domain.MessageDomain;
+import co.edu.uco.application.usecase.domain.security.MessageAccessContext;
+import co.edu.uco.application.usecase.domain.security.PermissionCode;
+import co.edu.uco.application.usecase.security.MessageEnvironmentResolver;
 import co.edu.uco.application.usecase.validator.message.ListMessageValidator;
 import co.edu.uco.application.usecase.validator.page.PageRequestRangeValidator;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
@@ -31,6 +34,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class FindMessageByEnvironmentUseCaseTest {
 
+    private static final MessageAccessContext ACCESS_CONTEXT = new MessageAccessContext("env", null);
+
     @Mock
     private MessageCatalogStrategy messageCatalogStrategy;
     @Mock
@@ -39,6 +44,8 @@ class FindMessageByEnvironmentUseCaseTest {
     private ListMessageValidator listMessageValidator;
     @Mock
     private PageRequestRangeValidator rangeValidator;
+    @Mock
+    private MessageEnvironmentResolver environmentResolver;
     @Mock
     private LoggingPortFactory loggerFactory;
     @Mock
@@ -50,7 +57,9 @@ class FindMessageByEnvironmentUseCaseTest {
     void setUp() {
         when(loggerFactory.getLogger(FindMessageByEnvironmentUseCase.class)).thenReturn(log);
         useCase = new FindMessageByEnvironmentUseCase(
-                messageCatalogStrategy, entityMapper, listMessageValidator, rangeValidator, loggerFactory);
+                messageCatalogStrategy, entityMapper, listMessageValidator, rangeValidator,
+                environmentResolver, loggerFactory);
+        when(environmentResolver.resolve(ACCESS_CONTEXT, PermissionCode.MESSAGE_READ)).thenReturn("env");
     }
 
     @Test
@@ -62,7 +71,7 @@ class FindMessageByEnvironmentUseCaseTest {
         when(messageCatalogStrategy.getMessagesWithEnvironment("env", request)).thenReturn(page);
         when(entityMapper.mapperDTO(message)).thenReturn(dto);
 
-        SimplePage<MessageDTO> result = useCase.execute("env", request);
+        SimplePage<MessageDTO> result = useCase.execute(ACCESS_CONTEXT, request);
 
         assertThat(result.getData()).containsExactly(dto);
         assertThat(result.getPage()).isEqualTo(1);
@@ -75,7 +84,7 @@ class FindMessageByEnvironmentUseCaseTest {
         SimplePageRequest request = new SimplePageRequest();
         when(messageCatalogStrategy.getMessagesWithEnvironment("env", request)).thenReturn(page);
 
-        SimplePage<MessageDTO> result = useCase.execute("env", request);
+        SimplePage<MessageDTO> result = useCase.execute(ACCESS_CONTEXT, request);
 
         assertThat(result.getData()).isEmpty();
     }
@@ -87,7 +96,7 @@ class FindMessageByEnvironmentUseCaseTest {
         SimplePage<MessageData> page = SimplePage.of(List.of(), 1, 10, 0, 0);
         when(messageCatalogStrategy.getMessagesWithEnvironment("env", request)).thenReturn(page);
 
-        assertThatThrownBy(() -> useCase.execute("env", request))
+        assertThatThrownBy(() -> useCase.execute(ACCESS_CONTEXT, request))
                 .isInstanceOf(CrossWordsException.class)
                 .satisfies(ex -> assertThat(((CrossWordsException) ex).getTechnicalMessage()).isEqualTo("range error"));
     }
@@ -100,7 +109,7 @@ class FindMessageByEnvironmentUseCaseTest {
         when(messageCatalogStrategy.getSystemMessageContent(MessageCatalogCodeEnum.FUN_011.getCode()))
                 .thenReturn("Unexpected error listing messages");
 
-        assertThatThrownBy(() -> useCase.execute("env", request))
+        assertThatThrownBy(() -> useCase.execute(ACCESS_CONTEXT, request))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(ex -> assertThat(((BusinessException) ex).getUserMessage())
                         .isEqualTo("Unexpected error listing messages"));

@@ -26,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -119,6 +120,45 @@ class ApplicationSurrealRepositoryAdapterImplTest {
         doReturn(emptyResponse()).when(surreal).query(anyString());
 
         assertThat(adapter.findByName("App")).isEmpty();
+    }
+
+    @Test
+    void findById_returnsMappedApplicationAndUsesExactRecordQuery() {
+        String applicationId = "123e4567-e89b-12d3-a456-426614174000";
+        String organizationId = "223e4567-e89b-12d3-a456-426614174000";
+        String query = "SELECT * FROM application:`" + applicationId + "` LIMIT 1;";
+        doReturn(responseWithOne(applicationDocument(applicationId, "App", organizationId)))
+                .when(surreal).query(query);
+
+        Optional<ApplicationData> result = adapter.findById(applicationId);
+
+        assertThat(result).hasValueSatisfying(application -> assertSoftly(softly -> {
+            softly.assertThat(application.getId()).isEqualTo(UUID.fromString(applicationId));
+            softly.assertThat(application.getName()).isEqualTo("App");
+            softly.assertThat(application.getOrganization().getId()).isEqualTo(UUID.fromString(organizationId));
+            softly.assertThat(application.getOrganization().getName()).isEmpty();
+        }));
+        verify(surreal).query(query);
+    }
+
+    @Test
+    void findById_returnsEmpty_whenResponseEmpty() {
+        doReturn(emptyResponse()).when(surreal).query(anyString());
+
+        assertThat(adapter.findById("123e4567-e89b-12d3-a456-426614174000")).isEmpty();
+    }
+
+    @Test
+    void findById_propagatesFailureAndLogsQuery_whenQueryFails() {
+        String applicationId = "123e4567-e89b-12d3-a456-426614174000";
+        String query = "SELECT * FROM application:`" + applicationId + "` LIMIT 1;";
+        RuntimeException cause = new RuntimeException("db down");
+        doThrow(cause).when(surreal).query(query);
+
+        assertThatThrownBy(() -> adapter.findById(applicationId))
+                .isSameAs(cause);
+        verify(log).error(eq("Error al consultar aplicación por id en SurrealDB: " + query),
+                any(RuntimeException.class));
     }
 
     @Test

@@ -277,5 +277,12 @@ redis_hset "FUN_150" "Organization id required" "The organization id is required
 redis_hset "FUN_151" "Organization not found" "The organization associated with the application does not exist." "FUNCTIONAL" "ERROR"
 redis_hset "FUN_152" "Authentication required" "Authentication is required to access this resource." "FUNCTIONAL" "ERROR"
 redis_hset "FUN_153" "Permission denied" "Permission denied for the requested resource." "FUNCTIONAL" "ERROR"
+redis_hset "FUN_154" "Active context not selected" "An active context has not been selected." "FUNCTIONAL" "ERROR"
+redis_hset "FUN_155" "Context identifiers required" "Organization, application, and environment identifiers are required." "FUNCTIONAL" "ERROR"
+redis_hset "FUN_156" "Organization not found" "The selected organization does not exist." "FUNCTIONAL" "ERROR"
+redis_hset "FUN_157" "Application not found" "The selected application does not exist." "FUNCTIONAL" "ERROR"
+redis_hset "FUN_158" "Environment not found" "The selected environment does not exist." "FUNCTIONAL" "ERROR"
+redis_hset "FUN_159" "Application outside organization" "The selected application does not belong to the selected organization." "FUNCTIONAL" "ERROR"
+redis_hset "FUN_160" "Environment outside application" "The selected environment does not belong to the selected application." "FUNCTIONAL" "ERROR"
 
 echo "Message catalog loaded successfully."

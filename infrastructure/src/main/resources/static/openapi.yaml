@@ -16,6 +16,8 @@ tags:
     description: Creacion de tokens de acceso.
   - name: Mensajes
     description: Consulta y traduccion de mensajes.
+  - name: Contexto
+    description: Consulta y seleccion del contexto activo de la identidad autenticada.
 
 paths:
   /messageucolab/v1/application/{id}/token:
@@ -49,10 +51,11 @@ paths:
     get:
       tags: [Mensajes]
       summary: Listar mensajes por ambiente
-      description: Retorna los mensajes paginados del ambiente asociado al token.
+      description: Retorna los mensajes paginados del ambiente legado o del contexto activo de la identidad.
       operationId: findMessagesByEnvironment
       security:
         - tokenAuth: []
+        - bearerAuth: []
       parameters:
         - name: page
           in: query
@@ -87,6 +90,8 @@ paths:
           $ref: '#/components/responses/MessagesFound'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -100,10 +105,11 @@ paths:
     get:
       tags: [Mensajes]
       summary: Buscar mensaje por codigo
-      description: Obtiene un mensaje por codigo dentro del ambiente asociado al token.
+      description: Obtiene un mensaje por codigo dentro del ambiente legado o del contexto activo de la identidad.
       operationId: findMessageByCode
       security:
         - tokenAuth: []
+        - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/MessageCode'
       responses:
@@ -111,6 +117,8 @@ paths:
           $ref: '#/components/responses/MessageFound'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -124,10 +132,11 @@ paths:
     get:
       tags: [Mensajes]
       summary: Traducir mensaje
-      description: Traduce un mensaje del ambiente asociado al token sin guardar la traduccion.
+      description: Traduce un mensaje del ambiente legado o del contexto activo de la identidad sin guardar la traduccion.
       operationId: translateMessageByCode
       security:
         - tokenAuth: []
+        - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/MessageCode'
         - name: sourceLanguage
@@ -149,12 +158,96 @@ paths:
           $ref: '#/components/responses/MessageTranslated'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '406':
           $ref: '#/components/responses/NotAcceptable'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /messageucolab/v1/me/contexts:
+    get:
+      tags: [Contexto]
+      summary: Listar contextos disponibles
+      description: Retorna los contextos que la identidad autenticada puede seleccionar.
+      operationId: findAvailableContexts
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Contextos disponibles obtenidos correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailableContextsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /messageucolab/v1/me/context:
+    get:
+      tags: [Contexto]
+      summary: Consultar contexto activo
+      description: Retorna el contexto activo de la identidad autenticada.
+      operationId: findActiveContext
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Contexto activo obtenido correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveContextResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags: [Contexto]
+      summary: Seleccionar contexto activo
+      description: Valida y guarda el contexto activo de la identidad autenticada.
+      operationId: selectActiveContext
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SelectActiveContextRequest'
+      responses:
+        '200':
+          description: Contexto activo seleccionado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveContextResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -165,6 +258,10 @@ components:
       in: header
       name: Token
       description: Token asociado a la aplicacion y al ambiente.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Token Bearer de la identidad externa.
 
   parameters:
     ApplicationId:
@@ -196,12 +293,18 @@ components:
       description: Mensaje traducido correctamente.
     BadRequest:
       description: Solicitud o parametros invalidos.
+    Unauthorized:
+      description: La identidad no esta autenticada.
     Forbidden:
       description: Token ausente, invalido o sin autorizacion.
     NotFound:
       description: Recurso no encontrado.
     NotAcceptable:
       description: Formato de respuesta no soportado.
+    Conflict:
+      description: El recurso no respeta la jerarquia requerida.
+    UnprocessableEntity:
+      description: Los identificadores no cumplen las reglas de validacion.
     InternalServerError:
       description: Error interno del servidor.
 
@@ -219,3 +322,68 @@ components:
           type: string
           format: uuid
           example: 123e4567-e89b-12d3-a456-426614174111
+    SelectActiveContextRequest:
+      type: object
+      required: [organizationId, applicationId, environmentId]
+      properties:
+        organizationId:
+          type: string
+          format: uuid
+        applicationId:
+          type: string
+          format: uuid
+        environmentId:
+          type: string
+          format: uuid
+    ActiveContext:
+      allOf:
+        - $ref: '#/components/schemas/SelectActiveContextRequest'
+        - type: object
+          required: [updatedAt]
+          properties:
+            updatedAt:
+              type: string
+              format: date-time
+    AvailableContext:
+      type: object
+      required: [organization, application, environment]
+      properties:
+        organization:
+          $ref: '#/components/schemas/CatalogItem'
+        application:
+          $ref: '#/components/schemas/CatalogItem'
+        environment:
+          $ref: '#/components/schemas/CatalogItem'
+    CatalogItem:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+    AvailableContextsResponse:
+      type: object
+      required: [data, errors]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailableContext'
+        errors:
+          type: array
+          items:
+            type: string
+    ActiveContextResponse:
+      type: object
+      required: [data, errors]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActiveContext'
+        errors:
+          type: array
+          items:
+            type: string

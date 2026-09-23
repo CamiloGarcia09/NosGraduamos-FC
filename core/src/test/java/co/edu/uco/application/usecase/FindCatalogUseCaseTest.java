@@ -1,6 +1,8 @@
 package co.edu.uco.application.usecase;
 
 import co.edu.uco.application.primaryports.dto.catalog.CatalogItemDTO;
+import co.edu.uco.application.primaryports.dto.context.ActiveContextDTO;
+import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.entity.EnvironmentData;
 import co.edu.uco.application.secondaryports.entity.FunctionalityData;
@@ -20,6 +22,7 @@ import co.edu.uco.application.usecase.domain.security.AuthorizationScopeType;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
 import co.edu.uco.application.usecase.domain.security.PrincipalType;
+import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
 import co.edu.uco.application.usecase.validator.authorization.AuthorizationRule;
 import co.edu.uco.crosscutting.exceptions.ForbiddenException;
 import org.junit.jupiter.api.Test;
@@ -36,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.doThrow;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -65,6 +69,15 @@ class FindCatalogUseCaseTest {
     private AuthorizationQueryPort authorizationQueryPort;
     @Mock
     private AuthorizationRule authorizationRule;
+    @Mock
+    private HandlingActiveContextPort activeContextPort;
+    @Mock
+    private CatalogPort catalogPort;
+
+    private void stubActiveContextForApplication() {
+        when(activeContextPort.findActiveContext(IDENTITY)).thenReturn(
+                ActiveContextDTO.builder().applicationId(ID.toString()).build());
+    }
 
     @Test
     void findApplications_mapsIdAndName() {
@@ -191,6 +204,7 @@ class FindCatalogUseCaseTest {
 
     @Test
     void findEnvironmentsByApplication_allowsEnvironmentOnlyAssignmentAndFiltersResults() {
+        stubActiveContextForApplication();
         when(authorizationQueryPort.findAuthorizedEnvironmentIds(IDENTITY, PermissionCode.CONTEXT_SELECT, ID))
                 .thenReturn(List.of(OTHER_ID));
         when(environmentCatalogRepository.findAllByApplicationId(ID.toString())).thenReturn(List.of(
@@ -206,6 +220,7 @@ class FindCatalogUseCaseTest {
 
     @Test
     void findEnvironmentsByApplication_deniesWhenNeitherApplicationNorEnvironmentIsAuthorized() {
+        stubActiveContextForApplication();
         when(authorizationQueryPort.findAuthorizedEnvironmentIds(IDENTITY, PermissionCode.CONTEXT_SELECT, ID))
                 .thenReturn(List.of());
         ForbiddenException denied = ForbiddenException.buildUserException("Permission denied");
@@ -220,6 +235,7 @@ class FindCatalogUseCaseTest {
 
     @Test
     void findEnvironmentsByApplication_allowsApplicationAssignmentWhenNoEnvironmentsExist() {
+        stubActiveContextForApplication();
         when(authorizationQueryPort.findAuthorizedEnvironmentIds(IDENTITY, PermissionCode.CONTEXT_SELECT, ID))
                 .thenReturn(List.of());
         when(environmentCatalogRepository.findAllByApplicationId(ID.toString())).thenReturn(List.of());
@@ -233,12 +249,92 @@ class FindCatalogUseCaseTest {
 
     @Test
     void findFunctionalitiesByApplication_requiresApplicationPermission() {
+        stubActiveContextForApplication();
         when(functionalityCatalogRepository.findAllByApplicationId(ID.toString())).thenReturn(List.of());
 
         buildUseCase().findFunctionalitiesByApplication(ID.toString(), IDENTITY);
 
         verify(authorizationRule).validate(IDENTITY, PermissionCode.CONTEXT_SELECT,
                 AuthorizationScopeType.APPLICATION, ID);
+    }
+
+    @Test
+    void findEnvironmentsByApplication_throwsForbidden_whenApplicationOutsideActiveContext() {
+        when(activeContextPort.findActiveContext(IDENTITY)).thenReturn(
+                ActiveContextDTO.builder().applicationId(OTHER_ID.toString()).build());
+        when(catalogPort.getMessage("FUN_153")).thenReturn("Fuera del contexto activo");
+
+        assertThatThrownBy(() -> buildUseCase()
+                .findEnvironmentsByApplication(ID.toString(), IDENTITY))
+                .isInstanceOf(ForbiddenException.class)
+                .satisfies(exception -> assertThat((ForbiddenException) exception)
+                        .extracting(ForbiddenException::getUserMessage, ForbiddenException::getHttpStatus)
+                        .containsExactly("Fuera del contexto activo", 403));
+        verifyNoInteractions(environmentCatalogRepository, authorizationQueryPort, authorizationRule);
+    }
+
+    @Test
+    void findEnvironmentsByApplication_throwsForbidden_whenActiveContextDoesNotExist() {
+        when(catalogPort.getMessage("FUN_153")).thenReturn("Fuera del contexto activo");
+
+        assertThatThrownBy(() -> buildUseCase()
+                .findEnvironmentsByApplication(ID.toString(), IDENTITY))
+                .isInstanceOf(ForbiddenException.class)
+                .satisfies(exception -> assertThat((ForbiddenException) exception)
+                        .extracting(ForbiddenException::getUserMessage, ForbiddenException::getHttpStatus)
+                        .containsExactly("Fuera del contexto activo", 403));
+        verifyNoInteractions(environmentCatalogRepository, authorizationQueryPort, authorizationRule);
+    }
+
+    @Test
+    void findEnvironmentsByApplication_withoutIdentitySkipsActiveContextCheck() {
+        when(environmentCatalogRepository.findAllByApplicationId(ID.toString()))
+                .thenReturn(List.of(new EnvironmentData(ID, "Dev", new ApplicationData())));
+
+        List<CatalogItemDTO> result = buildUseCase().findEnvironmentsByApplication(ID.toString(), null);
+
+        assertThat(result).extracting(CatalogItemDTO::id).containsExactly(ID.toString());
+        verifyNoInteractions(activeContextPort, authorizationQueryPort, authorizationRule, catalogPort);
+    }
+
+    @Test
+    void findFunctionalitiesByApplication_throwsForbidden_whenApplicationOutsideActiveContext() {
+        when(activeContextPort.findActiveContext(IDENTITY)).thenReturn(
+                ActiveContextDTO.builder().applicationId(OTHER_ID.toString()).build());
+        when(catalogPort.getMessage("FUN_153")).thenReturn("Fuera del contexto activo");
+
+        assertThatThrownBy(() -> buildUseCase()
+                .findFunctionalitiesByApplication(ID.toString(), IDENTITY))
+                .isInstanceOf(ForbiddenException.class)
+                .satisfies(exception -> assertThat((ForbiddenException) exception)
+                        .extracting(ForbiddenException::getUserMessage, ForbiddenException::getHttpStatus)
+                        .containsExactly("Fuera del contexto activo", 403));
+        verifyNoInteractions(functionalityCatalogRepository, authorizationRule);
+    }
+
+    @Test
+    void findFunctionalitiesByApplication_throwsForbidden_whenActiveContextDoesNotExist() {
+        when(catalogPort.getMessage("FUN_153")).thenReturn("Fuera del contexto activo");
+
+        assertThatThrownBy(() -> buildUseCase()
+                .findFunctionalitiesByApplication(ID.toString(), IDENTITY))
+                .isInstanceOf(ForbiddenException.class)
+                .satisfies(exception -> assertThat((ForbiddenException) exception)
+                        .extracting(ForbiddenException::getUserMessage, ForbiddenException::getHttpStatus)
+                        .containsExactly("Fuera del contexto activo", 403));
+        verifyNoInteractions(functionalityCatalogRepository, authorizationRule);
+    }
+
+    @Test
+    void findFunctionalitiesByApplication_propagatesForbiddenFromAuthorizationRule() {
+        stubActiveContextForApplication();
+        ForbiddenException denied = ForbiddenException.buildUserException("Permission denied");
+        doThrow(denied).when(authorizationRule).validate(
+                IDENTITY, PermissionCode.CONTEXT_SELECT, AuthorizationScopeType.APPLICATION, ID);
+
+        assertThatThrownBy(() -> buildUseCase()
+                .findFunctionalitiesByApplication(ID.toString(), IDENTITY)).isSameAs(denied);
+        verifyNoInteractions(functionalityCatalogRepository);
     }
 
     private FindCatalogUseCase buildUseCase() {
@@ -251,6 +347,8 @@ class FindCatalogUseCaseTest {
                 messageStateCatalogRepository,
                 messageEnvironmentStateCatalogRepository,
                 authorizationQueryPort,
-                authorizationRule);
+                authorizationRule,
+                activeContextPort,
+                catalogPort);
     }
 }

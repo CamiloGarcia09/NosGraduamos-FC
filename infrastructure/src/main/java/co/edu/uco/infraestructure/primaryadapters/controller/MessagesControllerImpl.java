@@ -8,6 +8,8 @@ import co.edu.uco.application.primaryports.facade.message.FindMessagesByEnvironm
 import co.edu.uco.application.primaryports.facade.message.TranslateMessageByCodeAndEnvironmentUseCaseFacade;
 import co.edu.uco.application.secondaryports.presenter.PresenterPort;
 import co.edu.uco.application.secondaryports.repository.SimplePage;
+import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
+import co.edu.uco.application.usecase.domain.security.MessageAccessContext;
 import co.edu.uco.infraestructure.primaryadapters.MessagesController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.ENVIRONMENT_ID_ATTRIBUTE;
+import static co.edu.uco.infraestructure.config.InfrastructureConstant.EXTERNAL_IDENTITY_ATTRIBUTE;
 
 @RestController
 final class MessagesControllerImpl implements MessagesController {
@@ -50,7 +53,7 @@ final class MessagesControllerImpl implements MessagesController {
                         HttpServletRequest httpServletRequest,
                         HttpServletResponse httpServletResponse) {
 
-                var environmentId = (String) httpServletRequest.getAttribute(ENVIRONMENT_ID_ATTRIBUTE);
+                var accessContext = accessContext(httpServletRequest);
                 var pageRequestDTO = PageRequestDTO.builder()
                         .page(page)
                         .size(size)
@@ -58,7 +61,7 @@ final class MessagesControllerImpl implements MessagesController {
                         .columnSort(columnSort)
                         .build();
                 
-                var messageDTOSimplePage = findMessagesByEnvironmentUsecaseFacade.execute(environmentId, pageRequestDTO);
+                var messageDTOSimplePage = findMessagesByEnvironmentUsecaseFacade.execute(accessContext, pageRequestDTO);
                 restPresenterPage.presentRestSuccess(List.of(messageDTOSimplePage), httpServletRequest,
                                 httpServletResponse);
         }
@@ -68,9 +71,9 @@ final class MessagesControllerImpl implements MessagesController {
                         String messageCode,
                         HttpServletRequest httpServletRequest,
                         HttpServletResponse httpServletResponse) {
-                var environmentId = (String) httpServletRequest.getAttribute(ENVIRONMENT_ID_ATTRIBUTE);
+                var accessContext = accessContext(httpServletRequest);
                 var messageDTO = findMessageByCodeAndEnvironmentUseCaseFacade.execute(messageCode,
-                                environmentId);
+                                accessContext);
                 restPresenter.presentRestSuccess(List.of(messageDTO), httpServletRequest, httpServletResponse);
         }
 
@@ -81,13 +84,19 @@ final class MessagesControllerImpl implements MessagesController {
                         String targetLanguage,
                         HttpServletRequest httpServletRequest,
                         HttpServletResponse httpServletResponse) {
-                var environmentId = (String) httpServletRequest.getAttribute(ENVIRONMENT_ID_ATTRIBUTE);
+                var accessContext = accessContext(httpServletRequest);
                 var translatedMessageDTO = translateMessageByCodeAndEnvironmentUseCaseFacade.execute(
                                 messageCode,
-                                environmentId,
+                                accessContext,
                                 sourceLanguage,
                                 targetLanguage);
                 translationPresenter.presentRestSuccess(List.of(translatedMessageDTO), httpServletRequest,
                                 httpServletResponse);
+        }
+
+        private static MessageAccessContext accessContext(final HttpServletRequest request) {
+                return new MessageAccessContext(
+                        (String) request.getAttribute(ENVIRONMENT_ID_ATTRIBUTE),
+                        (ExternalIdentity) request.getAttribute(EXTERNAL_IDENTITY_ATTRIBUTE));
         }
 }

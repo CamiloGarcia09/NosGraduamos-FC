@@ -73,10 +73,6 @@ public final class CreateMessageCompositeValidator {
             throw BusinessRuleException.buildUserException("El id de la aplicación es requerido.");
         }
 
-        if (isEmptyOrNull(dto.getEnvironmentId())) {
-            throw BusinessRuleException.buildUserException("El id del entorno es requerido.");
-        }
-
         if (isEmptyOrNull(dto.getFunctionalityId())) {
             throw BusinessRuleException.buildUserException("El id de la funcionalidad es requerido.");
         }

@@ -2,6 +2,7 @@ package co.edu.uco.application.primaryports.facade.message.impl;
 
 import co.edu.uco.application.primaryports.dto.message.CreateMessageDTO;
 import co.edu.uco.application.primaryports.facade.message.CreateMessageUseCaseFacade;
+import co.edu.uco.application.usecase.domain.security.MessageAccessContext;
 import co.edu.uco.application.usecase.handling.HandlingCreateMessagePort;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +16,7 @@ public final class CreateMessageUseCaseFacadeImpl implements CreateMessageUseCas
     }
 
     @Override
-    public void execute(CreateMessageDTO createMessageDTO, String authenticatedEnvironmentId) {
-        handlingCreateMessagePort.createMessage(createMessageDTO, authenticatedEnvironmentId);
+    public void execute(CreateMessageDTO createMessageDTO, MessageAccessContext context) {
+        handlingCreateMessagePort.createMessage(createMessageDTO, context);
     }
 }

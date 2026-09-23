@@ -35,9 +35,11 @@ class ExternalIdentityWebConfigTest {
         var registry = mock(InterceptorRegistry.class);
         var registration = mock(InterceptorRegistration.class);
         when(registry.addInterceptor(interceptor)).thenReturn(registration);
+        when(registration.addPathPatterns("/messageucolab/v1/**")).thenReturn(registration);
 
         new ExternalIdentityWebConfig(interceptor).addInterceptors(registry);
 
         verify(registration).addPathPatterns("/messageucolab/v1/**");
+        verify(registration).order(-100);
     }
 }

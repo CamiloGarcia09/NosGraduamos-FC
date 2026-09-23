@@ -32,9 +32,9 @@ Aplicacion obligatoria de esta ley:
 |---|---|
 | Ultima actualizacion | 2026-09-22 |
 | Estado global | Implementacion gradual en curso |
-| Fase actual | Fase 4 - Implementar contexto activo (pendiente) |
-| Proxima implementacion | Definir el comportamiento de sesiones simultaneas y modelar el contexto activo |
-| Bloqueo actual | Se debe decidir el alcance por sesion o identidad antes de implementar la Fase 4; antes de desplegar la relacion obligatoria en una base existente se requiere backfill o recreacion del volumen |
+| Fase actual | Fase 6 - Integrar el proveedor real |
+| Proxima implementacion | Implementar el adaptador del proveedor real de identidad |
+| Bloqueo actual | Ninguno; antes de desplegar sobre una base existente se requiere backfill o recreacion del volumen |
 
 ### Convenciones de estado
 
@@ -59,7 +59,7 @@ Aplicacion obligatoria de esta ley:
 - El contexto activo se administrara en el backend.
 - SurrealDB sera la fuente persistente del ultimo contexto y Redis permitira su consulta rapida.
 - La migracion sera gradual para no interrumpir las consultas que dependen del token actual.
-- Inicialmente se asumira un contexto activo por identidad. La estrategia para sesiones simultaneas se revisara antes de implementar la Fase 4.
+- Se mantendra un unico contexto activo por identidad `issuer + subject`, compartido entre pestanas, dispositivos y tokens validos de esa identidad; la ultima actualizacion persistida prevalece.
 - Durante la convivencia, la ausencia de `Authorization` permite continuar con el flujo legado; si el header se envia, debe ser un Bearer valido o la peticion recibe `401`.
 - El simulador de identidad externa permanece deshabilitado por defecto y todos sus datos se suministran mediante configuracion externa.
 - Toda Aplicacion nueva debe pertenecer a una Organizacion existente; no se asignara una organizacion artificial por defecto a datos historicos.
@@ -119,8 +119,8 @@ Respuestas esperadas:
 | 1 | Asegurar el flujo actual | `COMPLETADA` | El token existente no permite cruzar ambientes ni exponer secretos |
 | 2 | Introducir identidad externa simulada | `COMPLETADA` | Un bearer token identifica al principal sin contener contexto |
 | 3 | Modelar organizaciones y autorizacion | `COMPLETADA` | MessageUcoLab decide a que recursos accede cada identidad |
-| 4 | Implementar contexto activo | `PENDIENTE` | El backend recuerda y valida el contexto seleccionado |
-| 5 | Migrar operaciones al contexto | `PENDIENTE` | Los casos de uso dejan de confiar en IDs controlados por el cliente |
+| 4 | Implementar contexto activo | `COMPLETADA` | El backend recuerda y valida el contexto seleccionado |
+| 5 | Migrar operaciones al contexto | `COMPLETADA` | Creacion, catalogos y administracion resuelven alcance desde el contexto autorizado |
 | 6 | Integrar el proveedor real | `PENDIENTE` | El adaptador real reemplaza al simulador |
 | 7 | Retirar el mecanismo propietario | `PENDIENTE` | Se eliminan el token RSA y sus componentes exclusivos |
 
@@ -255,7 +255,7 @@ RoleAssignment con alcance
 
 ## Fase 4 - Implementar contexto activo
 
-**Estado:** `PENDIENTE`
+**Estado:** `COMPLETADA`
 
 ### Modelo esperado
 
@@ -269,47 +269,47 @@ ActiveContext
 
 ### Alcance
 
-- [ ] Decidir el comportamiento de varias pestanas o dispositivos para una misma identidad.
-- [ ] Crear el modelo y los puertos de contexto en `core`.
-- [ ] Persistir el ultimo contexto en SurrealDB.
-- [ ] Implementar cache distribuida del contexto en Redis.
-- [ ] No usar el token completo como clave de Redis.
-- [ ] Crear `GET /messageucolab/v1/me/contexts`.
-- [ ] Crear `GET /messageucolab/v1/me/context`.
-- [ ] Crear `PUT /messageucolab/v1/me/context`.
-- [ ] Verificar membresia, jerarquia y permiso `CONTEXT_SELECT` antes de cambiarlo.
-- [ ] Definir el comportamiento cuando no exista contexto activo.
-- [ ] Probar aislamiento, expiracion de cache, cambio y recuperacion desde persistencia.
+- [x] Decidir el comportamiento de varias pestanas o dispositivos para una misma identidad.
+- [x] Crear el modelo y los puertos de contexto en `core`.
+- [x] Persistir el ultimo contexto en SurrealDB.
+- [x] Implementar cache distribuida del contexto en Redis.
+- [x] No usar el token completo como clave de Redis.
+- [x] Crear `GET /messageucolab/v1/me/contexts`.
+- [x] Crear `GET /messageucolab/v1/me/context`.
+- [x] Crear `PUT /messageucolab/v1/me/context`.
+- [x] Verificar membresia, jerarquia y permiso `CONTEXT_SELECT` antes de cambiarlo.
+- [x] Definir el comportamiento cuando no exista contexto activo.
+- [x] Probar aislamiento, expiracion de cache, cambio y recuperacion desde persistencia.
 
 ### Criterio de salida
 
-La identidad puede seleccionar un contexto autorizado, recuperarlo en peticiones posteriores y conservarlo aunque Redis pierda la entrada cacheada.
+- [x] La identidad puede seleccionar un contexto autorizado, recuperarlo en peticiones posteriores y conservarlo aunque Redis pierda la entrada cacheada.
 
 ## Fase 5 - Migrar operaciones al contexto
 
-**Estado:** `PENDIENTE`
+**Estado:** `COMPLETADA`
 
 ### Orden de migracion
 
-- [ ] Consulta y listado de mensajes.
-- [ ] Traduccion de mensajes.
-- [ ] Creacion de mensajes.
-- [ ] Consulta de catalogos.
-- [ ] Administracion de aplicaciones, ambientes y funcionalidades.
+- [x] Consulta y listado de mensajes.
+- [x] Traduccion de mensajes.
+- [x] Creacion de mensajes.
+- [x] Consulta de catalogos.
+- [x] Administracion de aplicaciones, ambientes y funcionalidades.
 
 ### Reglas
 
-- [ ] Los casos de uso reciben identidad y contexto tipados.
-- [ ] Los controllers no implementan reglas de autorizacion de negocio.
-- [ ] `core` no depende de `HttpServletRequest`, Spring Security o Redis.
-- [ ] Los IDs implicitos en el contexto se eliminan de queries y bodies cuando sea posible.
-- [ ] Si un ID debe permanecer por compatibilidad, se exige coincidencia con el contexto.
-- [ ] Cada operacion verifica el permiso correspondiente antes de acceder al repositorio.
-- [ ] Se agregan pruebas de aislamiento entre organizaciones, aplicaciones y ambientes.
+- [x] Los casos de uso reciben identidad y contexto tipados.
+- [x] Los controllers no implementan reglas de autorizacion de negocio.
+- [x] `core` no depende de `HttpServletRequest`, Spring Security o Redis.
+- [x] Los IDs implicitos en el contexto se eliminan de queries y bodies cuando sea posible.
+- [x] Si un ID debe permanecer por compatibilidad, se exige coincidencia con el contexto.
+- [x] Cada operacion verifica el permiso correspondiente antes de acceder al repositorio.
+- [x] Se agregan pruebas de aislamiento entre organizaciones, aplicaciones y ambientes.
 
 ### Criterio de salida
 
-Ninguna operacion migrada puede seleccionar su alcance de negocio mediante IDs arbitrarios enviados por el cliente.
+- [x] Ninguna operacion migrada puede seleccionar su alcance de negocio mediante IDs arbitrarios enviados por el cliente.
 
 ## Fase 6 - Integrar el proveedor real
 
@@ -503,6 +503,58 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - `deployment/docker/scripts/surreal/surreal-init.surql`: tablas, relaciones e indices de membresias, roles, permisos, relaciones rol-permiso y asignaciones con alcance; carga de permisos iniciales.
 - `utils/src/main/java/co/edu/uco/crosscutting/catalog/MessageCatalogCodeEnum.java` y `deployment/docker/scripts/redis/CatalogMessageInit.sh`: mensajes `FUN_152` y `FUN_153` para autenticacion requerida y permiso denegado.
 - Pruebas de autorizacion: cobertura de entidades y enums, regla `401`/`403`, herencia de alcances, aislamiento entre organizaciones y aplicaciones, filtrado de catalogos, propagacion HTTP, composicion Spring y consultas SurrealQL.
+- `core/src/main/java/co/edu/uco/application/usecase/domain/aggregate/entities/ActiveContextEntity.java`: contexto activo persistente asociado a una identidad externa, Organizacion, Aplicacion, Ambiente y fecha UTC de actualizacion.
+- `core/src/main/java/co/edu/uco/application/secondaryports/repository/ActiveContextRepository.java`: puerto de persistencia del ultimo contexto por identidad externa.
+- `core/src/main/java/co/edu/uco/application/secondaryports/cache/ActiveContextCachePort.java`: puerto de cache distribuida tipado por `ExternalIdentity`, sin aceptar tokens.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/model/ActiveContextSurrealModel.java`: representacion persistente del contexto activo.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/data/ActiveContextSurrealMapper.java`: conversion explicita entre entidad y modelo SurrealDB.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/impl/ActiveContextSurrealRepositoryAdapterImpl.java`: consulta y `UPSERT` determinista por identificador de identidad externa.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/cache/ActiveContextRedisAdapter.java`: cache Redis de mejor esfuerzo, TTL configurable y claves SHA-256 sin identidad ni token visibles.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/cache/ActiveContextCacheModel.java`: formato interno validado para serializar el contexto en Redis.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/config/ActiveContextCacheProperties.java` y `application.properties`: configuracion externa del TTL mediante `ACTIVE_CONTEXT_CACHE_TTL_SECONDS`.
+- `deployment/docker/scripts/surreal/surreal-init.surql`: tabla `active_context`, referencias jerarquicas e indice unico por identidad externa.
+- Pruebas del primer incremento de contexto activo: entidad de dominio, modelo y mapper SurrealDB, consultas y errores tecnicos del repositorio, propiedades de cache, TTL, aislamiento de claves, colisiones, entradas malformadas y tolerancia a fallos Redis.
+- `core/src/main/java/co/edu/uco/application/usecase/ActiveContextUseCase.java`: listado de contextos autorizados, recuperacion cache-aside con reautorizacion y seleccion persistente antes de invalidar cache.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/context/`: validacion independiente de identificadores obligatorios y jerarquia Organizacion-Aplicacion-Ambiente antes de seleccionar el contexto.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/authorization/ExternalIdentityRequiredRuleImpl.java`: rechazo tipado `401` cuando no existe identidad externa.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/primaryadapters/MeContextController.java` y su implementacion: endpoints de contextos disponibles, consulta y seleccion del contexto activo sin reglas de negocio en el controller.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/config/UseCaseRuleConfig.java`: composicion Spring del caso de uso, facade y reglas fuera de `core`.
+- `infrastructure/src/main/resources/static/openapi.yaml`: contrato de los tres endpoints, esquema Bearer neutral respecto a JWT u opaco y respuestas `401`, `403`, `404`, `409` y `422` aplicables.
+- `utils/src/main/java/co/edu/uco/crosscutting/catalog/MessageCatalogCodeEnum.java` y `deployment/docker/scripts/redis/CatalogMessageInit.sh`: mensajes `FUN_154` a `FUN_160` para ausencia de contexto, identificadores, recursos y conflictos de jerarquia.
+- Pruebas de cierre de contexto activo: casos de uso, facade, reglas individuales y composite, propagacion HTTP, composicion Spring y consulta SurrealDB de Aplicacion por identificador.
+- `core/src/main/java/co/edu/uco/application/usecase/domain/security/MessageAccessContext.java`: contrato tipado de entrada con ambiente legado e identidad externa opcional.
+- `core/src/main/java/co/edu/uco/application/usecase/security/MessageEnvironmentResolver.java` y `MessageEnvironmentResolverImpl.java`: resolucion de alcance legado o contexto activo con autorizacion `MESSAGE_READ`/`MESSAGE_TRANSLATE`, `401` `FUN_152` sin identidad ni ambiente y propagacion de `403`.
+- `core/src/main/java/co/edu/uco/application/usecase/handling/HandlingFindMessageEnvironmentPort.java`, `HandlingFindMessageByCodeAndEnvironmentPort.java` y `HandlingTranslateMessageByCodeAndEnvironmentPort.java`: firmas migradas a `MessageAccessContext`.
+- `core/src/main/java/co/edu/uco/application/primaryports/facade/message/` (interfaces e impl de listado, consulta y traduccion): propagacion tipada del contexto hacia los casos de uso.
+- `core/src/main/java/co/edu/uco/application/usecase/FindMessageByEnvironmentUseCase.java`, `FindMessageByCodeAndEnvironmentUseCase.java` y `TranslateMessageByCodeAndEnvironmentUseCase.java`: resolucion de ambiente autorizado antes del repositorio; propagacion de `CrossWordsException` en consulta por codigo para no envolver autorizacion.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/primaryadapters/controller/MessagesControllerImpl.java`: construccion de `MessageAccessContext` desde atributos HTTP sin reglas de negocio.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/primaryadapters/interceptors/TokenHeaderInterceptor.java`: omision del token legado cuando ya existe identidad externa resuelta.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/config/ExternalIdentityWebConfig.java` y `WebConfig.java`: orden de interceptores (`-100` identidad externa, `0` token legado) para convivencia.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/config/UseCaseRuleConfig.java`: bean `messageEnvironmentResolver` fuera de `core`.
+- `infrastructure/src/main/resources/static/openapi.yaml`: los tres endpoints de mensajes aceptan `tokenAuth` y `bearerAuth`, con respuesta `401` y descripciones de convivencia.
+- `core/src/test/java/co/edu/uco/application/usecase/security/MessageEnvironmentResolverImplTest.java`: legado sin autorizacion, contexto activo con permiso, `401` `FUN_152` y `403` propagado.
+- `core/src/test/java/co/edu/uco/application/usecase/FindMessageByEnvironmentUseCaseTest.java`, `FindMessageByCodeAndEnvironmentUseCaseTest.java` y `TranslateMessageByCodeAndEnvironmentUseCaseTest.java`: mock de `MessageEnvironmentResolver` con `MessageAccessContext`, excepciones de dominio y `lenient()` donde el resolver no se invoca.
+- `core/src/test/java/co/edu/uco/application/primaryports/facade/message/impl/` (los tres tests de facade): delegacion del contexto al puerto interno.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/primaryadapters/controller/MessagesControllerImplTest.java`: captors de `MessageAccessContext` con ambiente legado e identidad externa.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/primaryadapters/interceptors/TokenHeaderInterceptorTest.java`: omision del token legado con identidad externa resuelta (`verifyNoInteractions`).
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/config/ExternalIdentityWebConfigTest.java` y `WebConfigTest.java`: orden de registro de interceptores.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/config/UseCaseRuleConfigTest.java`: composicion del bean `messageEnvironmentResolver`.
+- `core/src/main/java/co/edu/uco/application/primaryports/facade/message/CreateMessageUseCaseFacade.java` y `impl/CreateMessageUseCaseFacadeImpl.java`: propagacion de `MessageAccessContext` en la creacion.
+- `core/src/main/java/co/edu/uco/application/usecase/handling/HandlingCreateMessagePort.java`: contrato de creacion tipado con `MessageAccessContext`.
+- `core/src/main/java/co/edu/uco/application/usecase/CreateMessageUseCase.java`: resolucion de ambiente con `MessageEnvironmentResolver` y permiso `MESSAGE_CREATE` antes de validar y persistir.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/message/CreateMessageCompositeValidator.java`: `environmentId` del body deja de ser obligatorio.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/message/CreateMessageContextRuleImpl.java`: coincidencia de ambiente autenticado solo cuando el body lo trae.
+- `core/src/main/java/co/edu/uco/application/usecase/FindCatalogUseCase.java`: exige que `applicationId` del catalogo coincida con `ActiveContext.applicationId` cuando hay identidad; `403` `FUN_153` en desalineacion.
+- `core/src/main/java/co/edu/uco/application/primaryports/facade/application|environment|functionality/` (interfaces e impl de creacion): propagacion de `ExternalIdentity`.
+- `core/src/main/java/co/edu/uco/application/usecase/handling/HandlingCreate{Application,Environment,Functionality}Port.java`: firmas con `ExternalIdentity`.
+- `core/src/main/java/co/edu/uco/application/usecase/Create{Application,Environment,Functionality}UseCase.java`: autorizacion interna `authorizeAgainstActiveContext` con `APPLICATION_CREATE`/`ORGANIZATION`, `ENVIRONMENT_CREATE`/`APPLICATION` y `FUNCTIONALITY_CREATE`/`APPLICATION`; identity null conserva el flujo legado.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/primaryadapters/controller/Create{Message,Application,Environment,Functionality}ControllerImpl.java`: construccion de `MessageAccessContext` o `ExternalIdentity` desde atributos HTTP sin reglas de negocio.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/config/UseCaseRuleConfig.java`: beans `handlingFindCatalogPort` y `handlingCreateApplicationPort` con `HandlingActiveContextPort`, `AuthorizationRule` y `CatalogPort`.
+- `core/src/test/java/co/edu/uco/application/primaryports/facade/message/impl/CreateMessageUseCaseFacadeImplTest.java` y los de facade de application/environment/functionality: delegacion con contexto tipado e identity null legado.
+- `core/src/test/java/co/edu/uco/application/usecase/Create{Message,Application,Environment,Functionality}UseCaseTest.java` y `FindCatalogUseCaseTest.java`: pruebas de aislamiento (legacy null, match con `ActiveContext`, `403` `FUN_153`, permisos correctos, `AuthorizationRule` denegando).
+- `core/src/test/java/co/edu/uco/application/usecase/validator/message/CreateMessageCompositeValidatorTest.java` y `CreateMessageContextRuleImplTest.java`: environmentId opcional y match solo si el body lo trae.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/primaryadapters/controller/CreateMessageControllerImplTest.java`: captors de `MessageAccessContext` legado y autenticado, y propagacion de fallos del facade.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/config/UseCaseRuleConfigTest.java`: wiring de catalogos y creacion de Aplicacion con los nuevos puertos.
 
 ### Pruebas ejecutadas
 
@@ -569,10 +621,37 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - Suite `infrastructure`: 423 pruebas, 0 fallos, 0 errores y 0 omitidas.
 - JaCoCo al finalizar la Fase 3: `utils` 94.15 % de lineas y 96.97 % de ramas; `core` 98.00 % de lineas y 91.39 % de ramas; `infrastructure` 89.40 % de lineas y 81.26 % de ramas.
 - Auditoria final de autorizacion: pruebas AAA sin asserts triviales ni deshabilitados, regla probada directamente con excepciones tipadas, puertos simulados en `core`, cliente SurrealDB simulado en infraestructura, consultas y herencia de alcance verificadas, y Quality Gate de cobertura cumplido en los tres modulos.
+- Reactor completo posterior al primer incremento de la Fase 4 con `clean verify`: `utils`, `core` e `infrastructure` finalizaron correctamente.
+- Suite `utils`: 186 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `core`: 541 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `infrastructure`: 450 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- JaCoCo posterior al primer incremento de la Fase 4: `utils` 94.15 % de lineas y 96.97 % de ramas; `core` 98.02 % de lineas y 91.39 % de ramas; `infrastructure` 89.99 % de lineas y 81.09 % de ramas.
+- Auditoria del primer incremento de contexto activo: pruebas AAA sin asserts triviales ni deshabilitados, `core` sin frameworks, SurrealDB y Redis simulados, errores persistentes tipados, fallos de cache no fatales y ausencia de tokens o identidades en claves y logs.
+- Reactor completo al finalizar la Fase 4 con `clean verify`: `utils`, `core` e `infrastructure` finalizaron correctamente.
+- Suite `utils`: 188 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `core`: 573 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `infrastructure`: 462 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- JaCoCo al finalizar la Fase 4: los controles de cobertura de linea y rama, configurados con minimo de 80 %, se cumplieron en los tres modulos.
+- Auditoria final de contexto activo: pruebas AAA con resultados observables, reglas probadas directamente, excepciones `UnauthorizedException`, `ForbiddenException`, `NotFoundException`, `BusinessRuleException` y `ConflictException` verificadas segun el escenario, puertos simulados en `core`, clientes externos simulados en infraestructura y sin pruebas deshabilitadas ni asserts triviales.
+- Reactor completo del primer incremento de la Fase 5 con `clean verify`: `utils`, `core` e `infrastructure` finalizaron correctamente.
+- Suite `utils`: 188 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `core`: 577 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `infrastructure`: 465 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- JaCoCo del primer incremento de la Fase 5: `utils` 97.39 % de lineas y 96.97 % de ramas; `core` 96.42 % de lineas y 90.68 % de ramas; `infrastructure` 89.10 % de lineas y 81.15 % de ramas; controles de cobertura con minimo de 80 % cumplidos en los tres modulos.
+- Auditoria de pruebas de la Fase 5: pruebas AAA con asserts no triviales, excepciones de la jerarquia de dominio (`UnauthorizedException`, `ForbiddenException`, `BusinessException`, `BusinessRuleException`, `CrossWordsException`), puertos y `MessageEnvironmentResolver` simulados en `core` sin frameworks, `verifyNoInteractions` donde el resolver no debe intervenir, captors de `MessageAccessContext` en el controller, omision del token legado verificada y orden de interceptores (`-100`/`0`) comprobado; sin pruebas deshabilitadas.
+- `git diff --check`: sin errores de whitespace (solo avisos LF/CRLF).
+- Reactor completo del incremento de creacion, catalogos y administracion de la Fase 5 con `clean verify`: `utils`, `core` e `infrastructure` finalizaron correctamente.
+- Suite `utils`: 188 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `core`: 603 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- Suite `infrastructure`: 467 pruebas, 0 fallos, 0 errores y 0 omitidas.
+- JaCoCo del incremento: `utils` 97.39 % de lineas y 96.97 % de ramas; `core` 96.51 % de lineas y 91.22 % de ramas; `infrastructure` 88.93 % de lineas y 81.15 % de ramas; controles de cobertura con minimo de 80 % cumplidos en los tres modulos.
+- Auditoria de pruebas del incremento (`unit-test-validator`): 13 clases con veredicto ✅; se corrigio `CreateMessageControllerImplTest` (asserts agrupados con `assertAll`, caso de error `ForbiddenException` y `eq` de `ArgumentMatchers`); sin asserts triviales, `@Disabled`, excepciones genericas ni frameworks en `core`.
+- Pruebas focalizadas de las 13 clases auditadas: 0 fallos y 0 errores.
+- `git diff --check`: sin errores de whitespace (solo avisos LF/CRLF).
 
 ### Pendiente inmediato
 
-Iniciar la Fase 4 definiendo primero el comportamiento de varias pestanas o dispositivos para una misma identidad. El endpoint REST de registro de organizaciones permanece pendiente hasta definir su permiso o politica de aprovisionamiento. Antes de desplegar los nuevos esquemas sobre datos existentes se debe ejecutar un backfill con la Organizacion correcta, provisionar membresias y asignaciones iniciales, o recrear el volumen de desarrollo.
+Continuar con la Fase 6: integrar el proveedor real de identidad reemplazando al simulador sin modificar los casos de uso, con secretos y endpoints en configuracion externa. El endpoint REST de registro de organizaciones permanece pendiente hasta definir su permiso o politica de aprovisionamiento. Antes de desplegar los nuevos esquemas sobre datos existentes se debe ejecutar un backfill con la Organizacion correcta, provisionar identidades, membresias y asignaciones iniciales, o recrear el volumen de desarrollo.
 
 ## Historial de cambios
 
@@ -593,3 +672,7 @@ Iniciar la Fase 4 definiendo primero el comportamiento de varias pestanas o disp
 | 2026-09-22 | Gobierno arquitectonico | Se establece como ley innegociable replicar la arquitectura y convenciones existentes antes de introducir cualquier clase o patron nuevo | Regla permanente y transversal a todas las fases |
 | 2026-09-22 | Fase 3 | Se implementa la entidad `ExternalIdentityEntity`, el puerto `ExternalIdentityRepository`, el esquema SurrealDB con indice unico compuesto `(issuer, subject)`, modelo, mapper, adaptador y pruebas unitarias completas de la persistencia de identidades externas | Fase 3 `PARCIAL`; persistencia de identidades externas completada |
 | 2026-09-22 | Fase 3 | Se modelan membresias, roles, permisos y asignaciones con alcance; se implementan el puerto y adaptador de consulta, la politica `401`/`403`, la herencia de alcances y el filtrado de catalogos con pruebas de aislamiento y verificacion completa del reactor | Fase 3 `COMPLETADA`; autorizacion de negocio verificada |
+| 2026-09-22 | Fase 4 | Se implementan el modelo y los puertos de contexto activo, su persistencia unica por identidad en SurrealDB y una cache Redis de mejor esfuerzo con TTL y claves SHA-256 derivadas de `issuer + subject` | Fase 4 `PARCIAL`; primera mitad completada y verificada |
+| 2026-09-22 | Fase 4 | Se implementan los endpoints de contextos disponibles, consulta y seleccion, con validacion de identidad, autorizacion `CONTEXT_SELECT`, jerarquia, recuperacion cache-aside, OpenAPI y pruebas completas | Fase 4 `COMPLETADA`; criterio de salida verificado |
+| 2026-09-22 | Fase 5 | Se migran la consulta, el listado y la traduccion de mensajes al contexto autorizado con `MessageAccessContext` y `MessageEnvironmentResolver`, convivencia de interceptores por orden, OpenAPI dual y pruebas con auditoria y Quality Gate verificados | Fase 5 `EN CURSO`; consulta, listado y traduccion migrados |
+| 2026-09-22 | Fase 5 | Se migran la creacion de mensajes (`MESSAGE_CREATE`), la consulta de catalogos (match con `ActiveContext.applicationId`) y la administracion de aplicaciones, ambientes y funcionalidades (`APPLICATION_CREATE`, `ENVIRONMENT_CREATE`, `FUNCTIONALITY_CREATE`), con pruebas de aislamiento delegadas, auditoría `unit-test-validator` y Quality Gate verificado | Fase 5 `COMPLETADA`; criterio de salida de la fase cumplido |

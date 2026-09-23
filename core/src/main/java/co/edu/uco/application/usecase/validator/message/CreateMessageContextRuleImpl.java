@@ -56,7 +56,8 @@ public final class CreateMessageContextRuleImpl implements CreateMessageContextR
             throw forbidden(MessageCatalogCodeEnum.FUN_145);
         }
         UUID environmentId = getUUIDFromString(authenticatedEnvironmentId);
-        if (!isEqual(environmentId, getUUIDFromString(requestedEnvironmentId))) {
+        if (!isEmptyOrNull(requestedEnvironmentId)
+                && !isEqual(environmentId, getUUIDFromString(requestedEnvironmentId))) {
             throw forbidden(MessageCatalogCodeEnum.FUN_145);
         }
         return environmentId;

@@ -2,6 +2,7 @@ package co.edu.uco.application.primaryports.facade.application.impl;
 
 import co.edu.uco.application.primaryports.dto.application.CreateApplicationDTO;
 import co.edu.uco.application.primaryports.facade.application.CreateApplicationUseCaseFacade;
+import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.handling.HandlingCreateApplicationPort;
 
 public final class CreateApplicationUseCaseFacadeImpl implements CreateApplicationUseCaseFacade {
@@ -13,7 +14,7 @@ public final class CreateApplicationUseCaseFacadeImpl implements CreateApplicati
     }
 
     @Override
-    public void execute(CreateApplicationDTO createApplicationDTO) {
-        handlingCreateApplicationPort.createApplication(createApplicationDTO);
+    public void execute(CreateApplicationDTO createApplicationDTO, ExternalIdentity identity) {
+        handlingCreateApplicationPort.createApplication(createApplicationDTO, identity);
     }
 }

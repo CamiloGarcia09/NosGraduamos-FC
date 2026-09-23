@@ -52,6 +52,26 @@ class CreateMessageCompositeValidatorTest {
     }
 
     @Test
+    void validate_acceptsDto_whenBodyEnvironmentIdIsAbsent() {
+        CreateMessageDTO dto = validDto();
+        dto.setEnvironmentId("");
+
+        assertDoesNotThrow(() -> validator.validate(dto, "env-1"));
+
+        verify(contextRule).validate(dto, "env-1");
+    }
+
+    @Test
+    void validate_delegatesBodyAndAuthenticatedEnvironmentWhenTheyDiffer() {
+        CreateMessageDTO dto = validDto();
+        dto.setEnvironmentId("other-env");
+
+        assertDoesNotThrow(() -> validator.validate(dto, "env-1"));
+
+        verify(contextRule).validate(dto, "env-1");
+    }
+
+    @Test
     void validate_throwsBusinessRule_whenDtoIsNull() {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_010.getCode())).thenReturn("Datos no validos");
 
@@ -154,17 +174,6 @@ class CreateMessageCompositeValidatorTest {
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("El id de la aplicación es requerido."));
-    }
-
-    @Test
-    void validate_throwsBusinessRule_whenEnvironmentIdIsEmpty() {
-        CreateMessageDTO dto = validDto();
-        dto.setEnvironmentId("");
-
-        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
-                .isInstanceOf(BusinessRuleException.class)
-                .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("El id del entorno es requerido."));
     }
 
     @Test

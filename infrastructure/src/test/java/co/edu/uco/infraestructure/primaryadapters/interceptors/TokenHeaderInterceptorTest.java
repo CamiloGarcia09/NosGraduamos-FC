@@ -22,6 +22,7 @@ import java.io.StringWriter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -110,6 +111,17 @@ class TokenHeaderInterceptorTest {
 
         assertThat(result).isFalse();
         verify(response).setStatus(401);
+    }
+
+    @Test
+    void preHandle_skipsLegacyTokenWhenExternalIdentityWasResolved() throws Exception {
+        when(request.getAttribute("externalIdentity")).thenReturn(new Object());
+
+        boolean result = interceptor.preHandle(request, response, new Object());
+
+        assertThat(result).isTrue();
+        verifyNoInteractions(verifyAccessUseCaseFacade, findEnvironmentIdTokenUseCaseFacade,
+                serializerRegistry, catalogPort);
     }
 
     @Test

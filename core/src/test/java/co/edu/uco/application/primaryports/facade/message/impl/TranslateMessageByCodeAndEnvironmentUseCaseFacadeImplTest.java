@@ -2,6 +2,7 @@ package co.edu.uco.application.primaryports.facade.message.impl;
 
 import co.edu.uco.application.primaryports.dto.message.TranslatedMessageDTO;
 import co.edu.uco.application.usecase.handling.HandlingTranslateMessageByCodeAndEnvironmentPort;
+import co.edu.uco.application.usecase.domain.security.MessageAccessContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,11 +29,12 @@ class TranslateMessageByCodeAndEnvironmentUseCaseFacadeImplTest {
                 "título", "contenido", "type", "category", "app", "func",
                 "provider", "model", 100L
         );
-        when(handlingPort.execute("CODE001", "env-123", "en", "es")).thenReturn(expected);
+        MessageAccessContext context = new MessageAccessContext("env-123", null);
+        when(handlingPort.execute("CODE001", context, "en", "es")).thenReturn(expected);
 
-        TranslatedMessageDTO result = facade.execute("CODE001", "env-123", "en", "es");
+        TranslatedMessageDTO result = facade.execute("CODE001", context, "en", "es");
 
         assertThat(result).isSameAs(expected);
-        verify(handlingPort).execute("CODE001", "env-123", "en", "es");
+        verify(handlingPort).execute("CODE001", context, "en", "es");
     }
 }
