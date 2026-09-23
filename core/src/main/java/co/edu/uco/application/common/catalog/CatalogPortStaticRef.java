@@ -7,16 +7,17 @@ import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
 /**
  * Static holder so non-Spring code (domain exceptions, serializers) can resolve
  * catalog messages without requiring Spring injection.
- * Populated by RedisCatalogMessageAdapter on @PostConstruct.
+ * Initialized with a bootstrap catalog so startup failures are always reportable.
+ * Overridden by RedisCatalogMessageAdapter on @PostConstruct.
  */
 public final class CatalogPortStaticRef {
 
-    private static volatile CatalogPort instance;
+    private static volatile CatalogPort instance = new BootstrapMessageCatalogPort();
 
     private CatalogPortStaticRef() {}
 
     public static void set(CatalogPort catalog) {
-        instance = catalog;
+        instance = isNullObject(catalog) ? new BootstrapMessageCatalogPort() : catalog;
     }
 
     public static String getMessage(String key) {
@@ -36,9 +37,6 @@ public final class CatalogPortStaticRef {
     }
 
     private static CatalogPort instance() {
-        if (isNullObject(instance)) {
-            throw new IllegalStateException("CatalogPortStaticRef is not initialized");
-        }
         return instance;
     }
 }
