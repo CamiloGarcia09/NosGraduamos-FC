@@ -5,7 +5,6 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.repository.ApplicationRepository;
 import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
 import co.edu.uco.application.secondaryports.repository.RecordExistsCatalogPort;
-import co.edu.uco.application.usecase.validator.impl.UUIDValidator;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +39,7 @@ class CreateEnvironmentCompositeValidatorTest {
     @BeforeEach
     void setUp() {
         validator = new CreateEnvironmentCompositeValidator(catalogPort, recordExistsCatalogPort,
-                applicationRepository, environmentRepository, new UUIDValidator(catalogPort));
+                applicationRepository, environmentRepository);
     }
 
     private CreateEnvironmentDTO validDto() {
@@ -73,6 +72,9 @@ class CreateEnvironmentCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenNameIsEmpty() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_154.getCode()))
+                .thenReturn("El nombre del entorno es requerido.");
+
         assertThatThrownBy(() -> validator.validate(new CreateEnvironmentDTO()))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
@@ -81,6 +83,8 @@ class CreateEnvironmentCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenNameExceedsMaxLength() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_155.getCode()))
+                .thenReturn("El nombre del entorno no puede superar los 50 caracteres.");
         CreateEnvironmentDTO dto = validDto();
         dto.setName("a".repeat(51));
 
@@ -92,6 +96,8 @@ class CreateEnvironmentCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenApplicationIdIsEmpty() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_156.getCode()))
+                .thenReturn("El id de la aplicación es requerido.");
         CreateEnvironmentDTO dto = validDto();
         dto.setApplicationId("");
 
@@ -103,6 +109,8 @@ class CreateEnvironmentCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenApplicationDoesNotExist() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_157.getCode()))
+                .thenReturn("La aplicación a la que se asocia el entorno no existe.");
         when(applicationRepository.existsById(APP_UUID)).thenReturn(false);
         CreateEnvironmentDTO dto = validDto();
 
@@ -126,6 +134,8 @@ class CreateEnvironmentCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenTypeIdIsEmpty() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_158.getCode()))
+                .thenReturn("El tipo del entorno es requerido.");
         when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
         CreateEnvironmentDTO dto = validDto();
         dto.setTypeId("");
@@ -138,6 +148,8 @@ class CreateEnvironmentCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenTypeDoesNotExist() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_159.getCode()))
+                .thenReturn("El tipo de entorno no existe.");
         when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
         when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(false);
         CreateEnvironmentDTO dto = validDto();
@@ -150,6 +162,8 @@ class CreateEnvironmentCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenStateIdIsEmpty() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_160.getCode()))
+                .thenReturn("El estado del entorno es requerido.");
         when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
         when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
         CreateEnvironmentDTO dto = validDto();
@@ -163,6 +177,8 @@ class CreateEnvironmentCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenNameAlreadyExistsForApplication() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_162.getCode()))
+                .thenReturn("Ya existe un entorno con el mismo nombre para la aplicación.");
         when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
         when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
         when(environmentRepository.existsByNameAndApplicationId("Production", APP_UUID)).thenReturn(true);

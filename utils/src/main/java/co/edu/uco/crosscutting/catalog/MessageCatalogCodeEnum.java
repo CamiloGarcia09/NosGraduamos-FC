@@ -676,7 +676,94 @@ public enum MessageCatalogCodeEnum {
     FUN_143("FUN_143"),
 
     /** Id del estado de token inactivo. */
-    FUN_144("FUN_144");
+    FUN_144("FUN_144"),
+
+    /** El nombre de la aplicación es requerido. */
+    FUN_145("FUN_145"),
+
+    /** El nombre de la aplicación no puede superar los 50 caracteres. */
+    FUN_146("FUN_146"),
+
+    /** El idioma de la aplicación es requerido. */
+    FUN_147("FUN_147"),
+
+    /** El idioma de la aplicación no existe. */
+    FUN_148("FUN_148"),
+
+    /** La fecha de inicio de la aplicación es requerida. */
+    FUN_149("FUN_149"),
+
+    /** La fecha de fin de la aplicación es requerida. */
+    FUN_150("FUN_150"),
+
+    /** El estado de la aplicación es requerido. */
+    FUN_151("FUN_151"),
+
+    /** El estado de la aplicación no existe. */
+    FUN_152("FUN_152"),
+
+    /** Ya existe una aplicación con el nombre proporcionado. */
+    FUN_153("FUN_153"),
+
+    /** El nombre del entorno es requerido. */
+    FUN_154("FUN_154"),
+
+    /** El nombre del entorno no puede superar los 50 caracteres. */
+    FUN_155("FUN_155"),
+
+    /** El id de la aplicación es requerido. */
+    FUN_156("FUN_156"),
+
+    /** La aplicación a la que se asocia el entorno no existe. */
+    FUN_157("FUN_157"),
+
+    /** El tipo del entorno es requerido. */
+    FUN_158("FUN_158"),
+
+    /** El tipo de entorno no existe. */
+    FUN_159("FUN_159"),
+
+    /** El estado del entorno es requerido. */
+    FUN_160("FUN_160"),
+
+    /** El estado del entorno no existe. */
+    FUN_161("FUN_161"),
+
+    /** Ya existe un entorno con el mismo nombre para la aplicación. */
+    FUN_162("FUN_162"),
+
+    /** El nombre de la funcionalidad es requerido. */
+    FUN_163("FUN_163"),
+
+    /** El nombre de la funcionalidad no puede superar los 50 caracteres. */
+    FUN_164("FUN_164"),
+
+    /** La aplicación a la que se asocia la funcionalidad no existe. */
+    FUN_165("FUN_165"),
+
+    /** La fecha de inicio de la funcionalidad es requerida. */
+    FUN_166("FUN_166"),
+
+    /** La fecha de fin de la funcionalidad es requerida. */
+    FUN_167("FUN_167"),
+
+    /** El estado de la funcionalidad es requerido. */
+    FUN_168("FUN_168"),
+
+    /** El estado de la funcionalidad no existe. */
+    FUN_169("FUN_169"),
+
+    /** Ya existe una funcionalidad con el mismo nombre para la aplicación. */
+    FUN_170("FUN_170"),
+
+    /** El id del entorno es requerido. */
+    FUN_171("FUN_171"),
+
+    /** El id de la funcionalidad es requerido. */
+    FUN_172("FUN_172"),
+
+    /** La fecha de inicio no puede ser posterior a la fecha de fin. */
+    FUN_173("FUN_173");
 
     // =========================================================================
 

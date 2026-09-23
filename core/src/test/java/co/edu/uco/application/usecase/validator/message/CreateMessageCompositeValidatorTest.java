@@ -140,6 +140,8 @@ class CreateMessageCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenApplicationIdIsEmpty() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_156.getCode()))
+                .thenReturn("El id de la aplicación es requerido.");
         CreateMessageDTO dto = validDto();
         dto.setApplicationId("");
 
@@ -151,6 +153,8 @@ class CreateMessageCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenEnvironmentIdIsEmpty() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_171.getCode()))
+                .thenReturn("El id del entorno es requerido.");
         CreateMessageDTO dto = validDto();
         dto.setEnvironmentId("");
 
@@ -162,6 +166,8 @@ class CreateMessageCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenFunctionalityIdIsEmpty() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_172.getCode()))
+                .thenReturn("El id de la funcionalidad es requerido.");
         CreateMessageDTO dto = validDto();
         dto.setFunctionalityId("");
 
