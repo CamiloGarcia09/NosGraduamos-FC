@@ -5,6 +5,7 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.repository.ApplicationRepository;
 import co.edu.uco.application.secondaryports.repository.FunctionalityRepository;
 import co.edu.uco.application.secondaryports.repository.RecordExistsCatalogPort;
+import co.edu.uco.application.secondaryports.repository.ReferenceCatalog;
 import co.edu.uco.application.usecase.validator.impl.UUIDValidator;
 import co.edu.uco.application.usecase.validator.token.DateValidValidator;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
@@ -12,6 +13,7 @@ import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -20,12 +22,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CreateFunctionalityCompositeValidatorTest {
 
     private static final String APP_UUID = "123e4567-e89b-12d3-a456-426614175000";
+    private static final String STATE_ID = "123e4567-e89b-12d3-a456-426614175401";
+    private static final String INVALID_UUID = "not-a-uuid";
 
     @Mock
     private CatalogPort catalogPort;
@@ -51,7 +58,7 @@ class CreateFunctionalityCompositeValidatorTest {
                 .applicationId(APP_UUID)
                 .startDate("2025-01-01T00:00:00")
                 .endDate("2025-12-31T23:59:59")
-                .stateId("state-1")
+                .stateId(STATE_ID)
                 .build();
     }
 
@@ -62,6 +69,20 @@ class CreateFunctionalityCompositeValidatorTest {
         when(functionalityRepository.existsByNameAndApplicationId("Search messages", APP_UUID)).thenReturn(false);
 
         assertDoesNotThrow(() -> validator.validate(validDto()));
+    }
+
+    @Test
+    void validate_checksExactFunctionalityStateCatalogAndUuidPairBeforeDuplicateCheck() {
+        when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
+        when(recordExistsCatalogPort.exists(ReferenceCatalog.FUNCTIONALITY_STATE, STATE_ID)).thenReturn(true);
+        when(functionalityRepository.existsByNameAndApplicationId("Search messages", APP_UUID)).thenReturn(false);
+        CreateFunctionalityDTO dto = validDto();
+
+        validator.validate(dto);
+
+        InOrder catalogOrder = inOrder(recordExistsCatalogPort, functionalityRepository);
+        catalogOrder.verify(recordExistsCatalogPort).exists(ReferenceCatalog.FUNCTIONALITY_STATE, STATE_ID);
+        catalogOrder.verify(functionalityRepository).existsByNameAndApplicationId("Search messages", APP_UUID);
     }
 
     @Test
@@ -167,13 +188,28 @@ class CreateFunctionalityCompositeValidatorTest {
     @Test
     void validate_throwsBusinessRule_whenStateDoesNotExist() {
         when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
-        when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(false);
+        when(recordExistsCatalogPort.exists(ReferenceCatalog.FUNCTIONALITY_STATE, STATE_ID)).thenReturn(false);
         CreateFunctionalityDTO dto = validDto();
 
         assertThatThrownBy(() -> validator.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("El estado de la funcionalidad no existe."));
+        verify(recordExistsCatalogPort).exists(ReferenceCatalog.FUNCTIONALITY_STATE, STATE_ID);
+        verifyNoInteractions(functionalityRepository);
+    }
+
+    @Test
+    void validate_throwsBusinessRule_whenStateIdIsNotUuid() {
+        when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
+        CreateFunctionalityDTO dto = validDto();
+        dto.setStateId(INVALID_UUID);
+
+        assertThatThrownBy(() -> validator.validate(dto))
+                .isInstanceOf(BusinessRuleException.class)
+                .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
+                        .isEqualTo("El estado de la funcionalidad no existe."));
+        verifyNoInteractions(recordExistsCatalogPort, functionalityRepository);
     }
 
     @Test

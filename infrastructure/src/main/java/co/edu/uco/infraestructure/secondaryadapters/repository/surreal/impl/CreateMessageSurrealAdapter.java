@@ -44,9 +44,9 @@ public class CreateMessageSurrealAdapter implements CreateMessageRepository {
 
         String appId = message.getFunctionality().getApplication().getId().toString();
         String funcId = message.getFunctionality().getId().toString();
-        String typeId = message.getType().getName();
-        String categoryId = message.getCategory().getName();
-        String statusId = message.getStatus().getName();
+        String typeId = message.getType().getId().toString();
+        String categoryId = message.getCategory().getId().toString();
+        String statusId = message.getStatus().getId().toString();
 
         String upsertMessageSql = "UPSERT " + toRecordId(TABLE_MESSAGE, messageId) + " CONTENT { "
                 + "code: " + quote(message.getCode()) + ", "

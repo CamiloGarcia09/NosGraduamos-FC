@@ -9,6 +9,7 @@ import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static co.edu.uco.crosscutting.helpers.UtilDate.parseDate;
 import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
@@ -79,6 +80,11 @@ public abstract class CompositeValidatorSupport {
                                             String notExistsMessage) {
         if (isEmptyOrNull(id)) {
             throw BusinessRuleException.buildUserException(requiredMessage);
+        }
+        try {
+            UUID.fromString(id);
+        } catch (IllegalArgumentException exception) {
+            throw BusinessRuleException.buildUserException(notExistsMessage);
         }
         if (!recordExistsCatalogPort.exists(catalog, id)) {
             throw BusinessRuleException.buildUserException(notExistsMessage);

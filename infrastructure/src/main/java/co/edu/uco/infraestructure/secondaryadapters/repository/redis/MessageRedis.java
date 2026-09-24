@@ -42,8 +42,8 @@ public final class MessageRedis {
         setFunctionality(EMPTY);
         setEnvironmentId(EMPTY);
     }
-    public MessageRedis(UUID id, String code, String title, String content, String category,
-            String type, String status, String application, String functionality, String environmentId) {
+    public MessageRedis(UUID id, String code, String title, String content, String type,
+            String category, String status, String application, String functionality, String environmentId) {
         setId(id);
         setCode(code);
         setTitle(title);

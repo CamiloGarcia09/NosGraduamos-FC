@@ -18,8 +18,37 @@ tags:
     description: Consulta y traduccion de mensajes.
   - name: Contexto
     description: Consulta y seleccion del contexto activo de la identidad autenticada.
+  - name: Catalogos
+    description: Catalogos con identificadores UUID persistentes.
 
 paths:
+  /messageucolab/v1/application/message:
+    post:
+      tags: [Mensajes]
+      summary: Crear mensaje
+      description: Crea un mensaje en el ambiente del contexto activo. Todos los campos terminados en Id aceptan exclusivamente UUID persistentes.
+      operationId: createMessage
+      security:
+        - tokenAuth: []
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMessageRequest'
+      responses:
+        '200':
+          description: Mensaje creado correctamente.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /messageucolab/v1/application/{id}/token:
     post:
       tags: [Tokens]
@@ -191,6 +220,46 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /messageucolab/v1/catalog/message-types:
+    get:
+      tags: [Catalogos]
+      summary: Listar tipos de mensaje
+      operationId: findMessageTypes
+      security: []
+      responses:
+        '200':
+          $ref: '#/components/responses/CatalogFound'
+
+  /messageucolab/v1/catalog/message-categories:
+    get:
+      tags: [Catalogos]
+      summary: Listar categorias de mensaje
+      operationId: findMessageCategories
+      security: []
+      responses:
+        '200':
+          $ref: '#/components/responses/CatalogFound'
+
+  /messageucolab/v1/catalog/message-states:
+    get:
+      tags: [Catalogos]
+      summary: Listar estados de mensaje
+      operationId: findMessageStates
+      security: []
+      responses:
+        '200':
+          $ref: '#/components/responses/CatalogFound'
+
+  /messageucolab/v1/catalog/message-environment-states:
+    get:
+      tags: [Catalogos]
+      summary: Listar estados de mensaje por ambiente
+      operationId: findMessageEnvironmentStates
+      security: []
+      responses:
+        '200':
+          $ref: '#/components/responses/CatalogFound'
+
   /messageucolab/v1/me/context:
     get:
       tags: [Contexto]
@@ -236,8 +305,6 @@ paths:
                 $ref: '#/components/schemas/ActiveContextResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -291,6 +358,12 @@ components:
       description: Mensaje encontrado.
     MessageTranslated:
       description: Mensaje traducido correctamente.
+    CatalogFound:
+      description: Catalogo obtenido correctamente. Cada id es un UUID persistente.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CatalogResponse'
     BadRequest:
       description: Solicitud o parametros invalidos.
     Unauthorized:
@@ -309,6 +382,43 @@ components:
       description: Error interno del servidor.
 
   schemas:
+    CreateMessageRequest:
+      type: object
+      required: [code, title, content, typeId, categoryId, statusId, applicationId, application,
+        functionalityId, environmentId, messageEnvironmentStateId]
+      properties:
+        code:
+          type: string
+          example: DEMO_WELCOME
+        title:
+          type: string
+          example: Welcome message
+        content:
+          type: string
+          example: Welcome to MessageUcoLab
+        typeId:
+          type: string
+          format: uuid
+        categoryId:
+          type: string
+          format: uuid
+        statusId:
+          type: string
+          format: uuid
+        applicationId:
+          type: string
+          format: uuid
+        application:
+          type: string
+        functionalityId:
+          type: string
+          format: uuid
+        environmentId:
+          type: string
+          format: uuid
+        messageEnvironmentStateId:
+          type: string
+          format: uuid
     CreateTokenRequest:
       type: object
       required: [expirationDate, environmentId]
@@ -363,6 +473,18 @@ components:
           format: uuid
         name:
           type: string
+    CatalogResponse:
+      type: object
+      required: [data, errors]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogItem'
+        errors:
+          type: array
+          items:
+            type: string
     AvailableContextsResponse:
       type: object
       required: [data, errors]

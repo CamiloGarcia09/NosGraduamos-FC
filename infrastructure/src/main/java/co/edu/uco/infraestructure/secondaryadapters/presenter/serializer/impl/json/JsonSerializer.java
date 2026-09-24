@@ -6,6 +6,7 @@ import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.JSON_SERIALIZER_CONTENT_TYPE;
@@ -20,6 +21,7 @@ public final class JsonSerializer extends AbstractSerializer {
         try{
             var mapper = new ObjectMapper();
             mapper.registerModule(new JavaTimeModule());
+            mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
             return mapper.writeValueAsString(data);
         } catch (JsonProcessingException e) {
             throw CrossWordsException.build(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_018.getCode()), e);

@@ -50,8 +50,8 @@ public final class CreateMessageUseCase implements HandlingCreateMessagePort {
                     dto.getCode(),
                     dto.getTitle(),
                     dto.getContent(),
-                    MessageTypeData.build(dto.getTypeId()),
-                    MessageCategoryData.build(dto.getCategoryId()),
+                    new MessageTypeData(UtilUUID.getStringToUUID(dto.getTypeId()), ""),
+                    new MessageCategoryData(UtilUUID.getStringToUUID(dto.getCategoryId()), ""),
                     dto.getApplication(),
                     new FunctionalityData(
                             UtilUUID.getStringToUUID(dto.getFunctionalityId()),
@@ -61,7 +61,7 @@ public final class CreateMessageUseCase implements HandlingCreateMessagePort {
                             null
                     )
             );
-            messageData.setStatus(new StatusMessageData(UtilUUID.getNewUUID(), dto.getStatusId()));
+            messageData.setStatus(new StatusMessageData(UtilUUID.getStringToUUID(dto.getStatusId()), ""));
 
             createMessageRepository.createMessage(
                     messageData,

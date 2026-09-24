@@ -13,7 +13,8 @@ import java.util.List;
 @Repository
 public class ApplicationCatalogSurrealAdapter extends SurrealCatalogSupport implements ApplicationCatalogRepository {
 
-    private static final String SURREAL_TABLE_APPLICATION = "application";
+    private static final String FIND_ALL_APPLICATIONS =
+            "SELECT *, organization_id.name AS organization_name FROM application;";
 
     public ApplicationCatalogSurrealAdapter(final Surreal surreal, final LoggingPortFactory loggerFactory) {
         super(surreal, loggerFactory.getLogger(ApplicationCatalogSurrealAdapter.class));
@@ -21,7 +22,8 @@ public class ApplicationCatalogSurrealAdapter extends SurrealCatalogSupport impl
 
     @Override
     public List<ApplicationData> findAll() {
-        return queryAll(SURREAL_TABLE_APPLICATION, "Error al consultar aplicaciones en SurrealDB: ", this::toApplicationData);
+        return query(FIND_ALL_APPLICATIONS, "Error al consultar aplicaciones en SurrealDB: "
+                + FIND_ALL_APPLICATIONS, this::toApplicationData);
     }
 
     private ApplicationData toApplicationData(final Object obj) {
@@ -30,7 +32,7 @@ public class ApplicationCatalogSurrealAdapter extends SurrealCatalogSupport impl
         data.setName(stringOf(obj.get("name")));
         final OrganizationEntity organization = new OrganizationEntity();
         organization.setId(extractIdAsUUID(obj.get("organization_id")));
-        organization.setName("");
+        organization.setName(stringOf(obj.get("organization_name")));
         data.setOrganization(organization);
         return data;
     }

@@ -80,6 +80,9 @@ import java.util.UUID;
 @ExtendWith(MockitoExtension.class)
 class UseCaseRuleConfigTest {
 
+    private static final String LANGUAGE_ID = "123e4567-e89b-12d3-a456-426614175601";
+    private static final String STATE_ID = "123e4567-e89b-12d3-a456-426614175602";
+
     @Mock
     private CatalogPort catalogPort;
     @Mock
@@ -265,7 +268,7 @@ class UseCaseRuleConfigTest {
 
         verify(applicationValidator).validate(dto);
         verify(applicationRepository).create(any(ApplicationData.class),
-                eq("lang-1"), any(), any(), eq("state-1"));
+                eq(LANGUAGE_ID), any(), any(), eq(STATE_ID));
         verify(log).info("Application created successfully with name: {}", "Messages");
         verifyNoInteractions(handlingActiveContextPort, authorizationRule);
     }
@@ -402,10 +405,10 @@ class UseCaseRuleConfigTest {
         return CreateApplicationDTO.builder()
                 .name("Messages")
                 .organizationId("123e4567-e89b-12d3-a456-426614174000")
-                .languageId("lang-1")
+                .languageId(LANGUAGE_ID)
                 .startDate("2025-01-01T00:00:00")
                 .endDate("2025-12-31T23:59:59")
-                .stateId("state-1")
+                .stateId(STATE_ID)
                 .build();
     }
 
