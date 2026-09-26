@@ -13,6 +13,7 @@ import co.edu.uco.application.usecase.handling.HandlingCreateTokenPort;
 import co.edu.uco.application.usecase.handling.HandlingRevokeTokenPort;
 import co.edu.uco.application.usecase.domain.TokenDomain;
 import co.edu.uco.application.usecase.validator.token.CreateTokenCompositeValidator;
+import co.edu.uco.application.usecase.validator.token.TokenValidationContext;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import org.junit.jupiter.api.BeforeEach;
@@ -101,7 +102,7 @@ class CreateTokenUseCaseFacadeImplTest {
         String result = facade.execute(dto, applicationId);
 
         assertThat(result).isEqualTo(signature);
-        verify(validator).validate(dto, applicationId);
+        verify(validator).validate(new TokenValidationContext(dto, applicationId));
         verify(handlingRevokeTokenPort).execute(environmentId, "123e4567-e89b-12d3-a456-426614175000");
 
         ArgumentCaptor<String> secretNameCaptor = ArgumentCaptor.forClass(String.class);

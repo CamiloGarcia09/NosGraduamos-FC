@@ -18,6 +18,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UUIDValidatorTest {
 
+    private static final String DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
+
     @Mock
     private CatalogPort catalogPort;
 
@@ -33,13 +35,11 @@ class UUIDValidatorTest {
     @Test
     void validate_throwsBusinessRuleException_whenUuidIsDefault() {
         when(catalogPort.getMessage("FUN_038")).thenReturn("UUID cannot be empty");
-        String defaultUuid = "00000000-0000-0000-0000-000000000000";
 
-        assertThatThrownBy(() -> validator.validate(defaultUuid))
+        assertThatThrownBy(() -> validator.validate(DEFAULT_UUID))
                 .isInstanceOf(BusinessRuleException.class)
-                .satisfies(ex -> {
-                    assertThat(((BusinessRuleException) ex).getTechnicalMessage()).isEqualTo("UUID cannot be empty");
-                });
+                .satisfies(ex -> assertThat(((BusinessRuleException) ex).getTechnicalMessage())
+                        .isEqualTo("UUID cannot be empty"));
     }
 
     @Test
@@ -47,7 +47,9 @@ class UUIDValidatorTest {
         when(catalogPort.getMessage("FUN_038")).thenReturn("UUID cannot be empty");
 
         assertThatThrownBy(() -> validator.validate("   "))
-                .isInstanceOf(BusinessRuleException.class);
+                .isInstanceOf(BusinessRuleException.class)
+                .satisfies(ex -> assertThat(((BusinessRuleException) ex).getTechnicalMessage())
+                        .isEqualTo("UUID cannot be empty"));
     }
 
     @Test

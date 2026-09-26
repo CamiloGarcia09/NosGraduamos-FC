@@ -103,6 +103,18 @@ class RedisCatalogMessageAdapterTest {
     }
 
     @Test
+    void getMessageModel_returnsBootstrapModel_whenKeyIsBootstrapCode() {
+        MessageCatalog catalog = adapter.getMessageModel("TCH_021");
+
+        assertThat(catalog.code()).isEqualTo("TCH_021");
+        assertThat(catalog.title()).isEqualTo("Response success");
+        assertThat(catalog.content()).isEqualTo("The successful response is: {}");
+        assertThat(catalog.type()).isEqualTo("TECHNICAL");
+        assertThat(catalog.category()).isEqualTo("INFORMATION");
+        verify(hashOperations, never()).entries(anyString());
+    }
+
+    @Test
     void getMessageModel_throws_whenEntryIsEmpty() {
         when(hashOperations.entries("msg-key")).thenReturn(new HashMap<>());
 
@@ -140,6 +152,12 @@ class RedisCatalogMessageAdapterTest {
     }
 
     @Test
+    void getMessage_returnsBootstrapContent_whenKeyIsBootstrapCode() {
+        assertThat(adapter.getMessage("TCH_007")).isEqualTo("The message key is null");
+        verify(hashOperations, never()).get(anyString(), any());
+    }
+
+    @Test
     void getMessage_returnsKey_whenValueIsNull() {
         when(hashOperations.get("msg-key", "content")).thenReturn(null);
 
@@ -167,6 +185,13 @@ class RedisCatalogMessageAdapterTest {
     }
 
     @Test
+    void getMessageWithDefault_returnsBootstrapContent_whenKeyIsBootstrapCode() {
+        assertThat(adapter.getMessage("TCH_009", "default"))
+                .isEqualTo("Message code does not exist with %s key");
+        verify(hashOperations, never()).get(anyString(), any());
+    }
+
+    @Test
     void getMessageWithDefault_returnsDefault_whenValueIsNull() {
         when(hashOperations.get("msg-key", "content")).thenReturn(null);
 
@@ -191,6 +216,12 @@ class RedisCatalogMessageAdapterTest {
         when(hashOperations.get("msg-key", "title")).thenReturn("Title");
 
         assertThat(adapter.getTitle("msg-key")).isEqualTo("Title");
+    }
+
+    @Test
+    void getTitle_returnsBootstrapTitle_whenKeyIsBootstrapCode() {
+        assertThat(adapter.getTitle("TCH_027")).isEqualTo("Error generating signature");
+        verify(hashOperations, never()).get(anyString(), any());
     }
 
     @Test

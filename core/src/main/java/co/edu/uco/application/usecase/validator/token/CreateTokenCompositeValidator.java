@@ -1,44 +1,31 @@
 package co.edu.uco.application.usecase.validator.token;
 
-import co.edu.uco.application.primaryports.dto.token.CreateTokenDTO;
-import co.edu.uco.application.usecase.validator.environment.ApplicationBelongsEnvironmentValidator;
-import co.edu.uco.application.usecase.validator.environment.EnvironmentExistValidator;
-import co.edu.uco.application.usecase.validator.impl.ExpirationDateValidator;
-import co.edu.uco.application.usecase.validator.impl.UUIDValidator;
+import co.edu.uco.application.secondaryports.catalog.CatalogPort;
+import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
+import co.edu.uco.application.usecase.validator.CompositeValidator;
 import org.springframework.stereotype.Component;
 
-import static co.edu.uco.crosscutting.helpers.UtilDate.parseDate;
-import static co.edu.uco.crosscutting.helpers.UtilUUID.getUUIDFromString;
+import co.edu.uco.application.usecase.validator.token.rule.TokenApplicationBelongsEnvironmentRule;
+import co.edu.uco.application.usecase.validator.token.rule.TokenApplicationUuidRule;
+import co.edu.uco.application.usecase.validator.token.rule.TokenEnvironmentExistsRule;
+import co.edu.uco.application.usecase.validator.token.rule.TokenEnvironmentUuidRule;
+import co.edu.uco.application.usecase.validator.token.rule.TokenExpirationDateValidRule;
+import co.edu.uco.application.usecase.validator.token.rule.TokenExpirationNotPassedRule;
+
+import java.time.Clock;
+import java.util.List;
 
 @Component
-public final class CreateTokenCompositeValidator {
+public final class CreateTokenCompositeValidator extends CompositeValidator<TokenValidationContext> {
 
-    private final ApplicationBelongsEnvironmentValidator applicationBelongsEnvironmentValidator;
-    private final EnvironmentExistValidator environmentExistValidator;
-    private final ExpirationDateValidator expirationDateValidator;
-    private final DateValidValidator dateValidValidator;
-    private final UUIDValidator uuidValidator;
-
-    public CreateTokenCompositeValidator(ApplicationBelongsEnvironmentValidator applicationBelongsEnvironmentValidator,
-                                         EnvironmentExistValidator environmentExistValidator,
-                                         ExpirationDateValidator expirationDateValidator,
-                                         DateValidValidator dateValidValidator,
-                                         UUIDValidator uuidValidator) {
-        this.applicationBelongsEnvironmentValidator = applicationBelongsEnvironmentValidator;
-        this.environmentExistValidator = environmentExistValidator;
-        this.expirationDateValidator = expirationDateValidator;
-        this.dateValidValidator = dateValidValidator;
-        this.uuidValidator = uuidValidator;
-    }
-
-    public void validate(CreateTokenDTO createTokenDTO, String applicationId) {
-
-        uuidValidator.validate(applicationId);
-        uuidValidator.validate(createTokenDTO.getEnvironmentId());
-        dateValidValidator.validate(createTokenDTO.getExpirationDate());
-        expirationDateValidator.validate(parseDate(createTokenDTO.getExpirationDate()));
-        environmentExistValidator.validate(createTokenDTO);
-        applicationBelongsEnvironmentValidator.validate(getUUIDFromString(createTokenDTO.getEnvironmentId()),
-                getUUIDFromString(applicationId));
+    public CreateTokenCompositeValidator(CatalogPort catalogPort, EnvironmentRepository environmentRepository, Clock clock) {
+        super(List.of(
+                new TokenApplicationUuidRule(catalogPort),
+                new TokenEnvironmentUuidRule(catalogPort),
+                new TokenExpirationDateValidRule(catalogPort),
+                new TokenExpirationNotPassedRule(catalogPort, clock),
+                new TokenEnvironmentExistsRule(catalogPort, environmentRepository),
+                new TokenApplicationBelongsEnvironmentRule(catalogPort, environmentRepository)
+        ), catalogPort);
     }
 }

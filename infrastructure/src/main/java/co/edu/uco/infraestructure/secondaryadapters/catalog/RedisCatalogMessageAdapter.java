@@ -1,5 +1,6 @@
 package co.edu.uco.infraestructure.secondaryadapters.catalog;
 
+import co.edu.uco.application.common.catalog.BootstrapMessageCatalogPort;
 import co.edu.uco.application.common.catalog.CatalogPortStaticRef;
 import co.edu.uco.application.common.catalog.MessageCatalog;
 import co.edu.uco.application.crosscutting.exceptions.MessageKeyCanNotBeEmptyException;
@@ -8,6 +9,7 @@ import co.edu.uco.application.crosscutting.exceptions.MessageNotFoundException;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
+import co.edu.uco.crosscutting.catalog.BootstrapMessageCatalogEnum;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType;
@@ -29,10 +31,12 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
 
     private final LoggingPort log;
     private final RedisTemplate<String, String> redisTemplate;
+    private final BootstrapMessageCatalogPort defaultCatalog;
 
     public RedisCatalogMessageAdapter(RedisTemplate<String, String> redisTemplate, LoggingPortFactory loggerFactory) {
         this.log = loggerFactory.getLogger(RedisCatalogMessageAdapter.class);
         this.redisTemplate = redisTemplate;
+        this.defaultCatalog = new BootstrapMessageCatalogPort();
     }
 
     @PostConstruct
@@ -47,6 +51,9 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
         }
         if (isEmpty(trim(key))) {
             MessageKeyCanNotBeEmptyException.report();
+        }
+        if (BootstrapMessageCatalogEnum.exists(key)) {
+            return defaultCatalog.getMessageModel(key);
         }
         try {
             Map<Object, Object> entry = redisTemplate.opsForHash().entries(key);
@@ -74,6 +81,9 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
         if (isEmptyOrNull(trim(key))) {
             return EMPTY;
         }
+        if (BootstrapMessageCatalogEnum.exists(key)) {
+            return defaultCatalog.getMessage(key);
+        }
         try {
             var value = (String) redisTemplate.opsForHash().get(key, "content");
             return isNullObject(value) ? key : value;
@@ -88,6 +98,9 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
         if (isEmptyOrNull(trim(key))) {
             return defaultMessage;
         }
+        if (BootstrapMessageCatalogEnum.exists(key)) {
+            return defaultCatalog.getMessage(key);
+        }
         try {
             String message = (String) redisTemplate.opsForHash().get(key, "content");
             return isNullObject(message) ? defaultMessage : message;
@@ -101,6 +114,9 @@ public class RedisCatalogMessageAdapter implements CatalogPort {
     public String getTitle(String key) {
         if (isEmptyOrNull(trim(key))) {
             return EMPTY;
+        }
+        if (BootstrapMessageCatalogEnum.exists(key)) {
+            return defaultCatalog.getTitle(key);
         }
         try {
             var title = (String) redisTemplate.opsForHash().get(key, "title");

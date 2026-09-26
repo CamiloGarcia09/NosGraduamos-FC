@@ -6,8 +6,6 @@ import co.edu.uco.application.secondaryports.repository.ApplicationRepository;
 import co.edu.uco.application.secondaryports.repository.FunctionalityRepository;
 import co.edu.uco.application.secondaryports.repository.RecordExistsCatalogPort;
 import co.edu.uco.application.secondaryports.repository.ReferenceCatalog;
-import co.edu.uco.application.usecase.validator.impl.UUIDValidator;
-import co.edu.uco.application.usecase.validator.token.DateValidValidator;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +30,7 @@ class CreateFunctionalityCompositeValidatorTest {
 
     private static final String APP_UUID = "123e4567-e89b-12d3-a456-426614175000";
     private static final String STATE_ID = "123e4567-e89b-12d3-a456-426614175401";
+    private static final String DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
     private static final String INVALID_UUID = "not-a-uuid";
 
     @Mock
@@ -48,8 +47,7 @@ class CreateFunctionalityCompositeValidatorTest {
     @BeforeEach
     void setUp() {
         validator = new CreateFunctionalityCompositeValidator(catalogPort, recordExistsCatalogPort,
-                applicationRepository, functionalityRepository, new UUIDValidator(catalogPort),
-                new DateValidValidator(catalogPort));
+                applicationRepository, functionalityRepository);
     }
 
     private CreateFunctionalityDTO validDto() {
@@ -97,6 +95,9 @@ class CreateFunctionalityCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenNameIsEmpty() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_179.getCode()))
+                .thenReturn("El nombre de la funcionalidad es requerido.");
+
         assertThatThrownBy(() -> validator.validate(new CreateFunctionalityDTO()))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
@@ -105,6 +106,8 @@ class CreateFunctionalityCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenNameExceedsMaxLength() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_180.getCode()))
+                .thenReturn("El nombre de la funcionalidad no puede superar los 50 caracteres.");
         CreateFunctionalityDTO dto = validDto();
         dto.setName("a".repeat(51));
 
@@ -116,6 +119,8 @@ class CreateFunctionalityCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenApplicationIdIsEmpty() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_172.getCode()))
+                .thenReturn("El id de la aplicación es requerido.");
         CreateFunctionalityDTO dto = validDto();
         dto.setApplicationId("");
 
@@ -127,6 +132,8 @@ class CreateFunctionalityCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenApplicationDoesNotExist() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_181.getCode()))
+                .thenReturn("La aplicación a la que se asocia la funcionalidad no existe.");
         when(applicationRepository.existsById(APP_UUID)).thenReturn(false);
         CreateFunctionalityDTO dto = validDto();
 
@@ -137,7 +144,23 @@ class CreateFunctionalityCompositeValidatorTest {
     }
 
     @Test
+    void validate_throwsBusinessRule_whenApplicationIdIsDefaultUuid() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_038.getCode()))
+                .thenReturn("El uuid no es valido");
+        CreateFunctionalityDTO dto = validDto();
+        dto.setApplicationId(DEFAULT_UUID);
+
+        assertThatThrownBy(() -> validator.validate(dto))
+                .isInstanceOf(BusinessRuleException.class)
+                .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
+                        .isEqualTo("El uuid no es valido"));
+        verifyNoInteractions(applicationRepository, recordExistsCatalogPort, functionalityRepository);
+    }
+
+    @Test
     void validate_throwsBusinessRule_whenStartDateIsEmpty() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_182.getCode()))
+                .thenReturn("La fecha de inicio de la funcionalidad es requerida.");
         when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
         CreateFunctionalityDTO dto = validDto();
         dto.setStartDate("");
@@ -150,6 +173,8 @@ class CreateFunctionalityCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenEndDateIsEmpty() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_183.getCode()))
+                .thenReturn("La fecha de fin de la funcionalidad es requerida.");
         when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
         CreateFunctionalityDTO dto = validDto();
         dto.setEndDate("");
@@ -162,6 +187,8 @@ class CreateFunctionalityCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenStartDateIsAfterEndDate() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_189.getCode()))
+                .thenReturn("La fecha de inicio no puede ser posterior a la fecha de fin.");
         when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
         CreateFunctionalityDTO dto = validDto();
         dto.setStartDate("2026-12-31T23:59:59");
@@ -175,6 +202,8 @@ class CreateFunctionalityCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenStateIdIsEmpty() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_184.getCode()))
+                .thenReturn("El estado de la funcionalidad es requerido.");
         when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
         CreateFunctionalityDTO dto = validDto();
         dto.setStateId("");
@@ -187,6 +216,8 @@ class CreateFunctionalityCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenStateDoesNotExist() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_185.getCode()))
+                .thenReturn("El estado de la funcionalidad no existe.");
         when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
         when(recordExistsCatalogPort.exists(ReferenceCatalog.FUNCTIONALITY_STATE, STATE_ID)).thenReturn(false);
         CreateFunctionalityDTO dto = validDto();
@@ -201,6 +232,8 @@ class CreateFunctionalityCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenStateIdIsNotUuid() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_185.getCode()))
+                .thenReturn("El estado de la funcionalidad no existe.");
         when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
         CreateFunctionalityDTO dto = validDto();
         dto.setStateId(INVALID_UUID);
@@ -214,6 +247,8 @@ class CreateFunctionalityCompositeValidatorTest {
 
     @Test
     void validate_throwsBusinessRule_whenNameAlreadyExistsForApplication() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_186.getCode()))
+                .thenReturn("Ya existe una funcionalidad con el mismo nombre para la aplicación.");
         when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
         when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
         when(functionalityRepository.existsByNameAndApplicationId("Search messages", APP_UUID)).thenReturn(true);

@@ -1,11 +1,11 @@
 package co.edu.uco.application.common.catalog;
 
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
+import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -17,27 +17,40 @@ class CatalogPortStaticRefTest {
     }
 
     @Test
-    void getMessage_throwsIllegalStateWhenNoInstance() {
-        assertThatThrownBy(() -> CatalogPortStaticRef.getMessage("KEY"))
-                .isInstanceOf(IllegalStateException.class);
+    void getMessage_resolvesBootstrapContent_whenNoInstanceSet() {
+        assertThat(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_007.getCode()))
+                .isEqualTo("The message key is null");
     }
 
     @Test
-    void getMessage_withDefault_throwsIllegalStateWhenNoInstance() {
-        assertThatThrownBy(() -> CatalogPortStaticRef.getMessage("KEY", "fallback"))
-                .isInstanceOf(IllegalStateException.class);
+    void getMessage_withDefault_resolvesBootstrapContent_whenNoInstanceSet() {
+        assertThat(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_007.getCode(), "fallback"))
+                .isEqualTo("The message key is null");
     }
 
     @Test
-    void getTitle_throwsIllegalStateWhenNoInstance() {
-        assertThatThrownBy(() -> CatalogPortStaticRef.getTitle("KEY"))
-                .isInstanceOf(IllegalStateException.class);
+    void getTitle_resolvesBootstrapTitle_whenNoInstanceSet() {
+        assertThat(CatalogPortStaticRef.getTitle(MessageCatalogCodeEnum.TCH_027.getCode()))
+                .isEqualTo("Error generating signature");
     }
 
     @Test
-    void getMessageModel_throwsIllegalStateWhenNoInstance() {
-        assertThatThrownBy(() -> CatalogPortStaticRef.getMessageModel("KEY"))
-                .isInstanceOf(IllegalStateException.class);
+    void getMessageModel_resolvesBootstrapModel_whenNoInstanceSet() {
+        MessageCatalog model = CatalogPortStaticRef.getMessageModel(MessageCatalogCodeEnum.TCH_021.getCode());
+
+        assertThat(model.code()).isEqualTo("TCH_021");
+        assertThat(model.content()).isEqualTo("The successful response is: {}");
+    }
+
+    @Test
+    void set_null_restoresBootstrapDefault() {
+        CatalogPort catalogPort = mock(CatalogPort.class);
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_007.getCode())).thenReturn("custom");
+        CatalogPortStaticRef.set(catalogPort);
+        CatalogPortStaticRef.set(null);
+
+        assertThat(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_007.getCode()))
+                .isEqualTo("The message key is null");
     }
 
     @Test

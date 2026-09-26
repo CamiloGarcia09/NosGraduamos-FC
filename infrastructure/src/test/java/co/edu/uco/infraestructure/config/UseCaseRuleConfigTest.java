@@ -24,6 +24,7 @@ import co.edu.uco.application.secondaryports.repository.MessageEnvironmentStateC
 import co.edu.uco.application.secondaryports.repository.MessageStateCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.MessageTypeCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.RecordExistsCatalogPort;
+import co.edu.uco.application.secondaryports.repository.ReferenceCatalog;
 import co.edu.uco.application.secondaryports.security.AuthorizationQueryPort;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.usecase.domain.aggregate.entities.OrganizationEntity;
@@ -52,7 +53,6 @@ import co.edu.uco.application.usecase.validator.organization.CreateOrganizationN
 import co.edu.uco.application.usecase.validator.organization.CreateOrganizationNameRuleImpl;
 import co.edu.uco.application.usecase.validator.organization.CreateOrganizationUniqueNameRule;
 import co.edu.uco.application.usecase.validator.organization.CreateOrganizationUniqueNameRuleImpl;
-import co.edu.uco.application.usecase.validator.token.DateValidValidator;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
 import co.edu.uco.crosscutting.exceptions.UnauthorizedException;
 import org.junit.jupiter.api.BeforeEach;
@@ -105,8 +105,6 @@ class UseCaseRuleConfigTest {
     private RecordExistsCatalogPort recordExistsCatalogPort;
     @Mock
     private UUIDValidator uuidValidator;
-    @Mock
-    private DateValidValidator dateValidValidator;
     @Mock
     private CreateApplicationOrganizationExistsRule organizationExistsRule;
     @Mock
@@ -245,14 +243,14 @@ class UseCaseRuleConfigTest {
         when(applicationRepository.findByName("Messages")).thenReturn(Optional.empty());
         CreateApplicationCompositeValidator composite = config.createApplicationCompositeValidator(
                 catalogPort, recordExistsCatalogPort, applicationRepository,
-                dateValidValidator, organizationExistsRule);
+                organizationExistsRule);
         CreateApplicationDTO dto = validApplicationDto();
 
         composite.validate(dto);
 
         verify(organizationExistsRule).validate(dto);
-        verify(dateValidValidator).validate(dto.getStartDate());
-        verify(dateValidValidator).validate(dto.getEndDate());
+        verify(recordExistsCatalogPort).exists(ReferenceCatalog.LANGUAGE_BASE, LANGUAGE_ID);
+        verify(recordExistsCatalogPort).exists(ReferenceCatalog.APPLICATION_STATE, STATE_ID);
         verify(applicationRepository).findByName("Messages");
     }
 

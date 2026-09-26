@@ -55,7 +55,6 @@ import co.edu.uco.application.usecase.validator.organization.CreateOrganizationN
 import co.edu.uco.application.usecase.validator.organization.CreateOrganizationNameRuleImpl;
 import co.edu.uco.application.usecase.validator.organization.CreateOrganizationUniqueNameRule;
 import co.edu.uco.application.usecase.validator.organization.CreateOrganizationUniqueNameRuleImpl;
-import co.edu.uco.application.usecase.validator.token.DateValidValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -227,13 +226,11 @@ public class UseCaseRuleConfig {
             CatalogPort catalogPort,
             RecordExistsCatalogPort recordExistsCatalogPort,
             ApplicationRepository applicationRepository,
-            DateValidValidator dateValidValidator,
             CreateApplicationOrganizationExistsRule organizationExistsRule) {
         return new CreateApplicationCompositeValidator(
                 catalogPort,
                 recordExistsCatalogPort,
                 applicationRepository,
-                dateValidValidator,
                 organizationExistsRule);
     }
 

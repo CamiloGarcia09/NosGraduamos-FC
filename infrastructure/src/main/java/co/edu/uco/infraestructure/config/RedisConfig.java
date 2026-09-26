@@ -3,7 +3,7 @@ package co.edu.uco.infraestructure.config;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.infraestructure.secondaryadapters.repository.redis.MessageRedis;
-import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
+import co.edu.uco.crosscutting.catalog.BootstrapMessageCatalogEnum;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -52,14 +52,14 @@ public class RedisConfig {
             template.setValueSerializer(serializer);
             template.afterPropertiesSet();
         } catch (RedisConnectionFailureException ex) {
-            log.error(MessageCatalogCodeEnum.FUN_013.getCode(), ex);
-            throw BusinessException.buildTechnicalException(MessageCatalogCodeEnum.FUN_013.getCode());
+            log.error(BootstrapMessageCatalogEnum.FUN_013.getContent(), ex);
+            throw BusinessException.buildTechnicalException(BootstrapMessageCatalogEnum.FUN_013.getContent());
         } catch (DataAccessException ex) {
-            log.error(MessageCatalogCodeEnum.FUN_014.getCode(), ex);
-            throw BusinessException.buildTechnicalException(MessageCatalogCodeEnum.FUN_014.getCode());
+            log.error(BootstrapMessageCatalogEnum.FUN_014.getContent(), ex);
+            throw BusinessException.buildTechnicalException(BootstrapMessageCatalogEnum.FUN_014.getContent());
         } catch (Exception ex) {
-            log.error(MessageCatalogCodeEnum.FUN_015.getCode(), ex);
-            throw BusinessException.buildTechnicalException(MessageCatalogCodeEnum.FUN_015.getCode());
+            log.error(BootstrapMessageCatalogEnum.FUN_015.getContent(), ex);
+            throw BusinessException.buildTechnicalException(BootstrapMessageCatalogEnum.FUN_015.getContent());
         }
         return template;
     }
