@@ -42,9 +42,33 @@ services:
           - POST
         strip_path: false
 
+      - name: create-application
+        paths:
+          - ~/messageucolab/v1/application$
+        methods:
+          - POST
+        regex_priority: 10
+        strip_path: false
+
+      - name: create-environment
+        paths:
+          - ~/messageucolab/v1/application/environment$
+        methods:
+          - POST
+        regex_priority: 10
+        strip_path: false
+
       - name: catalog
         paths:
           - /messageucolab/v1/catalog
         methods:
           - GET
+        strip_path: false
+
+      - name: identity-context
+        paths:
+          - /messageucolab/v1/me
+        methods:
+          - GET
+          - PUT
         strip_path: false
