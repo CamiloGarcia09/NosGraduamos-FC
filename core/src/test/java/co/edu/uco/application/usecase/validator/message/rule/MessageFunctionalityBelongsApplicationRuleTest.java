@@ -80,8 +80,9 @@ class MessageFunctionalityBelongsApplicationRuleTest {
                 .thenReturn(List.of());
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_146.getCode()))
                 .thenReturn(OUTSIDE_APPLICATION_MESSAGE);
+        CreateMessageValidationContext context = context();
 
-        assertThatThrownBy(() -> rule.validate(context()))
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
                         .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)
@@ -95,8 +96,9 @@ class MessageFunctionalityBelongsApplicationRuleTest {
                 .thenReturn(null);
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_146.getCode()))
                 .thenReturn(OUTSIDE_APPLICATION_MESSAGE);
+        CreateMessageValidationContext context = context();
 
-        assertThatThrownBy(() -> rule.validate(context()))
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
                         .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)
@@ -111,8 +113,9 @@ class MessageFunctionalityBelongsApplicationRuleTest {
                 .thenReturn(functionalities);
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_146.getCode()))
                 .thenReturn(OUTSIDE_APPLICATION_MESSAGE);
+        CreateMessageValidationContext context = context();
 
-        assertThatThrownBy(() -> rule.validate(context()))
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
                         .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)

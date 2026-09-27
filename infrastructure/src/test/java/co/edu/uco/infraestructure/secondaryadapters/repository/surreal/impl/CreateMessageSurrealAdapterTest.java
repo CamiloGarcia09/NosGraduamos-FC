@@ -125,8 +125,9 @@ class CreateMessageSurrealAdapterTest {
     void createMessage_throwsBusinessException_whenQueryFails() {
         when(catalogPort.getMessage(anyString())).thenReturn("msg");
         doThrow(new RuntimeException("db down")).when(surreal).query(anyString());
+        MessageData message = buildMessage();
 
-        assertThatThrownBy(() -> adapter.createMessage(buildMessage(), ENVIRONMENT_ID,
+        assertThatThrownBy(() -> adapter.createMessage(message, ENVIRONMENT_ID,
                 MESSAGE_ENVIRONMENT_STATE_ID))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(ex -> assertThat(((BusinessException) ex).getTechnicalMessage())

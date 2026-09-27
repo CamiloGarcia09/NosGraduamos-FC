@@ -210,8 +210,9 @@ class CreateMessageCompositeValidatorTest {
         stubCatalogReferences();
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_145.getCode()))
                 .thenReturn("Environment not authorized");
+        CreateMessageDTO dto = validDto();
 
-        assertThatThrownBy(() -> validator.validate(validDto(), null))
+        assertThatThrownBy(() -> validator.validate(dto, null))
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
                         .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)
@@ -226,8 +227,9 @@ class CreateMessageCompositeValidatorTest {
         when(environmentRepository.findById(AUTHENTICATED_ENVIRONMENT_ID)).thenReturn(Optional.empty());
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_035.getCode()))
                 .thenReturn("Environment does not exist");
+        CreateMessageDTO dto = validDto();
 
-        assertThatThrownBy(() -> validator.validate(validDto(), AUTHENTICATED_ENVIRONMENT_ID))
+        assertThatThrownBy(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID))
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
                         .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)
@@ -243,8 +245,9 @@ class CreateMessageCompositeValidatorTest {
                 .thenReturn(Optional.of(environment(UUID.fromString(MISSING_ID))));
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_036.getCode()))
                 .thenReturn("Environment outside application");
+        CreateMessageDTO dto = validDto();
 
-        assertThatThrownBy(() -> validator.validate(validDto(), AUTHENTICATED_ENVIRONMENT_ID))
+        assertThatThrownBy(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID))
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
                         .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)
@@ -262,8 +265,9 @@ class CreateMessageCompositeValidatorTest {
                 .thenReturn(List.of());
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_146.getCode()))
                 .thenReturn("Functionality outside application");
+        CreateMessageDTO dto = validDto();
 
-        assertThatThrownBy(() -> validator.validate(validDto(), AUTHENTICATED_ENVIRONMENT_ID))
+        assertThatThrownBy(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID))
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
                         .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)

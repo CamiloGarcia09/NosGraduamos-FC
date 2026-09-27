@@ -77,6 +77,7 @@ class MessageDTOTest {
             assertAll(
                     () -> assertThat(Modifier.isFinal(MessageDTO.class.getModifiers())).isTrue(),
                     () -> assertThat(fields)
+                            .isNotEmpty()
                             .allSatisfy(field -> assertThat(Modifier.isFinal(field.getModifiers())).isTrue()),
                     () -> assertThat(setters).isEmpty());
         }
@@ -92,7 +93,7 @@ class MessageDTOTest {
 
             assertAll(
                     () -> assertThat(first).isEqualTo(second),
-                    () -> assertThat(first.hashCode()).isEqualTo(second.hashCode()));
+                    () -> assertThat(first).hasSameHashCodeAs(second));
         }
 
         @Test

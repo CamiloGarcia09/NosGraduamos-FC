@@ -64,8 +64,9 @@ class MessageEnvironmentResolverImplTest {
     @Test
     void resolve_rejectsRequestWithoutExternalIdentityOrLegacyEnvironment() {
         when(catalogPort.getMessage("FUN_152")).thenReturn("Authentication required");
+        MessageAccessContext context = new MessageAccessContext(" ", null);
 
-        assertThatThrownBy(() -> resolver.resolve(new MessageAccessContext(" ", null), PermissionCode.MESSAGE_READ))
+        assertThatThrownBy(() -> resolver.resolve(context, PermissionCode.MESSAGE_READ))
                 .isInstanceOf(UnauthorizedException.class)
                 .extracting("httpStatus", "userMessage")
                 .containsExactly(401, "Authentication required");

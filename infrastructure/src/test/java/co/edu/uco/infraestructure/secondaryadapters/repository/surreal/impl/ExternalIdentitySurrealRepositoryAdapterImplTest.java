@@ -154,11 +154,12 @@ class ExternalIdentitySurrealRepositoryAdapterImplTest {
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(surreal).query(captor.capture());
         String sql = captor.getValue();
-        assertThat(sql).contains("email: 'new@email.com'");
-        assertThat(sql).contains("principal_type: 'SERVICE'");
-        assertThat(sql).contains("time::now()");
-        assertThat(sql).doesNotContain("issuer");
-        assertThat(sql).doesNotContain("subject");
+        assertThat(sql)
+                .contains("email: 'new@email.com'")
+                .contains("principal_type: 'SERVICE'")
+                .contains("time::now()")
+                .doesNotContain("issuer")
+                .doesNotContain("subject");
         verify(log).info("Executing SurrealQL update external identity");
     }
 

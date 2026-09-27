@@ -155,9 +155,10 @@ class AuthorizationQuerySurrealAdapterTest {
     void hasPermission_wrapsDatabaseFailureAsTechnicalBusinessException() {
         RuntimeException cause = new RuntimeException("database unavailable");
         doThrow(cause).when(surreal).query(anyString());
+        UUID targetId = UUID.randomUUID();
 
         assertThatThrownBy(() -> adapter.hasPermission(identity, PermissionCode.MESSAGE_READ,
-                AuthorizationScopeType.ORGANIZATION, UUID.randomUUID()))
+                AuthorizationScopeType.ORGANIZATION, targetId))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(exception -> assertThat(((BusinessException) exception).getTechnicalMessage())
                         .isEqualTo("Error al consultar autorizaciones en la base de datos SurrealDB"));

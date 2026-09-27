@@ -263,8 +263,9 @@ class FindCatalogUseCaseTest {
         when(activeContextPort.findActiveContext(IDENTITY)).thenReturn(
                 ActiveContextDTO.builder().applicationId(OTHER_ID.toString()).build());
         when(catalogPort.getMessage("FUN_153")).thenReturn("Fuera del contexto activo");
+        FindCatalogUseCase useCase = buildUseCase();
 
-        assertThatThrownBy(() -> buildUseCase()
+        assertThatThrownBy(() -> useCase
                 .findEnvironmentsByApplication(ID.toString(), IDENTITY))
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
@@ -276,8 +277,9 @@ class FindCatalogUseCaseTest {
     @Test
     void findEnvironmentsByApplication_throwsForbidden_whenActiveContextDoesNotExist() {
         when(catalogPort.getMessage("FUN_153")).thenReturn("Fuera del contexto activo");
+        FindCatalogUseCase useCase = buildUseCase();
 
-        assertThatThrownBy(() -> buildUseCase()
+        assertThatThrownBy(() -> useCase
                 .findEnvironmentsByApplication(ID.toString(), IDENTITY))
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
@@ -302,8 +304,9 @@ class FindCatalogUseCaseTest {
         when(activeContextPort.findActiveContext(IDENTITY)).thenReturn(
                 ActiveContextDTO.builder().applicationId(OTHER_ID.toString()).build());
         when(catalogPort.getMessage("FUN_153")).thenReturn("Fuera del contexto activo");
+        FindCatalogUseCase useCase = buildUseCase();
 
-        assertThatThrownBy(() -> buildUseCase()
+        assertThatThrownBy(() -> useCase
                 .findFunctionalitiesByApplication(ID.toString(), IDENTITY))
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
@@ -315,8 +318,9 @@ class FindCatalogUseCaseTest {
     @Test
     void findFunctionalitiesByApplication_throwsForbidden_whenActiveContextDoesNotExist() {
         when(catalogPort.getMessage("FUN_153")).thenReturn("Fuera del contexto activo");
+        FindCatalogUseCase useCase = buildUseCase();
 
-        assertThatThrownBy(() -> buildUseCase()
+        assertThatThrownBy(() -> useCase
                 .findFunctionalitiesByApplication(ID.toString(), IDENTITY))
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
@@ -331,8 +335,9 @@ class FindCatalogUseCaseTest {
         ForbiddenException denied = ForbiddenException.buildUserException("Permission denied");
         doThrow(denied).when(authorizationCompositeValidator).validate(
                 IDENTITY, PermissionCode.CONTEXT_SELECT, AuthorizationScopeType.APPLICATION, ID);
+        FindCatalogUseCase useCase = buildUseCase();
 
-        assertThatThrownBy(() -> buildUseCase()
+        assertThatThrownBy(() -> useCase
                 .findFunctionalitiesByApplication(ID.toString(), IDENTITY)).isSameAs(denied);
         verifyNoInteractions(functionalityCatalogRepository);
     }

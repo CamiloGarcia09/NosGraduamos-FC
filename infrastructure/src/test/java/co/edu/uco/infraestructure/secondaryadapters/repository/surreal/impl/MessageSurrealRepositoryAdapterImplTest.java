@@ -285,6 +285,7 @@ class MessageSurrealRepositoryAdapterImplTest {
         verify(surreal, times(2)).query(queryCaptor.capture());
         List<String> queries = queryCaptor.getAllValues();
         assertThat(queries)
+                .isNotEmpty()
                 .allSatisfy(query -> assertThat(query)
                         .contains("environment_id")
                         .doesNotContain("WHERE TRUE"));

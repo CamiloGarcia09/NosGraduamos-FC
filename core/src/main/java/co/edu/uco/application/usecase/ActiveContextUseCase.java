@@ -60,6 +60,7 @@ public final class ActiveContextUseCase implements HandlingActiveContextPort {
     private final CatalogPort catalogPort;
     private final Clock clock;
 
+    @SuppressWarnings("java:S107")
     public ActiveContextUseCase(final ActiveContextRepository activeContextRepository,
                                 final ActiveContextCachePort activeContextCachePort,
                                 final ExternalIdentityRepository externalIdentityRepository,
@@ -110,16 +111,17 @@ public final class ActiveContextUseCase implements HandlingActiveContextPort {
     public ActiveContextDTO selectActiveContext(final SelectActiveContextDTO context,
                                                 final ExternalIdentity identity) {
         externalIdentityRequiredRule.validate(identity);
-        selectActiveContextValidator.validate(context);
+        SelectActiveContextDTO validatedContext = context == null ? new SelectActiveContextDTO() : context;
+        selectActiveContextValidator.validate(validatedContext);
         ExternalIdentityEntity persistedIdentity = findPersistedIdentity(identity);
-        UUID environmentId = getUUIDFromString(context.getEnvironmentId());
+        UUID environmentId = getUUIDFromString(validatedContext.getEnvironmentId());
         authorize(environmentId, identity);
 
         ActiveContextEntity activeContext = new ActiveContextEntity();
         activeContext.setId(persistedIdentity.getId());
         activeContext.setExternalIdentityId(persistedIdentity.getId());
-        activeContext.setOrganizationId(getUUIDFromString(context.getOrganizationId()));
-        activeContext.setApplicationId(getUUIDFromString(context.getApplicationId()));
+        activeContext.setOrganizationId(getUUIDFromString(validatedContext.getOrganizationId()));
+        activeContext.setApplicationId(getUUIDFromString(validatedContext.getApplicationId()));
         activeContext.setEnvironmentId(environmentId);
         activeContext.setUpdatedAt(LocalDateTime.now(clock));
         activeContextRepository.save(activeContext);

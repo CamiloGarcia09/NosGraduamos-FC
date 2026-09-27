@@ -72,8 +72,9 @@ class SelectActiveContextApplicationBelongsOrganizationRuleTest {
                 Optional.of(ApplicationData.build(UUID.fromString(APPLICATION_ID), "App", organization(OTHER_ORGANIZATION_ID))));
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_159.getCode()))
                 .thenReturn(CONFLICT_MESSAGE);
+        SelectActiveContextDTO context = context(ORGANIZATION_ID.toString());
 
-        assertThatThrownBy(() -> rule.validate(context(ORGANIZATION_ID.toString())))
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(ConflictException.class)
                 .satisfies(exception -> assertThat((ConflictException) exception)
                         .extracting(ConflictException::getHttpStatus, ConflictException::getUserMessage)
@@ -87,8 +88,9 @@ class SelectActiveContextApplicationBelongsOrganizationRuleTest {
         when(applicationRepository.findById(APPLICATION_ID)).thenReturn(Optional.of(application));
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_159.getCode()))
                 .thenReturn(CONFLICT_MESSAGE);
+        SelectActiveContextDTO context = context(ORGANIZATION_ID.toString());
 
-        assertThatThrownBy(() -> rule.validate(context(ORGANIZATION_ID.toString())))
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(ConflictException.class);
 
         verify(applicationRepository).findById(APPLICATION_ID);
@@ -100,7 +102,9 @@ class SelectActiveContextApplicationBelongsOrganizationRuleTest {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_159.getCode()))
                 .thenReturn(CONFLICT_MESSAGE);
 
-        assertThatThrownBy(() -> rule.validate(context(organizationId)))
+        SelectActiveContextDTO context = context(organizationId);
+
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(ConflictException.class);
 
         verifyNoInteractions(applicationRepository);

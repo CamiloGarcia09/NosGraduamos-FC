@@ -81,8 +81,9 @@ class ActiveContextSurrealRepositoryAdapterImplTest {
     void findByExternalIdentityId_wrapsFailureAndLogsOnlyGenericMessage() {
         RuntimeException failure = new RuntimeException("SELECT secret-id");
         doThrow(failure).when(surreal).query(anyString());
+        UUID externalIdentityId = UUID.randomUUID();
 
-        assertThatThrownBy(() -> adapter.findByExternalIdentityId(UUID.randomUUID()))
+        assertThatThrownBy(() -> adapter.findByExternalIdentityId(externalIdentityId))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(exception -> assertThat(((BusinessException) exception).getTechnicalMessage())
                         .isEqualTo("Unable to read active context from persistence"));

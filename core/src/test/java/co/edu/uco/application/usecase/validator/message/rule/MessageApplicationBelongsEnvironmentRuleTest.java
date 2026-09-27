@@ -70,8 +70,9 @@ class MessageApplicationBelongsEnvironmentRuleTest {
                 .thenReturn(Optional.of(environment(OTHER_APPLICATION_ID)));
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_036.getCode()))
                 .thenReturn(OUTSIDE_APPLICATION_MESSAGE);
+        CreateMessageValidationContext context = context(APPLICATION_ID.toString());
 
-        assertThatThrownBy(() -> rule.validate(context(APPLICATION_ID.toString())))
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
                         .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)
@@ -84,8 +85,9 @@ class MessageApplicationBelongsEnvironmentRuleTest {
         when(environmentRepository.findById(ENVIRONMENT_ID.toString())).thenReturn(Optional.empty());
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_036.getCode()))
                 .thenReturn(OUTSIDE_APPLICATION_MESSAGE);
+        CreateMessageValidationContext context = context(APPLICATION_ID.toString());
 
-        assertThatThrownBy(() -> rule.validate(context(APPLICATION_ID.toString())))
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
                         .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)

@@ -74,8 +74,9 @@ class SelectActiveContextEnvironmentBelongsApplicationRuleTest {
                         ApplicationData.build(OTHER_APPLICATION_ID, "Other"))));
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_160.getCode()))
                 .thenReturn(CONFLICT_MESSAGE);
+        SelectActiveContextDTO context = context(APPLICATION_ID.toString());
 
-        assertThatThrownBy(() -> rule.validate(context(APPLICATION_ID.toString())))
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(ConflictException.class)
                 .satisfies(exception -> assertThat((ConflictException) exception)
                         .extracting(ConflictException::getHttpStatus, ConflictException::getUserMessage)
@@ -89,7 +90,9 @@ class SelectActiveContextEnvironmentBelongsApplicationRuleTest {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_160.getCode()))
                 .thenReturn(CONFLICT_MESSAGE);
 
-        assertThatThrownBy(() -> rule.validate(context(applicationId)))
+        SelectActiveContextDTO context = context(applicationId);
+
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(ConflictException.class);
 
         verifyNoInteractions(environmentRepository);

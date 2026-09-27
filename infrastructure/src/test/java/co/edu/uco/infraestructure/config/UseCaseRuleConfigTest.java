@@ -145,8 +145,9 @@ class UseCaseRuleConfigTest {
         when(catalogPort.getMessage("FUN_147")).thenReturn("Nombre requerido");
         CreateOrganizationCompositeValidator composite =
                 config.createOrganizationCompositeValidator(catalogPort, organizationRepository);
+        CreateOrganizationDTO dto = CreateOrganizationDTO.builder().name("").build();
 
-        assertThatThrownBy(() -> composite.validate(CreateOrganizationDTO.builder().name("").build()))
+        assertThatThrownBy(() -> composite.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .extracting("userMessage")
                 .isEqualTo("Nombre requerido");
@@ -159,8 +160,9 @@ class UseCaseRuleConfigTest {
         when(organizationRepository.findByName("UCO")).thenReturn(Optional.of(new OrganizationEntity()));
         CreateOrganizationCompositeValidator composite =
                 config.createOrganizationCompositeValidator(catalogPort, organizationRepository);
+        CreateOrganizationDTO dto = CreateOrganizationDTO.builder().name("UCO").build();
 
-        assertThatThrownBy(() -> composite.validate(CreateOrganizationDTO.builder().name("UCO").build()))
+        assertThatThrownBy(() -> composite.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .extracting("userMessage")
                 .isEqualTo("Nombre duplicado");
@@ -285,8 +287,9 @@ class UseCaseRuleConfigTest {
         when(catalogPort.getMessage("FUN_155")).thenReturn("Identificadores requeridos");
         SelectActiveContextCompositeValidator composite = config.selectActiveContextCompositeValidator(
                 catalogPort, organizationRepository, applicationRepository, environmentRepository);
+        SelectActiveContextDTO context = new SelectActiveContextDTO();
 
-        assertThatThrownBy(() -> composite.validate(new SelectActiveContextDTO()))
+        assertThatThrownBy(() -> composite.validate(context))
                 .isInstanceOf(BusinessRuleException.class)
                 .extracting("userMessage")
                 .isEqualTo("Identificadores requeridos");

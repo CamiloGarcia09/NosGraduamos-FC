@@ -79,7 +79,9 @@ class MessageCatalogIdRequiredRuleTest {
         CreateMessageDTO dto = new CreateMessageDTO();
         setter.accept(dto, "");
 
-        assertThatThrownBy(() -> rule(extractor, code).validate(dto))
+        MessageCatalogIdRequiredRule ruleUnderTest = rule(extractor, code);
+
+        assertThatThrownBy(() -> ruleUnderTest.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo(messagePrefix + " es requerido."));
@@ -92,7 +94,10 @@ class MessageCatalogIdRequiredRuleTest {
                 .thenReturn("El tipo de mensaje es requerido.");
         CreateMessageDTO dto = new CreateMessageDTO();
 
-        assertThatThrownBy(() -> rule(CreateMessageDTO::getTypeId, MessageCatalogCodeEnum.FUN_190).validate(dto))
+        MessageCatalogIdRequiredRule ruleUnderTest = rule(CreateMessageDTO::getTypeId,
+                MessageCatalogCodeEnum.FUN_190);
+
+        assertThatThrownBy(() -> ruleUnderTest.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("El tipo de mensaje es requerido."));
@@ -105,7 +110,10 @@ class MessageCatalogIdRequiredRuleTest {
                 .thenReturn("El tipo de mensaje es requerido.");
         CreateMessageDTO dto = CreateMessageDTO.builder().typeId("   ").build();
 
-        assertThatThrownBy(() -> rule(CreateMessageDTO::getTypeId, MessageCatalogCodeEnum.FUN_190).validate(dto))
+        MessageCatalogIdRequiredRule ruleUnderTest = rule(CreateMessageDTO::getTypeId,
+                MessageCatalogCodeEnum.FUN_190);
+
+        assertThatThrownBy(() -> ruleUnderTest.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("El tipo de mensaje es requerido."));
@@ -117,7 +125,10 @@ class MessageCatalogIdRequiredRuleTest {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_190.getCode()))
                 .thenReturn("El tipo de mensaje es requerido.");
 
-        assertThatThrownBy(() -> rule(CreateMessageDTO::getTypeId, MessageCatalogCodeEnum.FUN_190).validate(null))
+        MessageCatalogIdRequiredRule ruleUnderTest = rule(CreateMessageDTO::getTypeId,
+                MessageCatalogCodeEnum.FUN_190);
+
+        assertThatThrownBy(() -> ruleUnderTest.validate(null))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("El tipo de mensaje es requerido."));

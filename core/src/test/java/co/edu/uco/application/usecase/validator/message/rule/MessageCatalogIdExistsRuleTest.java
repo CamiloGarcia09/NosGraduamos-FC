@@ -94,7 +94,9 @@ class MessageCatalogIdExistsRuleTest {
         CreateMessageDTO dto = new CreateMessageDTO();
         setter.accept(dto, VALID_UUID);
 
-        assertThatThrownBy(() -> rule(extractor, referenceCatalog, code).validate(dto))
+        MessageCatalogIdExistsRule ruleUnderTest = rule(extractor, referenceCatalog, code);
+
+        assertThatThrownBy(() -> ruleUnderTest.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo(messagePrefix + " no existe."));
@@ -114,7 +116,9 @@ class MessageCatalogIdExistsRuleTest {
         CreateMessageDTO dto = new CreateMessageDTO();
         setter.accept(dto, MALFORMED_UUID);
 
-        assertThatThrownBy(() -> rule(extractor, referenceCatalog, code).validate(dto))
+        MessageCatalogIdExistsRule ruleUnderTest = rule(extractor, referenceCatalog, code);
+
+        assertThatThrownBy(() -> ruleUnderTest.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo(messagePrefix + " no existe."));
@@ -134,7 +138,9 @@ class MessageCatalogIdExistsRuleTest {
         CreateMessageDTO dto = new CreateMessageDTO();
         setter.accept(dto, DEFAULT_UUID);
 
-        assertThatThrownBy(() -> rule(extractor, referenceCatalog, code).validate(dto))
+        MessageCatalogIdExistsRule ruleUnderTest = rule(extractor, referenceCatalog, code);
+
+        assertThatThrownBy(() -> ruleUnderTest.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo(messagePrefix + " no existe."));
@@ -154,7 +160,9 @@ class MessageCatalogIdExistsRuleTest {
         CreateMessageDTO dto = new CreateMessageDTO();
         setter.accept(dto, "");
 
-        assertThatThrownBy(() -> rule(extractor, referenceCatalog, code).validate(dto))
+        MessageCatalogIdExistsRule ruleUnderTest = rule(extractor, referenceCatalog, code);
+
+        assertThatThrownBy(() -> ruleUnderTest.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo(messagePrefix + " no existe."));
@@ -167,8 +175,10 @@ class MessageCatalogIdExistsRuleTest {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_191.getCode()))
                 .thenReturn("El tipo de mensaje no existe.");
 
-        assertThatThrownBy(() -> rule(CreateMessageDTO::getTypeId, ReferenceCatalog.MESSAGE_TYPE,
-                        MessageCatalogCodeEnum.FUN_191).validate(null))
+        MessageCatalogIdExistsRule ruleUnderTest = rule(CreateMessageDTO::getTypeId,
+                ReferenceCatalog.MESSAGE_TYPE, MessageCatalogCodeEnum.FUN_191);
+
+        assertThatThrownBy(() -> ruleUnderTest.validate(null))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("El tipo de mensaje no existe."));

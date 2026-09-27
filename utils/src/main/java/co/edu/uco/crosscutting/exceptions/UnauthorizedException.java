@@ -3,6 +3,7 @@ package co.edu.uco.crosscutting.exceptions;
 import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionLocation;
 import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType;
 
+@SuppressWarnings({"java:S110", "java:S9149"})
 public final class UnauthorizedException extends BusinessRuleException {
 
     private UnauthorizedException(String userMessage, String technicalMessage) {

@@ -57,8 +57,9 @@ class SelectActiveContextEnvironmentExistsRuleTest {
         when(environmentRepository.findById(ENVIRONMENT_ID)).thenReturn(Optional.empty());
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_158.getCode()))
                 .thenReturn(NOT_FOUND_MESSAGE);
+        SelectActiveContextDTO context = context(ENVIRONMENT_ID);
 
-        assertThatThrownBy(() -> rule.validate(context(ENVIRONMENT_ID)))
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(NotFoundException.class)
                 .satisfies(exception -> assertThat((NotFoundException) exception)
                         .extracting(NotFoundException::getHttpStatus, NotFoundException::getUserMessage)
@@ -73,7 +74,9 @@ class SelectActiveContextEnvironmentExistsRuleTest {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_158.getCode()))
                 .thenReturn(NOT_FOUND_MESSAGE);
 
-        assertThatThrownBy(() -> rule.validate(context(environmentId)))
+        SelectActiveContextDTO context = context(environmentId);
+
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(NotFoundException.class);
 
         verifyNoInteractions(environmentRepository);

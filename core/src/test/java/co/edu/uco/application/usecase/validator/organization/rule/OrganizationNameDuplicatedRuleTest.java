@@ -75,8 +75,9 @@ class OrganizationNameDuplicatedRuleTest {
         when(organizationRepository.findByName(NAME)).thenReturn(Optional.of(new OrganizationEntity()));
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_149.getCode()))
                 .thenReturn(DUPLICATE_MESSAGE);
+        CreateOrganizationDTO dto = CreateOrganizationDTO.builder().name(NAME).build();
 
-        assertThatThrownBy(() -> rule.validate(CreateOrganizationDTO.builder().name(NAME).build()))
+        assertThatThrownBy(() -> rule.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(exception -> assertThat((BusinessRuleException) exception)
                         .extracting(BusinessRuleException::getHttpStatus, BusinessRuleException::getUserMessage)

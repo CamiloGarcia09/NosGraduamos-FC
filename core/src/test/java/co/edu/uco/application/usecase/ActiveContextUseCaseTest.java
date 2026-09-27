@@ -23,6 +23,7 @@ import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompo
 import co.edu.uco.application.usecase.validator.authorization.rule.ExternalIdentityRequiredRule;
 import co.edu.uco.application.usecase.validator.context.SelectActiveContextCompositeValidator;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
+import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
 import co.edu.uco.crosscutting.exceptions.ForbiddenException;
 import co.edu.uco.crosscutting.exceptions.NotFoundException;
 import co.edu.uco.crosscutting.exceptions.UnauthorizedException;
@@ -46,6 +47,7 @@ import static co.edu.uco.crosscutting.helpers.UtilUUID.DEFAULT_UUID;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -100,7 +102,8 @@ class ActiveContextUseCaseTest {
 
         assertThatThrownBy(() -> useCase.findAvailableContexts(null)).isSameAs(failure);
         assertThatThrownBy(() -> useCase.findActiveContext(null)).isSameAs(failure);
-        assertThatThrownBy(() -> useCase.selectActiveContext(selection(), null)).isSameAs(failure);
+        SelectActiveContextDTO selection = selection();
+        assertThatThrownBy(() -> useCase.selectActiveContext(selection, null)).isSameAs(failure);
         verifyNoInteractions(activeContextRepository, activeContextCachePort, externalIdentityRepository,
                 applicationCatalogRepository, environmentCatalogRepository, authorizationQueryPort,
                 authorizationCompositeValidator, selectActiveContextValidator);
@@ -290,9 +293,10 @@ class ActiveContextUseCaseTest {
         BusinessException failure = BusinessException.buildUserException("Persistence failed");
         stubPersistedIdentity();
         doThrow(failure).when(activeContextRepository).save(any());
+        SelectActiveContextDTO selection = selection();
 
         BusinessException thrown = assertThrows(BusinessException.class,
-                () -> useCase.selectActiveContext(selection(), IDENTITY));
+                () -> useCase.selectActiveContext(selection, IDENTITY));
 
         assertSame(failure, thrown);
         verifyNoInteractions(activeContextCachePort);
@@ -307,6 +311,29 @@ class ActiveContextUseCaseTest {
 
         assertThat(result.getEnvironmentId()).isEqualTo(ENVIRONMENT_ID.toString());
         verify(activeContextRepository).save(any());
+    }
+
+    @Test
+    void selectActiveContext_normalizesNullContextToEmptyDtoAndSkipsDownstream_whenValidationFails() {
+        BusinessRuleException failure = BusinessRuleException.buildUserException("Identificadores requeridos");
+        doThrow(failure).when(selectActiveContextValidator).validate(any(SelectActiveContextDTO.class));
+
+        BusinessRuleException thrown = assertThrows(BusinessRuleException.class,
+                () -> useCase.selectActiveContext(null, IDENTITY));
+
+        ArgumentCaptor<SelectActiveContextDTO> contextCaptor =
+                ArgumentCaptor.forClass(SelectActiveContextDTO.class);
+        verify(selectActiveContextValidator).validate(contextCaptor.capture());
+        SelectActiveContextDTO validatedContext = contextCaptor.getValue();
+        assertAll(
+                () -> assertThat(validatedContext).isNotNull(),
+                () -> assertThat(validatedContext.getOrganizationId()).isNull(),
+                () -> assertThat(validatedContext.getApplicationId()).isNull(),
+                () -> assertThat(validatedContext.getEnvironmentId()).isNull());
+        assertSame(failure, thrown);
+        verifyNoInteractions(externalIdentityRepository, authorizationCompositeValidator, authorizationQueryPort,
+                activeContextRepository, activeContextCachePort, applicationCatalogRepository,
+                environmentCatalogRepository, catalogPort);
     }
 
     private void stubPersistedIdentity() {

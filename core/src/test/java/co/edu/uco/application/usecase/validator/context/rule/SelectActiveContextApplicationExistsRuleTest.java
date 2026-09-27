@@ -57,8 +57,9 @@ class SelectActiveContextApplicationExistsRuleTest {
         when(applicationRepository.findById(APPLICATION_ID)).thenReturn(Optional.empty());
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_157.getCode()))
                 .thenReturn(NOT_FOUND_MESSAGE);
+        SelectActiveContextDTO context = context(APPLICATION_ID);
 
-        assertThatThrownBy(() -> rule.validate(context(APPLICATION_ID)))
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(NotFoundException.class)
                 .satisfies(exception -> assertThat((NotFoundException) exception)
                         .extracting(NotFoundException::getHttpStatus, NotFoundException::getUserMessage)
@@ -73,7 +74,9 @@ class SelectActiveContextApplicationExistsRuleTest {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_157.getCode()))
                 .thenReturn(NOT_FOUND_MESSAGE);
 
-        assertThatThrownBy(() -> rule.validate(context(applicationId)))
+        SelectActiveContextDTO context = context(applicationId);
+
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(NotFoundException.class);
 
         verifyNoInteractions(applicationRepository);

@@ -22,6 +22,7 @@ public class AuthorizationQuerySurrealAdapter extends SurrealCatalogSupport impl
     private static final String QUERY_ERROR = "Error al consultar autorizaciones en SurrealDB";
     private static final String TECHNICAL_ERROR =
             "Error al consultar autorizaciones en la base de datos SurrealDB";
+    private static final String ORGANIZATION_ID_QUERY_PREFIX = "(SELECT VALUE organization_id FROM ";
 
     public AuthorizationQuerySurrealAdapter(final Surreal surreal, final LoggingPortFactory loggerFactory) {
         super(surreal, loggerFactory.getLogger(AuthorizationQuerySurrealAdapter.class));
@@ -61,7 +62,7 @@ public class AuthorizationQuerySurrealAdapter extends SurrealCatalogSupport impl
                                                     final PermissionCode permission,
                                                     final UUID applicationId) {
         final String application = recordIdLiteral("application", applicationId.toString());
-        final String organization = "(SELECT VALUE organization_id FROM " + application + ")[0]";
+        final String organization = ORGANIZATION_ID_QUERY_PREFIX + application + ")[0]";
         final String sql = "SELECT id AS authorized_id FROM environment WHERE application_id = "
                 + application + " AND application_id.organization_id = " + organization
                 + " AND count((SELECT id FROM role_assignment WHERE "
@@ -96,7 +97,7 @@ public class AuthorizationQuerySurrealAdapter extends SurrealCatalogSupport impl
         final String scope = recordIdLiteral(scopeTable(scopeType), scopeId.toString());
         return switch (scopeType) {
             case ORGANIZATION -> scope;
-            case APPLICATION -> "(SELECT VALUE organization_id FROM " + scope + ")[0]";
+            case APPLICATION -> ORGANIZATION_ID_QUERY_PREFIX + scope + ")[0]";
             case ENVIRONMENT -> "(SELECT VALUE application_id.organization_id FROM " + scope + ")[0]";
         };
     }
@@ -106,7 +107,7 @@ public class AuthorizationQuerySurrealAdapter extends SurrealCatalogSupport impl
         return switch (scopeType) {
             case ORGANIZATION -> "scope_type = 'ORGANIZATION' AND organization_id = " + scope;
             case APPLICATION -> "((scope_type = 'ORGANIZATION' AND organization_id IN "
-                    + "(SELECT VALUE organization_id FROM " + scope + "))"
+                    + ORGANIZATION_ID_QUERY_PREFIX + scope + "))"
                     + " OR (scope_type = 'APPLICATION' AND application_id = " + scope + "))";
             case ENVIRONMENT -> "((scope_type = 'ORGANIZATION' AND organization_id IN "
                     + "(SELECT VALUE application_id.organization_id FROM " + scope + "))"

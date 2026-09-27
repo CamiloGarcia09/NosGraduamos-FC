@@ -70,7 +70,9 @@ class MessageEnvironmentExistsRuleTest {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_035.getCode()))
                 .thenReturn(NOT_FOUND_MESSAGE);
 
-        assertThatThrownBy(() -> rule.validate(context(ENVIRONMENT_ID.toString())))
+        CreateMessageValidationContext context = context(ENVIRONMENT_ID.toString());
+
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
                         .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)
@@ -84,7 +86,9 @@ class MessageEnvironmentExistsRuleTest {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_035.getCode()))
                 .thenReturn(NOT_FOUND_MESSAGE);
 
-        assertThatThrownBy(() -> rule.validate(context(null)))
+        CreateMessageValidationContext context = context(null);
+
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
                         .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)

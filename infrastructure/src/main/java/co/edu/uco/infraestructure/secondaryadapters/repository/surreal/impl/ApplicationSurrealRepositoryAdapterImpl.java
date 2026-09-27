@@ -24,6 +24,8 @@ public class ApplicationSurrealRepositoryAdapterImpl extends SurrealCatalogSuppo
     private static final String SURREAL_TABLE_ORGANIZATION = "organization";
     private static final String SURREAL_TABLE_LANGUAGE_BASE = "language_base";
     private static final String SURREAL_TABLE_APPLICATION_STATE = "application_state";
+    private static final String SELECT_ALL_FROM = "SELECT * FROM ";
+    private static final String LIMIT_ONE = " LIMIT 1;";
 
     public ApplicationSurrealRepositoryAdapterImpl(final Surreal surreal, final LoggingPortFactory loggerFactory) {
         super(surreal, loggerFactory.getLogger(ApplicationSurrealRepositoryAdapterImpl.class));
@@ -31,20 +33,20 @@ public class ApplicationSurrealRepositoryAdapterImpl extends SurrealCatalogSuppo
 
     @Override
     public Optional<ApplicationData> findByName(final String name) {
-        final String sql = "SELECT * FROM " + SURREAL_TABLE_APPLICATION
-                + " WHERE name = " + quote(name) + " LIMIT 1;";
+        final String sql = SELECT_ALL_FROM + SURREAL_TABLE_APPLICATION
+                + " WHERE name = " + quote(name) + LIMIT_ONE;
         return queryOne(sql, "Error al consultar aplicación por nombre en SurrealDB: " + sql, this::toApplicationData);
     }
 
     @Override
     public Optional<ApplicationData> findById(final String id) {
-        final String sql = "SELECT * FROM " + recordIdLiteral(SURREAL_TABLE_APPLICATION, id) + " LIMIT 1;";
+        final String sql = SELECT_ALL_FROM + recordIdLiteral(SURREAL_TABLE_APPLICATION, id) + LIMIT_ONE;
         return queryOne(sql, "Error al consultar aplicación por id en SurrealDB: " + sql, this::toApplicationData);
     }
 
     @Override
     public boolean existsById(final String id) {
-        final String sql = "SELECT * FROM " + recordIdLiteral(SURREAL_TABLE_APPLICATION, id) + " LIMIT 1;";
+        final String sql = SELECT_ALL_FROM + recordIdLiteral(SURREAL_TABLE_APPLICATION, id) + LIMIT_ONE;
         return queryOne(sql, "Error al validar aplicación en SurrealDB: " + sql, obj -> obj).isPresent();
     }
 

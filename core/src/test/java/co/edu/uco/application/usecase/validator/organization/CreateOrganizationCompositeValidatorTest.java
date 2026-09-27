@@ -65,8 +65,9 @@ class CreateOrganizationCompositeValidatorTest {
     void validate_shortCircuitsMaxLengthAndDuplicateChecks_whenNameIsBlank() {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_147.getCode()))
                 .thenReturn("The organization name is required.");
+        CreateOrganizationDTO dto = CreateOrganizationDTO.builder().name("").build();
 
-        assertThatThrownBy(() -> validator.validate(CreateOrganizationDTO.builder().name("").build()))
+        assertThatThrownBy(() -> validator.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(exception -> assertThat((BusinessRuleException) exception)
                         .extracting(BusinessRuleException::getUserMessage)
@@ -79,9 +80,9 @@ class CreateOrganizationCompositeValidatorTest {
     void validate_shortCircuitsDuplicateCheck_whenNameExceedsFiftyCharacters() {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_148.getCode()))
                 .thenReturn("The organization name cannot exceed 50 characters.");
+        CreateOrganizationDTO dto = CreateOrganizationDTO.builder().name(FIFTY_ONE_CHARS).build();
 
-        assertThatThrownBy(() -> validator.validate(
-                CreateOrganizationDTO.builder().name(FIFTY_ONE_CHARS).build()))
+        assertThatThrownBy(() -> validator.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(exception -> assertThat((BusinessRuleException) exception)
                         .extracting(BusinessRuleException::getUserMessage)
@@ -95,8 +96,9 @@ class CreateOrganizationCompositeValidatorTest {
         when(organizationRepository.findByName(NAME)).thenReturn(Optional.of(new OrganizationEntity()));
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_149.getCode()))
                 .thenReturn("An organization with the given name already exists.");
+        CreateOrganizationDTO dto = CreateOrganizationDTO.builder().name(NAME).build();
 
-        assertThatThrownBy(() -> validator.validate(CreateOrganizationDTO.builder().name(NAME).build()))
+        assertThatThrownBy(() -> validator.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(exception -> assertThat((BusinessRuleException) exception)
                         .extracting(BusinessRuleException::getHttpStatus, BusinessRuleException::getUserMessage)

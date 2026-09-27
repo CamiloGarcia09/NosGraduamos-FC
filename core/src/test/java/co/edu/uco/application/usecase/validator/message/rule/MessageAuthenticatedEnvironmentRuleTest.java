@@ -71,7 +71,10 @@ class MessageAuthenticatedEnvironmentRuleTest {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_145.getCode()))
                 .thenReturn(NOT_AUTHORIZED_MESSAGE);
 
-        assertThatThrownBy(() -> rule.validate(context(AUTHENTICATED_ENVIRONMENT_ID, authenticatedEnvironmentId)))
+        CreateMessageValidationContext context =
+                context(AUTHENTICATED_ENVIRONMENT_ID, authenticatedEnvironmentId);
+
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
                         .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)
@@ -84,7 +87,9 @@ class MessageAuthenticatedEnvironmentRuleTest {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_145.getCode()))
                 .thenReturn(NOT_AUTHORIZED_MESSAGE);
 
-        assertThatThrownBy(() -> rule.validate(context(OTHER_ENVIRONMENT_ID, AUTHENTICATED_ENVIRONMENT_ID)))
+        CreateMessageValidationContext context = context(OTHER_ENVIRONMENT_ID, AUTHENTICATED_ENVIRONMENT_ID);
+
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(ForbiddenException.class)
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
                         .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)

@@ -129,8 +129,9 @@ class SelectActiveContextCompositeValidatorTest {
         when(organizationRepository.findById(ORGANIZATION_ID)).thenReturn(Optional.empty());
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_156.getCode()))
                 .thenReturn("Organization not found");
+        SelectActiveContextDTO context = validContext();
 
-        assertThatThrownBy(() -> validator.validate(validContext()))
+        assertThatThrownBy(() -> validator.validate(context))
                 .isInstanceOf(NotFoundException.class)
                 .satisfies(exception -> assertThat((NotFoundException) exception)
                         .extracting(NotFoundException::getHttpStatus, NotFoundException::getUserMessage)
@@ -146,8 +147,9 @@ class SelectActiveContextCompositeValidatorTest {
         when(applicationRepository.findById(APPLICATION_ID.toString())).thenReturn(Optional.empty());
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_157.getCode()))
                 .thenReturn("Application not found");
+        SelectActiveContextDTO context = validContext();
 
-        assertThatThrownBy(() -> validator.validate(validContext()))
+        assertThatThrownBy(() -> validator.validate(context))
                 .isInstanceOf(NotFoundException.class)
                 .satisfies(exception -> assertThat((NotFoundException) exception)
                         .extracting(NotFoundException::getHttpStatus, NotFoundException::getUserMessage)
@@ -164,8 +166,9 @@ class SelectActiveContextCompositeValidatorTest {
         when(environmentRepository.findById(ENVIRONMENT_ID.toString())).thenReturn(Optional.empty());
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_158.getCode()))
                 .thenReturn("Environment not found");
+        SelectActiveContextDTO context = validContext();
 
-        assertThatThrownBy(() -> validator.validate(validContext()))
+        assertThatThrownBy(() -> validator.validate(context))
                 .isInstanceOf(NotFoundException.class)
                 .satisfies(exception -> assertThat((NotFoundException) exception)
                         .extracting(NotFoundException::getHttpStatus, NotFoundException::getUserMessage)
@@ -181,8 +184,9 @@ class SelectActiveContextCompositeValidatorTest {
                 .thenReturn(Optional.of(environment(APPLICATION_ID)));
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_159.getCode()))
                 .thenReturn("Application hierarchy conflict");
+        SelectActiveContextDTO context = validContext();
 
-        assertThatThrownBy(() -> validator.validate(validContext()))
+        assertThatThrownBy(() -> validator.validate(context))
                 .isInstanceOf(ConflictException.class)
                 .satisfies(exception -> assertThat((ConflictException) exception)
                         .extracting(ConflictException::getHttpStatus, ConflictException::getUserMessage)
@@ -198,8 +202,9 @@ class SelectActiveContextCompositeValidatorTest {
                 .thenReturn(Optional.of(environment(OTHER_APPLICATION_ID)));
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_160.getCode()))
                 .thenReturn("Environment hierarchy conflict");
+        SelectActiveContextDTO context = validContext();
 
-        assertThatThrownBy(() -> validator.validate(validContext()))
+        assertThatThrownBy(() -> validator.validate(context))
                 .isInstanceOf(ConflictException.class)
                 .satisfies(exception -> assertThat((ConflictException) exception)
                         .extracting(ConflictException::getHttpStatus, ConflictException::getUserMessage)

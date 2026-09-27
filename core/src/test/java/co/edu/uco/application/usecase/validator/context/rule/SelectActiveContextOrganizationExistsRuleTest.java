@@ -75,7 +75,9 @@ class SelectActiveContextOrganizationExistsRuleTest {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_156.getCode()))
                 .thenReturn(NOT_FOUND_MESSAGE);
 
-        assertThatThrownBy(() -> rule.validate(context(organizationId)))
+        SelectActiveContextDTO context = context(organizationId);
+
+        assertThatThrownBy(() -> rule.validate(context))
                 .isInstanceOf(NotFoundException.class);
 
         verifyNoInteractions(organizationRepository);

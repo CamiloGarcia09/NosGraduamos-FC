@@ -49,9 +49,10 @@ class PageRequestAttributeFormatRuleTest {
                 MessageCatalogCodeEnum.FUN_043);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "page=[{0}]")
+    @NullAndEmptySource
     @ValueSource(strings = {"1", "50", "123"})
-    void validate_doesNotThrow_whenNumericAttributeMatchesThePattern(String value) {
+    void validate_doesNotThrow_whenNumericAttributeMatchesThePatternOrIsAbsent(String value) {
         PageRequestDTO dto = PageRequestDTO.builder().page(value).build();
 
         assertThatCode(() -> numericRule.validate(dto)).doesNotThrowAnyException();
@@ -65,16 +66,6 @@ class PageRequestAttributeFormatRuleTest {
         PageRequestDTO dto = PageRequestDTO.builder().columnSort(value).build();
 
         assertThatCode(() -> alphabeticRule.validate(dto)).doesNotThrowAnyException();
-
-        verifyNoInteractions(catalogPort);
-    }
-
-    @ParameterizedTest
-    @NullAndEmptySource
-    void validate_doesNotThrow_whenNumericAttributeIsNullOrEmpty(String value) {
-        PageRequestDTO dto = PageRequestDTO.builder().page(value).build();
-
-        assertThatCode(() -> numericRule.validate(dto)).doesNotThrowAnyException();
 
         verifyNoInteractions(catalogPort);
     }
