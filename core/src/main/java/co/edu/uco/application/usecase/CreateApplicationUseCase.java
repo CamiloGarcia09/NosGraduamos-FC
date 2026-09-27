@@ -12,7 +12,7 @@ import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
 import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
 import co.edu.uco.application.usecase.handling.HandlingCreateApplicationPort;
-import co.edu.uco.application.usecase.validator.authorization.AuthorizationRule;
+import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
 import co.edu.uco.application.usecase.validator.application.CreateApplicationCompositeValidator;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
@@ -30,14 +30,14 @@ public final class CreateApplicationUseCase implements HandlingCreateApplication
     private final ApplicationRepository applicationRepository;
     private final CreateApplicationCompositeValidator validator;
     private final HandlingActiveContextPort activeContextPort;
-    private final AuthorizationRule authorizationRule;
+    private final AuthorizationCompositeValidator authorizationRule;
     private final CatalogPort catalogPort;
     private final LoggingPort log;
 
     public CreateApplicationUseCase(ApplicationRepository applicationRepository,
                                     CreateApplicationCompositeValidator validator,
                                     HandlingActiveContextPort activeContextPort,
-                                    AuthorizationRule authorizationRule,
+                                     AuthorizationCompositeValidator authorizationRule,
                                     CatalogPort catalogPort,
                                     LoggingPortFactory loggerFactory) {
         this.applicationRepository = applicationRepository;

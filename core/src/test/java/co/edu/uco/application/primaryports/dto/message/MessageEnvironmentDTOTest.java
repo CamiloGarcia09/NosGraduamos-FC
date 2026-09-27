@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class MessageEnvironmentDTOTest {
 
@@ -12,11 +13,12 @@ class MessageEnvironmentDTOTest {
     void defaultConstructor_initializesAllFields() {
         MessageEnvironmentDTO dto = new MessageEnvironmentDTO();
 
-        assertThat(dto.getId()).isNotNull();
-        assertThat(dto.getMessageId()).isNotNull();
-        assertThat(dto.getMessage()).isNotNull();
-        assertThat(dto.getEnvironmentTypeId()).isNotNull();
-        assertThat(dto.getStateId()).isNotNull();
+        assertAll(
+                () -> assertThat(dto.getId()).isNotNull(),
+                () -> assertThat(dto.getMessageId()).isNotNull(),
+                () -> assertThat(dto.getMessage()).isNotNull(),
+                () -> assertThat(dto.getEnvironmentTypeId()).isNotNull(),
+                () -> assertThat(dto.getStateId()).isNotNull());
     }
 
     @Test
@@ -29,11 +31,12 @@ class MessageEnvironmentDTOTest {
 
         MessageEnvironmentDTO dto = new MessageEnvironmentDTO(id, messageId, message, envTypeId, stateId);
 
-        assertThat(dto.getId()).isEqualTo(id);
-        assertThat(dto.getMessageId()).isEqualTo(messageId);
-        assertThat(dto.getMessage()).isSameAs(message);
-        assertThat(dto.getEnvironmentTypeId()).isEqualTo(envTypeId);
-        assertThat(dto.getStateId()).isEqualTo(stateId);
+        assertAll(
+                () -> assertThat(dto.getId()).isEqualTo(id),
+                () -> assertThat(dto.getMessageId()).isEqualTo(messageId),
+                () -> assertThat(dto.getMessage()).isSameAs(message),
+                () -> assertThat(dto.getEnvironmentTypeId()).isEqualTo(envTypeId),
+                () -> assertThat(dto.getStateId()).isEqualTo(stateId));
     }
 
     @Test
@@ -43,7 +46,8 @@ class MessageEnvironmentDTOTest {
                 MessageDTO.create("CODE", "Title", "Content", "info", "general", "app", "func"),
                 UUID.randomUUID(), UUID.randomUUID());
 
-        assertThat(dto).isNotNull();
-        assertThat(dto.getMessage().code()).isEqualTo("CODE");
+        assertAll(
+                () -> assertThat(dto).isNotNull(),
+                () -> assertThat(dto.getMessage().getCode()).isEqualTo("CODE"));
     }
 }

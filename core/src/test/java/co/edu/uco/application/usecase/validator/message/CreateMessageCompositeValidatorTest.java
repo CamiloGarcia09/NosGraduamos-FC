@@ -2,10 +2,16 @@ package co.edu.uco.application.usecase.validator.message;
 
 import co.edu.uco.application.primaryports.dto.message.CreateMessageDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
+import co.edu.uco.application.secondaryports.entity.ApplicationData;
+import co.edu.uco.application.secondaryports.entity.EnvironmentData;
+import co.edu.uco.application.secondaryports.entity.FunctionalityData;
+import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
+import co.edu.uco.application.secondaryports.repository.FunctionalityCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.RecordExistsCatalogPort;
 import co.edu.uco.application.secondaryports.repository.ReferenceCatalog;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
+import co.edu.uco.crosscutting.exceptions.ForbiddenException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +22,9 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
@@ -29,6 +38,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -36,30 +46,36 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CreateMessageCompositeValidatorTest {
 
+    private static final UUID ENVIRONMENT_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614175105");
+    private static final UUID APPLICATION_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614175106");
+    private static final UUID FUNCTIONALITY_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614175107");
     private static final String TYPE_ID = "123e4567-e89b-12d3-a456-426614175101";
     private static final String CATEGORY_ID = "123e4567-e89b-12d3-a456-426614175102";
     private static final String STATUS_ID = "123e4567-e89b-12d3-a456-426614175103";
     private static final String MESSAGE_ENVIRONMENT_STATE_ID = "123e4567-e89b-12d3-a456-426614175104";
-    private static final String APPLICATION_ID = "123e4567-e89b-12d3-a456-426614175105";
-    private static final String FUNCTIONALITY_ID = "123e4567-e89b-12d3-a456-426614175106";
+    private static final String APPLICATION_ID_TEXT = APPLICATION_ID.toString();
+    private static final String FUNCTIONALITY_ID_TEXT = FUNCTIONALITY_ID.toString();
+    private static final String AUTHENTICATED_ENVIRONMENT_ID = ENVIRONMENT_ID.toString();
+    private static final String OTHER_ENVIRONMENT_ID = "123e4567-e89b-12d3-a456-426614175199";
     private static final String DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
-    private static final String MISSING_ID = "123e4567-e89b-12d3-a456-426614175199";
+    private static final String MISSING_ID = "123e4567-e89b-12d3-a456-426614175198";
     private static final String INVALID_UUID = "not-a-uuid";
-    private static final String INVALID_UUID_MESSAGE = "El id del catálogo debe ser un UUID válido.";
-    private static final String AUTHENTICATED_ENVIRONMENT_ID = "env-1";
 
     @Mock
     private CatalogPort catalogPort;
     @Mock
-    private CreateMessageContextRule contextRule;
-    @Mock
     private RecordExistsCatalogPort recordExistsCatalogPort;
+    @Mock
+    private EnvironmentRepository environmentRepository;
+    @Mock
+    private FunctionalityCatalogRepository functionalityCatalogRepository;
 
     private CreateMessageCompositeValidator validator;
 
     @BeforeEach
     void setUp() {
-        validator = new CreateMessageCompositeValidator(catalogPort, contextRule, recordExistsCatalogPort);
+        validator = new CreateMessageCompositeValidator(catalogPort, recordExistsCatalogPort,
+                environmentRepository, functionalityCatalogRepository);
     }
 
     private CreateMessageDTO.CreateMessageDTOBuilder validDtoBuilder() {
@@ -70,9 +86,9 @@ class CreateMessageCompositeValidatorTest {
                 .typeId(TYPE_ID)
                 .categoryId(CATEGORY_ID)
                 .statusId(STATUS_ID)
-                .applicationId(APPLICATION_ID)
+                .applicationId(APPLICATION_ID_TEXT)
                 .application("App")
-                .functionalityId(FUNCTIONALITY_ID)
+                .functionalityId(FUNCTIONALITY_ID_TEXT)
                 .messageEnvironmentStateId(MESSAGE_ENVIRONMENT_STATE_ID);
     }
 
@@ -80,18 +96,29 @@ class CreateMessageCompositeValidatorTest {
         return validDtoBuilder().environmentId(AUTHENTICATED_ENVIRONMENT_ID).build();
     }
 
+    private void stubCatalogReferences() {
+        lenient().when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
+    }
+
+    private void stubContextualHierarchy() {
+        lenient().when(environmentRepository.findById(AUTHENTICATED_ENVIRONMENT_ID))
+                .thenReturn(Optional.of(environment(APPLICATION_ID)));
+        lenient().when(functionalityCatalogRepository.findAllByApplicationId(APPLICATION_ID_TEXT))
+                .thenReturn(List.of(functionality(FUNCTIONALITY_ID, APPLICATION_ID)));
+    }
+
     private static Stream<Arguments> catalogReferenceFields() {
         return Stream.of(
-                Arguments.of(ReferenceCatalog.MESSAGE_TYPE, "El tipo de mensaje",
+                Arguments.of(ReferenceCatalog.MESSAGE_TYPE, "The message type",
                         (BiConsumer<CreateMessageDTO, String>) CreateMessageDTO::setTypeId,
                         MessageCatalogCodeEnum.FUN_190, MessageCatalogCodeEnum.FUN_191),
-                Arguments.of(ReferenceCatalog.MESSAGE_CATEGORY, "La categoría del mensaje",
+                Arguments.of(ReferenceCatalog.MESSAGE_CATEGORY, "The message category",
                         (BiConsumer<CreateMessageDTO, String>) CreateMessageDTO::setCategoryId,
                         MessageCatalogCodeEnum.FUN_192, MessageCatalogCodeEnum.FUN_193),
-                Arguments.of(ReferenceCatalog.MESSAGE_STATE, "El estado del mensaje",
+                Arguments.of(ReferenceCatalog.MESSAGE_STATE, "The message state",
                         (BiConsumer<CreateMessageDTO, String>) CreateMessageDTO::setStatusId,
                         MessageCatalogCodeEnum.FUN_194, MessageCatalogCodeEnum.FUN_195),
-                Arguments.of(ReferenceCatalog.MESSAGE_ENVIRONMENT_STATE, "El estado del mensaje en el ambiente",
+                Arguments.of(ReferenceCatalog.MESSAGE_ENVIRONMENT_STATE, "The message environment state",
                         (BiConsumer<CreateMessageDTO, String>) CreateMessageDTO::setMessageEnvironmentStateId,
                         MessageCatalogCodeEnum.FUN_196, MessageCatalogCodeEnum.FUN_197));
     }
@@ -105,66 +132,143 @@ class CreateMessageCompositeValidatorTest {
 
     @Test
     void validate_acceptsValidDto() {
-        when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
-        CreateMessageDTO dto = validDto();
+        stubCatalogReferences();
+        stubContextualHierarchy();
 
-        assertDoesNotThrow(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID));
-
-        verify(contextRule).validate(dto, AUTHENTICATED_ENVIRONMENT_ID);
-        verify(catalogPort, never()).getMessage(MessageCatalogCodeEnum.FUN_038.getCode());
+        assertDoesNotThrow(() -> validator.validate(validDto(), AUTHENTICATED_ENVIRONMENT_ID));
     }
 
     @Test
-    void validate_acceptsAbsentEnvironmentId_andDelegatesDtoAndAuthenticatedEnvironmentToContextRule() {
-        when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
+    void validate_acceptsAbsentBodyEnvironmentId_becauseTheAuthenticatedEnvironmentIsTheOneEnforced() {
+        stubCatalogReferences();
+        stubContextualHierarchy();
         CreateMessageDTO dto = validDtoBuilder().build();
+
         assertThat(dto.getEnvironmentId()).isNull();
-
         assertDoesNotThrow(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID));
-
-        assertAll(
-                () -> verify(contextRule).validate(dto, AUTHENTICATED_ENVIRONMENT_ID),
-                () -> verify(catalogPort, never()).getMessage(MessageCatalogCodeEnum.FUN_187.getCode()));
     }
 
     @Test
-    void validate_acceptsBlankEnvironmentId_andDelegatesDtoAndAuthenticatedEnvironmentToContextRule() {
-        when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
+    void validate_acceptsBlankBodyEnvironmentId_becauseTheAuthenticatedEnvironmentIsTheOneEnforced() {
+        stubCatalogReferences();
+        stubContextualHierarchy();
         CreateMessageDTO dto = validDto();
         dto.setEnvironmentId("");
 
         assertDoesNotThrow(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID));
-
-        assertAll(
-                () -> verify(contextRule).validate(dto, AUTHENTICATED_ENVIRONMENT_ID),
-                () -> verify(catalogPort, never()).getMessage(MessageCatalogCodeEnum.FUN_187.getCode()));
     }
 
     @Test
-    void validate_checksEveryMessageCatalogReferenceInOrderBeforeDelegatingToContextRule() {
-        when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
-        CreateMessageDTO dto = validDto();
+    void validate_acceptsUpperCasedUuidsBecauseComparisonsAreCaseInsensitive() {
+        stubCatalogReferences();
+        stubContextualHierarchy();
+        CreateMessageDTO dto = validDtoBuilder()
+                .applicationId(APPLICATION_ID_TEXT.toUpperCase())
+                .functionalityId(FUNCTIONALITY_ID_TEXT.toUpperCase())
+                .environmentId(AUTHENTICATED_ENVIRONMENT_ID.toUpperCase())
+                .build();
 
-        validator.validate(dto, "env-1");
+        assertDoesNotThrow(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID));
+    }
 
-        InOrder catalogOrder = inOrder(recordExistsCatalogPort, contextRule);
-        catalogOrder.verify(recordExistsCatalogPort).exists(ReferenceCatalog.MESSAGE_TYPE, TYPE_ID);
-        catalogOrder.verify(recordExistsCatalogPort).exists(ReferenceCatalog.MESSAGE_CATEGORY, CATEGORY_ID);
-        catalogOrder.verify(recordExistsCatalogPort).exists(ReferenceCatalog.MESSAGE_STATE, STATUS_ID);
-        catalogOrder.verify(recordExistsCatalogPort)
+    @Test
+    void validate_runsCatalogReferencesThenEnvironmentThenFunctionalityChecksInOrder() {
+        stubCatalogReferences();
+        stubContextualHierarchy();
+
+        validator.validate(validDto(), AUTHENTICATED_ENVIRONMENT_ID);
+
+        InOrder order = inOrder(recordExistsCatalogPort, environmentRepository, functionalityCatalogRepository);
+        order.verify(recordExistsCatalogPort).exists(ReferenceCatalog.MESSAGE_TYPE, TYPE_ID);
+        order.verify(recordExistsCatalogPort).exists(ReferenceCatalog.MESSAGE_CATEGORY, CATEGORY_ID);
+        order.verify(recordExistsCatalogPort).exists(ReferenceCatalog.MESSAGE_STATE, STATUS_ID);
+        order.verify(recordExistsCatalogPort)
                 .exists(ReferenceCatalog.MESSAGE_ENVIRONMENT_STATE, MESSAGE_ENVIRONMENT_STATE_ID);
-        catalogOrder.verify(contextRule).validate(dto, "env-1");
+        order.verify(environmentRepository, times(2)).findById(AUTHENTICATED_ENVIRONMENT_ID);
+        order.verify(functionalityCatalogRepository).findAllByApplicationId(APPLICATION_ID_TEXT);
     }
 
     @Test
-    void validate_delegatesAuthenticatedEnvironmentToContextRule_whenBodyEnvironmentDiffers() {
-        when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
+    void validate_shortCircuitsContextualRules_whenBodyEnvironmentDiffersFromTheAuthenticatedOne() {
+        stubCatalogReferences();
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_145.getCode()))
+                .thenReturn("Environment not authorized");
         CreateMessageDTO dto = validDto();
-        dto.setEnvironmentId("other-env");
+        dto.setEnvironmentId(OTHER_ENVIRONMENT_ID);
 
-        assertDoesNotThrow(() -> validator.validate(dto, "env-1"));
+        assertThatThrownBy(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID))
+                .isInstanceOf(ForbiddenException.class)
+                .satisfies(exception -> assertThat((ForbiddenException) exception)
+                        .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)
+                        .containsExactly(403, "Environment not authorized"));
 
-        verify(contextRule).validate(dto, "env-1");
+        verifyNoInteractions(environmentRepository, functionalityCatalogRepository);
+    }
+
+    @Test
+    void validate_shortCircuitsHierarchyRules_whenAuthenticatedEnvironmentIsMissing() {
+        stubCatalogReferences();
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_145.getCode()))
+                .thenReturn("Environment not authorized");
+
+        assertThatThrownBy(() -> validator.validate(validDto(), null))
+                .isInstanceOf(ForbiddenException.class)
+                .satisfies(exception -> assertThat((ForbiddenException) exception)
+                        .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)
+                        .containsExactly(403, "Environment not authorized"));
+
+        verifyNoInteractions(environmentRepository, functionalityCatalogRepository);
+    }
+
+    @Test
+    void validate_shortCircuitsHierarchyRules_whenAuthenticatedEnvironmentDoesNotExist() {
+        stubCatalogReferences();
+        when(environmentRepository.findById(AUTHENTICATED_ENVIRONMENT_ID)).thenReturn(Optional.empty());
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_035.getCode()))
+                .thenReturn("Environment does not exist");
+
+        assertThatThrownBy(() -> validator.validate(validDto(), AUTHENTICATED_ENVIRONMENT_ID))
+                .isInstanceOf(ForbiddenException.class)
+                .satisfies(exception -> assertThat((ForbiddenException) exception)
+                        .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)
+                        .containsExactly(403, "Environment does not exist"));
+
+        verifyNoInteractions(functionalityCatalogRepository);
+    }
+
+    @Test
+    void validate_shortCircuitsFunctionalityRule_whenEnvironmentBelongsToAnotherApplication() {
+        stubCatalogReferences();
+        when(environmentRepository.findById(AUTHENTICATED_ENVIRONMENT_ID))
+                .thenReturn(Optional.of(environment(UUID.fromString(MISSING_ID))));
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_036.getCode()))
+                .thenReturn("Environment outside application");
+
+        assertThatThrownBy(() -> validator.validate(validDto(), AUTHENTICATED_ENVIRONMENT_ID))
+                .isInstanceOf(ForbiddenException.class)
+                .satisfies(exception -> assertThat((ForbiddenException) exception)
+                        .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)
+                        .containsExactly(403, "Environment outside application"));
+
+        verifyNoInteractions(functionalityCatalogRepository);
+    }
+
+    @Test
+    void validate_throwsForbiddenUsingFun146_whenFunctionalityIsOutsideApplication() {
+        stubCatalogReferences();
+        when(environmentRepository.findById(AUTHENTICATED_ENVIRONMENT_ID))
+                .thenReturn(Optional.of(environment(APPLICATION_ID)));
+        when(functionalityCatalogRepository.findAllByApplicationId(APPLICATION_ID_TEXT))
+                .thenReturn(List.of());
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_146.getCode()))
+                .thenReturn("Functionality outside application");
+
+        assertThatThrownBy(() -> validator.validate(validDto(), AUTHENTICATED_ENVIRONMENT_ID))
+                .isInstanceOf(ForbiddenException.class)
+                .satisfies(exception -> assertThat((ForbiddenException) exception)
+                        .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)
+                        .containsExactly(403, "Functionality outside application"));
+        verify(functionalityCatalogRepository).findAllByApplicationId(APPLICATION_ID_TEXT);
     }
 
     @ParameterizedTest(name = "{1}")
@@ -174,44 +278,48 @@ class CreateMessageCompositeValidatorTest {
                                                                      MessageCatalogCodeEnum requiredCode,
                                                                      MessageCatalogCodeEnum existsCode) {
         lenient().when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
-        when(catalogPort.getMessage(requiredCode.getCode())).thenReturn(fieldName + " es requerido.");
+        when(catalogPort.getMessage(requiredCode.getCode())).thenReturn(fieldName + " is required.");
         CreateMessageDTO dto = validDto();
         setter.accept(dto, "");
 
-        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
+        assertThatThrownBy(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo(fieldName + " es requerido."));
-        verify(catalogPort).getMessage(requiredCode.getCode());
-        verify(catalogPort, never()).getMessage(existsCode.getCode());
-        verify(recordExistsCatalogPort, never()).exists(eq(catalog), anyString());
-        verifyNoInteractions(contextRule);
+                        .isEqualTo(fieldName + " is required."));
+
+        assertAll(
+                () -> verify(catalogPort).getMessage(requiredCode.getCode()),
+                () -> verify(catalogPort, never()).getMessage(existsCode.getCode()),
+                () -> verify(recordExistsCatalogPort, never()).exists(eq(catalog), anyString()),
+                () -> verifyNoInteractions(environmentRepository, functionalityCatalogRepository));
     }
 
     @ParameterizedTest(name = "{1} [{5}]")
     @MethodSource("catalogReferenceFieldsWithInvalidUuid")
-    void validate_throwsBusinessRuleWithFun038_withoutRepositoryOrContext_whenCatalogReferenceIsInvalidUuid(
+    void validate_throwsBusinessRuleUsingFun038_whenCatalogReferenceIsNotAValidUuid(
             ReferenceCatalog catalog, String fieldName,
             BiConsumer<CreateMessageDTO, String> setter,
             MessageCatalogCodeEnum requiredCode,
             MessageCatalogCodeEnum existsCode,
             String invalidValue) {
         lenient().when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
-        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_038.getCode())).thenReturn(INVALID_UUID_MESSAGE);
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_038.getCode()))
+                .thenReturn("The catalog id must be a valid UUID.");
         CreateMessageDTO dto = validDto();
         setter.accept(dto, invalidValue);
 
         assertThatThrownBy(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .as("Mensaje FUN_038 para %s con %s", fieldName, invalidValue)
-                        .isEqualTo(INVALID_UUID_MESSAGE));
+                        .as("FUN_038 message for %s with %s", fieldName, invalidValue)
+                        .isEqualTo("The catalog id must be a valid UUID."));
+
         assertAll(
                 () -> verify(catalogPort).getMessage(MessageCatalogCodeEnum.FUN_038.getCode()),
                 () -> verify(catalogPort, never()).getMessage(requiredCode.getCode()),
                 () -> verify(catalogPort, never()).getMessage(existsCode.getCode()),
                 () -> verify(recordExistsCatalogPort, never()).exists(eq(catalog), anyString()),
-                () -> verifyNoInteractions(contextRule));
+                () -> verifyNoInteractions(environmentRepository, functionalityCatalogRepository));
     }
 
     @ParameterizedTest(name = "{1}")
@@ -222,147 +330,175 @@ class CreateMessageCompositeValidatorTest {
                                                                       MessageCatalogCodeEnum existsCode) {
         lenient().when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
         when(recordExistsCatalogPort.exists(catalog, MISSING_ID)).thenReturn(false);
-        when(catalogPort.getMessage(existsCode.getCode())).thenReturn(fieldName + " no existe.");
+        when(catalogPort.getMessage(existsCode.getCode())).thenReturn(fieldName + " does not exist.");
         CreateMessageDTO dto = validDto();
         setter.accept(dto, MISSING_ID);
 
-        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
+        assertThatThrownBy(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo(fieldName + " no existe."));
-        verify(catalogPort).getMessage(existsCode.getCode());
-        verify(catalogPort, never()).getMessage(requiredCode.getCode());
-        verify(recordExistsCatalogPort).exists(catalog, MISSING_ID);
-        verifyNoInteractions(contextRule);
+                        .isEqualTo(fieldName + " does not exist."));
+
+        assertAll(
+                () -> verify(catalogPort).getMessage(existsCode.getCode()),
+                () -> verify(catalogPort, never()).getMessage(requiredCode.getCode()),
+                () -> verify(recordExistsCatalogPort).exists(catalog, MISSING_ID),
+                () -> verifyNoInteractions(environmentRepository, functionalityCatalogRepository));
     }
 
     @Test
     void validate_throwsBusinessRule_whenDtoIsNull() {
-        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_010.getCode())).thenReturn("Datos no validos");
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_010.getCode())).thenReturn("Invalid data");
 
-        assertThatThrownBy(() -> validator.validate(null, "env-1"))
+        assertThatThrownBy(() -> validator.validate(null, AUTHENTICATED_ENVIRONMENT_ID))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("Datos no validos"));
-        verifyNoInteractions(contextRule);
+                        .isEqualTo("Invalid data"));
+
+        verifyNoInteractions(environmentRepository, functionalityCatalogRepository);
     }
 
     @Test
     void validate_throwsBusinessRule_whenCodeIsEmpty() {
-        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_040.getCode())).thenReturn("El codigo es requerido");
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_040.getCode()))
+                .thenReturn("The message code is required");
         CreateMessageDTO dto = validDto();
         dto.setCode("");
 
-        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
+        assertThatThrownBy(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("El codigo es requerido"));
-        verifyNoInteractions(contextRule);
+                        .isEqualTo("The message code is required"));
+
+        verifyNoInteractions(environmentRepository, functionalityCatalogRepository);
     }
 
     @Test
     void validate_throwsBusinessRule_whenTitleIsEmpty() {
-        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_022.getCode())).thenReturn("El titulo es requerido");
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_022.getCode()))
+                .thenReturn("The message title is required");
         CreateMessageDTO dto = validDto();
         dto.setTitle("");
 
-        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
+        assertThatThrownBy(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("El titulo es requerido"));
-        verifyNoInteractions(contextRule);
+                        .isEqualTo("The message title is required"));
+
+        verifyNoInteractions(environmentRepository, functionalityCatalogRepository);
     }
 
     @Test
     void validate_throwsBusinessRule_whenTitleIsShorterThanTen() {
-        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_020.getCode())).thenReturn("Titulo corto");
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_020.getCode()))
+                .thenReturn("The message title is too short");
         CreateMessageDTO dto = validDto();
         dto.setTitle("Short");
 
-        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
+        assertThatThrownBy(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("Titulo corto"));
-        verifyNoInteractions(contextRule);
+                        .isEqualTo("The message title is too short"));
+
+        verifyNoInteractions(environmentRepository, functionalityCatalogRepository);
     }
 
     @Test
     void validate_throwsBusinessRule_whenTitleIsLongerThanFifty() {
-        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_021.getCode())).thenReturn("Titulo largo");
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_021.getCode()))
+                .thenReturn("The message title is too long");
         CreateMessageDTO dto = validDto();
         dto.setTitle("a".repeat(51));
 
-        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
+        assertThatThrownBy(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("Titulo largo"));
-        verifyNoInteractions(contextRule);
+                        .isEqualTo("The message title is too long"));
+
+        verifyNoInteractions(environmentRepository, functionalityCatalogRepository);
     }
 
     @Test
     void validate_throwsBusinessRule_whenContentIsEmpty() {
-        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_017.getCode())).thenReturn("El contenido es requerido");
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_017.getCode()))
+                .thenReturn("The message content is required");
         CreateMessageDTO dto = validDto();
         dto.setContent("");
 
-        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
+        assertThatThrownBy(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("El contenido es requerido"));
-        verifyNoInteractions(contextRule);
+                        .isEqualTo("The message content is required"));
+
+        verifyNoInteractions(environmentRepository, functionalityCatalogRepository);
     }
 
     @Test
     void validate_throwsBusinessRule_whenContentIsShorterThanTen() {
-        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_018.getCode())).thenReturn("Contenido corto");
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_018.getCode()))
+                .thenReturn("The message content is too short");
         CreateMessageDTO dto = validDto();
         dto.setContent("Short");
 
-        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
+        assertThatThrownBy(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("Contenido corto"));
-        verifyNoInteractions(contextRule);
+                        .isEqualTo("The message content is too short"));
+
+        verifyNoInteractions(environmentRepository, functionalityCatalogRepository);
     }
 
     @Test
     void validate_throwsBusinessRule_whenContentIsLongerThanOneHundred() {
-        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_019.getCode())).thenReturn("Contenido largo");
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_019.getCode()))
+                .thenReturn("The message content is too long");
         CreateMessageDTO dto = validDto();
         dto.setContent("a".repeat(101));
 
-        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
+        assertThatThrownBy(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("Contenido largo"));
-        verifyNoInteractions(contextRule);
+                        .isEqualTo("The message content is too long"));
+
+        verifyNoInteractions(environmentRepository, functionalityCatalogRepository);
     }
 
     @Test
     void validate_throwsBusinessRule_whenApplicationIdIsEmpty() {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_172.getCode()))
-                .thenReturn("El id de la aplicación es requerido.");
+                .thenReturn("The application id is required");
         CreateMessageDTO dto = validDto();
         dto.setApplicationId("");
 
-        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
+        assertThatThrownBy(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("El id de la aplicación es requerido."));
-        verifyNoInteractions(contextRule);
+                        .isEqualTo("The application id is required"));
+
+        verifyNoInteractions(environmentRepository, functionalityCatalogRepository);
     }
 
     @Test
     void validate_throwsBusinessRule_whenFunctionalityIdIsEmpty() {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_188.getCode()))
-                .thenReturn("El id de la funcionalidad es requerido.");
+                .thenReturn("The functionality id is required");
         CreateMessageDTO dto = validDto();
         dto.setFunctionalityId("");
 
-        assertThatThrownBy(() -> validator.validate(dto, "env-1"))
+        assertThatThrownBy(() -> validator.validate(dto, AUTHENTICATED_ENVIRONMENT_ID))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("El id de la funcionalidad es requerido."));
-        verifyNoInteractions(contextRule);
+                        .isEqualTo("The functionality id is required"));
+
+        verifyNoInteractions(environmentRepository, functionalityCatalogRepository);
+    }
+
+    private static EnvironmentData environment(UUID applicationId) {
+        return new EnvironmentData(ENVIRONMENT_ID, "Environment", ApplicationData.build(applicationId, "App"));
+    }
+
+    private static FunctionalityData functionality(UUID functionalityId, UUID applicationId) {
+        return new FunctionalityData(functionalityId, "Functionality",
+                ApplicationData.build(applicationId, "Application"), null, null);
     }
 }

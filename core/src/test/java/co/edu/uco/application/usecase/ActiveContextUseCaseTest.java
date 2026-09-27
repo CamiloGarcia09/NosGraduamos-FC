@@ -19,8 +19,8 @@ import co.edu.uco.application.usecase.domain.security.AuthorizationScopeType;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
 import co.edu.uco.application.usecase.domain.security.PrincipalType;
-import co.edu.uco.application.usecase.validator.authorization.AuthorizationRule;
-import co.edu.uco.application.usecase.validator.authorization.ExternalIdentityRequiredRule;
+import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
+import co.edu.uco.application.usecase.validator.authorization.rule.ExternalIdentityRequiredRule;
 import co.edu.uco.application.usecase.validator.context.SelectActiveContextCompositeValidator;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
 import co.edu.uco.crosscutting.exceptions.ForbiddenException;
@@ -43,6 +43,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static co.edu.uco.crosscutting.helpers.UtilUUID.DEFAULT_UUID;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -72,7 +73,7 @@ class ActiveContextUseCaseTest {
     @Mock private ApplicationCatalogRepository applicationCatalogRepository;
     @Mock private EnvironmentCatalogRepository environmentCatalogRepository;
     @Mock private AuthorizationQueryPort authorizationQueryPort;
-    @Mock private AuthorizationRule authorizationRule;
+    @Mock private AuthorizationCompositeValidator authorizationCompositeValidator;
     @Mock private ExternalIdentityRequiredRule externalIdentityRequiredRule;
     @Mock private SelectActiveContextCompositeValidator selectActiveContextValidator;
     @Mock private CatalogPort catalogPort;
@@ -84,7 +85,7 @@ class ActiveContextUseCaseTest {
     void setUp() {
         useCase = new ActiveContextUseCase(activeContextRepository, activeContextCachePort,
                 externalIdentityRepository, applicationCatalogRepository, environmentCatalogRepository,
-                authorizationQueryPort, authorizationRule, externalIdentityRequiredRule,
+                authorizationQueryPort, authorizationCompositeValidator, externalIdentityRequiredRule,
                 selectActiveContextValidator, catalogPort, Clock.fixed(NOW, ZoneOffset.UTC));
         persistedIdentity = new ExternalIdentityEntity();
         persistedIdentity.setId(IDENTITY_ID);
@@ -102,7 +103,7 @@ class ActiveContextUseCaseTest {
         assertThatThrownBy(() -> useCase.selectActiveContext(selection(), null)).isSameAs(failure);
         verifyNoInteractions(activeContextRepository, activeContextCachePort, externalIdentityRepository,
                 applicationCatalogRepository, environmentCatalogRepository, authorizationQueryPort,
-                authorizationRule, selectActiveContextValidator);
+                authorizationCompositeValidator, selectActiveContextValidator);
     }
 
     @Test
@@ -145,15 +146,39 @@ class ActiveContextUseCaseTest {
 
         List<AvailableContextDTO> result = useCase.findAvailableContexts(IDENTITY);
 
-        assertThat(result).extracting(context -> context.getApplication().name())
+        assertThat(result).extracting(context -> context.getApplication().getName())
                 .containsExactly("Alpha", "Zulu");
         assertThat(result).allSatisfy(context -> {
-            assertThat(context.getOrganization().id()).isEqualTo(ORGANIZATION_ID.toString());
-            assertThat(context.getEnvironment().id()).isNotEqualTo(DEFAULT_UUID.toString());
+            assertThat(context.getOrganization().getId()).isEqualTo(ORGANIZATION_ID.toString());
+            assertThat(context.getEnvironment().getId()).isNotEqualTo(DEFAULT_UUID.toString());
         });
         verify(environmentCatalogRepository, never()).findAllByApplicationId(unauthorized.getId().toString());
         verify(environmentCatalogRepository, never()).findAllByApplicationId(invalidOrganization.getId().toString());
         verify(environmentCatalogRepository, never()).findAllByApplicationId(invalidApplication.getId().toString());
+    }
+
+    @Test
+    void findAvailableContexts_ignoresEntriesWithMissingHierarchy_whenCatalogReturnsIncompleteData() {
+        ApplicationData app = application(APPLICATION_ID, "App", ORGANIZATION_ID, "Org");
+        ApplicationData withoutOrganizationIdentifier = ApplicationData.build(UUID.randomUUID(), "No Org Id");
+        EnvironmentData withoutIdentifier = new EnvironmentData(null, "No Id", app);
+        EnvironmentData validEnvironment = environment(ENVIRONMENT_ID, "Env", app);
+        when(authorizationQueryPort.findAuthorizedApplicationIds(IDENTITY, PermissionCode.CONTEXT_SELECT))
+                .thenReturn(List.of(APPLICATION_ID));
+        when(applicationCatalogRepository.findAll())
+                .thenReturn(asList(null, withoutOrganizationIdentifier, app));
+        when(authorizationQueryPort.findAuthorizedEnvironmentIds(
+                IDENTITY, PermissionCode.CONTEXT_SELECT, APPLICATION_ID))
+                .thenReturn(List.of(ENVIRONMENT_ID));
+        when(environmentCatalogRepository.findAllByApplicationId(APPLICATION_ID.toString()))
+                .thenReturn(asList(null, withoutIdentifier, validEnvironment));
+
+        List<AvailableContextDTO> result = useCase.findAvailableContexts(IDENTITY);
+
+        assertThat(result)
+                .singleElement()
+                .satisfies(context -> assertThat(context.getEnvironment().getId())
+                        .isEqualTo(ENVIRONMENT_ID.toString()));
     }
 
     @Test
@@ -167,7 +192,7 @@ class ActiveContextUseCaseTest {
         assertThat(result.getEnvironmentId()).isEqualTo(ENVIRONMENT_ID.toString());
         verify(activeContextRepository, never()).findByExternalIdentityId(any());
         verify(activeContextCachePort, never()).save(any(), any());
-        verify(authorizationRule).validate(IDENTITY, PermissionCode.CONTEXT_SELECT,
+        verify(authorizationCompositeValidator).validate(IDENTITY, PermissionCode.CONTEXT_SELECT,
                 AuthorizationScopeType.ENVIRONMENT, ENVIRONMENT_ID);
     }
 
@@ -210,7 +235,7 @@ class ActiveContextUseCaseTest {
         assertThatThrownBy(() -> useCase.findActiveContext(IDENTITY)).isInstanceOf(NotFoundException.class)
                 .extracting("httpStatus", "userMessage").containsExactly(404, "No active context");
         verify(activeContextCachePort, never()).save(any(), any());
-        verifyNoInteractions(authorizationRule);
+        verifyNoInteractions(authorizationCompositeValidator);
     }
 
     @Test
@@ -219,7 +244,7 @@ class ActiveContextUseCaseTest {
         ForbiddenException failure = ForbiddenException.buildUserException("Permission revoked");
         stubPersistedIdentity();
         when(activeContextCachePort.find(IDENTITY)).thenReturn(Optional.of(cached));
-        doThrow(failure).when(authorizationRule).validate(IDENTITY, PermissionCode.CONTEXT_SELECT,
+        doThrow(failure).when(authorizationCompositeValidator).validate(IDENTITY, PermissionCode.CONTEXT_SELECT,
                 AuthorizationScopeType.ENVIRONMENT, ENVIRONMENT_ID);
 
         assertThatThrownBy(() -> useCase.findActiveContext(IDENTITY)).isSameAs(failure);
@@ -244,11 +269,11 @@ class ActiveContextUseCaseTest {
         ActiveContextDTO result = useCase.selectActiveContext(selection, IDENTITY);
 
         ArgumentCaptor<ActiveContextEntity> entityCaptor = ArgumentCaptor.forClass(ActiveContextEntity.class);
-        InOrder order = inOrder(selectActiveContextValidator, externalIdentityRepository, authorizationRule,
+        InOrder order = inOrder(selectActiveContextValidator, externalIdentityRepository, authorizationCompositeValidator,
                 activeContextRepository, activeContextCachePort);
         order.verify(selectActiveContextValidator).validate(selection);
         order.verify(externalIdentityRepository).findByIssuerAndSubject(IDENTITY.issuer(), IDENTITY.subject());
-        order.verify(authorizationRule).validate(IDENTITY, PermissionCode.CONTEXT_SELECT,
+        order.verify(authorizationCompositeValidator).validate(IDENTITY, PermissionCode.CONTEXT_SELECT,
                 AuthorizationScopeType.ENVIRONMENT, ENVIRONMENT_ID);
         order.verify(activeContextRepository).save(entityCaptor.capture());
         order.verify(activeContextCachePort).evict(IDENTITY);

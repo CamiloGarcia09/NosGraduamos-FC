@@ -2,31 +2,24 @@ package co.edu.uco.application.usecase.validator.organization;
 
 import co.edu.uco.application.primaryports.dto.organization.CreateOrganizationDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
-import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
-import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
+import co.edu.uco.application.secondaryports.repository.OrganizationRepository;
+import co.edu.uco.application.usecase.validator.CompositeValidator;
+import co.edu.uco.application.usecase.validator.organization.rule.OrganizationNameDuplicatedRule;
+import co.edu.uco.application.usecase.validator.organization.rule.OrganizationNameMaxLengthRule;
+import co.edu.uco.application.usecase.validator.organization.rule.OrganizationNameRequiredRule;
+import org.springframework.stereotype.Component;
 
-import static co.edu.uco.crosscutting.helpers.UtilObject.isNullObject;
+import java.util.List;
 
-public final class CreateOrganizationCompositeValidator {
+@Component
+public final class CreateOrganizationCompositeValidator extends CompositeValidator<CreateOrganizationDTO> {
 
-    private final CatalogPort catalogPort;
-    private final CreateOrganizationNameRule nameRule;
-    private final CreateOrganizationUniqueNameRule uniqueNameRule;
-
-    public CreateOrganizationCompositeValidator(final CatalogPort catalogPort,
-                                                final CreateOrganizationNameRule nameRule,
-                                                final CreateOrganizationUniqueNameRule uniqueNameRule) {
-        this.catalogPort = catalogPort;
-        this.nameRule = nameRule;
-        this.uniqueNameRule = uniqueNameRule;
-    }
-
-    public void validate(final CreateOrganizationDTO organizationDTO) {
-        if (isNullObject(organizationDTO)) {
-            throw BusinessRuleException.buildUserException(
-                    catalogPort.getMessage(MessageCatalogCodeEnum.FUN_010.getCode()));
-        }
-        nameRule.validate(organizationDTO);
-        uniqueNameRule.validate(organizationDTO);
+    public CreateOrganizationCompositeValidator(CatalogPort catalogPort,
+                                                OrganizationRepository organizationRepository) {
+        super(List.of(
+                new OrganizationNameRequiredRule(catalogPort),
+                new OrganizationNameMaxLengthRule(catalogPort),
+                new OrganizationNameDuplicatedRule(catalogPort, organizationRepository)
+        ), catalogPort);
     }
 }

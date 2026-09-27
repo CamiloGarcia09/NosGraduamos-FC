@@ -8,7 +8,7 @@ import co.edu.uco.application.usecase.domain.security.MessageAccessContext;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
 import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
-import co.edu.uco.application.usecase.validator.authorization.AuthorizationRule;
+import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
 import co.edu.uco.crosscutting.exceptions.ForbiddenException;
 import co.edu.uco.crosscutting.exceptions.UnauthorizedException;
 import org.junit.jupiter.api.Test;
@@ -32,10 +32,11 @@ class MessageEnvironmentResolverImplTest {
             "issuer", "subject", "user@example.com", PrincipalType.HUMAN, Instant.MAX);
 
     private final HandlingActiveContextPort activeContextPort = mock(HandlingActiveContextPort.class);
-    private final AuthorizationRule authorizationRule = mock(AuthorizationRule.class);
+    private final AuthorizationCompositeValidator authorizationCompositeValidator =
+            mock(AuthorizationCompositeValidator.class);
     private final CatalogPort catalogPort = mock(CatalogPort.class);
     private final MessageEnvironmentResolver resolver =
-            new MessageEnvironmentResolverImpl(activeContextPort, authorizationRule, catalogPort);
+            new MessageEnvironmentResolverImpl(activeContextPort, authorizationCompositeValidator, catalogPort);
 
     @Test
     void resolve_returnsLegacyEnvironmentWithoutExternalAuthorization() {
@@ -44,7 +45,7 @@ class MessageEnvironmentResolverImplTest {
         String result = resolver.resolve(context, PermissionCode.MESSAGE_READ);
 
         assertThat(result).isEqualTo("legacy-environment");
-        verifyNoInteractions(activeContextPort, authorizationRule, catalogPort);
+        verifyNoInteractions(activeContextPort, authorizationCompositeValidator, catalogPort);
     }
 
     @Test
@@ -56,7 +57,7 @@ class MessageEnvironmentResolverImplTest {
         String result = resolver.resolve(context, PermissionCode.MESSAGE_TRANSLATE);
 
         assertThat(result).isEqualTo(ENVIRONMENT_ID.toString());
-        verify(authorizationRule).validate(IDENTITY, PermissionCode.MESSAGE_TRANSLATE,
+        verify(authorizationCompositeValidator).validate(IDENTITY, PermissionCode.MESSAGE_TRANSLATE,
                 AuthorizationScopeType.ENVIRONMENT, ENVIRONMENT_ID);
     }
 
@@ -68,7 +69,7 @@ class MessageEnvironmentResolverImplTest {
                 .isInstanceOf(UnauthorizedException.class)
                 .extracting("httpStatus", "userMessage")
                 .containsExactly(401, "Authentication required");
-        verifyNoInteractions(activeContextPort, authorizationRule);
+        verifyNoInteractions(activeContextPort, authorizationCompositeValidator);
     }
 
     @Test
@@ -77,9 +78,20 @@ class MessageEnvironmentResolverImplTest {
         ForbiddenException failure = ForbiddenException.buildUserException("Permission denied");
         when(activeContextPort.findActiveContext(IDENTITY)).thenReturn(
                 ActiveContextDTO.builder().environmentId(ENVIRONMENT_ID.toString()).build());
-        doThrow(failure).when(authorizationRule).validate(IDENTITY, PermissionCode.MESSAGE_READ,
+        doThrow(failure).when(authorizationCompositeValidator).validate(IDENTITY, PermissionCode.MESSAGE_READ,
                 AuthorizationScopeType.ENVIRONMENT, ENVIRONMENT_ID);
 
         assertThatThrownBy(() -> resolver.resolve(context, PermissionCode.MESSAGE_READ)).isSameAs(failure);
+    }
+
+    @Test
+    void resolve_throwsUnauthorized_whenTheContextIsNull() {
+        when(catalogPort.getMessage("FUN_152")).thenReturn("Authentication required");
+
+        assertThatThrownBy(() -> resolver.resolve(null, PermissionCode.MESSAGE_READ))
+                .isInstanceOf(UnauthorizedException.class)
+                .extracting("httpStatus", "userMessage")
+                .containsExactly(401, "Authentication required");
+        verifyNoInteractions(activeContextPort, authorizationCompositeValidator);
     }
 }

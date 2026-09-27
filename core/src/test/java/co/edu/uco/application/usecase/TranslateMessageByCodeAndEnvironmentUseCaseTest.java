@@ -98,13 +98,13 @@ class TranslateMessageByCodeAndEnvironmentUseCaseTest {
         TranslatedMessageDTO result = useCase.execute("CODE", ACCESS_CONTEXT, "", "en");
 
         assertAll(
-                () -> assertThat(result.code()).isEqualTo("CODE"),
-                () -> assertThat(result.sourceLanguage()).isEqualTo("auto"),
-                () -> assertThat(result.targetLanguage()).isEqualTo("en"),
-                () -> assertThat(result.translatedTitle()).isEqualTo("Translated Title"),
-                () -> assertThat(result.translationProvider()).isEqualTo("ollama"),
-                () -> assertThat(result.translationElapsedMs()).isEqualTo(120L),
-                () -> assertThat(result.dynamicTranslation()).isTrue());
+                () -> assertThat(result.getCode()).isEqualTo("CODE"),
+                () -> assertThat(result.getSourceLanguage()).isEqualTo("auto"),
+                () -> assertThat(result.getTargetLanguage()).isEqualTo("en"),
+                () -> assertThat(result.getTranslatedTitle()).isEqualTo("Translated Title"),
+                () -> assertThat(result.getTranslationProvider()).isEqualTo("ollama"),
+                () -> assertThat(result.getTranslationElapsedMs()).isEqualTo(120L),
+                () -> assertThat(result.isDynamicTranslation()).isTrue());
         verify(messageTranslationCachePort).saveTranslation(eq("CODE"), eq("env"), eq("auto"), eq("en"), eq(response));
     }
 
@@ -120,7 +120,7 @@ class TranslateMessageByCodeAndEnvironmentUseCaseTest {
 
         TranslatedMessageDTO result = useCase.execute("CODE", ACCESS_CONTEXT, "  es ", "en");
 
-        assertThat(result.sourceLanguage()).isEqualTo("es");
+        assertThat(result.getSourceLanguage()).isEqualTo("es");
     }
 
     @Test
@@ -136,9 +136,9 @@ class TranslateMessageByCodeAndEnvironmentUseCaseTest {
         TranslatedMessageDTO result = useCase.execute("CODE", ACCESS_CONTEXT, "es", "en");
 
         assertAll(
-                () -> assertThat(result.translatedTitle()).isEqualTo("Cached Title"),
-                () -> assertThat(result.translatedContent()).isEqualTo("Cached Content"),
-                () -> assertThat(result.translationElapsedMs()).isEqualTo(5L));
+                () -> assertThat(result.getTranslatedTitle()).isEqualTo("Cached Title"),
+                () -> assertThat(result.getTranslatedContent()).isEqualTo("Cached Content"),
+                () -> assertThat(result.getTranslationElapsedMs()).isEqualTo(5L));
         verify(messageTranslationPort, never()).translate(any());
         verify(messageTranslationCachePort).findTranslation("CODE", "env", "es", "en");
     }

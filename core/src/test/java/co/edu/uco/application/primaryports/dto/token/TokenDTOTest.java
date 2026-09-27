@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class TokenDTOTest {
 
@@ -92,6 +93,35 @@ class TokenDTOTest {
         b.setSecretName(null);
 
         assertThat(a).isNotEqualTo(b);
+    }
+
+    @Test
+    void equals_returnsTrue_whenComparingTheSameInstance() {
+        TokenDTO dto = buildToken();
+
+        assertThat(dto).isEqualTo(dto);
+    }
+
+    @Test
+    void equals_returnsFalse_whenTheReceiverFieldIsNullAndTheOtherIsNot() {
+        TokenDTO empty = new TokenDTO();
+        TokenDTO withId = new TokenDTO();
+        withId.setId("token-1");
+        TokenDTO withSecretName = new TokenDTO();
+        withSecretName.setSecretName("secret-name");
+        TokenDTO withCreationDate = new TokenDTO();
+        withCreationDate.setCreationDate(CREATION);
+        TokenDTO withExpirationDate = new TokenDTO();
+        withExpirationDate.setExpirationDate(EXPIRATION);
+        TokenDTO withEnvironmentId = new TokenDTO();
+        withEnvironmentId.setEnvironmentId(ENV_ID);
+
+        assertAll(
+                () -> assertThat(empty).isNotEqualTo(withId),
+                () -> assertThat(empty).isNotEqualTo(withSecretName),
+                () -> assertThat(empty).isNotEqualTo(withCreationDate),
+                () -> assertThat(empty).isNotEqualTo(withExpirationDate),
+                () -> assertThat(empty).isNotEqualTo(withEnvironmentId));
     }
 
     @Test

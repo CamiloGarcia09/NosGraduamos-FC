@@ -12,7 +12,7 @@ import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
 import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
 import co.edu.uco.application.usecase.handling.HandlingCreateEnvironmentPort;
-import co.edu.uco.application.usecase.validator.authorization.AuthorizationRule;
+import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
 import co.edu.uco.application.usecase.validator.environment.CreateEnvironmentCompositeValidator;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
@@ -31,14 +31,14 @@ public final class CreateEnvironmentUseCase implements HandlingCreateEnvironment
     private final EnvironmentRepository environmentRepository;
     private final CreateEnvironmentCompositeValidator validator;
     private final HandlingActiveContextPort activeContextPort;
-    private final AuthorizationRule authorizationRule;
+    private final AuthorizationCompositeValidator authorizationRule;
     private final CatalogPort catalogPort;
     private final LoggingPort log;
 
     public CreateEnvironmentUseCase(EnvironmentRepository environmentRepository,
                                     CreateEnvironmentCompositeValidator validator,
                                     HandlingActiveContextPort activeContextPort,
-                                    AuthorizationRule authorizationRule,
+                                     AuthorizationCompositeValidator authorizationRule,
                                     CatalogPort catalogPort,
                                     LoggingPortFactory loggerFactory) {
         this.environmentRepository = environmentRepository;

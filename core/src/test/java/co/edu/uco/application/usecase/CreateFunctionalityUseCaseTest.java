@@ -11,7 +11,7 @@ import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
 import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
-import co.edu.uco.application.usecase.validator.authorization.AuthorizationRule;
+import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
 import co.edu.uco.application.usecase.validator.functionality.CreateFunctionalityCompositeValidator;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
@@ -51,7 +51,7 @@ class CreateFunctionalityUseCaseTest {
     @Mock
     private HandlingActiveContextPort activeContextPort;
     @Mock
-    private AuthorizationRule authorizationRule;
+    private AuthorizationCompositeValidator authorizationCompositeValidator;
     @Mock
     private CatalogPort catalogPort;
     @Mock
@@ -65,7 +65,7 @@ class CreateFunctionalityUseCaseTest {
     void setUp() {
         when(loggerFactory.getLogger(CreateFunctionalityUseCase.class)).thenReturn(log);
         useCase = new CreateFunctionalityUseCase(functionalityRepository, validator,
-                activeContextPort, authorizationRule, catalogPort, loggerFactory);
+                activeContextPort, authorizationCompositeValidator, catalogPort, loggerFactory);
     }
 
     private CreateFunctionalityDTO validDto() {
@@ -87,7 +87,7 @@ class CreateFunctionalityUseCaseTest {
         verify(validator).validate(dto);
         verify(functionalityRepository).create(any(), eq("state-1"));
         verify(log).info("Functionality created successfully with name: {}", "Search messages");
-        verifyNoInteractions(activeContextPort, authorizationRule, catalogPort);
+        verifyNoInteractions(activeContextPort, authorizationCompositeValidator, catalogPort);
     }
 
     @Test
@@ -98,7 +98,7 @@ class CreateFunctionalityUseCaseTest {
 
         useCase.createFunctionality(dto, IDENTITY);
 
-        verify(authorizationRule).validate(IDENTITY, PermissionCode.FUNCTIONALITY_CREATE,
+        verify(authorizationCompositeValidator).validate(IDENTITY, PermissionCode.FUNCTIONALITY_CREATE,
                 AuthorizationScopeType.APPLICATION, UUID.fromString(APP_UUID));
         verify(validator).validate(dto);
         verify(functionalityRepository).create(any(), eq("state-1"));
@@ -116,7 +116,7 @@ class CreateFunctionalityUseCaseTest {
                 .satisfies(ex -> assertThat((ForbiddenException) ex)
                         .extracting(ForbiddenException::getUserMessage, ForbiddenException::getHttpStatus)
                         .containsExactly("Fuera del contexto activo", 403));
-        verifyNoInteractions(functionalityRepository, authorizationRule);
+        verifyNoInteractions(functionalityRepository, authorizationCompositeValidator);
         verify(validator, never()).validate(any());
     }
 
@@ -132,16 +132,16 @@ class CreateFunctionalityUseCaseTest {
                 .satisfies(ex -> assertThat((ForbiddenException) ex)
                         .extracting(ForbiddenException::getUserMessage, ForbiddenException::getHttpStatus)
                         .containsExactly("Fuera del contexto activo", 403));
-        verifyNoInteractions(functionalityRepository, authorizationRule, validator);
+        verifyNoInteractions(functionalityRepository, authorizationCompositeValidator, validator);
     }
 
     @Test
-    void createFunctionality_propagatesForbiddenFromAuthorizationRule() {
+    void createFunctionality_propagatesForbiddenFromAuthorizationCompositeValidator() {
         CreateFunctionalityDTO dto = validDto();
         ForbiddenException failure = ForbiddenException.buildUserException("Permission denied");
         when(activeContextPort.findActiveContext(IDENTITY)).thenReturn(
                 ActiveContextDTO.builder().applicationId(APP_UUID).build());
-        doThrow(failure).when(authorizationRule).validate(IDENTITY,
+        doThrow(failure).when(authorizationCompositeValidator).validate(IDENTITY,
                 PermissionCode.FUNCTIONALITY_CREATE, AuthorizationScopeType.APPLICATION,
                 UUID.fromString(APP_UUID));
 

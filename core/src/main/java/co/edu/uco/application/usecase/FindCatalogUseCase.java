@@ -15,7 +15,7 @@ import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
 import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
 import co.edu.uco.application.usecase.handling.HandlingFindCatalogPort;
-import co.edu.uco.application.usecase.validator.authorization.AuthorizationRule;
+import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.ForbiddenException;
 
@@ -36,7 +36,7 @@ public final class FindCatalogUseCase implements HandlingFindCatalogPort {
     private final MessageStateCatalogRepository messageStateCatalogRepository;
     private final MessageEnvironmentStateCatalogRepository messageEnvironmentStateCatalogRepository;
     private final AuthorizationQueryPort authorizationQueryPort;
-    private final AuthorizationRule authorizationRule;
+    private final AuthorizationCompositeValidator authorizationRule;
     private final HandlingActiveContextPort activeContextPort;
     private final CatalogPort catalogPort;
 
@@ -49,7 +49,7 @@ public final class FindCatalogUseCase implements HandlingFindCatalogPort {
             MessageStateCatalogRepository messageStateCatalogRepository,
             MessageEnvironmentStateCatalogRepository messageEnvironmentStateCatalogRepository,
             AuthorizationQueryPort authorizationQueryPort,
-            AuthorizationRule authorizationRule,
+            AuthorizationCompositeValidator authorizationRule,
             HandlingActiveContextPort activeContextPort,
             CatalogPort catalogPort) {
         this.applicationCatalogRepository = applicationCatalogRepository;

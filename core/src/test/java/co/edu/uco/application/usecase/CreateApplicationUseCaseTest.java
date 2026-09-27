@@ -12,7 +12,7 @@ import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
 import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
-import co.edu.uco.application.usecase.validator.authorization.AuthorizationRule;
+import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
 import co.edu.uco.application.usecase.validator.application.CreateApplicationCompositeValidator;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
@@ -54,7 +54,7 @@ class CreateApplicationUseCaseTest {
     @Mock
     private HandlingActiveContextPort activeContextPort;
     @Mock
-    private AuthorizationRule authorizationRule;
+    private AuthorizationCompositeValidator authorizationCompositeValidator;
     @Mock
     private CatalogPort catalogPort;
     @Mock
@@ -68,7 +68,7 @@ class CreateApplicationUseCaseTest {
     void setUp() {
         when(loggerFactory.getLogger(CreateApplicationUseCase.class)).thenReturn(log);
         useCase = new CreateApplicationUseCase(applicationRepository, validator,
-                activeContextPort, authorizationRule, catalogPort, loggerFactory);
+                activeContextPort, authorizationCompositeValidator, catalogPort, loggerFactory);
     }
 
     private CreateApplicationDTO validDto() {
@@ -99,7 +99,7 @@ class CreateApplicationUseCaseTest {
             softly.assertThat(capturedApplication.getOrganization().getName()).isEmpty();
         });
         verify(log).info("Application created successfully with name: {}", "Message App");
-        verifyNoInteractions(activeContextPort, authorizationRule, catalogPort);
+        verifyNoInteractions(activeContextPort, authorizationCompositeValidator, catalogPort);
     }
 
     @Test
@@ -110,7 +110,7 @@ class CreateApplicationUseCaseTest {
 
         useCase.createApplication(dto, IDENTITY);
 
-        verify(authorizationRule).validate(IDENTITY, PermissionCode.APPLICATION_CREATE,
+        verify(authorizationCompositeValidator).validate(IDENTITY, PermissionCode.APPLICATION_CREATE,
                 AuthorizationScopeType.ORGANIZATION, UUID.fromString(ORGANIZATION_ID));
         verify(validator).validate(dto);
         verify(applicationRepository).create(any(ApplicationData.class),
@@ -128,7 +128,7 @@ class CreateApplicationUseCaseTest {
                 .satisfies(ex -> assertThat((ForbiddenException) ex)
                         .extracting(ForbiddenException::getUserMessage, ForbiddenException::getHttpStatus)
                         .containsExactly("Fuera del contexto activo", 403));
-        verifyNoInteractions(applicationRepository, authorizationRule);
+        verifyNoInteractions(applicationRepository, authorizationCompositeValidator);
         verify(validator, never()).validate(any());
     }
 
@@ -144,16 +144,16 @@ class CreateApplicationUseCaseTest {
                 .satisfies(ex -> assertThat((ForbiddenException) ex)
                         .extracting(ForbiddenException::getUserMessage, ForbiddenException::getHttpStatus)
                         .containsExactly("Fuera del contexto activo", 403));
-        verifyNoInteractions(applicationRepository, authorizationRule, validator);
+        verifyNoInteractions(applicationRepository, authorizationCompositeValidator, validator);
     }
 
     @Test
-    void createApplication_propagatesForbiddenFromAuthorizationRule() {
+    void createApplication_propagatesForbiddenFromAuthorizationCompositeValidator() {
         CreateApplicationDTO dto = validDto();
         ForbiddenException failure = ForbiddenException.buildUserException("Permission denied");
         when(activeContextPort.findActiveContext(IDENTITY)).thenReturn(
                 ActiveContextDTO.builder().organizationId(ORGANIZATION_ID).build());
-        doThrow(failure).when(authorizationRule).validate(IDENTITY,
+        doThrow(failure).when(authorizationCompositeValidator).validate(IDENTITY,
                 PermissionCode.APPLICATION_CREATE, AuthorizationScopeType.ORGANIZATION,
                 UUID.fromString(ORGANIZATION_ID));
 

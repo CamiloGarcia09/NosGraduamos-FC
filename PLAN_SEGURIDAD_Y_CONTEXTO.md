@@ -30,7 +30,7 @@ Aplicacion obligatoria de esta ley:
 
 | Campo | Valor |
 |---|---|
-| Ultima actualizacion | 2026-09-22 |
+| Ultima actualizacion | 2026-09-26 |
 | Estado global | Implementacion gradual en curso |
 | Fase actual | Fase 6 - Integrar el proveedor real |
 | Proxima implementacion | Implementar el adaptador del proveedor real de identidad |
@@ -67,6 +67,48 @@ Aplicacion obligatoria de esta ley:
 - Los permisos asignados a una Organizacion se heredan por sus Aplicaciones y Ambientes; los asignados a una Aplicacion se heredan por sus Ambientes; los asignados a un Ambiente no conceden permiso sobre toda la Aplicacion.
 - Las asignaciones son aditivas y no se modelan denegaciones explicitas en la Fase 3.
 - Durante la convivencia, los catalogos jerarquicos conservan el comportamiento legado sin identidad externa; con identidad externa filtran recursos por `CONTEXT_SELECT` y rechazan con `403` los accesos fuera del alcance autorizado.
+
+## Convencion vigente de validacion
+
+Desde la unificacion realizada el 2026-09-26, las validaciones nuevas o modificadas deben seguir este modelo:
+
+```text
+Specification<T> -> evalua una condicion y retorna boolean
+RuleValidator<T> -> asocia Specification + codigo de catalogo + fabrica de excepcion
+CompositeValidator<T> -> ejecuta reglas en orden y se detiene en el primer error
+```
+
+Reglas obligatorias para las siguientes fases:
+
+- Una `Specification` no obtiene mensajes ni lanza excepciones; solo evalua una condicion reutilizable.
+- Cada regla concreta extiende `RuleValidator<T>`, tiene una responsabilidad y selecciona su codigo de `MessageCatalogCodeEnum`.
+- `Specifications.field(...)` aplica una especificacion reutilizable a un campo de un DTO o contexto.
+- Las validaciones con varias entradas usan un contexto tipado, como `AuthorizationValidationContext` o `CreateMessageValidationContext`; no se deben recrear validadores imperativos `*RuleImpl`.
+- Los composites declaran el orden con `List.of(...)`. Ese orden es parte del contrato y garantiza cortocircuito antes de consultar repositorios o convertir identificadores.
+- Las reglas de requerido y UUID se ejecutan antes de existencia, pertenencia o duplicidad.
+- Las consultas se hacen mediante puertos de `core` desde reglas concretas, nunca mediante adaptadores de infraestructura.
+- La fabrica de excepcion de `RuleValidator` debe preservar la semantica HTTP: `UnauthorizedException` (`401`), `ForbiddenException` (`403`), `NotFoundException` (`404`), `ConflictException` (`409`) y `BusinessRuleException` (`422`).
+- No se deben reintroducir interfaces con una unica implementacion `*RuleImpl` para reglas simples.
+- Cada regla requiere pruebas de caso valido, limite y error; cada composite requiere pruebas de orden y cortocircuito.
+
+Ordenes que forman parte del contrato actual:
+
+- Aplicacion: nombre, Organizacion requerida, UUID de Organizacion, existencia de Organizacion, catalogos, fechas, estado y duplicidad.
+- Contexto activo: identificadores requeridos, tres UUID, existencia de Organizacion/Aplicacion/Ambiente y las dos relaciones jerarquicas.
+- Autorizacion: identidad requerida antes de consultar permisos.
+- Mensaje: campos y catalogos antes del ambiente autenticado, existencia del ambiente y relaciones con Aplicacion y Funcionalidad.
+- Organizacion: nombre requerido, longitud maxima y duplicidad.
+- Paginacion: formato opcional del DTO, numero, tamano, direccion y columna de ordenamiento; el rango contra paginas disponibles se valida despues de consultar el repositorio.
+
+La validacion transversal de paginacion sigue la misma separacion:
+
+- `page/PageRequestDTOCompositeValidator` valida el formato textual recibido por la API.
+- `page/SimplePageRequestCompositeValidator` valida el objeto normalizado antes de consultar datos.
+- `page/PageRequestRangeValidator` valida la pagina solicitada contra el total obtenido.
+- `page/rule/` contiene las reglas atomicas de numero, tamano, direccion, columna y formato de atributos.
+- `SimplePageRequestValidationContext` transporta la peticion y el tipo de modelo requerido para validar columnas mediante reflexion.
+- `PageRequestRangeValidationContext` agrupa pagina solicitada y total de paginas.
+- Los antiguos wrappers `PageRequestDTOValidator` y `SimplePageRequestValidator` no deben reintroducirse; los consumidores dependen directamente de los composites.
 
 ## Estado actual del sistema
 
@@ -381,9 +423,9 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - `core/src/main/java/co/edu/uco/application/primaryports/facade/message/impl/CreateMessageUseCaseFacadeImpl.java`: delegacion del DTO junto con el ambiente autenticado.
 - `core/src/main/java/co/edu/uco/application/usecase/handling/HandlingCreateMessagePort.java`: contrato de creacion extendido con el ambiente autenticado.
 - `core/src/main/java/co/edu/uco/application/usecase/CreateMessageUseCase.java`: persistencia exclusiva con el ambiente autenticado.
-- `core/src/main/java/co/edu/uco/application/usecase/validator/message/CreateMessageCompositeValidator.java`: integracion de la regla de contexto en la validacion compuesta.
-- `core/src/main/java/co/edu/uco/application/usecase/validator/message/CreateMessageContextRule.java`: contrato de la regla de contexto de creacion.
-- `core/src/main/java/co/edu/uco/application/usecase/validator/message/CreateMessageContextRuleImpl.java`: validacion de ambiente autenticado y jerarquia aplicacion-entorno-funcionalidad mediante identificadores UUID equivalentes y rechazos `403`.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/message/CreateMessageCompositeValidator.java`: composicion unica de reglas del DTO, catalogos y contexto autenticado mediante `CreateMessageValidationContext`.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/message/rule/MessageAuthenticatedEnvironmentRule.java`: ambiente autenticado requerido y coincidencia con el body cuando este lo informa.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/message/rule/MessageEnvironmentExistsRule.java`, `MessageApplicationBelongsEnvironmentRule.java` y `MessageFunctionalityBelongsApplicationRule.java`: jerarquia ambiente-aplicacion-funcionalidad con rechazos `403`.
 - `infrastructure/src/main/java/co/edu/uco/infraestructure/config/UseCaseRuleConfig.java`: composicion Spring de la regla de contexto para mantener `core` libre de frameworks.
 - `infrastructure/src/main/java/co/edu/uco/infraestructure/primaryadapters/controller/CreateMessageControllerImpl.java`: extraccion del ambiente autenticado desde la peticion.
 - `utils/src/main/java/co/edu/uco/crosscutting/catalog/MessageCatalogCodeEnum.java`: codigos `FUN_145` y `FUN_146` para las nuevas reglas y correccion de la descripcion de `FUN_036`.
@@ -397,8 +439,8 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - `infrastructure/src/main/java/co/edu/uco/infraestructure/primaryadapters/interceptors/TokenHeaderInterceptor.java`: respuesta `401` para token ausente, invalido, vencido o revocado durante la resolucion del ambiente.
 - `ArquitecturaEjemplo.md`: documentacion actualizada de estados de seguridad y traduccion de excepciones HTTP.
 - `core/src/test/java/co/edu/uco/application/usecase/CreateMessageUseCaseTest.java`: propagacion y persistencia del ambiente autenticado.
-- `core/src/test/java/co/edu/uco/application/usecase/validator/message/CreateMessageCompositeValidatorTest.java`: integracion de la regla de contexto.
-- `core/src/test/java/co/edu/uco/application/usecase/validator/message/CreateMessageContextRuleImplTest.java`: cobertura de la jerarquia, escenarios `403` y UUID equivalentes con distinta capitalizacion.
+- `core/src/test/java/co/edu/uco/application/usecase/validator/message/CreateMessageCompositeValidatorTest.java`: orden y cortocircuito de campos, catalogos y contexto autenticado.
+- `core/src/test/java/co/edu/uco/application/usecase/validator/message/rule/`: cobertura individual de ambiente autenticado, jerarquia, escenarios `403`, listas nulas y UUID equivalentes con distinta capitalizacion.
 - `core/src/test/java/co/edu/uco/application/primaryports/facade/message/impl/CreateMessageUseCaseFacadeImplTest.java`: propagacion de facade a caso de uso.
 - `infrastructure/src/test/java/co/edu/uco/infraestructure/primaryadapters/controller/CreateMessageControllerImplTest.java`: uso del ambiente autenticado por el controller.
 - `infrastructure/src/test/java/co/edu/uco/infraestructure/secondaryadapters/security/SecurityAdapterTest.java`: verifica validacion valida e invalida sin pasar el token al logger.
@@ -448,11 +490,10 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - `core/src/main/java/co/edu/uco/application/primaryports/facade/organization/impl/CreateOrganizationUseCaseFacadeImpl.java`: delegacion hacia el puerto interno de manejo.
 - `core/src/main/java/co/edu/uco/application/usecase/handling/HandlingCreateOrganizationPort.java`: contrato interno del caso de uso.
 - `core/src/main/java/co/edu/uco/application/usecase/CreateOrganizationUseCase.java`: validacion, construccion de `OrganizationEntity`, persistencia y traduccion de errores tecnicos.
-- `core/src/main/java/co/edu/uco/application/usecase/validator/organization/CreateOrganizationCompositeValidator.java`: composicion ordenada de reglas y rechazo de entradas nulas.
-- `core/src/main/java/co/edu/uco/application/usecase/validator/organization/CreateOrganizationNameRule.java`: contrato de validacion del nombre.
-- `core/src/main/java/co/edu/uco/application/usecase/validator/organization/CreateOrganizationNameRuleImpl.java`: obligatoriedad y longitud maxima del nombre.
-- `core/src/main/java/co/edu/uco/application/usecase/validator/organization/CreateOrganizationUniqueNameRule.java`: contrato de unicidad del nombre.
-- `core/src/main/java/co/edu/uco/application/usecase/validator/organization/CreateOrganizationUniqueNameRuleImpl.java`: rechazo de organizaciones duplicadas mediante el puerto de persistencia.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/organization/CreateOrganizationCompositeValidator.java`: composicion ordenada de nombre requerido, longitud maxima y duplicidad.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/organization/rule/OrganizationNameRequiredRule.java`: obligatoriedad del nombre con `FUN_147`.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/organization/rule/OrganizationNameMaxLengthRule.java`: maximo de 50 caracteres con `FUN_148`.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/organization/rule/OrganizationNameDuplicatedRule.java`: rechazo de duplicados mediante `OrganizationRepository` y `FUN_149`.
 - `infrastructure/src/main/java/co/edu/uco/infraestructure/config/UseCaseRuleConfig.java`: composicion Spring de reglas, composite, caso de uso y facade fuera de `core`.
 - `utils/src/main/java/co/edu/uco/crosscutting/catalog/MessageCatalogCodeEnum.java`: codigos `FUN_147`, `FUN_148` y `FUN_149` para las reglas de Organizacion.
 - `deployment/docker/scripts/redis/CatalogMessageInit.sh`: mensajes funcionales de nombre requerido, longitud maxima y duplicidad.
@@ -460,15 +501,15 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - `core/src/test/java/co/edu/uco/application/primaryports/facade/organization/impl/CreateOrganizationUseCaseFacadeImplTest.java`: delegacion y propagacion de errores de dominio.
 - `core/src/test/java/co/edu/uco/application/usecase/CreateOrganizationUseCaseTest.java`: persistencia, UUID generado, limites, excepciones tipadas y logs saneados.
 - `core/src/test/java/co/edu/uco/application/usecase/validator/organization/CreateOrganizationCompositeValidatorTest.java`: orden, entrada nula y cortocircuito de reglas.
-- `core/src/test/java/co/edu/uco/application/usecase/validator/organization/CreateOrganizationNameRuleImplTest.java`: nombres validos, ausentes y limites de longitud.
-- `core/src/test/java/co/edu/uco/application/usecase/validator/organization/CreateOrganizationUniqueNameRuleImplTest.java`: nombre disponible, normalizado y duplicado.
-- `infrastructure/src/test/java/co/edu/uco/infraestructure/config/UseCaseRuleConfigTest.java`: conexion de los cinco beans nuevos con puertos simulados.
+- `core/src/test/java/co/edu/uco/application/usecase/validator/organization/rule/`: pruebas individuales de nombre requerido, longitud maxima y duplicidad.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/config/UseCaseRuleConfigTest.java`: composicion de composites y casos de uso con puertos simulados, sin beans legacy.
 - `utils/src/test/java/co/edu/uco/crosscutting/catalog/MessageCatalogCodeEnumTest.java`: verificacion del ultimo codigo funcional de Organizacion.
 - `core/src/main/java/co/edu/uco/application/primaryports/dto/application/CreateApplicationDTO.java`: incorpora `organizationId` como parte obligatoria del contrato de creacion.
 - `core/src/main/java/co/edu/uco/application/secondaryports/entity/ApplicationData.java`: referencia tipada a `OrganizationEntity` preservando constructores parciales existentes.
-- `core/src/main/java/co/edu/uco/application/usecase/validator/application/CreateApplicationOrganizationExistsRule.java`: contrato de validacion de la Organizacion asociada.
-- `core/src/main/java/co/edu/uco/application/usecase/validator/application/CreateApplicationOrganizationExistsRuleImpl.java`: valida presencia, formato UUID y existencia mediante `OrganizationRepository`.
-- `core/src/main/java/co/edu/uco/application/usecase/validator/application/CreateApplicationCompositeValidator.java`: integra la regla de Organizacion antes de catalogos y duplicidad.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/application/rule/ApplicationOrganizationIdRequiredRule.java`: presencia de Organizacion con `FUN_150`.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/application/rule/ApplicationOrganizationIdUuidRule.java`: formato UUID mediante `ValidUuidSpecification` y `FUN_038`.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/application/rule/ApplicationOrganizationExistsRule.java`: existencia mediante `OrganizationRepository` y `FUN_151`.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/application/CreateApplicationCompositeValidator.java`: integra las tres reglas de Organizacion antes de catalogos y duplicidad.
 - `core/src/main/java/co/edu/uco/application/usecase/CreateApplicationUseCase.java`: construye la Aplicacion con su `OrganizationEntity` validada.
 - `core/src/main/java/co/edu/uco/application/primaryports/facade/application/impl/CreateApplicationUseCaseFacadeImpl.java`: retira la anotacion Spring para mantener la composicion en infraestructura.
 - `infrastructure/src/main/java/co/edu/uco/infraestructure/config/UseCaseRuleConfig.java`: compone regla, composite, caso de uso y facade de Aplicacion mediante beans explicitos.
@@ -479,7 +520,7 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - `utils/src/main/java/co/edu/uco/crosscutting/catalog/MessageCatalogCodeEnum.java`: codigos `FUN_150` y `FUN_151` para Organizacion requerida e inexistente.
 - `deployment/docker/scripts/redis/CatalogMessageInit.sh`: mensajes funcionales de la relacion Aplicacion-Organizacion.
 - `core/src/test/java/co/edu/uco/application/secondaryports/entity/ApplicationDataTest.java`: asociacion tipada y compatibilidad de constructores parciales.
-- `core/src/test/java/co/edu/uco/application/usecase/validator/application/CreateApplicationOrganizationExistsRuleImplTest.java`: presencia, UUID, existencia y cortocircuitos de la regla.
+- `core/src/test/java/co/edu/uco/application/usecase/validator/application/rule/ApplicationOrganizationIdRequiredRuleTest.java`, `ApplicationOrganizationIdUuidRuleTest.java` y `ApplicationOrganizationExistsRuleTest.java`: presencia, UUID, existencia y cortocircuitos.
 - `core/src/test/java/co/edu/uco/application/primaryports/dto/application/CreateApplicationDTOTest.java`: valores por defecto y normalizacion de `organizationId`.
 - `core/src/test/java/co/edu/uco/application/usecase/validator/application/CreateApplicationCompositeValidatorTest.java`: orden y cortocircuito de la nueva regla.
 - `core/src/test/java/co/edu/uco/application/usecase/CreateApplicationUseCaseTest.java`: propagacion del identificador de Organizacion a la entidad persistida.
@@ -494,7 +535,8 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - `core/src/main/java/co/edu/uco/application/usecase/domain/security/PermissionCode.java`: catalogo tipado de los siete permisos iniciales.
 - `core/src/main/java/co/edu/uco/application/usecase/domain/security/AuthorizationScopeType.java`: tipos de alcance de autorizacion.
 - `core/src/main/java/co/edu/uco/application/secondaryports/security/AuthorizationQueryPort.java`: puerto para consultar permisos y recursos autorizados sin depender de SurrealDB.
-- `core/src/main/java/co/edu/uco/application/usecase/validator/authorization/AuthorizationRule.java` y `AuthorizationRuleImpl.java`: politica de negocio que diferencia ausencia de identidad (`401`) y falta de permiso (`403`).
+- `core/src/main/java/co/edu/uco/application/usecase/validator/authorization/AuthorizationCompositeValidator.java`: compone identidad requerida y permiso mediante `AuthorizationValidationContext`, preservando ausencia de identidad (`401`) y falta de permiso (`403`).
+- `core/src/main/java/co/edu/uco/application/usecase/validator/authorization/rule/ExternalIdentityRequiredRule.java` y `AuthorizationPermissionRule.java`: reglas concretas para `FUN_152` y `FUN_153`.
 - `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/impl/AuthorizationQuerySurrealAdapter.java`: resolucion de permisos por `issuer + subject`, membresia, rol, permiso y alcance heredado.
 - `core/src/main/java/co/edu/uco/application/usecase/FindCatalogUseCase.java`: filtrado de Aplicaciones y Ambientes y proteccion del catalogo de Funcionalidades para identidades externas.
 - `core/src/main/java/co/edu/uco/application/usecase/handling/HandlingFindCatalogPort.java`, `core/src/main/java/co/edu/uco/application/primaryports/facade/catalog/FindCatalogUseCaseFacade.java` y su implementacion: propagacion tipada de identidad hacia los catalogos jerarquicos.
@@ -515,8 +557,8 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - `deployment/docker/scripts/surreal/surreal-init.surql`: tabla `active_context`, referencias jerarquicas e indice unico por identidad externa.
 - Pruebas del primer incremento de contexto activo: entidad de dominio, modelo y mapper SurrealDB, consultas y errores tecnicos del repositorio, propiedades de cache, TTL, aislamiento de claves, colisiones, entradas malformadas y tolerancia a fallos Redis.
 - `core/src/main/java/co/edu/uco/application/usecase/ActiveContextUseCase.java`: listado de contextos autorizados, recuperacion cache-aside con reautorizacion y seleccion persistente antes de invalidar cache.
-- `core/src/main/java/co/edu/uco/application/usecase/validator/context/`: validacion independiente de identificadores obligatorios y jerarquia Organizacion-Aplicacion-Ambiente antes de seleccionar el contexto.
-- `core/src/main/java/co/edu/uco/application/usecase/validator/authorization/ExternalIdentityRequiredRuleImpl.java`: rechazo tipado `401` cuando no existe identidad externa.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/context/SelectActiveContextCompositeValidator.java` y `context/rule/`: reglas ordenadas de identificadores, UUID, existencia y jerarquia Organizacion-Aplicacion-Ambiente.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/authorization/rule/ExternalIdentityRequiredRule.java`: rechazo tipado `401` cuando no existe identidad externa.
 - `infrastructure/src/main/java/co/edu/uco/infraestructure/primaryadapters/MeContextController.java` y su implementacion: endpoints de contextos disponibles, consulta y seleccion del contexto activo sin reglas de negocio en el controller.
 - `infrastructure/src/main/java/co/edu/uco/infraestructure/config/UseCaseRuleConfig.java`: composicion Spring del caso de uso, facade y reglas fuera de `core`.
 - `infrastructure/src/main/resources/static/openapi.yaml`: contrato de los tres endpoints, esquema Bearer neutral respecto a JWT u opaco y respuestas `401`, `403`, `404`, `409` y `422` aplicables.
@@ -542,17 +584,17 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - `core/src/main/java/co/edu/uco/application/primaryports/facade/message/CreateMessageUseCaseFacade.java` y `impl/CreateMessageUseCaseFacadeImpl.java`: propagacion de `MessageAccessContext` en la creacion.
 - `core/src/main/java/co/edu/uco/application/usecase/handling/HandlingCreateMessagePort.java`: contrato de creacion tipado con `MessageAccessContext`.
 - `core/src/main/java/co/edu/uco/application/usecase/CreateMessageUseCase.java`: resolucion de ambiente con `MessageEnvironmentResolver` y permiso `MESSAGE_CREATE` antes de validar y persistir.
-- `core/src/main/java/co/edu/uco/application/usecase/validator/message/CreateMessageCompositeValidator.java`: `environmentId` del body deja de ser obligatorio.
-- `core/src/main/java/co/edu/uco/application/usecase/validator/message/CreateMessageContextRuleImpl.java`: coincidencia de ambiente autenticado solo cuando el body lo trae.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/message/CreateMessageCompositeValidator.java`: `environmentId` del body permanece opcional y las reglas contextuales forman parte del mismo composite.
+- `core/src/main/java/co/edu/uco/application/usecase/validator/message/rule/MessageAuthenticatedEnvironmentRule.java`: exige ambiente autenticado y compara el ambiente del body solo cuando este se informa.
 - `core/src/main/java/co/edu/uco/application/usecase/FindCatalogUseCase.java`: exige que `applicationId` del catalogo coincida con `ActiveContext.applicationId` cuando hay identidad; `403` `FUN_153` en desalineacion.
 - `core/src/main/java/co/edu/uco/application/primaryports/facade/application|environment|functionality/` (interfaces e impl de creacion): propagacion de `ExternalIdentity`.
 - `core/src/main/java/co/edu/uco/application/usecase/handling/HandlingCreate{Application,Environment,Functionality}Port.java`: firmas con `ExternalIdentity`.
 - `core/src/main/java/co/edu/uco/application/usecase/Create{Application,Environment,Functionality}UseCase.java`: autorizacion interna `authorizeAgainstActiveContext` con `APPLICATION_CREATE`/`ORGANIZATION`, `ENVIRONMENT_CREATE`/`APPLICATION` y `FUNCTIONALITY_CREATE`/`APPLICATION`; identity null conserva el flujo legado.
 - `infrastructure/src/main/java/co/edu/uco/infraestructure/primaryadapters/controller/Create{Message,Application,Environment,Functionality}ControllerImpl.java`: construccion de `MessageAccessContext` o `ExternalIdentity` desde atributos HTTP sin reglas de negocio.
-- `infrastructure/src/main/java/co/edu/uco/infraestructure/config/UseCaseRuleConfig.java`: beans `handlingFindCatalogPort` y `handlingCreateApplicationPort` con `HandlingActiveContextPort`, `AuthorizationRule` y `CatalogPort`.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/config/UseCaseRuleConfig.java`: beans `handlingFindCatalogPort` y `handlingCreateApplicationPort` con `HandlingActiveContextPort`, `AuthorizationCompositeValidator` y `CatalogPort`.
 - `core/src/test/java/co/edu/uco/application/primaryports/facade/message/impl/CreateMessageUseCaseFacadeImplTest.java` y los de facade de application/environment/functionality: delegacion con contexto tipado e identity null legado.
-- `core/src/test/java/co/edu/uco/application/usecase/Create{Message,Application,Environment,Functionality}UseCaseTest.java` y `FindCatalogUseCaseTest.java`: pruebas de aislamiento (legacy null, match con `ActiveContext`, `403` `FUN_153`, permisos correctos, `AuthorizationRule` denegando).
-- `core/src/test/java/co/edu/uco/application/usecase/validator/message/CreateMessageCompositeValidatorTest.java` y `CreateMessageContextRuleImplTest.java`: environmentId opcional y match solo si el body lo trae.
+- `core/src/test/java/co/edu/uco/application/usecase/Create{Message,Application,Environment,Functionality}UseCaseTest.java` y `FindCatalogUseCaseTest.java`: pruebas de aislamiento (legacy null, match con `ActiveContext`, `403` `FUN_153`, permisos correctos, composite de autorizacion denegando).
+- `core/src/test/java/co/edu/uco/application/usecase/validator/message/CreateMessageCompositeValidatorTest.java` y pruebas de `validator/message/rule/`: environmentId opcional, match condicional, jerarquia y cortocircuito.
 - `infrastructure/src/test/java/co/edu/uco/infraestructure/primaryadapters/controller/CreateMessageControllerImplTest.java`: captors de `MessageAccessContext` legado y autenticado, y propagacion de fallos del facade.
 - `infrastructure/src/test/java/co/edu/uco/infraestructure/config/UseCaseRuleConfigTest.java`: wiring de catalogos y creacion de Aplicacion con los nuevos puertos.
 
@@ -640,6 +682,10 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - JaCoCo del primer incremento de la Fase 5: `utils` 97.39 % de lineas y 96.97 % de ramas; `core` 96.42 % de lineas y 90.68 % de ramas; `infrastructure` 89.10 % de lineas y 81.15 % de ramas; controles de cobertura con minimo de 80 % cumplidos en los tres modulos.
 - Auditoria de pruebas de la Fase 5: pruebas AAA con asserts no triviales, excepciones de la jerarquia de dominio (`UnauthorizedException`, `ForbiddenException`, `BusinessException`, `BusinessRuleException`, `CrossWordsException`), puertos y `MessageEnvironmentResolver` simulados en `core` sin frameworks, `verifyNoInteractions` donde el resolver no debe intervenir, captors de `MessageAccessContext` en el controller, omision del token legado verificada y orden de interceptores (`-100`/`0`) comprobado; sin pruebas deshabilitadas.
 - `git diff --check`: sin errores de whitespace (solo avisos LF/CRLF).
+- Reactor completo posterior a la unificacion del patron de validacion con `clean install/verify`: `utils`, `core` e `infrastructure` finalizaron correctamente.
+- Suite posterior a la unificacion: `utils` 196 pruebas, `core` 1066 pruebas e `infrastructure` 492 pruebas; total 1754, sin fallos, errores ni omitidas.
+- JaCoCo posterior a la unificacion: controles de cobertura de linea y rama con minimo de 80 % cumplidos en los tres modulos.
+- Auditoria de las reglas migradas: pruebas individuales de `RuleValidator`, authorization, context, message, organization y application; excepciones `401`, `403`, `404`, `409` y `422`, orden, cortocircuito y ausencia de referencias Java a implementaciones legacy verificados.
 - Reactor completo del incremento de creacion, catalogos y administracion de la Fase 5 con `clean verify`: `utils`, `core` e `infrastructure` finalizaron correctamente.
 - Suite `utils`: 188 pruebas, 0 fallos, 0 errores y 0 omitidas.
 - Suite `core`: 603 pruebas, 0 fallos, 0 errores y 0 omitidas.
@@ -676,3 +722,5 @@ Continuar con la Fase 6: integrar el proveedor real de identidad reemplazando al
 | 2026-09-22 | Fase 4 | Se implementan los endpoints de contextos disponibles, consulta y seleccion, con validacion de identidad, autorizacion `CONTEXT_SELECT`, jerarquia, recuperacion cache-aside, OpenAPI y pruebas completas | Fase 4 `COMPLETADA`; criterio de salida verificado |
 | 2026-09-22 | Fase 5 | Se migran la consulta, el listado y la traduccion de mensajes al contexto autorizado con `MessageAccessContext` y `MessageEnvironmentResolver`, convivencia de interceptores por orden, OpenAPI dual y pruebas con auditoria y Quality Gate verificados | Fase 5 `EN CURSO`; consulta, listado y traduccion migrados |
 | 2026-09-22 | Fase 5 | Se migran la creacion de mensajes (`MESSAGE_CREATE`), la consulta de catalogos (match con `ActiveContext.applicationId`) y la administracion de aplicaciones, ambientes y funcionalidades (`APPLICATION_CREATE`, `ENVIRONMENT_CREATE`, `FUNCTIONALITY_CREATE`), con pruebas de aislamiento delegadas, auditoría `unit-test-validator` y Quality Gate verificado | Fase 5 `COMPLETADA`; criterio de salida de la fase cumplido |
+| 2026-09-26 | Gobierno arquitectonico | Se unifican las validaciones de Aplicacion, Organizacion, autorizacion, contexto y mensajes con `Specification`, `RuleValidator` y `CompositeValidator`; se eliminan interfaces e implementaciones legacy, se preservan las categorias HTTP y se documenta el orden obligatorio de cortocircuito | Patron de validacion vigente, 1754 pruebas correctas y Quality Gate cumplido |
+| 2026-09-26 | Gobierno arquitectonico | Se migra la validacion transversal de paginacion a composites explicitos, contextos tipados y reglas `RuleValidator` bajo `page/rule`; se eliminan wrappers y validadores imperativos legacy, preservando mensajes dinamicos y cortocircuito | Estructura de paginacion alineada con el patron vigente y pruebas focalizadas correctas |

@@ -3,6 +3,7 @@ package co.edu.uco.application.usecase.validator.application;
 import co.edu.uco.application.primaryports.dto.application.CreateApplicationDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.repository.ApplicationRepository;
+import co.edu.uco.application.secondaryports.repository.OrganizationRepository;
 import co.edu.uco.application.secondaryports.repository.RecordExistsCatalogPort;
 import co.edu.uco.application.usecase.validator.CompositeValidator;
 import co.edu.uco.application.usecase.validator.application.rule.ApplicationDateRangeOrderRule;
@@ -13,6 +14,9 @@ import co.edu.uco.application.usecase.validator.application.rule.ApplicationLang
 import co.edu.uco.application.usecase.validator.application.rule.ApplicationNameDuplicatedRule;
 import co.edu.uco.application.usecase.validator.application.rule.ApplicationNameMaxLengthRule;
 import co.edu.uco.application.usecase.validator.application.rule.ApplicationNameRequiredRule;
+import co.edu.uco.application.usecase.validator.application.rule.ApplicationOrganizationExistsRule;
+import co.edu.uco.application.usecase.validator.application.rule.ApplicationOrganizationIdRequiredRule;
+import co.edu.uco.application.usecase.validator.application.rule.ApplicationOrganizationIdUuidRule;
 import co.edu.uco.application.usecase.validator.application.rule.ApplicationStartDateRequiredRule;
 import co.edu.uco.application.usecase.validator.application.rule.ApplicationStartDateValidRule;
 import co.edu.uco.application.usecase.validator.application.rule.ApplicationStateExistsRule;
@@ -27,11 +31,13 @@ public final class CreateApplicationCompositeValidator extends CompositeValidato
     public CreateApplicationCompositeValidator(CatalogPort catalogPort,
                                                RecordExistsCatalogPort recordExistsCatalogPort,
                                                ApplicationRepository applicationRepository,
-                                               CreateApplicationOrganizationExistsRule organizationExistsRule) {
+                                               OrganizationRepository organizationRepository) {
         super(List.of(
                 new ApplicationNameRequiredRule(catalogPort),
                 new ApplicationNameMaxLengthRule(catalogPort),
-                organizationExistsRule,
+                new ApplicationOrganizationIdRequiredRule(catalogPort),
+                new ApplicationOrganizationIdUuidRule(catalogPort),
+                new ApplicationOrganizationExistsRule(catalogPort, organizationRepository),
                 new ApplicationLanguageRequiredRule(catalogPort),
                 new ApplicationLanguageExistsRule(catalogPort, recordExistsCatalogPort),
                 new ApplicationStartDateRequiredRule(catalogPort),

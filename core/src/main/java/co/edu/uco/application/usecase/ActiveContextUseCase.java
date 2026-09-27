@@ -19,8 +19,8 @@ import co.edu.uco.application.usecase.domain.security.AuthorizationScopeType;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
 import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
-import co.edu.uco.application.usecase.validator.authorization.AuthorizationRule;
-import co.edu.uco.application.usecase.validator.authorization.ExternalIdentityRequiredRule;
+import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
+import co.edu.uco.application.usecase.validator.authorization.rule.ExternalIdentityRequiredRule;
 import co.edu.uco.application.usecase.validator.context.SelectActiveContextCompositeValidator;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.ForbiddenException;
@@ -41,12 +41,12 @@ import static co.edu.uco.crosscutting.helpers.UtilUUID.getUUIDFromString;
 public final class ActiveContextUseCase implements HandlingActiveContextPort {
 
     private static final Comparator<AvailableContextDTO> CONTEXT_ORDER = Comparator
-            .comparing((AvailableContextDTO context) -> context.getOrganization().name())
-            .thenComparing(context -> context.getApplication().name())
-            .thenComparing(context -> context.getEnvironment().name())
-            .thenComparing(context -> context.getOrganization().id())
-            .thenComparing(context -> context.getApplication().id())
-            .thenComparing(context -> context.getEnvironment().id());
+            .comparing((AvailableContextDTO context) -> context.getOrganization().getName())
+            .thenComparing(context -> context.getApplication().getName())
+            .thenComparing(context -> context.getEnvironment().getName())
+            .thenComparing(context -> context.getOrganization().getId())
+            .thenComparing(context -> context.getApplication().getId())
+            .thenComparing(context -> context.getEnvironment().getId());
 
     private final ActiveContextRepository activeContextRepository;
     private final ActiveContextCachePort activeContextCachePort;
@@ -54,7 +54,7 @@ public final class ActiveContextUseCase implements HandlingActiveContextPort {
     private final ApplicationCatalogRepository applicationCatalogRepository;
     private final EnvironmentCatalogRepository environmentCatalogRepository;
     private final AuthorizationQueryPort authorizationQueryPort;
-    private final AuthorizationRule authorizationRule;
+    private final AuthorizationCompositeValidator authorizationRule;
     private final ExternalIdentityRequiredRule externalIdentityRequiredRule;
     private final SelectActiveContextCompositeValidator selectActiveContextValidator;
     private final CatalogPort catalogPort;
@@ -66,7 +66,7 @@ public final class ActiveContextUseCase implements HandlingActiveContextPort {
                                 final ApplicationCatalogRepository applicationCatalogRepository,
                                 final EnvironmentCatalogRepository environmentCatalogRepository,
                                 final AuthorizationQueryPort authorizationQueryPort,
-                                final AuthorizationRule authorizationRule,
+                                final AuthorizationCompositeValidator authorizationRule,
                                 final ExternalIdentityRequiredRule externalIdentityRequiredRule,
                                 final SelectActiveContextCompositeValidator selectActiveContextValidator,
                                 final CatalogPort catalogPort,

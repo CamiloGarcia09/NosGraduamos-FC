@@ -23,7 +23,7 @@ import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
 import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
-import co.edu.uco.application.usecase.validator.authorization.AuthorizationRule;
+import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
 import co.edu.uco.crosscutting.exceptions.ForbiddenException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,7 +68,7 @@ class FindCatalogUseCaseTest {
     @Mock
     private AuthorizationQueryPort authorizationQueryPort;
     @Mock
-    private AuthorizationRule authorizationRule;
+    private AuthorizationCompositeValidator authorizationCompositeValidator;
     @Mock
     private HandlingActiveContextPort activeContextPort;
     @Mock
@@ -88,8 +88,8 @@ class FindCatalogUseCaseTest {
 
         assertThat(result).hasSize(1);
         assertAll(
-                () -> assertThat(result.get(0).id()).isEqualTo(ID.toString()),
-                () -> assertThat(result.get(0).name()).isEqualTo("App"));
+                () -> assertThat(result.get(0).getId()).isEqualTo(ID.toString()),
+                () -> assertThat(result.get(0).getName()).isEqualTo("App"));
     }
 
     @Test
@@ -110,8 +110,8 @@ class FindCatalogUseCaseTest {
 
         assertThat(result).hasSize(1);
         assertAll(
-                () -> assertThat(result.get(0).id()).isEqualTo(ID.toString()),
-                () -> assertThat(result.get(0).name()).isEqualTo("Prod"));
+                () -> assertThat(result.get(0).getId()).isEqualTo(ID.toString()),
+                () -> assertThat(result.get(0).getName()).isEqualTo("Prod"));
     }
 
     @Test
@@ -124,8 +124,8 @@ class FindCatalogUseCaseTest {
 
         assertThat(result).hasSize(1);
         assertAll(
-                () -> assertThat(result.get(0).id()).isEqualTo(ID.toString()),
-                () -> assertThat(result.get(0).name()).isEqualTo("Search"));
+                () -> assertThat(result.get(0).getId()).isEqualTo(ID.toString()),
+                () -> assertThat(result.get(0).getName()).isEqualTo("Search"));
     }
 
     @Test
@@ -137,8 +137,8 @@ class FindCatalogUseCaseTest {
 
         assertThat(result).hasSize(1);
         assertAll(
-                () -> assertThat(result.get(0).id()).isEqualTo(ID.toString()),
-                () -> assertThat(result.get(0).name()).isEqualTo("TEXT"));
+                () -> assertThat(result.get(0).getId()).isEqualTo(ID.toString()),
+                () -> assertThat(result.get(0).getName()).isEqualTo("TEXT"));
     }
 
     @Test
@@ -150,8 +150,8 @@ class FindCatalogUseCaseTest {
 
         assertThat(result).hasSize(1);
         assertAll(
-                () -> assertThat(result.get(0).id()).isEqualTo(ID.toString()),
-                () -> assertThat(result.get(0).name()).isEqualTo("GENERAL"));
+                () -> assertThat(result.get(0).getId()).isEqualTo(ID.toString()),
+                () -> assertThat(result.get(0).getName()).isEqualTo("GENERAL"));
     }
 
     @Test
@@ -163,8 +163,8 @@ class FindCatalogUseCaseTest {
 
         assertThat(result).hasSize(1);
         assertAll(
-                () -> assertThat(result.get(0).id()).isEqualTo(ID.toString()),
-                () -> assertThat(result.get(0).name()).isEqualTo("ACTIVE"));
+                () -> assertThat(result.get(0).getId()).isEqualTo(ID.toString()),
+                () -> assertThat(result.get(0).getName()).isEqualTo("ACTIVE"));
     }
 
     @Test
@@ -177,8 +177,8 @@ class FindCatalogUseCaseTest {
 
         assertThat(result).hasSize(1);
         assertAll(
-                () -> assertThat(result.get(0).id()).isEqualTo(ID.toString()),
-                () -> assertThat(result.get(0).name()).isEqualTo("PENDING"));
+                () -> assertThat(result.get(0).getId()).isEqualTo(ID.toString()),
+                () -> assertThat(result.get(0).getName()).isEqualTo("PENDING"));
     }
 
     @Test
@@ -191,7 +191,7 @@ class FindCatalogUseCaseTest {
 
         List<CatalogItemDTO> result = buildUseCase().findApplications(IDENTITY);
 
-        assertThat(result).extracting(CatalogItemDTO::id).containsExactly(OTHER_ID.toString());
+        assertThat(result).extracting(CatalogItemDTO::getId).containsExactly(OTHER_ID.toString());
     }
 
     @Test
@@ -213,8 +213,8 @@ class FindCatalogUseCaseTest {
 
         List<CatalogItemDTO> result = buildUseCase().findEnvironmentsByApplication(ID.toString(), IDENTITY);
 
-        assertThat(result).extracting(CatalogItemDTO::id).containsExactly(OTHER_ID.toString());
-        verify(authorizationRule, never()).validate(IDENTITY, PermissionCode.CONTEXT_SELECT,
+        assertThat(result).extracting(CatalogItemDTO::getId).containsExactly(OTHER_ID.toString());
+        verify(authorizationCompositeValidator, never()).validate(IDENTITY, PermissionCode.CONTEXT_SELECT,
                 AuthorizationScopeType.APPLICATION, ID);
     }
 
@@ -224,7 +224,7 @@ class FindCatalogUseCaseTest {
         when(authorizationQueryPort.findAuthorizedEnvironmentIds(IDENTITY, PermissionCode.CONTEXT_SELECT, ID))
                 .thenReturn(List.of());
         ForbiddenException denied = ForbiddenException.buildUserException("Permission denied");
-        doThrow(denied).when(authorizationRule).validate(
+        doThrow(denied).when(authorizationCompositeValidator).validate(
                 IDENTITY, PermissionCode.CONTEXT_SELECT, AuthorizationScopeType.APPLICATION, ID);
 
         FindCatalogUseCase useCase = buildUseCase();
@@ -243,7 +243,7 @@ class FindCatalogUseCaseTest {
         List<CatalogItemDTO> result = buildUseCase().findEnvironmentsByApplication(ID.toString(), IDENTITY);
 
         assertThat(result).isEmpty();
-        verify(authorizationRule).validate(IDENTITY, PermissionCode.CONTEXT_SELECT,
+        verify(authorizationCompositeValidator).validate(IDENTITY, PermissionCode.CONTEXT_SELECT,
                 AuthorizationScopeType.APPLICATION, ID);
     }
 
@@ -254,7 +254,7 @@ class FindCatalogUseCaseTest {
 
         buildUseCase().findFunctionalitiesByApplication(ID.toString(), IDENTITY);
 
-        verify(authorizationRule).validate(IDENTITY, PermissionCode.CONTEXT_SELECT,
+        verify(authorizationCompositeValidator).validate(IDENTITY, PermissionCode.CONTEXT_SELECT,
                 AuthorizationScopeType.APPLICATION, ID);
     }
 
@@ -270,7 +270,7 @@ class FindCatalogUseCaseTest {
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
                         .extracting(ForbiddenException::getUserMessage, ForbiddenException::getHttpStatus)
                         .containsExactly("Fuera del contexto activo", 403));
-        verifyNoInteractions(environmentCatalogRepository, authorizationQueryPort, authorizationRule);
+        verifyNoInteractions(environmentCatalogRepository, authorizationQueryPort, authorizationCompositeValidator);
     }
 
     @Test
@@ -283,7 +283,7 @@ class FindCatalogUseCaseTest {
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
                         .extracting(ForbiddenException::getUserMessage, ForbiddenException::getHttpStatus)
                         .containsExactly("Fuera del contexto activo", 403));
-        verifyNoInteractions(environmentCatalogRepository, authorizationQueryPort, authorizationRule);
+        verifyNoInteractions(environmentCatalogRepository, authorizationQueryPort, authorizationCompositeValidator);
     }
 
     @Test
@@ -293,8 +293,8 @@ class FindCatalogUseCaseTest {
 
         List<CatalogItemDTO> result = buildUseCase().findEnvironmentsByApplication(ID.toString(), null);
 
-        assertThat(result).extracting(CatalogItemDTO::id).containsExactly(ID.toString());
-        verifyNoInteractions(activeContextPort, authorizationQueryPort, authorizationRule, catalogPort);
+        assertThat(result).extracting(CatalogItemDTO::getId).containsExactly(ID.toString());
+        verifyNoInteractions(activeContextPort, authorizationQueryPort, authorizationCompositeValidator, catalogPort);
     }
 
     @Test
@@ -309,7 +309,7 @@ class FindCatalogUseCaseTest {
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
                         .extracting(ForbiddenException::getUserMessage, ForbiddenException::getHttpStatus)
                         .containsExactly("Fuera del contexto activo", 403));
-        verifyNoInteractions(functionalityCatalogRepository, authorizationRule);
+        verifyNoInteractions(functionalityCatalogRepository, authorizationCompositeValidator);
     }
 
     @Test
@@ -322,14 +322,14 @@ class FindCatalogUseCaseTest {
                 .satisfies(exception -> assertThat((ForbiddenException) exception)
                         .extracting(ForbiddenException::getUserMessage, ForbiddenException::getHttpStatus)
                         .containsExactly("Fuera del contexto activo", 403));
-        verifyNoInteractions(functionalityCatalogRepository, authorizationRule);
+        verifyNoInteractions(functionalityCatalogRepository, authorizationCompositeValidator);
     }
 
     @Test
-    void findFunctionalitiesByApplication_propagatesForbiddenFromAuthorizationRule() {
+    void findFunctionalitiesByApplication_propagatesForbiddenFromAuthorizationCompositeValidator() {
         stubActiveContextForApplication();
         ForbiddenException denied = ForbiddenException.buildUserException("Permission denied");
-        doThrow(denied).when(authorizationRule).validate(
+        doThrow(denied).when(authorizationCompositeValidator).validate(
                 IDENTITY, PermissionCode.CONTEXT_SELECT, AuthorizationScopeType.APPLICATION, ID);
 
         assertThatThrownBy(() -> buildUseCase()
@@ -347,7 +347,7 @@ class FindCatalogUseCaseTest {
                 messageStateCatalogRepository,
                 messageEnvironmentStateCatalogRepository,
                 authorizationQueryPort,
-                authorizationRule,
+                authorizationCompositeValidator,
                 activeContextPort,
                 catalogPort);
     }

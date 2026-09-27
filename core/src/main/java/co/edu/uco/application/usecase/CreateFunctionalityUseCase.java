@@ -12,7 +12,7 @@ import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
 import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
 import co.edu.uco.application.usecase.handling.HandlingCreateFunctionalityPort;
-import co.edu.uco.application.usecase.validator.authorization.AuthorizationRule;
+import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
 import co.edu.uco.application.usecase.validator.functionality.CreateFunctionalityCompositeValidator;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
@@ -32,14 +32,14 @@ public final class CreateFunctionalityUseCase implements HandlingCreateFunctiona
     private final FunctionalityRepository functionalityRepository;
     private final CreateFunctionalityCompositeValidator validator;
     private final HandlingActiveContextPort activeContextPort;
-    private final AuthorizationRule authorizationRule;
+    private final AuthorizationCompositeValidator authorizationRule;
     private final CatalogPort catalogPort;
     private final LoggingPort log;
 
     public CreateFunctionalityUseCase(FunctionalityRepository functionalityRepository,
                                       CreateFunctionalityCompositeValidator validator,
                                       HandlingActiveContextPort activeContextPort,
-                                      AuthorizationRule authorizationRule,
+                                       AuthorizationCompositeValidator authorizationRule,
                                       CatalogPort catalogPort,
                                       LoggingPortFactory loggerFactory) {
         this.functionalityRepository = functionalityRepository;

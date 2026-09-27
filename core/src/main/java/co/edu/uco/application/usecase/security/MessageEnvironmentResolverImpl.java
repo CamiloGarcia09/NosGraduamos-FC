@@ -5,7 +5,7 @@ import co.edu.uco.application.usecase.domain.security.AuthorizationScopeType;
 import co.edu.uco.application.usecase.domain.security.MessageAccessContext;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
 import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
-import co.edu.uco.application.usecase.validator.authorization.AuthorizationRule;
+import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.UnauthorizedException;
 
@@ -15,11 +15,11 @@ import static co.edu.uco.crosscutting.helpers.UtilUUID.getUUIDFromString;
 public final class MessageEnvironmentResolverImpl implements MessageEnvironmentResolver {
 
     private final HandlingActiveContextPort activeContextPort;
-    private final AuthorizationRule authorizationRule;
+    private final AuthorizationCompositeValidator authorizationRule;
     private final CatalogPort catalogPort;
 
     public MessageEnvironmentResolverImpl(final HandlingActiveContextPort activeContextPort,
-                                          final AuthorizationRule authorizationRule,
+                                           final AuthorizationCompositeValidator authorizationRule,
                                           final CatalogPort catalogPort) {
         this.activeContextPort = activeContextPort;
         this.authorizationRule = authorizationRule;

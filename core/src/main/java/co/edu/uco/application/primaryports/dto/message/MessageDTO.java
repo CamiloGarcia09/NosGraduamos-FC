@@ -1,9 +1,23 @@
 package co.edu.uco.application.primaryports.dto.message;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
 import static co.edu.uco.crosscutting.helpers.UtilText.trim;
 
-public record MessageDTO(String code, String title, String content, String type, String category, String application,
-                         String functionality) {
+@Getter
+@EqualsAndHashCode
+@ToString
+public final class MessageDTO {
+
+    private final String code;
+    private final String title;
+    private final String content;
+    private final String type;
+    private final String category;
+    private final String application;
+    private final String functionality;
 
     public MessageDTO(String code, String title, String content, String type, String category, String application,
                       String functionality) {

@@ -10,18 +10,18 @@ import java.util.UUID;
 public final class MessageEnvironmentData {
     private UUID id;
     private MessageData message;
-    private EnvironmentType environmentType;
+    private EnvironmentTypeData environmentTypeData;
     private MessageEnvironmentStateData stateData;
 
-    public MessageEnvironmentData(UUID id, MessageData message, EnvironmentType environmentType) {
+    public MessageEnvironmentData(UUID id, MessageData message, EnvironmentTypeData environmentTypeData) {
         setId(id);
         setMessage(message);
-        setEnvironmentType(environmentType);
+        setEnvironmentTypeData(environmentTypeData);
     }
     public MessageEnvironmentData() {
         setId(UtilUUID.getNewUUID());
         setMessage(MessageData.build());
-        setEnvironmentType(EnvironmentType.build());
+        setEnvironmentTypeData(EnvironmentTypeData.build());
     }
     public void setId(UUID id) {
         this.id = UtilUUID.getDefaultUUID(id);
@@ -29,8 +29,8 @@ public final class MessageEnvironmentData {
     public void setMessage(MessageData message) {
         this.message = UtilObject.getDefaultIsNullObject(message, MessageData.build());
     }
-    public void setEnvironmentType(EnvironmentType environmentType) {
-        this.environmentType = UtilObject.getDefaultIsNullObject(environmentType, EnvironmentType.build());
+    public void setEnvironmentTypeData(EnvironmentTypeData environmentTypeData) {
+        this.environmentTypeData = UtilObject.getDefaultIsNullObject(environmentTypeData, EnvironmentTypeData.build());
     }
     public void setStateData(MessageEnvironmentStateData stateData) {
         this.stateData = UtilObject.getDefaultIsNullObject(stateData, MessageEnvironmentStateData.build());

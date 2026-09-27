@@ -1,24 +1,32 @@
 package co.edu.uco.application.primaryports.dto.message;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
 import static co.edu.uco.crosscutting.helpers.UtilText.trim;
 
-public record TranslatedMessageDTO(
-        String code,
-        String sourceLanguage,
-        String targetLanguage,
-        String originalTitle,
-        String originalContent,
-        String translatedTitle,
-        String translatedContent,
-        String type,
-        String category,
-        String application,
-        String functionality,
-        String translationProvider,
-        String translationModel,
-        long translationElapsedMs,
-        boolean dynamicTranslation
-) {
+@Getter
+@EqualsAndHashCode
+@ToString
+public final class TranslatedMessageDTO {
+
+    private final String code;
+    private final String sourceLanguage;
+    private final String targetLanguage;
+    private final String originalTitle;
+    private final String originalContent;
+    private final String translatedTitle;
+    private final String translatedContent;
+    private final String type;
+    private final String category;
+    private final String application;
+    private final String functionality;
+    private final String translationProvider;
+    private final String translationModel;
+    private final long translationElapsedMs;
+    private final boolean dynamicTranslation;
+
     public TranslatedMessageDTO(
             String code,
             String sourceLanguage,

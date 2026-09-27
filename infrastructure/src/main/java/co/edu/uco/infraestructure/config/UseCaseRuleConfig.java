@@ -35,26 +35,12 @@ import co.edu.uco.application.usecase.handling.HandlingCreateOrganizationPort;
 import co.edu.uco.application.usecase.handling.HandlingFindCatalogPort;
 import co.edu.uco.application.usecase.security.MessageEnvironmentResolver;
 import co.edu.uco.application.usecase.security.MessageEnvironmentResolverImpl;
-import co.edu.uco.application.usecase.validator.authorization.AuthorizationRule;
-import co.edu.uco.application.usecase.validator.authorization.AuthorizationRuleImpl;
-import co.edu.uco.application.usecase.validator.authorization.ExternalIdentityRequiredRule;
-import co.edu.uco.application.usecase.validator.authorization.ExternalIdentityRequiredRuleImpl;
+import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
+import co.edu.uco.application.usecase.validator.authorization.rule.ExternalIdentityRequiredRule;
 import co.edu.uco.application.usecase.validator.application.CreateApplicationCompositeValidator;
-import co.edu.uco.application.usecase.validator.application.CreateApplicationOrganizationExistsRule;
-import co.edu.uco.application.usecase.validator.application.CreateApplicationOrganizationExistsRuleImpl;
 import co.edu.uco.application.usecase.validator.context.SelectActiveContextCompositeValidator;
-import co.edu.uco.application.usecase.validator.context.SelectActiveContextHierarchyRule;
-import co.edu.uco.application.usecase.validator.context.SelectActiveContextHierarchyRuleImpl;
-import co.edu.uco.application.usecase.validator.context.SelectActiveContextIdentifiersRule;
-import co.edu.uco.application.usecase.validator.context.SelectActiveContextIdentifiersRuleImpl;
-import co.edu.uco.application.usecase.validator.impl.UUIDValidator;
-import co.edu.uco.application.usecase.validator.message.CreateMessageContextRule;
-import co.edu.uco.application.usecase.validator.message.CreateMessageContextRuleImpl;
+import co.edu.uco.application.usecase.validator.message.CreateMessageCompositeValidator;
 import co.edu.uco.application.usecase.validator.organization.CreateOrganizationCompositeValidator;
-import co.edu.uco.application.usecase.validator.organization.CreateOrganizationNameRule;
-import co.edu.uco.application.usecase.validator.organization.CreateOrganizationNameRuleImpl;
-import co.edu.uco.application.usecase.validator.organization.CreateOrganizationUniqueNameRule;
-import co.edu.uco.application.usecase.validator.organization.CreateOrganizationUniqueNameRuleImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -64,36 +50,24 @@ import java.time.Clock;
 public class UseCaseRuleConfig {
 
     @Bean
-    AuthorizationRule authorizationRule(AuthorizationQueryPort authorizationQueryPort, CatalogPort catalogPort) {
-        return new AuthorizationRuleImpl(authorizationQueryPort, catalogPort);
+    AuthorizationCompositeValidator authorizationCompositeValidator(
+            AuthorizationQueryPort authorizationQueryPort, CatalogPort catalogPort) {
+        return new AuthorizationCompositeValidator(authorizationQueryPort, catalogPort);
     }
 
     @Bean
     ExternalIdentityRequiredRule externalIdentityRequiredRule(CatalogPort catalogPort) {
-        return new ExternalIdentityRequiredRuleImpl(catalogPort);
-    }
-
-    @Bean
-    SelectActiveContextIdentifiersRule selectActiveContextIdentifiersRule(
-            UUIDValidator uuidValidator, CatalogPort catalogPort) {
-        return new SelectActiveContextIdentifiersRuleImpl(uuidValidator, catalogPort);
-    }
-
-    @Bean
-    SelectActiveContextHierarchyRule selectActiveContextHierarchyRule(
-            OrganizationRepository organizationRepository,
-            ApplicationRepository applicationRepository,
-            EnvironmentRepository environmentRepository,
-            CatalogPort catalogPort) {
-        return new SelectActiveContextHierarchyRuleImpl(
-                organizationRepository, applicationRepository, environmentRepository, catalogPort);
+        return new ExternalIdentityRequiredRule(catalogPort);
     }
 
     @Bean
     SelectActiveContextCompositeValidator selectActiveContextCompositeValidator(
-            SelectActiveContextIdentifiersRule identifiersRule,
-            SelectActiveContextHierarchyRule hierarchyRule) {
-        return new SelectActiveContextCompositeValidator(identifiersRule, hierarchyRule);
+            CatalogPort catalogPort,
+            OrganizationRepository organizationRepository,
+            ApplicationRepository applicationRepository,
+            EnvironmentRepository environmentRepository) {
+        return new SelectActiveContextCompositeValidator(
+                catalogPort, organizationRepository, applicationRepository, environmentRepository);
     }
 
     @Bean
@@ -104,7 +78,7 @@ public class UseCaseRuleConfig {
             ApplicationCatalogRepository applicationCatalogRepository,
             EnvironmentCatalogRepository environmentCatalogRepository,
             AuthorizationQueryPort authorizationQueryPort,
-            AuthorizationRule authorizationRule,
+            AuthorizationCompositeValidator authorizationCompositeValidator,
             ExternalIdentityRequiredRule externalIdentityRequiredRule,
             SelectActiveContextCompositeValidator selectActiveContextValidator,
             CatalogPort catalogPort,
@@ -116,7 +90,7 @@ public class UseCaseRuleConfig {
                 applicationCatalogRepository,
                 environmentCatalogRepository,
                 authorizationQueryPort,
-                authorizationRule,
+                authorizationCompositeValidator,
                 externalIdentityRequiredRule,
                 selectActiveContextValidator,
                 catalogPort,
@@ -131,9 +105,10 @@ public class UseCaseRuleConfig {
     @Bean
     MessageEnvironmentResolver messageEnvironmentResolver(
             HandlingActiveContextPort handlingActiveContextPort,
-            AuthorizationRule authorizationRule,
+            AuthorizationCompositeValidator authorizationCompositeValidator,
             CatalogPort catalogPort) {
-        return new MessageEnvironmentResolverImpl(handlingActiveContextPort, authorizationRule, catalogPort);
+        return new MessageEnvironmentResolverImpl(
+                handlingActiveContextPort, authorizationCompositeValidator, catalogPort);
     }
 
     @Bean
@@ -146,7 +121,7 @@ public class UseCaseRuleConfig {
             MessageStateCatalogRepository messageStateCatalogRepository,
             MessageEnvironmentStateCatalogRepository messageEnvironmentStateCatalogRepository,
             AuthorizationQueryPort authorizationQueryPort,
-            AuthorizationRule authorizationRule,
+            AuthorizationCompositeValidator authorizationCompositeValidator,
             HandlingActiveContextPort handlingActiveContextPort,
             CatalogPort catalogPort) {
         return new FindCatalogUseCase(
@@ -158,7 +133,7 @@ public class UseCaseRuleConfig {
                 messageStateCatalogRepository,
                 messageEnvironmentStateCatalogRepository,
                 authorizationQueryPort,
-                authorizationRule,
+                authorizationCompositeValidator,
                 handlingActiveContextPort,
                 catalogPort);
     }
@@ -169,33 +144,20 @@ public class UseCaseRuleConfig {
     }
 
     @Bean
-    CreateMessageContextRule createMessageContextRule(EnvironmentRepository environmentRepository,
-                                                      FunctionalityCatalogRepository functionalityCatalogRepository,
-                                                      CatalogPort catalogPort) {
-        return new CreateMessageContextRuleImpl(
-                environmentRepository,
-                functionalityCatalogRepository,
-                catalogPort);
-    }
-
-    @Bean
-    CreateOrganizationNameRule createOrganizationNameRule(CatalogPort catalogPort) {
-        return new CreateOrganizationNameRuleImpl(catalogPort);
-    }
-
-    @Bean
-    CreateOrganizationUniqueNameRule createOrganizationUniqueNameRule(
-            OrganizationRepository organizationRepository, CatalogPort catalogPort) {
-        return new CreateOrganizationUniqueNameRuleImpl(organizationRepository, catalogPort);
+    CreateMessageCompositeValidator createMessageCompositeValidator(
+            CatalogPort catalogPort,
+            RecordExistsCatalogPort recordExistsCatalogPort,
+            EnvironmentRepository environmentRepository,
+            FunctionalityCatalogRepository functionalityCatalogRepository) {
+        return new CreateMessageCompositeValidator(
+                catalogPort, recordExistsCatalogPort, environmentRepository, functionalityCatalogRepository);
     }
 
     @Bean
     CreateOrganizationCompositeValidator createOrganizationCompositeValidator(
             CatalogPort catalogPort,
-            CreateOrganizationNameRule createOrganizationNameRule,
-            CreateOrganizationUniqueNameRule createOrganizationUniqueNameRule) {
-        return new CreateOrganizationCompositeValidator(
-                catalogPort, createOrganizationNameRule, createOrganizationUniqueNameRule);
+            OrganizationRepository organizationRepository) {
+        return new CreateOrganizationCompositeValidator(catalogPort, organizationRepository);
     }
 
     @Bean
@@ -213,25 +175,16 @@ public class UseCaseRuleConfig {
     }
 
     @Bean
-    CreateApplicationOrganizationExistsRule createApplicationOrganizationExistsRule(
-            OrganizationRepository organizationRepository,
-            UUIDValidator uuidValidator,
-            CatalogPort catalogPort) {
-        return new CreateApplicationOrganizationExistsRuleImpl(
-                organizationRepository, uuidValidator, catalogPort);
-    }
-
-    @Bean
     CreateApplicationCompositeValidator createApplicationCompositeValidator(
             CatalogPort catalogPort,
             RecordExistsCatalogPort recordExistsCatalogPort,
             ApplicationRepository applicationRepository,
-            CreateApplicationOrganizationExistsRule organizationExistsRule) {
+            OrganizationRepository organizationRepository) {
         return new CreateApplicationCompositeValidator(
                 catalogPort,
                 recordExistsCatalogPort,
                 applicationRepository,
-                organizationExistsRule);
+                organizationRepository);
     }
 
     @Bean
@@ -239,11 +192,12 @@ public class UseCaseRuleConfig {
             ApplicationRepository applicationRepository,
             CreateApplicationCompositeValidator validator,
             HandlingActiveContextPort handlingActiveContextPort,
-            AuthorizationRule authorizationRule,
+            AuthorizationCompositeValidator authorizationCompositeValidator,
             CatalogPort catalogPort,
             LoggingPortFactory loggerFactory) {
         return new CreateApplicationUseCase(
-                applicationRepository, validator, handlingActiveContextPort, authorizationRule, catalogPort, loggerFactory);
+                applicationRepository, validator, handlingActiveContextPort,
+                authorizationCompositeValidator, catalogPort, loggerFactory);
     }
 
     @Bean
