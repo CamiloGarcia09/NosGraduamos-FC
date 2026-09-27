@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -113,15 +114,16 @@ public final class ActiveContextUseCase implements HandlingActiveContextPort {
         externalIdentityRequiredRule.validate(identity);
         SelectActiveContextDTO validatedContext = context == null ? new SelectActiveContextDTO() : context;
         selectActiveContextValidator.validate(validatedContext);
+        SelectActiveContextDTO contextToPersist = Objects.requireNonNull(validatedContext);
         ExternalIdentityEntity persistedIdentity = findPersistedIdentity(identity);
-        UUID environmentId = getUUIDFromString(validatedContext.getEnvironmentId());
+        UUID environmentId = getUUIDFromString(contextToPersist.getEnvironmentId());
         authorize(environmentId, identity);
 
         ActiveContextEntity activeContext = new ActiveContextEntity();
         activeContext.setId(persistedIdentity.getId());
         activeContext.setExternalIdentityId(persistedIdentity.getId());
-        activeContext.setOrganizationId(getUUIDFromString(validatedContext.getOrganizationId()));
-        activeContext.setApplicationId(getUUIDFromString(validatedContext.getApplicationId()));
+        activeContext.setOrganizationId(getUUIDFromString(contextToPersist.getOrganizationId()));
+        activeContext.setApplicationId(getUUIDFromString(contextToPersist.getApplicationId()));
         activeContext.setEnvironmentId(environmentId);
         activeContext.setUpdatedAt(LocalDateTime.now(clock));
         activeContextRepository.save(activeContext);
