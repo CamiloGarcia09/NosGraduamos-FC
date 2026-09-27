@@ -6,6 +6,7 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
+import co.edu.uco.crosscutting.exceptions.ForbiddenException;
 import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionType;
 import co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.SerializerRegistry;
 import co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.SerializerType;
@@ -85,7 +86,7 @@ class HttpPresenterAdapterTest {
         verify(response).setStatus(200);
         verify(response).setContentType("application/json");
         assertThat(writer.toString()).contains("dto");
-        verify(log).info("success", "{\"data\":[\"dto\"]}");
+        verify(log).info("success");
     }
 
     @Test
@@ -114,7 +115,7 @@ class HttpPresenterAdapterTest {
         verify(response).setStatus(500);
         verify(response).setContentType("application/json");
         assertThat(writer.toString()).contains("user msg");
-        verify(log).error("error sent", "{\"errors\":[{\"code\":\"INTERNAL_SERVER_ERROR\",\"message\":\"user msg\"}]}");
+        verify(log).error("error sent");
     }
 
     @Test
@@ -128,6 +129,19 @@ class HttpPresenterAdapterTest {
         adapter.presentCrossWordsException(ex, request, response);
 
         verify(response).setStatus(400);
+    }
+
+    @Test
+    void presentCrossWordsException_forbiddenTypeMapsTo403() throws Exception {
+        StringWriter writer = stubWriter();
+        stubCommonErrorHandling("{\"errors\":[{\"code\":\"FORBIDDEN\",\"message\":\"Context forbidden\"}]}");
+        when(catalogPort.getMessage("TCH_020")).thenReturn("error sent");
+
+        adapter.presentCrossWordsException(
+                ForbiddenException.buildUserException("Context forbidden"), request, response);
+
+        verify(response).setStatus(403);
+        assertThat(writer.toString()).contains("FORBIDDEN");
     }
 
     @Test
@@ -212,7 +226,7 @@ class HttpPresenterAdapterTest {
         adapter.presentCrossWordsException(ex, request, response);
 
         assertThat(writer.toString()).contains("MESSAGE_NOT_FOUND");
-        verify(log).error("error sent", "{\"errors\":[{\"code\":\"MESSAGE_NOT_FOUND\",\"message\":\"user msg\"}]}");
+        verify(log).error("error sent");
     }
 
     @Test

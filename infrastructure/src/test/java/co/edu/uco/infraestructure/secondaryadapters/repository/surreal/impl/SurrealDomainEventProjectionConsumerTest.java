@@ -37,6 +37,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.atLeastOnce;
+import org.mockito.ArgumentCaptor;
 
 @ExtendWith(MockitoExtension.class)
 class SurrealDomainEventProjectionConsumerTest {
@@ -164,6 +166,7 @@ class SurrealDomainEventProjectionConsumerTest {
     @Test
     void consumePendingDomainEvents_projectsApplicationDocument() {
         Object app = mock(Object.class);
+        doReturn(stringValue("organization:org-1")).when(app).get("organization_id");
         doReturn(stringValue("language:lang-1")).when(app).get("language_id");
         doReturn(stringValue("state:st-1")).when(app).get("state_id");
         doReturn(stringValue("MiApp")).when(app).get("name");
@@ -179,12 +182,22 @@ class SurrealDomainEventProjectionConsumerTest {
 
         stubEvents(eventObject("event-1", "APPLICATION_CREATED", "application:app-1", "application", 1));
         stubRecord("application:app-1", app);
+        stubRecord("organization:org-1", catalogRecord("UCO"));
         stubRecord("language:lang-1", language);
         stubRecord("state:st-1", catalogRecord("ACTIVE"));
 
         consumer.consumePendingDomainEvents();
 
         verify(surreal).query(contains("UPSERT application_document:`app-1`"));
+        ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
+        verify(surreal, atLeastOnce()).query(queryCaptor.capture());
+        String applicationUpsert = queryCaptor.getAllValues().stream()
+                .filter(query -> query.startsWith("UPSERT application_document:`app-1`"))
+                .findFirst()
+                .orElseThrow();
+        assertThat(applicationUpsert)
+                .contains("organization_id: 'organization:org-1'")
+                .contains("organization: { id: 'organization:org-1', name: 'UCO' }");
         verify(surreal).query(contains("UPSERT domain_event_document:`event-1`"));
         verify(surreal).query(contains("SET projection_status = 'processed'"));
     }

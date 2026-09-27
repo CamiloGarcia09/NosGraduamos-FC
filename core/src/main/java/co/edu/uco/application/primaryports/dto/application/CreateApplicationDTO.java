@@ -13,6 +13,7 @@ import static co.edu.uco.crosscutting.helpers.UtilText.trim;
 public final class CreateApplicationDTO {
 
     private String name;
+    private String organizationId;
     private String languageId;
     private String startDate;
     private String endDate;
@@ -20,6 +21,7 @@ public final class CreateApplicationDTO {
 
     public CreateApplicationDTO() {
         setName(EMPTY);
+        setOrganizationId(EMPTY);
         setLanguageId(EMPTY);
         setStartDate(EMPTY);
         setEndDate(EMPTY);
@@ -27,6 +29,7 @@ public final class CreateApplicationDTO {
     }
 
     public void setName(String name) { this.name = trim(name); }
+    public void setOrganizationId(String organizationId) { this.organizationId = trim(organizationId); }
     public void setLanguageId(String languageId) { this.languageId = trim(languageId); }
     public void setStartDate(String startDate) { this.startDate = trim(startDate); }
     public void setEndDate(String endDate) { this.endDate = trim(endDate); }

@@ -12,6 +12,6 @@ public final class FunctionalityStartDateRequiredRule extends RuleValidator<Crea
     public FunctionalityStartDateRequiredRule(CatalogPort catalogPort) {
         super(catalogPort,
                 Specifications.field(CreateFunctionalityDTO::getStartDate, new TextRequiredSpecification()),
-                MessageCatalogCodeEnum.FUN_166);
+                MessageCatalogCodeEnum.FUN_182);
     }
 }

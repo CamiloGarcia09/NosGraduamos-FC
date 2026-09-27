@@ -12,6 +12,6 @@ public final class FunctionalityEndDateRequiredRule extends RuleValidator<Create
     public FunctionalityEndDateRequiredRule(CatalogPort catalogPort) {
         super(catalogPort,
                 Specifications.field(CreateFunctionalityDTO::getEndDate, new TextRequiredSpecification()),
-                MessageCatalogCodeEnum.FUN_167);
+                MessageCatalogCodeEnum.FUN_183);
     }
 }

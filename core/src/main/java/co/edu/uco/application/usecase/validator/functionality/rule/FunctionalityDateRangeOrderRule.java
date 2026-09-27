@@ -18,6 +18,6 @@ public final class FunctionalityDateRangeOrderRule extends RuleValidator<CreateF
                         functionality -> new DateTimeRange(parseDate(functionality.getStartDate()),
                                 parseDate(functionality.getEndDate())),
                         new DateRangeOrderSpecification()),
-                MessageCatalogCodeEnum.FUN_173);
+                MessageCatalogCodeEnum.FUN_189);
     }
 }

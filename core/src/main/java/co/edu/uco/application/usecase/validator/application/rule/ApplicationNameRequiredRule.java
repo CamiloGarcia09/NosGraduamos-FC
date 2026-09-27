@@ -12,6 +12,6 @@ public final class ApplicationNameRequiredRule extends RuleValidator<CreateAppli
     public ApplicationNameRequiredRule(CatalogPort catalogPort) {
         super(catalogPort,
                 Specifications.field(CreateApplicationDTO::getName, new TextRequiredSpecification()),
-                MessageCatalogCodeEnum.FUN_145);
+                MessageCatalogCodeEnum.FUN_161);
     }
 }

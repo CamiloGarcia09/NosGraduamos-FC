@@ -6,6 +6,7 @@ import co.edu.uco.application.primaryports.facade.message.FindMessagesByEnvironm
 import co.edu.uco.application.primaryports.facade.page.impl.SimplePageFacadeImpl;
 import co.edu.uco.application.secondaryports.repository.SimplePage;
 import co.edu.uco.application.usecase.handling.HandlingFindMessageEnvironmentPort;
+import co.edu.uco.application.usecase.domain.security.MessageAccessContext;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,8 +19,8 @@ public final class FindMessagesByEnvironmentUsecaseFacadeImpl implements FindMes
         this.handlingFindMessageEnvironmentPort = handlingFindMessageEnvironmentPort;
         this.simplePageFacadeImpl = simplePageFacadeImpl;
     }
-    public SimplePage<MessageDTO> execute(String environmentId, PageRequestDTO pageDTO) {
+    public SimplePage<MessageDTO> execute(MessageAccessContext context, PageRequestDTO pageDTO) {
         var simplePageRequest = simplePageFacadeImpl.execute(pageDTO);
-        return handlingFindMessageEnvironmentPort.execute(environmentId, simplePageRequest);
+        return handlingFindMessageEnvironmentPort.execute(context, simplePageRequest);
     }
 }

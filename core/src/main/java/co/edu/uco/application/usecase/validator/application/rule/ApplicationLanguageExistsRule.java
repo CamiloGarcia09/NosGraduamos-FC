@@ -15,6 +15,6 @@ public final class ApplicationLanguageExistsRule extends RuleValidator<CreateApp
         super(catalogPort,
                 Specifications.field(CreateApplicationDTO::getLanguageId,
                         new CatalogReferenceExistsSpecification(recordExistsCatalogPort, ReferenceCatalog.LANGUAGE_BASE)),
-                MessageCatalogCodeEnum.FUN_148);
+                MessageCatalogCodeEnum.FUN_164);
     }
 }

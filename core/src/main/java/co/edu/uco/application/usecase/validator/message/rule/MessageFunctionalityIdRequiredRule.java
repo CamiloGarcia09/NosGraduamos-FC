@@ -12,6 +12,6 @@ public final class MessageFunctionalityIdRequiredRule extends RuleValidator<Crea
     public MessageFunctionalityIdRequiredRule(CatalogPort catalogPort) {
         super(catalogPort,
                 Specifications.field(CreateMessageDTO::getFunctionalityId, new TextRequiredSpecification()),
-                MessageCatalogCodeEnum.FUN_172);
+                MessageCatalogCodeEnum.FUN_188);
     }
 }

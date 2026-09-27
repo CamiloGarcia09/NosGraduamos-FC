@@ -12,6 +12,6 @@ public final class FunctionalityApplicationExistsRule extends RuleValidator<Crea
     public FunctionalityApplicationExistsRule(CatalogPort catalogPort, ApplicationRepository applicationRepository) {
         super(catalogPort,
                 Specifications.field(CreateFunctionalityDTO::getApplicationId, applicationRepository::existsById),
-                MessageCatalogCodeEnum.FUN_165);
+                MessageCatalogCodeEnum.FUN_181);
     }
 }

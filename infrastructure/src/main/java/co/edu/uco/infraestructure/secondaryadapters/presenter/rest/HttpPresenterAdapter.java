@@ -53,7 +53,7 @@ public final class HttpPresenterAdapter<T> implements PresenterPort<T> {
             response.setStatus(HttpStatus.OK.value());
             response.setContentType(serializer.getSupportedContentType());
             response.getWriter().write(formattedResponse);
-            log.info(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_021.getCode()), formattedResponse);
+            log.info(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_021.getCode()));
 
         } catch (CrossWordsException | IOException ex) {
             log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_016.getCode()), ex);
@@ -87,7 +87,7 @@ public final class HttpPresenterAdapter<T> implements PresenterPort<T> {
             if (status >= HttpStatus.INTERNAL_SERVER_ERROR.value()) {
                 log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_016.getCode()), ex);
             }
-            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_020.getCode()), formattedResponse);
+            log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_020.getCode()));
         } catch (IOException | CrossWordsException exception) {
             log.error(catalogPort.getMessage(MessageCatalogCodeEnum.TCH_019.getCode()), exception);
             throw exception;

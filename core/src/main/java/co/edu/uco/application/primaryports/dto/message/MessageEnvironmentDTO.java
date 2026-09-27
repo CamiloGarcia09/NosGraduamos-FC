@@ -43,8 +43,9 @@ public final class MessageEnvironmentDTO {
         this.stateId = getDefaultUUID(stateId);
     }
     public void setMessage(MessageDTO message) {
-        this.message = UtilObject.getDefaultIsNullObject(message,MessageDTO.create(message.code(), message.title(), message.content(), message.type(),
-                message.category(), message.application(), message.functionality()));
+        this.message = UtilObject.getDefaultIsNullObject(message, MessageDTO.create(message.getCode(), message.getTitle(),
+                message.getContent(), message.getType(), message.getCategory(), message.getApplication(),
+                message.getFunctionality()));
     }
     public static MessageEnvironmentDTO create(UUID id, UUID messageId, MessageDTO message, UUID environmentTypeId, UUID stateId) {
         return new MessageEnvironmentDTO(id, messageId, message, environmentTypeId, stateId);

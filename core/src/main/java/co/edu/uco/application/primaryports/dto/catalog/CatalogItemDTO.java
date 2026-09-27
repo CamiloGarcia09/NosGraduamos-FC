@@ -1,8 +1,18 @@
 package co.edu.uco.application.primaryports.dto.catalog;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
 import static co.edu.uco.crosscutting.helpers.UtilText.trim;
 
-public record CatalogItemDTO(String id, String name) {
+@Getter
+@EqualsAndHashCode
+@ToString
+public final class CatalogItemDTO {
+
+    private final String id;
+    private final String name;
 
     public CatalogItemDTO(String id, String name) {
         this.id = trim(id);

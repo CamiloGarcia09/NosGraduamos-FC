@@ -15,6 +15,6 @@ public final class FunctionalityStateExistsRule extends RuleValidator<CreateFunc
         super(catalogPort,
                 Specifications.field(CreateFunctionalityDTO::getStateId,
                         new CatalogReferenceExistsSpecification(recordExistsCatalogPort, ReferenceCatalog.FUNCTIONALITY_STATE)),
-                MessageCatalogCodeEnum.FUN_169);
+                MessageCatalogCodeEnum.FUN_185);
     }
 }

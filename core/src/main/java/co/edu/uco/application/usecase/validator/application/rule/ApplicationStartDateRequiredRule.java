@@ -12,6 +12,6 @@ public final class ApplicationStartDateRequiredRule extends RuleValidator<Create
     public ApplicationStartDateRequiredRule(CatalogPort catalogPort) {
         super(catalogPort,
                 Specifications.field(CreateApplicationDTO::getStartDate, new TextRequiredSpecification()),
-                MessageCatalogCodeEnum.FUN_149);
+                MessageCatalogCodeEnum.FUN_165);
     }
 }

@@ -12,6 +12,6 @@ public final class EnvironmentNameDuplicatedRule extends RuleValidator<CreateEnv
         super(catalogPort,
                 environment -> !environmentRepository.existsByNameAndApplicationId(environment.getName(),
                         environment.getApplicationId()),
-                MessageCatalogCodeEnum.FUN_162);
+                MessageCatalogCodeEnum.FUN_178);
     }
 }

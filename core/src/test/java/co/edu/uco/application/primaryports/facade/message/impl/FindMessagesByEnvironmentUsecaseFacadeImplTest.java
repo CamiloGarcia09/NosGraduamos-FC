@@ -6,6 +6,7 @@ import co.edu.uco.application.primaryports.facade.page.impl.SimplePageFacadeImpl
 import co.edu.uco.application.secondaryports.repository.SimplePage;
 import co.edu.uco.application.secondaryports.repository.SimplePageRequest;
 import co.edu.uco.application.usecase.handling.HandlingFindMessageEnvironmentPort;
+import co.edu.uco.application.usecase.domain.security.MessageAccessContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,15 +32,16 @@ class FindMessagesByEnvironmentUsecaseFacadeImplTest {
     void execute_buildsPageRequestAndDelegates() {
         PageRequestDTO pageDTO = new PageRequestDTO();
         SimplePageRequest request = new SimplePageRequest();
+        MessageAccessContext context = new MessageAccessContext("env", null);
         when(simplePageFacadeImpl.execute(pageDTO)).thenReturn(request);
 
         SimplePage<MessageDTO> page = SimplePage.of(java.util.List.of(), 1, 10, 0, 0);
-        when(handlingFindMessageEnvironmentPort.execute("env", request)).thenReturn(page);
+        when(handlingFindMessageEnvironmentPort.execute(context, request)).thenReturn(page);
 
-        SimplePage<MessageDTO> result = facade.execute("env", pageDTO);
+        SimplePage<MessageDTO> result = facade.execute(context, pageDTO);
 
         assertThat(result).isSameAs(page);
         verify(simplePageFacadeImpl).execute(pageDTO);
-        verify(handlingFindMessageEnvironmentPort).execute("env", request);
+        verify(handlingFindMessageEnvironmentPort).execute(context, request);
     }
 }

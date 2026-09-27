@@ -89,6 +89,40 @@ class SimplePageRequestTest {
     }
 
     @Test
+    void equals_returnsTrue_whenComparedWithTheSameInstance() {
+        SimplePageRequest request = new SimplePageRequest();
+
+        assertThat(request).isEqualTo(request);
+    }
+
+    @Test
+    void equals_returnsFalse_whenTheReceiverSortIsNullAndTheOtherIsNot() {
+        SimplePageRequest receiver = new SimplePageRequest();
+        receiver.setSort(null);
+        SimplePageRequest other = new SimplePageRequest();
+
+        assertThat(receiver).isNotEqualTo(other);
+    }
+
+    @Test
+    void equals_returnsFalse_whenTheReceiverColumnSortIsNullAndTheOtherIsNot() {
+        SimplePageRequest receiver = new SimplePageRequest();
+        receiver.setColumnSort(null);
+        SimplePageRequest other = new SimplePageRequest();
+
+        assertThat(receiver).isNotEqualTo(other);
+    }
+
+    @Test
+    void equals_returnsFalse_whenTheSizeDiffers() {
+        SimplePageRequest receiver = new SimplePageRequest();
+        SimplePageRequest other = new SimplePageRequest();
+        other.setSize(10);
+
+        assertThat(receiver).isNotEqualTo(other);
+    }
+
+    @Test
     void toString_containsDefaultValues() {
         String value = new SimplePageRequest().toString();
 

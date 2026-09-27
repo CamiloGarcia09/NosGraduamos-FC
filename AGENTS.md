@@ -7,6 +7,7 @@
 - Antes de correr la app: levantar infraestructura con `docker compose up -d` en `deployment/docker`.
 - No hay linter/formatter configurado — no asumas reglas de estilo automáticas.
 - Todo cambio debe respetar Clean/Hexagonal Architecture y pasar el Quality Gate de SonarCloud (ver sección "Clean Architecture y SonarCloud").
+- Tests: crear/modificar SIEMPRE delegando al agente `unit-test-agent`; auditar con el skill `unit-test-validator`. No escribir tests en la conversación principal (quema tokens de la cuota principal).
 
 ## Qué es este proyecto
 API de mensajes multientorno con catálogo jerárquico (Organización → Aplicación → Módulo → Funcionalidad → Parámetro), soporte de tokens, traducción asistida por IA, caché Redis y eventos SSE en memoria. Diseñada para desplegarse en Azure con secretos en Key Vault/Doppler y observabilidad vía Grafana/Prometheus/Loki.
@@ -55,6 +56,14 @@ cd ../..
 Reporte de cobertura HTML en `infrastructure/target/site/jacoco/index.html`.
 
 No hay linter/formatter configurado actualmente — no introducir reglas de estilo automáticas ni asumir que existen; seguir el estilo del código circundante.
+
+### Delegación obligatoria de tests
+Aplica en todas las sesiones, incluso nuevas:
+
+1. **Crear o modificar pruebas unitarias** → delegar SIEMPRE al agente `unit-test-agent` (subagente con contexto aislado). No editar archivos de test en la conversación principal.
+2. **Auditar pruebas ya escritas** → usar el skill `unit-test-validator` dentro de un subagente, no en la conversación principal.
+3. **Conversación principal** → solo coordinar: leer plan/archivos clave, lanzar agentes, revisar resúmenes y actualizar documentación (`PLAN_SEGURIDAD_Y_CONTEXTO.md`, etc.).
+4. Tras el subagente, la conversación principal solo verifica con `./mvnw clean verify` (o tests focalizados) y reporta el resultado; no reescribe tests salvo fallo puntual que el agente no pueda resolver.
 
 ## Manejo de errores
 - Jerarquía base en `core`: `BusinessException`, `ValidationException`, `ConflictException`, `NotFoundException`, `TechnicalException`.

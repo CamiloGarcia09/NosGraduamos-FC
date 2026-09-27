@@ -2,12 +2,11 @@ package co.edu.uco.application.primaryports.facade.catalog.impl;
 
 import co.edu.uco.application.primaryports.dto.catalog.CatalogItemDTO;
 import co.edu.uco.application.primaryports.facade.catalog.FindCatalogUseCaseFacade;
+import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.handling.HandlingFindCatalogPort;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
 public final class FindCatalogUseCaseFacadeImpl implements FindCatalogUseCaseFacade {
 
     private final HandlingFindCatalogPort handlingFindCatalogPort;
@@ -17,18 +16,20 @@ public final class FindCatalogUseCaseFacadeImpl implements FindCatalogUseCaseFac
     }
 
     @Override
-    public List<CatalogItemDTO> findApplications() {
-        return handlingFindCatalogPort.findApplications();
+    public List<CatalogItemDTO> findApplications(final ExternalIdentity identity) {
+        return handlingFindCatalogPort.findApplications(identity);
     }
 
     @Override
-    public List<CatalogItemDTO> findEnvironmentsByApplication(String applicationId) {
-        return handlingFindCatalogPort.findEnvironmentsByApplication(applicationId);
+    public List<CatalogItemDTO> findEnvironmentsByApplication(final String applicationId,
+                                                               final ExternalIdentity identity) {
+        return handlingFindCatalogPort.findEnvironmentsByApplication(applicationId, identity);
     }
 
     @Override
-    public List<CatalogItemDTO> findFunctionalitiesByApplication(String applicationId) {
-        return handlingFindCatalogPort.findFunctionalitiesByApplication(applicationId);
+    public List<CatalogItemDTO> findFunctionalitiesByApplication(final String applicationId,
+                                                                  final ExternalIdentity identity) {
+        return handlingFindCatalogPort.findFunctionalitiesByApplication(applicationId, identity);
     }
 
     @Override

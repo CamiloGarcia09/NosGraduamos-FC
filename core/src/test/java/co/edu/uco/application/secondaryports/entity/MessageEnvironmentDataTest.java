@@ -14,19 +14,19 @@ class MessageEnvironmentDataTest {
 
         assertThat(data.getId()).isNotNull();
         assertThat(data.getMessage()).isNotNull();
-        assertThat(data.getEnvironmentType()).isNotNull();
+        assertThat(data.getEnvironmentTypeData()).isNotNull();
     }
 
     @Test
     void parameterizedConstructor_storesValues() {
         UUID id = UUID.randomUUID();
         MessageData message = MessageData.build();
-        EnvironmentType environmentType = EnvironmentType.build();
-        MessageEnvironmentData data = new MessageEnvironmentData(id, message, environmentType);
+        EnvironmentTypeData environmentTypeData = EnvironmentTypeData.build();
+        MessageEnvironmentData data = new MessageEnvironmentData(id, message, environmentTypeData);
 
         assertThat(data.getId()).isEqualTo(id);
         assertThat(data.getMessage()).isSameAs(message);
-        assertThat(data.getEnvironmentType()).isSameAs(environmentType);
+        assertThat(data.getEnvironmentTypeData()).isSameAs(environmentTypeData);
     }
 
     @Test
@@ -35,13 +35,13 @@ class MessageEnvironmentDataTest {
 
         data.setId(null);
         data.setMessage(null);
-        data.setEnvironmentType(null);
+        data.setEnvironmentTypeData(null);
         data.setStateData(null);
 
         assertThat(data.getId())
                 .isEqualTo(UUID.fromString("00000000-0000-0000-0000-000000000000"));
         assertThat(data.getMessage()).isNotNull();
-        assertThat(data.getEnvironmentType()).isNotNull();
+        assertThat(data.getEnvironmentTypeData()).isNotNull();
         assertThat(data.getStateData()).isNotNull();
     }
 

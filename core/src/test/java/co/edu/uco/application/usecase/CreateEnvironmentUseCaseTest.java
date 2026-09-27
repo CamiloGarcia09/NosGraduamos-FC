@@ -1,17 +1,29 @@
 package co.edu.uco.application.usecase;
 
+import co.edu.uco.application.primaryports.dto.context.ActiveContextDTO;
 import co.edu.uco.application.primaryports.dto.environment.CreateEnvironmentDTO;
+import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
+import co.edu.uco.application.usecase.domain.security.AuthorizationScopeType;
+import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
+import co.edu.uco.application.usecase.domain.security.PermissionCode;
+import co.edu.uco.application.usecase.domain.security.PrincipalType;
+import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
+import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
 import co.edu.uco.application.usecase.validator.environment.CreateEnvironmentCompositeValidator;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
+import co.edu.uco.crosscutting.exceptions.ForbiddenException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.Instant;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -19,6 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -27,11 +40,20 @@ import static org.mockito.Mockito.when;
 class CreateEnvironmentUseCaseTest {
 
     private static final String APP_UUID = "123e4567-e89b-12d3-a456-426614175000";
+    private static final String OTHER_APP_UUID = "123e4567-e89b-12d3-a456-426614175002";
+    private static final ExternalIdentity IDENTITY = new ExternalIdentity(
+            "issuer", "subject", "user@example.com", PrincipalType.HUMAN, Instant.MAX);
 
     @Mock
     private EnvironmentRepository environmentRepository;
     @Mock
     private CreateEnvironmentCompositeValidator validator;
+    @Mock
+    private HandlingActiveContextPort activeContextPort;
+    @Mock
+    private AuthorizationCompositeValidator authorizationCompositeValidator;
+    @Mock
+    private CatalogPort catalogPort;
     @Mock
     private LoggingPortFactory loggerFactory;
     @Mock
@@ -42,7 +64,8 @@ class CreateEnvironmentUseCaseTest {
     @BeforeEach
     void setUp() {
         when(loggerFactory.getLogger(CreateEnvironmentUseCase.class)).thenReturn(log);
-        useCase = new CreateEnvironmentUseCase(environmentRepository, validator, loggerFactory);
+        useCase = new CreateEnvironmentUseCase(environmentRepository, validator,
+                activeContextPort, authorizationCompositeValidator, catalogPort, loggerFactory);
     }
 
     private CreateEnvironmentDTO validDto() {
@@ -55,14 +78,74 @@ class CreateEnvironmentUseCaseTest {
     }
 
     @Test
-    void createEnvironment_persistsEnvironmentAndLogs() {
+    void createEnvironment_persistsLegacyEnvironmentWhenIdentityIsNull() {
         CreateEnvironmentDTO dto = validDto();
 
-        useCase.createEnvironment(dto);
+        useCase.createEnvironment(dto, null);
 
         verify(validator).validate(dto);
         verify(environmentRepository).create(any(), eq("type-1"), eq("state-1"));
         verify(log).info("Environment created successfully with name: {}", "Production");
+        verifyNoInteractions(activeContextPort, authorizationCompositeValidator, catalogPort);
+    }
+
+    @Test
+    void createEnvironment_authorizesMatchingActiveContextWithEnvironmentCreatePermission() {
+        CreateEnvironmentDTO dto = validDto();
+        when(activeContextPort.findActiveContext(IDENTITY)).thenReturn(
+                ActiveContextDTO.builder().applicationId(APP_UUID).build());
+
+        useCase.createEnvironment(dto, IDENTITY);
+
+        verify(authorizationCompositeValidator).validate(IDENTITY, PermissionCode.ENVIRONMENT_CREATE,
+                AuthorizationScopeType.APPLICATION, UUID.fromString(APP_UUID));
+        verify(validator).validate(dto);
+        verify(environmentRepository).create(any(), eq("type-1"), eq("state-1"));
+        verify(log).info("Environment created successfully with name: {}", "Production");
+        verifyNoInteractions(catalogPort);
+    }
+
+    @Test
+    void createEnvironment_throwsForbidden_whenActiveContextDoesNotExist() {
+        CreateEnvironmentDTO dto = validDto();
+        when(catalogPort.getMessage("FUN_153")).thenReturn("Fuera del contexto activo");
+
+        assertThatThrownBy(() -> useCase.createEnvironment(dto, IDENTITY))
+                .isInstanceOf(ForbiddenException.class)
+                .satisfies(ex -> assertThat((ForbiddenException) ex)
+                        .extracting(ForbiddenException::getUserMessage, ForbiddenException::getHttpStatus)
+                        .containsExactly("Fuera del contexto activo", 403));
+        verifyNoInteractions(environmentRepository, authorizationCompositeValidator);
+        verify(validator, never()).validate(any());
+    }
+
+    @Test
+    void createEnvironment_throwsForbidden_whenActiveContextIsOutsideRequestedApplication() {
+        CreateEnvironmentDTO dto = validDto();
+        when(activeContextPort.findActiveContext(IDENTITY)).thenReturn(
+                ActiveContextDTO.builder().applicationId(OTHER_APP_UUID).build());
+        when(catalogPort.getMessage("FUN_153")).thenReturn("Fuera del contexto activo");
+
+        assertThatThrownBy(() -> useCase.createEnvironment(dto, IDENTITY))
+                .isInstanceOf(ForbiddenException.class)
+                .satisfies(ex -> assertThat((ForbiddenException) ex)
+                        .extracting(ForbiddenException::getUserMessage, ForbiddenException::getHttpStatus)
+                        .containsExactly("Fuera del contexto activo", 403));
+        verifyNoInteractions(environmentRepository, authorizationCompositeValidator, validator);
+    }
+
+    @Test
+    void createEnvironment_propagatesForbiddenFromAuthorizationCompositeValidator() {
+        CreateEnvironmentDTO dto = validDto();
+        ForbiddenException failure = ForbiddenException.buildUserException("Permission denied");
+        when(activeContextPort.findActiveContext(IDENTITY)).thenReturn(
+                ActiveContextDTO.builder().applicationId(APP_UUID).build());
+        doThrow(failure).when(authorizationCompositeValidator).validate(IDENTITY,
+                PermissionCode.ENVIRONMENT_CREATE, AuthorizationScopeType.APPLICATION,
+                UUID.fromString(APP_UUID));
+
+        assertThatThrownBy(() -> useCase.createEnvironment(dto, IDENTITY)).isSameAs(failure);
+        verifyNoInteractions(environmentRepository, validator);
     }
 
     @Test
@@ -71,7 +154,7 @@ class CreateEnvironmentUseCaseTest {
         doThrow(BusinessRuleException.buildUserException("Invalid environment"))
                 .when(validator).validate(dto);
 
-        assertThatThrownBy(() -> useCase.createEnvironment(dto))
+        assertThatThrownBy(() -> useCase.createEnvironment(dto, null))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("Invalid environment"));
@@ -83,7 +166,7 @@ class CreateEnvironmentUseCaseTest {
         CreateEnvironmentDTO dto = validDto();
         doThrow(new RuntimeException("db down")).when(environmentRepository).create(any(), anyString(), anyString());
 
-        assertThatThrownBy(() -> useCase.createEnvironment(dto))
+        assertThatThrownBy(() -> useCase.createEnvironment(dto, null))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(ex -> assertThat(((BusinessException) ex).getTechnicalMessage())
                         .isEqualTo("Error al crear el entorno"));
@@ -96,7 +179,7 @@ class CreateEnvironmentUseCaseTest {
         doThrow(BusinessRuleException.buildUserException("conflict"))
                 .when(environmentRepository).create(any(), anyString(), anyString());
 
-        assertThatThrownBy(() -> useCase.createEnvironment(dto))
+        assertThatThrownBy(() -> useCase.createEnvironment(dto, null))
                 .isInstanceOf(BusinessRuleException.class);
     }
 }

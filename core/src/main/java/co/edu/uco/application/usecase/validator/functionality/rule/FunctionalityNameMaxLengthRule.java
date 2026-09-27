@@ -14,6 +14,6 @@ public final class FunctionalityNameMaxLengthRule extends RuleValidator<CreateFu
     public FunctionalityNameMaxLengthRule(CatalogPort catalogPort) {
         super(catalogPort,
                 Specifications.field(CreateFunctionalityDTO::getName, new TextMaxLengthSpecification(NAME_MAX_LENGTH)),
-                MessageCatalogCodeEnum.FUN_164);
+                MessageCatalogCodeEnum.FUN_180);
     }
 }

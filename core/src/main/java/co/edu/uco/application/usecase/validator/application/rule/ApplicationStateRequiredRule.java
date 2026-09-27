@@ -12,6 +12,6 @@ public final class ApplicationStateRequiredRule extends RuleValidator<CreateAppl
     public ApplicationStateRequiredRule(CatalogPort catalogPort) {
         super(catalogPort,
                 Specifications.field(CreateApplicationDTO::getStateId, new TextRequiredSpecification()),
-                MessageCatalogCodeEnum.FUN_151);
+                MessageCatalogCodeEnum.FUN_167);
     }
 }

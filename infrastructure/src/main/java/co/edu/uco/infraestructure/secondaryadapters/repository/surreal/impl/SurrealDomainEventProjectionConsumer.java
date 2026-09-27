@@ -110,12 +110,16 @@ public final class SurrealDomainEventProjectionConsumer {
         }
 
         final com.surrealdb.Object record = application.get();
+        final String organizationId = recordString(record.get("organization_id"));
         final String languageId = recordString(record.get("language_id"));
         final String stateId = recordString(record.get("state_id"));
 
         final String content = "{ "
                 + projectionHeader(event, "application_id")
                 + ", name: " + literal(record.get("name"))
+                + ", organization_id: " + quote(organizationId)
+                + ", organization: " + catalogLiteral(
+                        organizationId, findByRecordId(organizationId), "name")
                 + ", language_id: " + quote(languageId)
                 + ", language: " + catalogLiteral(languageId, findByRecordId(languageId), "language", "code")
                 + ", start_date: " + literal(record.get("start_date"))

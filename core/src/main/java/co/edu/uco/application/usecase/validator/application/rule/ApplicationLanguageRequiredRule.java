@@ -12,6 +12,6 @@ public final class ApplicationLanguageRequiredRule extends RuleValidator<CreateA
     public ApplicationLanguageRequiredRule(CatalogPort catalogPort) {
         super(catalogPort,
                 Specifications.field(CreateApplicationDTO::getLanguageId, new TextRequiredSpecification()),
-                MessageCatalogCodeEnum.FUN_147);
+                MessageCatalogCodeEnum.FUN_163);
     }
 }

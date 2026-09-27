@@ -29,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doReturn;
@@ -132,6 +133,7 @@ class TokenSurrealRepositoryAdapterImplTest {
 
         assertThat(result).isSameAs(model);
         verify(surreal).query(anyString());
+        verify(log).debug("msg");
     }
 
     @Test
@@ -143,7 +145,7 @@ class TokenSurrealRepositoryAdapterImplTest {
         assertThatThrownBy(() -> adapter.upsert(model))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("boom");
-        verify(log).error(anyString(), any(RuntimeException.class));
+        verify(log).error(eq("msg"), any(RuntimeException.class));
     }
 
     @Test
@@ -283,6 +285,16 @@ class TokenSurrealRepositoryAdapterImplTest {
         when(surreal.query(anyString())).thenReturn(null);
 
         assertThat(adapter.findTokenSurrealModelByEnvironmentIdAndStateId("env-1", "st-1")).isEmpty();
+    }
+
+    @Test
+    void findTokenSurrealModelById_logsGenericMessage_whenQueryFails() {
+        RuntimeException exception = new RuntimeException("boom");
+        when(surreal.query(anyString())).thenThrow(exception);
+
+        assertThatThrownBy(() -> adapter.findTokenSurrealModelById("sensitive-token"))
+                .isSameAs(exception);
+        verify(log).error("Error al consultar token en SurrealDB", exception);
     }
 
     @Test

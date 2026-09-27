@@ -9,7 +9,11 @@ import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.usecase.handling.HandlingFindMessageByCodeAndEnvironmentPort;
 import co.edu.uco.application.usecase.validator.message.FindMessageCodeValidator;
+import co.edu.uco.application.usecase.domain.security.MessageAccessContext;
+import co.edu.uco.application.usecase.domain.security.PermissionCode;
+import co.edu.uco.application.usecase.security.MessageEnvironmentResolver;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
+import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import org.springframework.stereotype.Component;
 
@@ -18,28 +22,33 @@ public final class FindMessageByCodeAndEnvironmentUseCase implements HandlingFin
     private final MessageCatalogStrategy messageCatalogStrategy;
     private final FindMessageCodeValidator findMessageCodeValidator;
     private final DataMapper<MessageData, MessageDomain, MessageDTO> entityMapper;
+    private final MessageEnvironmentResolver environmentResolver;
     private final LoggingPort log;
 
     public FindMessageByCodeAndEnvironmentUseCase(MessageCatalogStrategy messageCatalogStrategy, FindMessageCodeValidator findMessageCodeValidator,
-                                                  DataMapper<MessageData, MessageDomain, MessageDTO> entityMapper,
-                                                  LoggingPortFactory loggerFactory) {
+                                                   DataMapper<MessageData, MessageDomain, MessageDTO> entityMapper,
+                                                   MessageEnvironmentResolver environmentResolver,
+                                                   LoggingPortFactory loggerFactory) {
         this.messageCatalogStrategy = messageCatalogStrategy;
         this.findMessageCodeValidator = findMessageCodeValidator;
         this.entityMapper = entityMapper;
+        this.environmentResolver = environmentResolver;
         this.log = loggerFactory.getLogger(FindMessageByCodeAndEnvironmentUseCase.class);
     }
     @Override
-    public MessageDTO execute(String messageCode, String environmentId) {
+    public MessageDTO execute(String messageCode, MessageAccessContext context) {
+        String environmentId = null;
         try {
             findMessageCodeValidator.validate(messageCode);
+            environmentId = environmentResolver.resolve(context, PermissionCode.MESSAGE_READ);
             var messageDataOptional = messageCatalogStrategy
                     .getMessageByCodeAndEnvironment(messageCode, environmentId);
-            var messageData = messageDataOptional.orElseThrow(() -> {
+            if (messageDataOptional.isEmpty()) {
                 var errorMessage = String.format(messageCatalogStrategy.getSystemMessageContent(MessageCatalogCodeEnum.FUN_012.getCode()), messageCode, environmentId);
-                return BusinessException.buildUserException(errorMessage);
-            });
-            return entityMapper.mapperDTO(messageData);
-        } catch (BusinessException exception) {
+                throw BusinessException.buildUserException(errorMessage);
+            }
+            return entityMapper.mapperDTO(messageDataOptional.get());
+        } catch (CrossWordsException exception) {
             throw exception;
         } catch (Exception exception) {
             String errorMessage = String.format(messageCatalogStrategy.getSystemMessageContent(MessageCatalogCodeEnum.FUN_012.getCode()), messageCode, environmentId);

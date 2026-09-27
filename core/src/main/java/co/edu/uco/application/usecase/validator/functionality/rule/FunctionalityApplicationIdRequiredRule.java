@@ -12,6 +12,6 @@ public final class FunctionalityApplicationIdRequiredRule extends RuleValidator<
     public FunctionalityApplicationIdRequiredRule(CatalogPort catalogPort) {
         super(catalogPort,
                 Specifications.field(CreateFunctionalityDTO::getApplicationId, new TextRequiredSpecification()),
-                MessageCatalogCodeEnum.FUN_156);
+                MessageCatalogCodeEnum.FUN_172);
     }
 }

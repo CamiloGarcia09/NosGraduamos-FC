@@ -16,13 +16,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -32,6 +35,15 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CreateMessageSurrealAdapterTest {
+
+    private static final UUID MESSAGE_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614175701");
+    private static final UUID TYPE_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614175702");
+    private static final UUID CATEGORY_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614175703");
+    private static final UUID STATUS_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614175704");
+    private static final UUID APP_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614175705");
+    private static final UUID FUNCTIONALITY_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614175706");
+    private static final String ENVIRONMENT_ID = "123e4567-e89b-12d3-a456-426614175707";
+    private static final String MESSAGE_ENVIRONMENT_STATE_ID = "123e4567-e89b-12d3-a456-426614175708";
 
     @Mock
     private Surreal surreal;
@@ -58,26 +70,19 @@ class CreateMessageSurrealAdapterTest {
 
     private MessageData buildMessage() {
         MessageData message = MessageData.build();
-        message.setId(UUID.randomUUID());
+        message.setId(MESSAGE_ID);
         message.setCode("MSG-001");
         message.setTitle("A valid title");
         message.setContent("A valid content");
         message.setApplication("App");
 
-        MessageTypeData type = MessageTypeData.build();
-        type.setName("message_type:TEXT");
-        message.setType(type);
+        message.setType(new MessageTypeData(TYPE_ID, "TEXT"));
+        message.setCategory(new MessageCategoryData(CATEGORY_ID, "GENERAL"));
+        message.setStatus(new StatusMessageData(STATUS_ID, "ACTIVE"));
 
-        MessageCategoryData category = MessageCategoryData.build();
-        category.setName("GENERAL");
-        message.setCategory(category);
-
-        StatusMessageData status = StatusMessageData.build();
-        status.setName("ACTIVE");
-        message.setStatus(status);
-
-        ApplicationData application = ApplicationData.build();
+        ApplicationData application = ApplicationData.build(APP_ID, "App");
         FunctionalityData functionality = FunctionalityData.build();
+        functionality.setId(FUNCTIONALITY_ID);
         functionality.setName("Search");
         functionality.setApplication(application);
         message.setFunctionality(functionality);
@@ -85,12 +90,34 @@ class CreateMessageSurrealAdapterTest {
     }
 
     @Test
-    void createMessage_persistsMessageAndMessageEnvironment() {
+    void createMessage_persistsMessageAndMessageEnvironmentWithUuidRecordIds() {
         MessageData message = buildMessage();
 
-        adapter.createMessage(message, "env-1", "state-1");
+        adapter.createMessage(message, ENVIRONMENT_ID, MESSAGE_ENVIRONMENT_STATE_ID);
 
-        verify(surreal, times(2)).query(anyString());
+        ArgumentCaptor<String> queries = ArgumentCaptor.forClass(String.class);
+        verify(surreal, times(2)).query(queries.capture());
+        List<String> executed = queries.getAllValues();
+
+        String expectedMessageUpsert = "UPSERT message:`" + MESSAGE_ID + "` CONTENT { "
+                + "code: 'MSG-001', "
+                + "title: 'A valid title', "
+                + "content: 'A valid content', "
+                + "type_id: message_type:`" + TYPE_ID + "`, "
+                + "category_id: message_category:`" + CATEGORY_ID + "`, "
+                + "status_id: message_state:`" + STATUS_ID + "`, "
+                + "application_id: application:`" + APP_ID + "`, "
+                + "application: 'App', "
+                + "functionality_id: functionality:`" + FUNCTIONALITY_ID + "` };";
+
+        assertAll(
+                () -> assertThat(executed.get(0)).isEqualTo(expectedMessageUpsert),
+                () -> assertThat(executed.get(1))
+                        .startsWith("UPSERT message_environment:`")
+                        .contains("message_id: message:`" + MESSAGE_ID + "`")
+                        .contains("environment_id: environment:`" + ENVIRONMENT_ID + "`")
+                        .contains("state_data_id: message_environment_state:`"
+                                + MESSAGE_ENVIRONMENT_STATE_ID + "`"));
         verify(log, times(2)).info(anyString(), anyString());
     }
 
@@ -98,8 +125,10 @@ class CreateMessageSurrealAdapterTest {
     void createMessage_throwsBusinessException_whenQueryFails() {
         when(catalogPort.getMessage(anyString())).thenReturn("msg");
         doThrow(new RuntimeException("db down")).when(surreal).query(anyString());
+        MessageData message = buildMessage();
 
-        assertThatThrownBy(() -> adapter.createMessage(buildMessage(), "env-1", "state-1"))
+        assertThatThrownBy(() -> adapter.createMessage(message, ENVIRONMENT_ID,
+                MESSAGE_ENVIRONMENT_STATE_ID))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(ex -> assertThat(((BusinessException) ex).getTechnicalMessage())
                         .isEqualTo("msg"));

@@ -14,6 +14,6 @@ public final class EnvironmentNameMaxLengthRule extends RuleValidator<CreateEnvi
     public EnvironmentNameMaxLengthRule(CatalogPort catalogPort) {
         super(catalogPort,
                 Specifications.field(CreateEnvironmentDTO::getName, new TextMaxLengthSpecification(NAME_MAX_LENGTH)),
-                MessageCatalogCodeEnum.FUN_155);
+                MessageCatalogCodeEnum.FUN_171);
     }
 }

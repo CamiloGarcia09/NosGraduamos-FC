@@ -12,6 +12,6 @@ public final class EnvironmentApplicationIdRequiredRule extends RuleValidator<Cr
     public EnvironmentApplicationIdRequiredRule(CatalogPort catalogPort) {
         super(catalogPort,
                 Specifications.field(CreateEnvironmentDTO::getApplicationId, new TextRequiredSpecification()),
-                MessageCatalogCodeEnum.FUN_156);
+                MessageCatalogCodeEnum.FUN_172);
     }
 }

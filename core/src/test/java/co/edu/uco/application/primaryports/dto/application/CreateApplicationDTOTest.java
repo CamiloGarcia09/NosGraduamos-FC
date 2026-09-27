@@ -13,6 +13,7 @@ class CreateApplicationDTOTest {
 
         assertAll(
                 () -> assertEquals("", dto.getName()),
+                () -> assertEquals("", dto.getOrganizationId()),
                 () -> assertEquals("", dto.getLanguageId()),
                 () -> assertEquals("", dto.getStartDate()),
                 () -> assertEquals("", dto.getEndDate()),
@@ -23,6 +24,7 @@ class CreateApplicationDTOTest {
     void setters_trimValues() {
         CreateApplicationDTO dto = new CreateApplicationDTO();
         dto.setName("  App  ");
+        dto.setOrganizationId("  org-id  ");
         dto.setLanguageId("  lang  ");
         dto.setStartDate("  2025-01-01T00:00:00  ");
         dto.setEndDate("  2025-12-31T23:59:59  ");
@@ -30,6 +32,7 @@ class CreateApplicationDTOTest {
 
         assertAll(
                 () -> assertEquals("App", dto.getName()),
+                () -> assertEquals("org-id", dto.getOrganizationId()),
                 () -> assertEquals("lang", dto.getLanguageId()),
                 () -> assertEquals("2025-01-01T00:00:00", dto.getStartDate()),
                 () -> assertEquals("2025-12-31T23:59:59", dto.getEndDate()),
@@ -40,6 +43,7 @@ class CreateApplicationDTOTest {
     void builder_createsDtoWithValues() {
         CreateApplicationDTO dto = CreateApplicationDTO.builder()
                 .name("App")
+                .organizationId("org-id")
                 .languageId("lang")
                 .startDate("2025-01-01T00:00:00")
                 .endDate("2025-12-31T23:59:59")
@@ -48,6 +52,7 @@ class CreateApplicationDTOTest {
 
         assertAll(
                 () -> assertEquals("App", dto.getName()),
+                () -> assertEquals("org-id", dto.getOrganizationId()),
                 () -> assertEquals("lang", dto.getLanguageId()),
                 () -> assertEquals("2025-01-01T00:00:00", dto.getStartDate()),
                 () -> assertEquals("2025-12-31T23:59:59", dto.getEndDate()),

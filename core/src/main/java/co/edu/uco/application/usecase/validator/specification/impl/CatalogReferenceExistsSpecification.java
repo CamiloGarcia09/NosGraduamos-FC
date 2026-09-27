@@ -19,6 +19,7 @@ public final class CatalogReferenceExistsSpecification implements Specification<
 
     @Override
     public boolean isSatisfiedBy(String candidate) {
-        return recordExistsCatalogPort.exists(catalog, candidate);
+        return new ValidUuidSpecification().isSatisfiedBy(candidate)
+                && recordExistsCatalogPort.exists(catalog, candidate);
     }
 }

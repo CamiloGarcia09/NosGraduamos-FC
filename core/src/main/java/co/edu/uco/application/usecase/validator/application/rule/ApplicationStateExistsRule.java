@@ -15,6 +15,6 @@ public final class ApplicationStateExistsRule extends RuleValidator<CreateApplic
         super(catalogPort,
                 Specifications.field(CreateApplicationDTO::getStateId,
                         new CatalogReferenceExistsSpecification(recordExistsCatalogPort, ReferenceCatalog.APPLICATION_STATE)),
-                MessageCatalogCodeEnum.FUN_152);
+                MessageCatalogCodeEnum.FUN_168);
     }
 }

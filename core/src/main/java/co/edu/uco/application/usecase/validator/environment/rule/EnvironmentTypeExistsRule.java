@@ -15,6 +15,6 @@ public final class EnvironmentTypeExistsRule extends RuleValidator<CreateEnviron
         super(catalogPort,
                 Specifications.field(CreateEnvironmentDTO::getTypeId,
                         new CatalogReferenceExistsSpecification(recordExistsCatalogPort, ReferenceCatalog.ENVIRONMENT_TYPE)),
-                MessageCatalogCodeEnum.FUN_159);
+                MessageCatalogCodeEnum.FUN_175);
     }
 }

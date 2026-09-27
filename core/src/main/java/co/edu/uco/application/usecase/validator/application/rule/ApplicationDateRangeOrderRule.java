@@ -18,6 +18,6 @@ public final class ApplicationDateRangeOrderRule extends RuleValidator<CreateApp
                         application -> new DateTimeRange(parseDate(application.getStartDate()),
                                 parseDate(application.getEndDate())),
                         new DateRangeOrderSpecification()),
-                MessageCatalogCodeEnum.FUN_173);
+                MessageCatalogCodeEnum.FUN_189);
     }
 }

@@ -12,6 +12,6 @@ public final class EnvironmentNameRequiredRule extends RuleValidator<CreateEnvir
     public EnvironmentNameRequiredRule(CatalogPort catalogPort) {
         super(catalogPort,
                 Specifications.field(CreateEnvironmentDTO::getName, new TextRequiredSpecification()),
-                MessageCatalogCodeEnum.FUN_154);
+                MessageCatalogCodeEnum.FUN_170);
     }
 }

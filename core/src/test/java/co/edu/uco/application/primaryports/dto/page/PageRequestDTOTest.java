@@ -3,6 +3,7 @@ package co.edu.uco.application.primaryports.dto.page;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class PageRequestDTOTest {
 
@@ -81,6 +82,32 @@ class PageRequestDTOTest {
         b.setSort(null);
 
         assertThat(a).isNotEqualTo(b);
+    }
+
+    @Test
+    void equals_returnsTrue_whenComparingTheSameInstance() {
+        PageRequestDTO dto = buildPageRequest();
+
+        assertThat(dto).isEqualTo(dto);
+    }
+
+    @Test
+    void equals_returnsFalse_whenTheReceiverFieldIsNullAndTheOtherIsNot() {
+        PageRequestDTO empty = new PageRequestDTO();
+        PageRequestDTO withPage = new PageRequestDTO();
+        withPage.setPage("1");
+        PageRequestDTO withSize = new PageRequestDTO();
+        withSize.setSize("50");
+        PageRequestDTO withColumnSort = new PageRequestDTO();
+        withColumnSort.setColumnSort("code");
+        PageRequestDTO withSort = new PageRequestDTO();
+        withSort.setSort("DESC");
+
+        assertAll(
+                () -> assertThat(empty).isNotEqualTo(withPage),
+                () -> assertThat(empty).isNotEqualTo(withSize),
+                () -> assertThat(empty).isNotEqualTo(withColumnSort),
+                () -> assertThat(empty).isNotEqualTo(withSort));
     }
 
     @Test

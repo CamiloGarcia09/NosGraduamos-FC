@@ -12,6 +12,9 @@ import co.edu.uco.application.secondaryports.repository.SimplePageRequest;
 import co.edu.uco.application.usecase.handling.HandlingFindMessageEnvironmentPort;
 import co.edu.uco.application.usecase.validator.message.ListMessageValidator;
 import co.edu.uco.application.usecase.validator.page.PageRequestRangeValidator;
+import co.edu.uco.application.usecase.domain.security.MessageAccessContext;
+import co.edu.uco.application.usecase.domain.security.PermissionCode;
+import co.edu.uco.application.usecase.security.MessageEnvironmentResolver;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.CrossWordsException;
@@ -23,21 +26,25 @@ public final class FindMessageByEnvironmentUseCase implements HandlingFindMessag
     private final DataMapper<MessageData, MessageDomain,MessageDTO> entityMapper;
     private final ListMessageValidator listMessageValidator;
     private final PageRequestRangeValidator rangeValidator;
+    private final MessageEnvironmentResolver environmentResolver;
     private final LoggingPort log;
 
     public FindMessageByEnvironmentUseCase(MessageCatalogStrategy messageCatalogStrategy, DataMapper<MessageData, MessageDomain, MessageDTO> entityMapper,
-                                           ListMessageValidator listMessageValidator, PageRequestRangeValidator rangeValidator,
-                                           LoggingPortFactory loggerFactory) {
+                                            ListMessageValidator listMessageValidator, PageRequestRangeValidator rangeValidator,
+                                            MessageEnvironmentResolver environmentResolver,
+                                            LoggingPortFactory loggerFactory) {
         this.messageCatalogStrategy = messageCatalogStrategy;
         this.entityMapper = entityMapper;
         this.listMessageValidator = listMessageValidator;
         this.rangeValidator = rangeValidator;
+        this.environmentResolver = environmentResolver;
         this.log = loggerFactory.getLogger(FindMessageByEnvironmentUseCase.class);
     }
     @Override
-    public SimplePage<MessageDTO> execute(String environment, SimplePageRequest pageRequest) {
+    public SimplePage<MessageDTO> execute(MessageAccessContext context, SimplePageRequest pageRequest) {
         try {
             listMessageValidator.validate(pageRequest);
+            var environment = environmentResolver.resolve(context, PermissionCode.MESSAGE_READ);
             var page = messageCatalogStrategy.getMessagesWithEnvironment(environment, pageRequest);
             rangeValidator.validate(pageRequest.getPage(), page.getTotalPages());
             var messages = page.getData().stream().map(entityMapper::mapperDTO).toList();

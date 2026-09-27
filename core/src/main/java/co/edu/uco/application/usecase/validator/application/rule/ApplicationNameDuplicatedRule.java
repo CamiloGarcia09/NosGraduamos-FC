@@ -12,6 +12,6 @@ public final class ApplicationNameDuplicatedRule extends RuleValidator<CreateApp
     public ApplicationNameDuplicatedRule(CatalogPort catalogPort, ApplicationRepository applicationRepository) {
         super(catalogPort,
                 Specifications.field(CreateApplicationDTO::getName, name -> applicationRepository.findByName(name).isEmpty()),
-                MessageCatalogCodeEnum.FUN_153);
+                MessageCatalogCodeEnum.FUN_169);
     }
 }

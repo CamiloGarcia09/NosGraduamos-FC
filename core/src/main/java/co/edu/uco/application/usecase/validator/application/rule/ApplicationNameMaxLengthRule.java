@@ -14,6 +14,6 @@ public final class ApplicationNameMaxLengthRule extends RuleValidator<CreateAppl
     public ApplicationNameMaxLengthRule(CatalogPort catalogPort) {
         super(catalogPort,
                 Specifications.field(CreateApplicationDTO::getName, new TextMaxLengthSpecification(NAME_MAX_LENGTH)),
-                MessageCatalogCodeEnum.FUN_146);
+                MessageCatalogCodeEnum.FUN_162);
     }
 }

@@ -12,6 +12,6 @@ public final class EnvironmentApplicationExistsRule extends RuleValidator<Create
     public EnvironmentApplicationExistsRule(CatalogPort catalogPort, ApplicationRepository applicationRepository) {
         super(catalogPort,
                 Specifications.field(CreateEnvironmentDTO::getApplicationId, applicationRepository::existsById),
-                MessageCatalogCodeEnum.FUN_157);
+                MessageCatalogCodeEnum.FUN_173);
     }
 }

@@ -1,6 +1,8 @@
 package co.edu.uco.application.usecase;
 
 import co.edu.uco.application.primaryports.dto.catalog.CatalogItemDTO;
+import co.edu.uco.application.primaryports.dto.context.ActiveContextDTO;
+import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.entity.EnvironmentData;
 import co.edu.uco.application.secondaryports.entity.FunctionalityData;
@@ -15,6 +17,14 @@ import co.edu.uco.application.secondaryports.repository.MessageCategoryCatalogRe
 import co.edu.uco.application.secondaryports.repository.MessageEnvironmentStateCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.MessageStateCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.MessageTypeCatalogRepository;
+import co.edu.uco.application.secondaryports.security.AuthorizationQueryPort;
+import co.edu.uco.application.usecase.domain.security.AuthorizationScopeType;
+import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
+import co.edu.uco.application.usecase.domain.security.PermissionCode;
+import co.edu.uco.application.usecase.domain.security.PrincipalType;
+import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
+import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
+import co.edu.uco.crosscutting.exceptions.ForbiddenException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -22,15 +32,24 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.UUID;
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.doThrow;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 class FindCatalogUseCaseTest {
 
     private static final UUID ID = UUID.fromString("123e4567-e89b-12d3-a456-426614175000");
+    private static final UUID OTHER_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614175001");
+    private static final ExternalIdentity IDENTITY = new ExternalIdentity(
+            "issuer", "subject", null, PrincipalType.HUMAN, Instant.MAX);
 
     @Mock
     private ApplicationCatalogRepository applicationCatalogRepository;
@@ -46,18 +65,31 @@ class FindCatalogUseCaseTest {
     private MessageStateCatalogRepository messageStateCatalogRepository;
     @Mock
     private MessageEnvironmentStateCatalogRepository messageEnvironmentStateCatalogRepository;
+    @Mock
+    private AuthorizationQueryPort authorizationQueryPort;
+    @Mock
+    private AuthorizationCompositeValidator authorizationCompositeValidator;
+    @Mock
+    private HandlingActiveContextPort activeContextPort;
+    @Mock
+    private CatalogPort catalogPort;
+
+    private void stubActiveContextForApplication() {
+        when(activeContextPort.findActiveContext(IDENTITY)).thenReturn(
+                ActiveContextDTO.builder().applicationId(ID.toString()).build());
+    }
 
     @Test
     void findApplications_mapsIdAndName() {
         when(applicationCatalogRepository.findAll()).thenReturn(List.of(new ApplicationData(ID, "App")));
         FindCatalogUseCase useCase = buildUseCase();
 
-        List<CatalogItemDTO> result = useCase.findApplications();
+        List<CatalogItemDTO> result = useCase.findApplications(null);
 
         assertThat(result).hasSize(1);
         assertAll(
-                () -> assertThat(result.get(0).id()).isEqualTo(ID.toString()),
-                () -> assertThat(result.get(0).name()).isEqualTo("App"));
+                () -> assertThat(result.get(0).getId()).isEqualTo(ID.toString()),
+                () -> assertThat(result.get(0).getName()).isEqualTo("App"));
     }
 
     @Test
@@ -65,7 +97,7 @@ class FindCatalogUseCaseTest {
         when(applicationCatalogRepository.findAll()).thenReturn(List.of());
         FindCatalogUseCase useCase = buildUseCase();
 
-        assertThat(useCase.findApplications()).isEmpty();
+        assertThat(useCase.findApplications(null)).isEmpty();
     }
 
     @Test
@@ -74,12 +106,12 @@ class FindCatalogUseCaseTest {
                 .thenReturn(List.of(new EnvironmentData(ID, "Prod", new ApplicationData())));
         FindCatalogUseCase useCase = buildUseCase();
 
-        List<CatalogItemDTO> result = useCase.findEnvironmentsByApplication("app-1");
+        List<CatalogItemDTO> result = useCase.findEnvironmentsByApplication("app-1", null);
 
         assertThat(result).hasSize(1);
         assertAll(
-                () -> assertThat(result.get(0).id()).isEqualTo(ID.toString()),
-                () -> assertThat(result.get(0).name()).isEqualTo("Prod"));
+                () -> assertThat(result.get(0).getId()).isEqualTo(ID.toString()),
+                () -> assertThat(result.get(0).getName()).isEqualTo("Prod"));
     }
 
     @Test
@@ -88,12 +120,12 @@ class FindCatalogUseCaseTest {
                 .thenReturn(List.of(new FunctionalityData(ID, "Search", new ApplicationData(), null, null)));
         FindCatalogUseCase useCase = buildUseCase();
 
-        List<CatalogItemDTO> result = useCase.findFunctionalitiesByApplication("app-1");
+        List<CatalogItemDTO> result = useCase.findFunctionalitiesByApplication("app-1", null);
 
         assertThat(result).hasSize(1);
         assertAll(
-                () -> assertThat(result.get(0).id()).isEqualTo(ID.toString()),
-                () -> assertThat(result.get(0).name()).isEqualTo("Search"));
+                () -> assertThat(result.get(0).getId()).isEqualTo(ID.toString()),
+                () -> assertThat(result.get(0).getName()).isEqualTo("Search"));
     }
 
     @Test
@@ -105,8 +137,8 @@ class FindCatalogUseCaseTest {
 
         assertThat(result).hasSize(1);
         assertAll(
-                () -> assertThat(result.get(0).id()).isEqualTo(ID.toString()),
-                () -> assertThat(result.get(0).name()).isEqualTo("TEXT"));
+                () -> assertThat(result.get(0).getId()).isEqualTo(ID.toString()),
+                () -> assertThat(result.get(0).getName()).isEqualTo("TEXT"));
     }
 
     @Test
@@ -118,8 +150,8 @@ class FindCatalogUseCaseTest {
 
         assertThat(result).hasSize(1);
         assertAll(
-                () -> assertThat(result.get(0).id()).isEqualTo(ID.toString()),
-                () -> assertThat(result.get(0).name()).isEqualTo("GENERAL"));
+                () -> assertThat(result.get(0).getId()).isEqualTo(ID.toString()),
+                () -> assertThat(result.get(0).getName()).isEqualTo("GENERAL"));
     }
 
     @Test
@@ -131,8 +163,8 @@ class FindCatalogUseCaseTest {
 
         assertThat(result).hasSize(1);
         assertAll(
-                () -> assertThat(result.get(0).id()).isEqualTo(ID.toString()),
-                () -> assertThat(result.get(0).name()).isEqualTo("ACTIVE"));
+                () -> assertThat(result.get(0).getId()).isEqualTo(ID.toString()),
+                () -> assertThat(result.get(0).getName()).isEqualTo("ACTIVE"));
     }
 
     @Test
@@ -145,8 +177,175 @@ class FindCatalogUseCaseTest {
 
         assertThat(result).hasSize(1);
         assertAll(
-                () -> assertThat(result.get(0).id()).isEqualTo(ID.toString()),
-                () -> assertThat(result.get(0).name()).isEqualTo("PENDING"));
+                () -> assertThat(result.get(0).getId()).isEqualTo(ID.toString()),
+                () -> assertThat(result.get(0).getName()).isEqualTo("PENDING"));
+    }
+
+    @Test
+    void findApplications_filtersAuthorizedIdsAcrossOrganizations() {
+        when(authorizationQueryPort.findAuthorizedApplicationIds(IDENTITY, PermissionCode.CONTEXT_SELECT))
+                .thenReturn(List.of(OTHER_ID));
+        when(applicationCatalogRepository.findAll()).thenReturn(List.of(
+                new ApplicationData(ID, "First organization app"),
+                new ApplicationData(OTHER_ID, "Second organization app")));
+
+        List<CatalogItemDTO> result = buildUseCase().findApplications(IDENTITY);
+
+        assertThat(result).extracting(CatalogItemDTO::getId).containsExactly(OTHER_ID.toString());
+    }
+
+    @Test
+    void findApplications_preservesLegacyBehaviorWithoutIdentity() {
+        when(applicationCatalogRepository.findAll()).thenReturn(List.of(new ApplicationData(ID, "App")));
+
+        assertThat(buildUseCase().findApplications(null)).hasSize(1);
+        verify(authorizationQueryPort, never()).findAuthorizedApplicationIds(null, PermissionCode.CONTEXT_SELECT);
+    }
+
+    @Test
+    void findEnvironmentsByApplication_allowsEnvironmentOnlyAssignmentAndFiltersResults() {
+        stubActiveContextForApplication();
+        when(authorizationQueryPort.findAuthorizedEnvironmentIds(IDENTITY, PermissionCode.CONTEXT_SELECT, ID))
+                .thenReturn(List.of(OTHER_ID));
+        when(environmentCatalogRepository.findAllByApplicationId(ID.toString())).thenReturn(List.of(
+                new EnvironmentData(ID, "Dev", new ApplicationData()),
+                new EnvironmentData(OTHER_ID, "Prod", new ApplicationData())));
+
+        List<CatalogItemDTO> result = buildUseCase().findEnvironmentsByApplication(ID.toString(), IDENTITY);
+
+        assertThat(result).extracting(CatalogItemDTO::getId).containsExactly(OTHER_ID.toString());
+        verify(authorizationCompositeValidator, never()).validate(IDENTITY, PermissionCode.CONTEXT_SELECT,
+                AuthorizationScopeType.APPLICATION, ID);
+    }
+
+    @Test
+    void findEnvironmentsByApplication_deniesWhenNeitherApplicationNorEnvironmentIsAuthorized() {
+        stubActiveContextForApplication();
+        when(authorizationQueryPort.findAuthorizedEnvironmentIds(IDENTITY, PermissionCode.CONTEXT_SELECT, ID))
+                .thenReturn(List.of());
+        ForbiddenException denied = ForbiddenException.buildUserException("Permission denied");
+        doThrow(denied).when(authorizationCompositeValidator).validate(
+                IDENTITY, PermissionCode.CONTEXT_SELECT, AuthorizationScopeType.APPLICATION, ID);
+
+        FindCatalogUseCase useCase = buildUseCase();
+        String applicationId = ID.toString();
+        assertThatThrownBy(() -> useCase
+                        .findEnvironmentsByApplication(applicationId, IDENTITY))
+                .isSameAs(denied);
+    }
+
+    @Test
+    void findEnvironmentsByApplication_allowsApplicationAssignmentWhenNoEnvironmentsExist() {
+        stubActiveContextForApplication();
+        when(authorizationQueryPort.findAuthorizedEnvironmentIds(IDENTITY, PermissionCode.CONTEXT_SELECT, ID))
+                .thenReturn(List.of());
+        when(environmentCatalogRepository.findAllByApplicationId(ID.toString())).thenReturn(List.of());
+
+        List<CatalogItemDTO> result = buildUseCase().findEnvironmentsByApplication(ID.toString(), IDENTITY);
+
+        assertThat(result).isEmpty();
+        verify(authorizationCompositeValidator).validate(IDENTITY, PermissionCode.CONTEXT_SELECT,
+                AuthorizationScopeType.APPLICATION, ID);
+    }
+
+    @Test
+    void findFunctionalitiesByApplication_requiresApplicationPermission() {
+        stubActiveContextForApplication();
+        when(functionalityCatalogRepository.findAllByApplicationId(ID.toString())).thenReturn(List.of());
+
+        buildUseCase().findFunctionalitiesByApplication(ID.toString(), IDENTITY);
+
+        verify(authorizationCompositeValidator).validate(IDENTITY, PermissionCode.CONTEXT_SELECT,
+                AuthorizationScopeType.APPLICATION, ID);
+    }
+
+    @Test
+    void findEnvironmentsByApplication_throwsForbidden_whenApplicationOutsideActiveContext() {
+        when(activeContextPort.findActiveContext(IDENTITY)).thenReturn(
+                ActiveContextDTO.builder().applicationId(OTHER_ID.toString()).build());
+        when(catalogPort.getMessage("FUN_153")).thenReturn("Fuera del contexto activo");
+        FindCatalogUseCase useCase = buildUseCase();
+
+        String applicationId = ID.toString();
+        assertThatThrownBy(() -> useCase
+                .findEnvironmentsByApplication(applicationId, IDENTITY))
+                .isInstanceOf(ForbiddenException.class)
+                .satisfies(exception -> assertThat((ForbiddenException) exception)
+                        .extracting(ForbiddenException::getUserMessage, ForbiddenException::getHttpStatus)
+                        .containsExactly("Fuera del contexto activo", 403));
+        verifyNoInteractions(environmentCatalogRepository, authorizationQueryPort, authorizationCompositeValidator);
+    }
+
+    @Test
+    void findEnvironmentsByApplication_throwsForbidden_whenActiveContextDoesNotExist() {
+        when(catalogPort.getMessage("FUN_153")).thenReturn("Fuera del contexto activo");
+        FindCatalogUseCase useCase = buildUseCase();
+
+        String applicationId = ID.toString();
+        assertThatThrownBy(() -> useCase
+                .findEnvironmentsByApplication(applicationId, IDENTITY))
+                .isInstanceOf(ForbiddenException.class)
+                .satisfies(exception -> assertThat((ForbiddenException) exception)
+                        .extracting(ForbiddenException::getUserMessage, ForbiddenException::getHttpStatus)
+                        .containsExactly("Fuera del contexto activo", 403));
+        verifyNoInteractions(environmentCatalogRepository, authorizationQueryPort, authorizationCompositeValidator);
+    }
+
+    @Test
+    void findEnvironmentsByApplication_withoutIdentitySkipsActiveContextCheck() {
+        when(environmentCatalogRepository.findAllByApplicationId(ID.toString()))
+                .thenReturn(List.of(new EnvironmentData(ID, "Dev", new ApplicationData())));
+
+        List<CatalogItemDTO> result = buildUseCase().findEnvironmentsByApplication(ID.toString(), null);
+
+        assertThat(result).extracting(CatalogItemDTO::getId).containsExactly(ID.toString());
+        verifyNoInteractions(activeContextPort, authorizationQueryPort, authorizationCompositeValidator, catalogPort);
+    }
+
+    @Test
+    void findFunctionalitiesByApplication_throwsForbidden_whenApplicationOutsideActiveContext() {
+        when(activeContextPort.findActiveContext(IDENTITY)).thenReturn(
+                ActiveContextDTO.builder().applicationId(OTHER_ID.toString()).build());
+        when(catalogPort.getMessage("FUN_153")).thenReturn("Fuera del contexto activo");
+        FindCatalogUseCase useCase = buildUseCase();
+
+        String applicationId = ID.toString();
+        assertThatThrownBy(() -> useCase
+                .findFunctionalitiesByApplication(applicationId, IDENTITY))
+                .isInstanceOf(ForbiddenException.class)
+                .satisfies(exception -> assertThat((ForbiddenException) exception)
+                        .extracting(ForbiddenException::getUserMessage, ForbiddenException::getHttpStatus)
+                        .containsExactly("Fuera del contexto activo", 403));
+        verifyNoInteractions(functionalityCatalogRepository, authorizationCompositeValidator);
+    }
+
+    @Test
+    void findFunctionalitiesByApplication_throwsForbidden_whenActiveContextDoesNotExist() {
+        when(catalogPort.getMessage("FUN_153")).thenReturn("Fuera del contexto activo");
+        FindCatalogUseCase useCase = buildUseCase();
+
+        String applicationId = ID.toString();
+        assertThatThrownBy(() -> useCase
+                .findFunctionalitiesByApplication(applicationId, IDENTITY))
+                .isInstanceOf(ForbiddenException.class)
+                .satisfies(exception -> assertThat((ForbiddenException) exception)
+                        .extracting(ForbiddenException::getUserMessage, ForbiddenException::getHttpStatus)
+                        .containsExactly("Fuera del contexto activo", 403));
+        verifyNoInteractions(functionalityCatalogRepository, authorizationCompositeValidator);
+    }
+
+    @Test
+    void findFunctionalitiesByApplication_propagatesForbiddenFromAuthorizationCompositeValidator() {
+        stubActiveContextForApplication();
+        ForbiddenException denied = ForbiddenException.buildUserException("Permission denied");
+        doThrow(denied).when(authorizationCompositeValidator).validate(
+                IDENTITY, PermissionCode.CONTEXT_SELECT, AuthorizationScopeType.APPLICATION, ID);
+        FindCatalogUseCase useCase = buildUseCase();
+
+        String applicationId = ID.toString();
+        assertThatThrownBy(() -> useCase
+                .findFunctionalitiesByApplication(applicationId, IDENTITY)).isSameAs(denied);
+        verifyNoInteractions(functionalityCatalogRepository);
     }
 
     private FindCatalogUseCase buildUseCase() {
@@ -157,6 +356,10 @@ class FindCatalogUseCaseTest {
                 messageTypeCatalogRepository,
                 messageCategoryCatalogRepository,
                 messageStateCatalogRepository,
-                messageEnvironmentStateCatalogRepository);
+                messageEnvironmentStateCatalogRepository,
+                authorizationQueryPort,
+                authorizationCompositeValidator,
+                activeContextPort,
+                catalogPort);
     }
 }

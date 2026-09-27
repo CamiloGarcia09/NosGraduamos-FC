@@ -12,6 +12,6 @@ public final class FunctionalityNameRequiredRule extends RuleValidator<CreateFun
     public FunctionalityNameRequiredRule(CatalogPort catalogPort) {
         super(catalogPort,
                 Specifications.field(CreateFunctionalityDTO::getName, new TextRequiredSpecification()),
-                MessageCatalogCodeEnum.FUN_163);
+                MessageCatalogCodeEnum.FUN_179);
     }
 }

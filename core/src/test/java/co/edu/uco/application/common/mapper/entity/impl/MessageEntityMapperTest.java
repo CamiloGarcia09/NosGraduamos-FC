@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -67,13 +68,14 @@ class MessageEntityMapperTest {
     void mapperDTO_buildsDtoFromEntityComposites() {
         MessageDTO dto = mapper.mapperDTO(messageData());
 
-        assertThat(dto.code()).isEqualTo("CODE");
-        assertThat(dto.title()).isEqualTo("Title");
-        assertThat(dto.content()).isEqualTo("Content");
-        assertThat(dto.type()).isEqualTo("info");
-        assertThat(dto.category()).isEqualTo("general");
-        assertThat(dto.application()).isEqualTo("app");
-        assertThat(dto.functionality()).isEqualTo("func");
+        assertAll(
+                () -> assertThat(dto.getCode()).isEqualTo("CODE"),
+                () -> assertThat(dto.getTitle()).isEqualTo("Title"),
+                () -> assertThat(dto.getContent()).isEqualTo("Content"),
+                () -> assertThat(dto.getType()).isEqualTo("info"),
+                () -> assertThat(dto.getCategory()).isEqualTo("general"),
+                () -> assertThat(dto.getApplication()).isEqualTo("app"),
+                () -> assertThat(dto.getFunctionality()).isEqualTo("func"));
     }
 
     @Test
@@ -86,8 +88,9 @@ class MessageEntityMapperTest {
 
         MessageDTO dto = mapper.mapperDTO(message);
 
-        assertThat(dto.type()).isEmpty();
-        assertThat(dto.category()).isEmpty();
-        assertThat(dto.functionality()).isEmpty();
+        assertAll(
+                () -> assertThat(dto.getType()).isEmpty(),
+                () -> assertThat(dto.getCategory()).isEmpty(),
+                () -> assertThat(dto.getFunctionality()).isEmpty());
     }
 }

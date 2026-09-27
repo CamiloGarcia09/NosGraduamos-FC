@@ -3,10 +3,13 @@ package co.edu.uco.infraestructure.primaryadapters.controller;
 import co.edu.uco.application.primaryports.dto.catalog.CatalogItemDTO;
 import co.edu.uco.application.primaryports.facade.catalog.FindCatalogUseCaseFacade;
 import co.edu.uco.application.secondaryports.presenter.PresenterPort;
+import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.infraestructure.primaryadapters.CatalogController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.RestController;
+
+import static co.edu.uco.infraestructure.config.InfrastructureConstant.EXTERNAL_IDENTITY_ATTRIBUTE;
 
 @RestController
 final class CatalogControllerImpl implements CatalogController {
@@ -22,21 +25,23 @@ final class CatalogControllerImpl implements CatalogController {
 
     @Override
     public void getApplications(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
-        var list = findCatalogUseCaseFacade.findApplications();
+        var list = findCatalogUseCaseFacade.findApplications(identity(httpServletRequest));
         restPresenter.presentRestSuccess(list, httpServletRequest, httpServletResponse);
     }
 
     @Override
     public void getEnvironmentsByApplication(String applicationId, HttpServletRequest httpServletRequest,
                                             HttpServletResponse httpServletResponse) {
-        var list = findCatalogUseCaseFacade.findEnvironmentsByApplication(applicationId);
+        var list = findCatalogUseCaseFacade.findEnvironmentsByApplication(
+                applicationId, identity(httpServletRequest));
         restPresenter.presentRestSuccess(list, httpServletRequest, httpServletResponse);
     }
 
     @Override
     public void getFunctionalitiesByApplication(String applicationId, HttpServletRequest httpServletRequest,
                                                HttpServletResponse httpServletResponse) {
-        var list = findCatalogUseCaseFacade.findFunctionalitiesByApplication(applicationId);
+        var list = findCatalogUseCaseFacade.findFunctionalitiesByApplication(
+                applicationId, identity(httpServletRequest));
         restPresenter.presentRestSuccess(list, httpServletRequest, httpServletResponse);
     }
 
@@ -62,5 +67,9 @@ final class CatalogControllerImpl implements CatalogController {
     public void getMessageEnvironmentStates(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         var list = findCatalogUseCaseFacade.findMessageEnvironmentStates();
         restPresenter.presentRestSuccess(list, httpServletRequest, httpServletResponse);
+    }
+
+    private ExternalIdentity identity(final HttpServletRequest request) {
+        return (ExternalIdentity) request.getAttribute(EXTERNAL_IDENTITY_ATTRIBUTE);
     }
 }

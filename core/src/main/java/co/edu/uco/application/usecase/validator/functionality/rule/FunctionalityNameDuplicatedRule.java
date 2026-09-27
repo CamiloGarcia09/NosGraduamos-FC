@@ -12,6 +12,6 @@ public final class FunctionalityNameDuplicatedRule extends RuleValidator<CreateF
         super(catalogPort,
                 functionality -> !functionalityRepository.existsByNameAndApplicationId(functionality.getName(),
                         functionality.getApplicationId()),
-                MessageCatalogCodeEnum.FUN_170);
+                MessageCatalogCodeEnum.FUN_186);
     }
 }

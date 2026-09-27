@@ -12,6 +12,6 @@ public final class FunctionalityStateRequiredRule extends RuleValidator<CreateFu
     public FunctionalityStateRequiredRule(CatalogPort catalogPort) {
         super(catalogPort,
                 Specifications.field(CreateFunctionalityDTO::getStateId, new TextRequiredSpecification()),
-                MessageCatalogCodeEnum.FUN_168);
+                MessageCatalogCodeEnum.FUN_184);
     }
 }

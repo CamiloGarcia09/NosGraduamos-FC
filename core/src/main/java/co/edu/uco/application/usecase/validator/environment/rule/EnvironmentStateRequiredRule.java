@@ -12,6 +12,6 @@ public final class EnvironmentStateRequiredRule extends RuleValidator<CreateEnvi
     public EnvironmentStateRequiredRule(CatalogPort catalogPort) {
         super(catalogPort,
                 Specifications.field(CreateEnvironmentDTO::getStateId, new TextRequiredSpecification()),
-                MessageCatalogCodeEnum.FUN_160);
+                MessageCatalogCodeEnum.FUN_176);
     }
 }
