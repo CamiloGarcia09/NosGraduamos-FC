@@ -22,13 +22,13 @@ public final class MessageSurrealModel {
     private String typeId;
     private String categoryId;
     private String statusId;
-    private String application;
+    private String applicationId;
     private String functionalityId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public MessageSurrealModel(UUID id, String code, String title, String content, String typeId,
-                               String categoryId, String statusId, String application, String functionalityId,
+                               String categoryId, String statusId, String applicationId, String functionalityId,
                                LocalDateTime createdAt, LocalDateTime updatedAt) {
         setId(id);
         setCode(code);
@@ -37,7 +37,7 @@ public final class MessageSurrealModel {
         setTypeId(typeId);
         setCategoryId(categoryId);
         setStatusId(statusId);
-        setApplication(application);
+        setApplicationId(applicationId);
         setFunctionalityId(functionalityId);
         setCreatedAt(createdAt);
         setUpdatedAt(updatedAt);
@@ -51,7 +51,7 @@ public final class MessageSurrealModel {
         setTypeId(EMPTY);
         setCategoryId(EMPTY);
         setStatusId(EMPTY);
-        setApplication(EMPTY);
+        setApplicationId(EMPTY);
         setFunctionalityId(EMPTY);
         setCreatedAt(nowUtc());
         setUpdatedAt(nowUtc());
@@ -85,8 +85,8 @@ public final class MessageSurrealModel {
         this.statusId = trim(statusId);
     }
 
-    public void setApplication(String application) {
-        this.application = trim(application);
+    public void setApplicationId(String applicationId) {
+        this.applicationId = trim(applicationId);
     }
 
     public void setFunctionalityId(String functionalityId) {

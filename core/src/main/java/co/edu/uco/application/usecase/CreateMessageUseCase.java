@@ -19,6 +19,8 @@ import co.edu.uco.crosscutting.exceptions.CrossWordsException;
 import co.edu.uco.crosscutting.helpers.UtilUUID;
 import org.springframework.stereotype.Component;
 
+import static co.edu.uco.crosscutting.helpers.UtilText.EMPTY;
+
 @Component
 public final class CreateMessageUseCase implements HandlingCreateMessagePort {
 
@@ -52,13 +54,11 @@ public final class CreateMessageUseCase implements HandlingCreateMessagePort {
                     dto.getContent(),
                     new MessageTypeData(UtilUUID.getStringToUUID(dto.getTypeId()), ""),
                     new MessageCategoryData(UtilUUID.getStringToUUID(dto.getCategoryId()), ""),
-                    dto.getApplication(),
+                    EMPTY,
                     new FunctionalityData(
                             UtilUUID.getStringToUUID(dto.getFunctionalityId()),
                             "",
-                            ApplicationData.build(UtilUUID.getStringToUUID(dto.getApplicationId()), dto.getApplication()),
-                            null,
-                            null
+                            ApplicationData.build(UtilUUID.getStringToUUID(dto.getApplicationId()), EMPTY)
                     )
             );
             messageData.setStatus(new StatusMessageData(UtilUUID.getStringToUUID(dto.getStatusId()), ""));

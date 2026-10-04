@@ -11,9 +11,7 @@ import org.springframework.stereotype.Component;
 import co.edu.uco.application.usecase.validator.environment.rule.EnvironmentApplicationExistsRule;
 import co.edu.uco.application.usecase.validator.environment.rule.EnvironmentApplicationIdRequiredRule;
 import co.edu.uco.application.usecase.validator.environment.rule.EnvironmentApplicationIdUuidRule;
-import co.edu.uco.application.usecase.validator.environment.rule.EnvironmentNameDuplicatedRule;
-import co.edu.uco.application.usecase.validator.environment.rule.EnvironmentNameMaxLengthRule;
-import co.edu.uco.application.usecase.validator.environment.rule.EnvironmentNameRequiredRule;
+import co.edu.uco.application.usecase.validator.environment.rule.EnvironmentTypeDuplicatedRule;
 import co.edu.uco.application.usecase.validator.environment.rule.EnvironmentStateExistsRule;
 import co.edu.uco.application.usecase.validator.environment.rule.EnvironmentStateRequiredRule;
 import co.edu.uco.application.usecase.validator.environment.rule.EnvironmentTypeExistsRule;
@@ -29,8 +27,6 @@ public final class CreateEnvironmentCompositeValidator extends CompositeValidato
                                                ApplicationRepository applicationRepository,
                                                EnvironmentRepository environmentRepository) {
         super(List.of(
-                new EnvironmentNameRequiredRule(catalogPort),
-                new EnvironmentNameMaxLengthRule(catalogPort),
                 new EnvironmentApplicationIdRequiredRule(catalogPort),
                 new EnvironmentApplicationIdUuidRule(catalogPort),
                 new EnvironmentApplicationExistsRule(catalogPort, applicationRepository),
@@ -38,7 +34,7 @@ public final class CreateEnvironmentCompositeValidator extends CompositeValidato
                 new EnvironmentTypeExistsRule(catalogPort, recordExistsCatalogPort),
                 new EnvironmentStateRequiredRule(catalogPort),
                 new EnvironmentStateExistsRule(catalogPort, recordExistsCatalogPort),
-                new EnvironmentNameDuplicatedRule(catalogPort, environmentRepository)
+                new EnvironmentTypeDuplicatedRule(catalogPort, environmentRepository)
         ), catalogPort);
     }
 }

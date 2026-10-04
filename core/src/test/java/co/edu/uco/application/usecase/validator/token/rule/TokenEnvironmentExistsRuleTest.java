@@ -4,6 +4,7 @@ import co.edu.uco.application.primaryports.dto.token.CreateTokenDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.entity.EnvironmentData;
+import co.edu.uco.application.secondaryports.entity.EnvironmentTypeData;
 import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
 import co.edu.uco.application.usecase.validator.token.TokenValidationContext;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
@@ -49,8 +50,9 @@ class TokenEnvironmentExistsRuleTest {
     @Test
     void validate_doesNotThrow_whenEnvironmentExists() {
         when(environmentRepository.findById(anyString()))
-                .thenReturn(Optional.of(new EnvironmentData(UUID.fromString(ENVIRONMENT_ID), "Production",
-                        new ApplicationData(UUID.fromString(APPLICATION_ID), "Message App"))));
+                .thenReturn(Optional.of(new EnvironmentData(UUID.fromString(ENVIRONMENT_ID),
+                        new ApplicationData(UUID.fromString(APPLICATION_ID), "Message App"),
+                        new EnvironmentTypeData(UUID.randomUUID(), "Production"))));
 
         assertDoesNotThrow(() -> rule.validate(context()));
     }

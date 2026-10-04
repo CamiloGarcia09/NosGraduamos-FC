@@ -2,7 +2,6 @@ package co.edu.uco.application.primaryports.facade.environment.impl;
 
 import co.edu.uco.application.primaryports.dto.environment.CreateEnvironmentDTO;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.application.usecase.handling.HandlingCreateEnvironmentPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,7 @@ class CreateEnvironmentUseCaseFacadeImplTest {
     void execute_delegatesEnvironmentAndIdentity() {
         CreateEnvironmentDTO dto = new CreateEnvironmentDTO();
         ExternalIdentity identity = new ExternalIdentity(
-                "issuer", "subject", "user@example.com", PrincipalType.HUMAN, Instant.MAX);
+                "issuer", "subject", "user@example.com", Instant.MAX);
 
         facade.execute(dto, identity);
 

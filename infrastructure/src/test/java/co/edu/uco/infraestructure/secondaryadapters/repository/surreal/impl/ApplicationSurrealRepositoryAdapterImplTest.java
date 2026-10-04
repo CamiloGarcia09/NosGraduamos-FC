@@ -17,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -183,14 +182,11 @@ class ApplicationSurrealRepositoryAdapterImplTest {
         organization.setId(organizationId);
         organization.setName("UCO");
         ApplicationData application = ApplicationData.build(applicationId, "App", organization);
-        LocalDateTime startDate = LocalDateTime.of(2025, 1, 1, 10, 15, 30);
-        LocalDateTime endDate = LocalDateTime.of(2025, 12, 31, 18, 45, 0);
         String expectedUpsert = "UPSERT application:`123e4567-e89b-12d3-a456-426614174000` CONTENT { "
                 + "name: 'App', organization_id: organization:`223e4567-e89b-12d3-a456-426614174000`, "
-                + "language_id: language_base:`lang-1`, start_date: d'2025-01-01T10:15:30Z', "
-                + "end_date: d'2025-12-31T18:45:00Z', state_id: application_state:`state-1` };";
+                + "language_id: language_base:`lang-1`, state_id: application_state:`state-1` };";
 
-        adapter.create(application, "lang-1", startDate, endDate, "state-1");
+        adapter.create(application, "lang-1", "state-1");
 
         verify(surreal).query(expectedUpsert);
         verify(log).info("Executing SurrealQL upsert application: {}", expectedUpsert);
@@ -202,7 +198,7 @@ class ApplicationSurrealRepositoryAdapterImplTest {
         ApplicationData application = ApplicationData.build();
         doThrow(new RuntimeException("db down")).when(surreal).query(anyString());
 
-        assertThatThrownBy(() -> adapter.create(application, "lang-1", LocalDateTime.now(), LocalDateTime.now(), "state-1"))
+        assertThatThrownBy(() -> adapter.create(application, "lang-1", "state-1"))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(ex -> assertThat(((BusinessException) ex).getTechnicalMessage())
                         .isEqualTo("Error al persistir la aplicación en la base de datos SurrealDB"));

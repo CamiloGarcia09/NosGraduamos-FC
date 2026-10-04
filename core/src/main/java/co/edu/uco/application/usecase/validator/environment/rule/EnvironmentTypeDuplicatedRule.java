@@ -6,12 +6,12 @@ import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
 import co.edu.uco.application.usecase.validator.rule.RuleValidator;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 
-public final class EnvironmentNameDuplicatedRule extends RuleValidator<CreateEnvironmentDTO> {
+public final class EnvironmentTypeDuplicatedRule extends RuleValidator<CreateEnvironmentDTO> {
 
-    public EnvironmentNameDuplicatedRule(CatalogPort catalogPort, EnvironmentRepository environmentRepository) {
+    public EnvironmentTypeDuplicatedRule(CatalogPort catalogPort, EnvironmentRepository environmentRepository) {
         super(catalogPort,
-                environment -> !environmentRepository.existsByNameAndApplicationId(environment.getName(),
-                        environment.getApplicationId()),
+                environment -> !environmentRepository.existsByApplicationIdAndTypeId(environment.getApplicationId(),
+                        environment.getTypeId()),
                 MessageCatalogCodeEnum.FUN_178);
     }
 }

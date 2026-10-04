@@ -5,6 +5,7 @@ import co.edu.uco.application.primaryports.dto.context.ActiveContextDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.entity.EnvironmentData;
+import co.edu.uco.application.secondaryports.entity.EnvironmentTypeData;
 import co.edu.uco.application.secondaryports.entity.FunctionalityData;
 import co.edu.uco.application.secondaryports.entity.MessageCategoryData;
 import co.edu.uco.application.secondaryports.entity.MessageEnvironmentStateData;
@@ -21,7 +22,6 @@ import co.edu.uco.application.secondaryports.security.AuthorizationQueryPort;
 import co.edu.uco.application.usecase.domain.security.AuthorizationScopeType;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
 import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
 import co.edu.uco.crosscutting.exceptions.ForbiddenException;
@@ -49,7 +49,7 @@ class FindCatalogUseCaseTest {
     private static final UUID ID = UUID.fromString("123e4567-e89b-12d3-a456-426614175000");
     private static final UUID OTHER_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614175001");
     private static final ExternalIdentity IDENTITY = new ExternalIdentity(
-            "issuer", "subject", null, PrincipalType.HUMAN, Instant.MAX);
+            "issuer", "subject", null, Instant.MAX);
 
     @Mock
     private ApplicationCatalogRepository applicationCatalogRepository;
@@ -79,6 +79,10 @@ class FindCatalogUseCaseTest {
                 ActiveContextDTO.builder().applicationId(ID.toString()).build());
     }
 
+    private static EnvironmentTypeData environmentType(final String name) {
+        return new EnvironmentTypeData(UUID.randomUUID(), name);
+    }
+
     @Test
     void findApplications_mapsIdAndName() {
         when(applicationCatalogRepository.findAll()).thenReturn(List.of(new ApplicationData(ID, "App")));
@@ -103,7 +107,7 @@ class FindCatalogUseCaseTest {
     @Test
     void findEnvironmentsByApplication_mapsIdAndName() {
         when(environmentCatalogRepository.findAllByApplicationId("app-1"))
-                .thenReturn(List.of(new EnvironmentData(ID, "Prod", new ApplicationData())));
+                .thenReturn(List.of(new EnvironmentData(ID, new ApplicationData(), environmentType("Prod"))));
         FindCatalogUseCase useCase = buildUseCase();
 
         List<CatalogItemDTO> result = useCase.findEnvironmentsByApplication("app-1", null);
@@ -117,7 +121,7 @@ class FindCatalogUseCaseTest {
     @Test
     void findFunctionalitiesByApplication_mapsIdAndName() {
         when(functionalityCatalogRepository.findAllByApplicationId("app-1"))
-                .thenReturn(List.of(new FunctionalityData(ID, "Search", new ApplicationData(), null, null)));
+                .thenReturn(List.of(new FunctionalityData(ID, "Search", new ApplicationData())));
         FindCatalogUseCase useCase = buildUseCase();
 
         List<CatalogItemDTO> result = useCase.findFunctionalitiesByApplication("app-1", null);
@@ -208,8 +212,8 @@ class FindCatalogUseCaseTest {
         when(authorizationQueryPort.findAuthorizedEnvironmentIds(IDENTITY, PermissionCode.CONTEXT_SELECT, ID))
                 .thenReturn(List.of(OTHER_ID));
         when(environmentCatalogRepository.findAllByApplicationId(ID.toString())).thenReturn(List.of(
-                new EnvironmentData(ID, "Dev", new ApplicationData()),
-                new EnvironmentData(OTHER_ID, "Prod", new ApplicationData())));
+                new EnvironmentData(ID, new ApplicationData(), environmentType("Dev")),
+                new EnvironmentData(OTHER_ID, new ApplicationData(), environmentType("Prod"))));
 
         List<CatalogItemDTO> result = buildUseCase().findEnvironmentsByApplication(ID.toString(), IDENTITY);
 
@@ -294,7 +298,7 @@ class FindCatalogUseCaseTest {
     @Test
     void findEnvironmentsByApplication_withoutIdentitySkipsActiveContextCheck() {
         when(environmentCatalogRepository.findAllByApplicationId(ID.toString()))
-                .thenReturn(List.of(new EnvironmentData(ID, "Dev", new ApplicationData())));
+                .thenReturn(List.of(new EnvironmentData(ID, new ApplicationData(), environmentType("Dev"))));
 
         List<CatalogItemDTO> result = buildUseCase().findEnvironmentsByApplication(ID.toString(), null);
 

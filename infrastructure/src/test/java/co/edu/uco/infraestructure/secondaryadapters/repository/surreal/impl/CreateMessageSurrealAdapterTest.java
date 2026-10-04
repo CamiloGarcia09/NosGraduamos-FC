@@ -74,7 +74,6 @@ class CreateMessageSurrealAdapterTest {
         message.setCode("MSG-001");
         message.setTitle("A valid title");
         message.setContent("A valid content");
-        message.setApplication("App");
 
         message.setType(new MessageTypeData(TYPE_ID, "TEXT"));
         message.setCategory(new MessageCategoryData(CATEGORY_ID, "GENERAL"));
@@ -107,7 +106,6 @@ class CreateMessageSurrealAdapterTest {
                 + "category_id: message_category:`" + CATEGORY_ID + "`, "
                 + "status_id: message_state:`" + STATUS_ID + "`, "
                 + "application_id: application:`" + APP_ID + "`, "
-                + "application: 'App', "
                 + "functionality_id: functionality:`" + FUNCTIONALITY_ID + "` };";
 
         assertAll(

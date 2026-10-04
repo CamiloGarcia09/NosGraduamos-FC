@@ -6,7 +6,6 @@ public record ExternalIdentity(
         String issuer,
         String subject,
         String email,
-        PrincipalType principalType,
         Instant expiration
 ) {
 }

@@ -144,6 +144,6 @@ class MessageFunctionalityBelongsApplicationRuleTest {
 
     private static FunctionalityData functionality(UUID functionalityId, UUID applicationId) {
         return new FunctionalityData(functionalityId, "Functionality",
-                ApplicationData.build(applicationId, "Application"), null, null);
+                ApplicationData.build(applicationId, "Application"));
     }
 }

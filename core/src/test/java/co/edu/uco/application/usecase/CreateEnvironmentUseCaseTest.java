@@ -3,13 +3,13 @@ package co.edu.uco.application.usecase;
 import co.edu.uco.application.primaryports.dto.context.ActiveContextDTO;
 import co.edu.uco.application.primaryports.dto.environment.CreateEnvironmentDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
+import co.edu.uco.application.secondaryports.entity.EnvironmentData;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
 import co.edu.uco.application.usecase.domain.security.AuthorizationScopeType;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
 import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
 import co.edu.uco.application.usecase.validator.environment.CreateEnvironmentCompositeValidator;
@@ -19,6 +19,7 @@ import co.edu.uco.crosscutting.exceptions.ForbiddenException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -27,6 +28,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -41,8 +43,9 @@ class CreateEnvironmentUseCaseTest {
 
     private static final String APP_UUID = "123e4567-e89b-12d3-a456-426614175000";
     private static final String OTHER_APP_UUID = "123e4567-e89b-12d3-a456-426614175002";
+    private static final String TYPE_UUID = "123e4567-e89b-12d3-a456-426614175003";
     private static final ExternalIdentity IDENTITY = new ExternalIdentity(
-            "issuer", "subject", "user@example.com", PrincipalType.HUMAN, Instant.MAX);
+            "issuer", "subject", "user@example.com", Instant.MAX);
 
     @Mock
     private EnvironmentRepository environmentRepository;
@@ -70,9 +73,8 @@ class CreateEnvironmentUseCaseTest {
 
     private CreateEnvironmentDTO validDto() {
         return CreateEnvironmentDTO.builder()
-                .name("Production")
                 .applicationId(APP_UUID)
-                .typeId("type-1")
+                .typeId(TYPE_UUID)
                 .stateId("state-1")
                 .build();
     }
@@ -80,12 +82,20 @@ class CreateEnvironmentUseCaseTest {
     @Test
     void createEnvironment_persistsLegacyEnvironmentWhenIdentityIsNull() {
         CreateEnvironmentDTO dto = validDto();
+        ArgumentCaptor<EnvironmentData> environmentCaptor = ArgumentCaptor.forClass(EnvironmentData.class);
 
         useCase.createEnvironment(dto, null);
 
         verify(validator).validate(dto);
-        verify(environmentRepository).create(any(), eq("type-1"), eq("state-1"));
-        verify(log).info("Environment created successfully with name: {}", "Production");
+        verify(environmentRepository).create(environmentCaptor.capture(), eq(TYPE_UUID), eq("state-1"));
+        EnvironmentData environment = environmentCaptor.getValue();
+        assertSoftly(softly -> {
+            softly.assertThat(environment.getId()).isNotNull();
+            softly.assertThat(environment.getApplication().getId()).isEqualTo(UUID.fromString(APP_UUID));
+            softly.assertThat(environment.getType().getId()).isEqualTo(UUID.fromString(TYPE_UUID));
+            softly.assertThat(environment.getType().getName()).isEmpty();
+        });
+        verify(log).info("Environment created successfully with type id: {}", TYPE_UUID);
         verifyNoInteractions(activeContextPort, authorizationCompositeValidator, catalogPort);
     }
 
@@ -100,8 +110,8 @@ class CreateEnvironmentUseCaseTest {
         verify(authorizationCompositeValidator).validate(IDENTITY, PermissionCode.ENVIRONMENT_CREATE,
                 AuthorizationScopeType.APPLICATION, UUID.fromString(APP_UUID));
         verify(validator).validate(dto);
-        verify(environmentRepository).create(any(), eq("type-1"), eq("state-1"));
-        verify(log).info("Environment created successfully with name: {}", "Production");
+        verify(environmentRepository).create(any(), eq(TYPE_UUID), eq("state-1"));
+        verify(log).info("Environment created successfully with type id: {}", TYPE_UUID);
         verifyNoInteractions(catalogPort);
     }
 

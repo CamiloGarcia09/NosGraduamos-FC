@@ -37,15 +37,15 @@ public final class MessageDomain {
     }
 
     public void setType(MessageTypeDomain type) {
-        this.type = getDefaultIsNullObject(type, MessageTypeDomain.create(type.getId(), type.getName()));
+        this.type = getDefaultIsNullObject(type, MessageTypeDomain.create(null, null));
     }
 
     public void setCategory(MessageCategoryDomain category) {
-        this.category = getDefaultIsNullObject(category, MessageCategoryDomain.create(category.getId(), category.getName()));
+        this.category = getDefaultIsNullObject(category, MessageCategoryDomain.create(null, null));
     }
 
     public void setStatus(MessageStatusDomain status) {
-        this.status = getDefaultIsNullObject(status, MessageStatusDomain.create(status.getId(), status.getName()));
+        this.status = getDefaultIsNullObject(status, MessageStatusDomain.create(null, null));
     }
 
     public void setApplication(String application) {
@@ -53,7 +53,6 @@ public final class MessageDomain {
     }
 
     public void setFunctionality(FunctionalityDomain functionality) {
-        this.functionality = getDefaultIsNullObject(functionality, FunctionalityDomain.create(functionality.getId(),
-                functionality.getName(), functionality.getStartDate(), functionality.getEndDate()));
+        this.functionality = getDefaultIsNullObject(functionality, FunctionalityDomain.create(null, null));
     }
 }

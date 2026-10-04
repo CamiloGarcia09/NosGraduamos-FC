@@ -56,7 +56,6 @@ public class CreateMessageSurrealAdapter implements CreateMessageRepository {
                 + "category_id: " + toRecordId(TABLE_MESSAGE_CATEGORY, categoryId) + ", "
                 + "status_id: " + toRecordId(TABLE_MESSAGE_STATE, statusId) + ", "
                 + "application_id: " + toRecordId(TABLE_APPLICATION, appId) + ", "
-                + "application: " + quote(message.getApplication()) + ", "
                 + "functionality_id: " + toRecordId(TABLE_FUNCTIONALITY, funcId)
                 + " };";
 

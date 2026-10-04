@@ -4,6 +4,7 @@ import co.edu.uco.application.primaryports.dto.token.CreateTokenDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.entity.EnvironmentData;
+import co.edu.uco.application.secondaryports.entity.EnvironmentTypeData;
 import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
@@ -56,8 +57,9 @@ class CreateTokenCompositeValidatorTest {
 
     private void environmentBelongs(UUID applicationId) {
         when(environmentRepository.findById(ENVIRONMENT_ID))
-                .thenReturn(Optional.of(new EnvironmentData(UUID.fromString(ENVIRONMENT_ID), "Production",
-                        new ApplicationData(applicationId, "Message App"))));
+                .thenReturn(Optional.of(new EnvironmentData(UUID.fromString(ENVIRONMENT_ID),
+                        new ApplicationData(applicationId, "Message App"),
+                        new EnvironmentTypeData(UUID.randomUUID(), "Production"))));
     }
 
     @Test

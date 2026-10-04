@@ -1,6 +1,5 @@
 package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.model;
 
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import lombok.Getter;
 
 import java.util.UUID;
@@ -17,15 +16,13 @@ public final class ExternalIdentitySurrealModel {
     private String issuer;
     private String subject;
     private String email;
-    private PrincipalType principalType;
 
     public ExternalIdentitySurrealModel(final UUID id, final String issuer, final String subject,
-                                        final String email, final PrincipalType principalType) {
+                                         final String email) {
         setId(id);
         setIssuer(issuer);
         setSubject(subject);
         setEmail(email);
-        setPrincipalType(principalType);
     }
 
     public ExternalIdentitySurrealModel() {
@@ -33,7 +30,6 @@ public final class ExternalIdentitySurrealModel {
         setIssuer(EMPTY);
         setSubject(EMPTY);
         setEmail(null);
-        setPrincipalType(null);
     }
 
     public void setId(final UUID id) {
@@ -50,10 +46,6 @@ public final class ExternalIdentitySurrealModel {
 
     public void setEmail(final String email) {
         this.email = email == null ? null : trim(email);
-    }
-
-    public void setPrincipalType(final PrincipalType principalType) {
-        this.principalType = principalType;
     }
 
     public static ExternalIdentitySurrealModel build() {

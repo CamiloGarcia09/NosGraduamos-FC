@@ -2,6 +2,7 @@ package co.edu.uco.application.usecase;
 
 import co.edu.uco.application.common.catalog.strategy.MessageCatalogStrategy;
 import co.edu.uco.application.primaryports.dto.message.TranslatedMessageDTO;
+import co.edu.uco.application.secondaryports.entity.FunctionalityData;
 import co.edu.uco.application.secondaryports.entity.MessageCategoryData;
 import co.edu.uco.application.secondaryports.entity.MessageData;
 import co.edu.uco.application.secondaryports.entity.MessageTranslationRequestData;
@@ -80,8 +81,7 @@ class TranslateMessageByCodeAndEnvironmentUseCaseTest {
         message.setType(new MessageTypeData(java.util.UUID.randomUUID(), "info"));
         message.setCategory(new MessageCategoryData(java.util.UUID.randomUUID(), "general"));
         message.setApplication("app");
-        message.setFunctionality(new co.edu.uco.application.secondaryports.entity.FunctionalityData(
-                java.util.UUID.randomUUID(), "func", null, null, null));
+        message.setFunctionality(FunctionalityData.build("func"));
         return message;
     }
 

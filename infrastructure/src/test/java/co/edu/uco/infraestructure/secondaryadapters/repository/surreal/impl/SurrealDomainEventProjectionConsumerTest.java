@@ -143,6 +143,21 @@ class SurrealDomainEventProjectionConsumerTest {
         return obj;
     }
 
+    private Object environmentRecord() {
+        Object environment = mock(Object.class);
+        doReturn(stringValue("environment_type:et-1")).when(environment).get("type_id");
+        return environment;
+    }
+
+    private String documentQuery(final String prefix) {
+        ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
+        verify(surreal, atLeastOnce()).query(queryCaptor.capture());
+        return queryCaptor.getAllValues().stream()
+                .filter(query -> query.startsWith(prefix))
+                .findFirst()
+                .orElseThrow();
+    }
+
     @Test
     void consumePendingDomainEvents_doesNothing_whenNoEvents() {
         stubEvents();
@@ -170,9 +185,6 @@ class SurrealDomainEventProjectionConsumerTest {
         doReturn(stringValue("language:lang-1")).when(app).get("language_id");
         doReturn(stringValue("state:st-1")).when(app).get("state_id");
         doReturn(stringValue("MiApp")).when(app).get("name");
-        when(app.get("start_date")).thenReturn(null);
-        when(app.get("end_date")).thenReturn(null);
-        when(app.get("version")).thenReturn(null);
         when(app.get("created_at")).thenReturn(null);
         when(app.get("updated_at")).thenReturn(null);
 
@@ -197,7 +209,10 @@ class SurrealDomainEventProjectionConsumerTest {
                 .orElseThrow();
         assertThat(applicationUpsert)
                 .contains("organization_id: 'organization:org-1'")
-                .contains("organization: { id: 'organization:org-1', name: 'UCO' }");
+                .contains("organization: { id: 'organization:org-1', name: 'UCO' }")
+                .contains("name: 'MiApp'")
+                .doesNotContain(", version: ")
+                .doesNotContain("start_date");
         verify(surreal).query(contains("UPSERT domain_event_document:`event-1`"));
         verify(surreal).query(contains("SET projection_status = 'processed'"));
     }
@@ -217,8 +232,6 @@ class SurrealDomainEventProjectionConsumerTest {
         doReturn(stringValue("application:app-1")).when(env).get("application_id");
         doReturn(stringValue("environment_type:et-1")).when(env).get("type_id");
         doReturn(stringValue("state:st-1")).when(env).get("state_id");
-        doReturn(stringValue("PROD")).when(env).get("name");
-        when(env.get("version")).thenReturn(null);
         when(env.get("created_at")).thenReturn(null);
         when(env.get("updated_at")).thenReturn(null);
 
@@ -230,7 +243,11 @@ class SurrealDomainEventProjectionConsumerTest {
 
         consumer.consumePendingDomainEvents();
 
-        verify(surreal).query(contains("UPSERT environment_document:`env-1`"));
+        assertThat(documentQuery("UPSERT environment_document:`env-1`"))
+                .contains("name: 'PRODUCTION'")
+                .contains("type_id: 'environment_type:et-1'")
+                .contains("projection_version: 1")
+                .doesNotContain(", version: ");
     }
 
     @Test
@@ -241,11 +258,9 @@ class SurrealDomainEventProjectionConsumerTest {
         doReturn(stringValue("status:s-1")).when(message).get("status_id");
         doReturn(stringValue("application:a-1")).when(message).get("application_id");
         doReturn(stringValue("functionality:f-1")).when(message).get("functionality_id");
-        when(message.get("application")).thenReturn(null);
         doReturn(stringValue("CODE")).when(message).get("code");
         doReturn(stringValue("Title")).when(message).get("title");
         doReturn(stringValue("Content")).when(message).get("content");
-        when(message.get("version")).thenReturn(null);
         when(message.get("created_at")).thenReturn(null);
         when(message.get("updated_at")).thenReturn(null);
 
@@ -259,7 +274,9 @@ class SurrealDomainEventProjectionConsumerTest {
 
         consumer.consumePendingDomainEvents();
 
-        verify(surreal).query(contains("UPSERT message_data_collection:`msg-1`"));
+        assertThat(documentQuery("UPSERT message_data_collection:`msg-1`"))
+                .contains("application: 'APP'")
+                .doesNotContain(", version: ");
     }
 
     @Test
@@ -270,7 +287,6 @@ class SurrealDomainEventProjectionConsumerTest {
         doReturn(stringValue("status:s-1")).when(message).get("status_id");
         doReturn(stringValue("application:a-1")).when(message).get("application_id");
         doReturn(stringValue("functionality:f-1")).when(message).get("functionality_id");
-        when(message.get("application")).thenReturn(null);
         doReturn(stringValue("CODE")).when(message).get("code");
         doReturn(stringValue("Title")).when(message).get("title");
         doReturn(stringValue("Content")).when(message).get("content");
@@ -279,7 +295,6 @@ class SurrealDomainEventProjectionConsumerTest {
         doReturn(stringValue("message:msg-1")).when(readModel).get("message_id");
         doReturn(stringValue("environment:e-1")).when(readModel).get("environment_id");
         doReturn(stringValue("state:st-1")).when(readModel).get("state_data_id");
-        when(readModel.get("version")).thenReturn(null);
         when(readModel.get("created_at")).thenReturn(null);
         when(readModel.get("updated_at")).thenReturn(null);
 
@@ -287,7 +302,8 @@ class SurrealDomainEventProjectionConsumerTest {
                 "message_environment:me-1", "message_environment", 1));
         stubRecord("message_environment:me-1", readModel);
         stubRecord("message:msg-1", message);
-        stubRecord("environment:e-1", catalogRecord("PROD"));
+        stubRecord("environment:e-1", environmentRecord());
+        stubRecord("environment_type:et-1", catalogRecord("PRODUCTION"));
         stubRecord("state:st-1", catalogRecord("ACTIVE"));
         stubRecord("type:t-1", catalogRecord("MESSAGE_TYPE"));
         stubRecord("category:c-1", catalogRecord("CATEGORY"));
@@ -297,18 +313,19 @@ class SurrealDomainEventProjectionConsumerTest {
 
         consumer.consumePendingDomainEvents();
 
-        verify(surreal).query(contains("UPSERT message_environment_readmodel:`me-1`"));
+        assertThat(documentQuery("UPSERT message_environment_readmodel:`me-1`"))
+                .contains("environment: { id: 'environment:e-1', name: 'PRODUCTION' }")
+                .doesNotContain(", version: ");
     }
 
     @Test
-    void consumePendingDomainEvents_usesDenormalizedApplicationName_whenPresent() {
+    void consumePendingDomainEvents_resolvesApplicationNameFromCatalog_ignoringDenormalizedValue() {
         Object message = mock(Object.class);
         doReturn(stringValue("type:t-1")).when(message).get("type_id");
         doReturn(stringValue("category:c-1")).when(message).get("category_id");
         doReturn(stringValue("status:s-1")).when(message).get("status_id");
         doReturn(stringValue("application:a-1")).when(message).get("application_id");
         doReturn(stringValue("functionality:f-1")).when(message).get("functionality_id");
-        doReturn(stringValue("DENORM_APP")).when(message).get("application");
         doReturn(stringValue("CODE")).when(message).get("code");
         doReturn(stringValue("Title")).when(message).get("title");
         doReturn(stringValue("Content")).when(message).get("content");
@@ -318,32 +335,35 @@ class SurrealDomainEventProjectionConsumerTest {
         stubRecord("type:t-1", catalogRecord("MESSAGE_TYPE"));
         stubRecord("category:c-1", catalogRecord("CATEGORY"));
         stubRecord("status:s-1", catalogRecord("ACTIVE"));
+        stubRecord("application:a-1", applicationRecord());
         stubRecord("functionality:f-1", catalogRecord("FUNC"));
 
         consumer.consumePendingDomainEvents();
 
-        verify(surreal).query(contains("UPSERT message_data_collection:`msg-1`"));
+        assertThat(documentQuery("UPSERT message_data_collection:`msg-1`"))
+                .contains("application: 'APP'")
+                .doesNotContain("'DENORM_APP'");
     }
 
     @Test
-    void consumePendingDomainEvents_projectsMessageEnvironmentWithMissingMessage() {
+    void consumePendingDomainEvents_projectsReferences_whenMessageAndEnvironmentAreMissing() {
         Object readModel = mock(Object.class);
         doReturn(stringValue("message:missing-1")).when(readModel).get("message_id");
         doReturn(stringValue("environment:e-1")).when(readModel).get("environment_id");
         doReturn(stringValue("state:st-1")).when(readModel).get("state_data_id");
-        when(readModel.get("version")).thenReturn(null);
         when(readModel.get("created_at")).thenReturn(null);
         when(readModel.get("updated_at")).thenReturn(null);
 
         stubEvents(eventObject("event-1", "MESSAGE_ENVIRONMENT_CREATED",
                 "message_environment:me-1", "message_environment", 1));
         stubRecord("message_environment:me-1", readModel);
-        stubRecord("environment:e-1", catalogRecord("PROD"));
         stubRecord("state:st-1", catalogRecord("ACTIVE"));
 
         consumer.consumePendingDomainEvents();
 
-        verify(surreal).query(contains("UPSERT message_environment_readmodel:`me-1`"));
+        assertThat(documentQuery("UPSERT message_environment_readmodel:`me-1`"))
+                .contains("environment: { id: 'environment:e-1', name: NONE }")
+                .contains("message: { id: 'message:missing-1' }");
     }
 
     @Test

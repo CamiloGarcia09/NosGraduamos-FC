@@ -4,6 +4,7 @@ import co.edu.uco.application.primaryports.dto.message.CreateMessageDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.entity.EnvironmentData;
+import co.edu.uco.application.secondaryports.entity.EnvironmentTypeData;
 import co.edu.uco.application.secondaryports.entity.FunctionalityData;
 import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
 import co.edu.uco.application.secondaryports.repository.FunctionalityCatalogRepository;
@@ -87,7 +88,6 @@ class CreateMessageCompositeValidatorTest {
                 .categoryId(CATEGORY_ID)
                 .statusId(STATUS_ID)
                 .applicationId(APPLICATION_ID_TEXT)
-                .application("App")
                 .functionalityId(FUNCTIONALITY_ID_TEXT)
                 .messageEnvironmentStateId(MESSAGE_ENVIRONMENT_STATE_ID);
     }
@@ -498,11 +498,12 @@ class CreateMessageCompositeValidatorTest {
     }
 
     private static EnvironmentData environment(UUID applicationId) {
-        return new EnvironmentData(ENVIRONMENT_ID, "Environment", ApplicationData.build(applicationId, "App"));
+        return new EnvironmentData(ENVIRONMENT_ID, ApplicationData.build(applicationId, "App"),
+                new EnvironmentTypeData(UUID.randomUUID(), "Environment"));
     }
 
     private static FunctionalityData functionality(UUID functionalityId, UUID applicationId) {
         return new FunctionalityData(functionalityId, "Functionality",
-                ApplicationData.build(applicationId, "Application"), null, null);
+                ApplicationData.build(applicationId, "Application"));
     }
 }

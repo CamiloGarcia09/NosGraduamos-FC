@@ -4,6 +4,7 @@ import co.edu.uco.application.primaryports.dto.message.CreateMessageDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.entity.EnvironmentData;
+import co.edu.uco.application.secondaryports.entity.EnvironmentTypeData;
 import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
 import co.edu.uco.application.usecase.validator.message.CreateMessageValidationContext;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
@@ -101,6 +102,7 @@ class MessageEnvironmentExistsRuleTest {
     }
 
     private static EnvironmentData environment() {
-        return new EnvironmentData(ENVIRONMENT_ID, "Environment", ApplicationData.build(APPLICATION_ID, "App"));
+        return new EnvironmentData(ENVIRONMENT_ID, ApplicationData.build(APPLICATION_ID, "App"),
+                new EnvironmentTypeData(UUID.randomUUID(), "Environment"));
     }
 }

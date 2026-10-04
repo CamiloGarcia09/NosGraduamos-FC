@@ -6,9 +6,6 @@ import co.edu.uco.application.secondaryports.repository.ApplicationRepository;
 import co.edu.uco.application.secondaryports.repository.OrganizationRepository;
 import co.edu.uco.application.secondaryports.repository.RecordExistsCatalogPort;
 import co.edu.uco.application.usecase.validator.CompositeValidator;
-import co.edu.uco.application.usecase.validator.application.rule.ApplicationDateRangeOrderRule;
-import co.edu.uco.application.usecase.validator.application.rule.ApplicationEndDateRequiredRule;
-import co.edu.uco.application.usecase.validator.application.rule.ApplicationEndDateValidRule;
 import co.edu.uco.application.usecase.validator.application.rule.ApplicationLanguageExistsRule;
 import co.edu.uco.application.usecase.validator.application.rule.ApplicationLanguageRequiredRule;
 import co.edu.uco.application.usecase.validator.application.rule.ApplicationNameDuplicatedRule;
@@ -17,8 +14,6 @@ import co.edu.uco.application.usecase.validator.application.rule.ApplicationName
 import co.edu.uco.application.usecase.validator.application.rule.ApplicationOrganizationExistsRule;
 import co.edu.uco.application.usecase.validator.application.rule.ApplicationOrganizationIdRequiredRule;
 import co.edu.uco.application.usecase.validator.application.rule.ApplicationOrganizationIdUuidRule;
-import co.edu.uco.application.usecase.validator.application.rule.ApplicationStartDateRequiredRule;
-import co.edu.uco.application.usecase.validator.application.rule.ApplicationStartDateValidRule;
 import co.edu.uco.application.usecase.validator.application.rule.ApplicationStateExistsRule;
 import co.edu.uco.application.usecase.validator.application.rule.ApplicationStateRequiredRule;
 import org.springframework.stereotype.Component;
@@ -40,11 +35,6 @@ public final class CreateApplicationCompositeValidator extends CompositeValidato
                 new ApplicationOrganizationExistsRule(catalogPort, organizationRepository),
                 new ApplicationLanguageRequiredRule(catalogPort),
                 new ApplicationLanguageExistsRule(catalogPort, recordExistsCatalogPort),
-                new ApplicationStartDateRequiredRule(catalogPort),
-                new ApplicationStartDateValidRule(catalogPort),
-                new ApplicationEndDateRequiredRule(catalogPort),
-                new ApplicationEndDateValidRule(catalogPort),
-                new ApplicationDateRangeOrderRule(catalogPort),
                 new ApplicationStateRequiredRule(catalogPort),
                 new ApplicationStateExistsRule(catalogPort, recordExistsCatalogPort),
                 new ApplicationNameDuplicatedRule(catalogPort, applicationRepository)

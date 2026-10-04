@@ -7,7 +7,7 @@ import java.util.Optional;
 public interface EnvironmentRepository {
     Optional<EnvironmentData> findById(String id);
 
-    boolean existsByNameAndApplicationId(String name, String applicationId);
+    boolean existsByApplicationIdAndTypeId(String applicationId, String typeId);
 
     void create(EnvironmentData environment, String typeId, String stateId);
 }

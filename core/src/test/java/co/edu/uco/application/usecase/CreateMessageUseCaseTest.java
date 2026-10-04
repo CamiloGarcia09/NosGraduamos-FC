@@ -8,7 +8,6 @@ import co.edu.uco.application.secondaryports.repository.CreateMessageRepository;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.MessageAccessContext;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.application.usecase.security.MessageEnvironmentResolver;
 import co.edu.uco.application.usecase.validator.message.CreateMessageCompositeValidator;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
@@ -45,7 +44,7 @@ class CreateMessageUseCaseTest {
     private static final String STATUS_UUID = "123e4567-e89b-12d3-a456-426614175012";
     private static final String MESSAGE_ENVIRONMENT_STATE_UUID = "123e4567-e89b-12d3-a456-426614175013";
     private static final ExternalIdentity IDENTITY = new ExternalIdentity(
-            "issuer", "subject", "user@example.com", PrincipalType.HUMAN, Instant.MAX);
+            "issuer", "subject", "user@example.com", Instant.MAX);
 
     @Mock
     private CreateMessageRepository createMessageRepository;
@@ -76,7 +75,6 @@ class CreateMessageUseCaseTest {
                 .categoryId(CATEGORY_UUID)
                 .statusId(STATUS_UUID)
                 .applicationId(APP_UUID)
-                .application("App")
                 .functionalityId(FUNC_UUID)
                 .environmentId("env-1")
                 .messageEnvironmentStateId(MESSAGE_ENVIRONMENT_STATE_UUID)
@@ -144,6 +142,8 @@ class CreateMessageUseCaseTest {
             softly.assertThat(message.getFunctionality().getName()).isEmpty();
             softly.assertThat(message.getFunctionality().getApplication().getId())
                     .isEqualTo(UUID.fromString(APP_UUID));
+            softly.assertThat(message.getApplication()).isEmpty();
+            softly.assertThat(message.getFunctionality().getApplication().getName()).isEmpty();
         });
     }
 

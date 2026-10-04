@@ -8,7 +8,6 @@ import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionLocation;
 import com.surrealdb.Surreal;
 import org.springframework.stereotype.Repository;
 
-import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.datetime;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.quote;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
 
@@ -38,8 +37,6 @@ public class FunctionalitySurrealRepositoryAdapterImpl extends SurrealCatalogSup
                 + " CONTENT { "
                 + "name: " + quote(functionality.getName()) + ", "
                 + "application_id: " + recordIdLiteral(SURREAL_TABLE_APPLICATION, functionality.getApplication().getId().toString()) + ", "
-                + "start_date: " + datetime(functionality.getStartDate()) + ", "
-                + "end_date: " + datetime(functionality.getEndDate()) + ", "
                 + "state_id: " + recordIdLiteral(SURREAL_TABLE_FUNCTIONALITY_STATE, stateId)
                 + " };";
         try {

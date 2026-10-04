@@ -7,6 +7,7 @@ import co.edu.uco.application.secondaryports.cache.ActiveContextCachePort;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.entity.EnvironmentData;
+import co.edu.uco.application.secondaryports.entity.EnvironmentTypeData;
 import co.edu.uco.application.secondaryports.repository.ActiveContextRepository;
 import co.edu.uco.application.secondaryports.repository.ApplicationCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.EnvironmentCatalogRepository;
@@ -18,7 +19,6 @@ import co.edu.uco.application.usecase.domain.aggregate.entities.OrganizationEnti
 import co.edu.uco.application.usecase.domain.security.AuthorizationScopeType;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
 import co.edu.uco.application.usecase.validator.authorization.rule.ExternalIdentityRequiredRule;
 import co.edu.uco.application.usecase.validator.context.SelectActiveContextCompositeValidator;
@@ -67,7 +67,7 @@ class ActiveContextUseCaseTest {
     private static final UUID ENVIRONMENT_ID = UUID.fromString("40000000-0000-0000-0000-000000000004");
     private static final Instant NOW = Instant.parse("2026-09-22T14:15:16Z");
     private static final ExternalIdentity IDENTITY = new ExternalIdentity(
-            "issuer", "subject", "user@example.com", PrincipalType.HUMAN, Instant.MAX);
+            "issuer", "subject", "user@example.com", Instant.MAX);
 
     @Mock private ActiveContextRepository activeContextRepository;
     @Mock private ActiveContextCachePort activeContextCachePort;
@@ -151,6 +151,8 @@ class ActiveContextUseCaseTest {
 
         assertThat(result).extracting(context -> context.getApplication().getName())
                 .containsExactly("Alpha", "Zulu");
+        assertThat(result).extracting(context -> context.getEnvironment().getName())
+                .containsExactly("Alpha Env", "Zulu Env");
         assertThat(result).allSatisfy(context -> {
             assertThat(context.getOrganization().getId()).isEqualTo(ORGANIZATION_ID.toString());
             assertThat(context.getEnvironment().getId()).isNotEqualTo(DEFAULT_UUID.toString());
@@ -164,7 +166,8 @@ class ActiveContextUseCaseTest {
     void findAvailableContexts_ignoresEntriesWithMissingHierarchy_whenCatalogReturnsIncompleteData() {
         ApplicationData app = application(APPLICATION_ID, "App", ORGANIZATION_ID, "Org");
         ApplicationData withoutOrganizationIdentifier = ApplicationData.build(UUID.randomUUID(), "No Org Id");
-        EnvironmentData withoutIdentifier = new EnvironmentData(null, "No Id", app);
+        EnvironmentData withoutIdentifier = new EnvironmentData(null, app,
+                new EnvironmentTypeData(UUID.randomUUID(), "No Id"));
         EnvironmentData validEnvironment = environment(ENVIRONMENT_ID, "Env", app);
         when(authorizationQueryPort.findAuthorizedApplicationIds(IDENTITY, PermissionCode.CONTEXT_SELECT))
                 .thenReturn(List.of(APPLICATION_ID));
@@ -365,6 +368,6 @@ class ActiveContextUseCaseTest {
     }
 
     private static EnvironmentData environment(UUID id, String name, ApplicationData application) {
-        return new EnvironmentData(id, name, application);
+        return new EnvironmentData(id, application, new EnvironmentTypeData(UUID.randomUUID(), name));
     }
 }

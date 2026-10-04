@@ -54,7 +54,6 @@ class CreateEnvironmentCompositeValidatorTest {
 
     private CreateEnvironmentDTO validDto() {
         return CreateEnvironmentDTO.builder()
-                .name("Production")
                 .applicationId(APP_UUID)
                 .typeId(TYPE_ID)
                 .stateId(STATE_ID)
@@ -65,7 +64,7 @@ class CreateEnvironmentCompositeValidatorTest {
     void validate_acceptsValidDto() {
         when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
         when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
-        when(environmentRepository.existsByNameAndApplicationId("Production", APP_UUID)).thenReturn(false);
+        when(environmentRepository.existsByApplicationIdAndTypeId(APP_UUID, TYPE_ID)).thenReturn(false);
 
         assertDoesNotThrow(() -> validator.validate(validDto()));
     }
@@ -75,7 +74,7 @@ class CreateEnvironmentCompositeValidatorTest {
         when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
         when(recordExistsCatalogPort.exists(ReferenceCatalog.ENVIRONMENT_TYPE, TYPE_ID)).thenReturn(true);
         when(recordExistsCatalogPort.exists(ReferenceCatalog.ENVIRONMENT_STATE, STATE_ID)).thenReturn(true);
-        when(environmentRepository.existsByNameAndApplicationId("Production", APP_UUID)).thenReturn(false);
+        when(environmentRepository.existsByApplicationIdAndTypeId(APP_UUID, TYPE_ID)).thenReturn(false);
         CreateEnvironmentDTO dto = validDto();
 
         validator.validate(dto);
@@ -83,7 +82,7 @@ class CreateEnvironmentCompositeValidatorTest {
         InOrder catalogOrder = inOrder(recordExistsCatalogPort, environmentRepository);
         catalogOrder.verify(recordExistsCatalogPort).exists(ReferenceCatalog.ENVIRONMENT_TYPE, TYPE_ID);
         catalogOrder.verify(recordExistsCatalogPort).exists(ReferenceCatalog.ENVIRONMENT_STATE, STATE_ID);
-        catalogOrder.verify(environmentRepository).existsByNameAndApplicationId("Production", APP_UUID);
+        catalogOrder.verify(environmentRepository).existsByApplicationIdAndTypeId(APP_UUID, TYPE_ID);
     }
 
     @Test
@@ -94,30 +93,6 @@ class CreateEnvironmentCompositeValidatorTest {
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("Datos no validos"));
-    }
-
-    @Test
-    void validate_throwsBusinessRule_whenNameIsEmpty() {
-        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_170.getCode()))
-                .thenReturn("El nombre del entorno es requerido.");
-
-        assertThatThrownBy(() -> validator.validate(new CreateEnvironmentDTO()))
-                .isInstanceOf(BusinessRuleException.class)
-                .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("El nombre del entorno es requerido."));
-    }
-
-    @Test
-    void validate_throwsBusinessRule_whenNameExceedsMaxLength() {
-        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_171.getCode()))
-                .thenReturn("El nombre del entorno no puede superar los 50 caracteres.");
-        CreateEnvironmentDTO dto = validDto();
-        dto.setName("a".repeat(51));
-
-        assertThatThrownBy(() -> validator.validate(dto))
-                .isInstanceOf(BusinessRuleException.class)
-                .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("El nombre del entorno no puede superar los 50 caracteres."));
     }
 
     @Test
@@ -257,17 +232,17 @@ class CreateEnvironmentCompositeValidatorTest {
     }
 
     @Test
-    void validate_throwsBusinessRule_whenNameAlreadyExistsForApplication() {
+    void validate_throwsBusinessRule_whenTypeAlreadyExistsForApplication() {
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_178.getCode()))
-                .thenReturn("Ya existe un entorno con el mismo nombre para la aplicación.");
+                .thenReturn("Ya existe un entorno del mismo tipo para la aplicación.");
         when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
         when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
-        when(environmentRepository.existsByNameAndApplicationId("Production", APP_UUID)).thenReturn(true);
+        when(environmentRepository.existsByApplicationIdAndTypeId(APP_UUID, TYPE_ID)).thenReturn(true);
         CreateEnvironmentDTO dto = validDto();
 
         assertThatThrownBy(() -> validator.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("Ya existe un entorno con el mismo nombre para la aplicación."));
+                        .isEqualTo("Ya existe un entorno del mismo tipo para la aplicación."));
     }
 }

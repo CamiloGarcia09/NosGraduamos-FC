@@ -9,7 +9,6 @@ import co.edu.uco.application.secondaryports.repository.FunctionalityRepository;
 import co.edu.uco.application.usecase.domain.security.AuthorizationScopeType;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
 import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
 import co.edu.uco.application.usecase.validator.functionality.CreateFunctionalityCompositeValidator;
@@ -42,7 +41,7 @@ class CreateFunctionalityUseCaseTest {
     private static final String APP_UUID = "123e4567-e89b-12d3-a456-426614175000";
     private static final String OTHER_APP_UUID = "123e4567-e89b-12d3-a456-426614175002";
     private static final ExternalIdentity IDENTITY = new ExternalIdentity(
-            "issuer", "subject", "user@example.com", PrincipalType.HUMAN, Instant.MAX);
+            "issuer", "subject", "user@example.com", Instant.MAX);
 
     @Mock
     private FunctionalityRepository functionalityRepository;
@@ -72,8 +71,6 @@ class CreateFunctionalityUseCaseTest {
         return CreateFunctionalityDTO.builder()
                 .name("Search messages")
                 .applicationId(APP_UUID)
-                .startDate("2025-01-01T00:00:00")
-                .endDate("2025-12-31T23:59:59")
                 .stateId("state-1")
                 .build();
     }

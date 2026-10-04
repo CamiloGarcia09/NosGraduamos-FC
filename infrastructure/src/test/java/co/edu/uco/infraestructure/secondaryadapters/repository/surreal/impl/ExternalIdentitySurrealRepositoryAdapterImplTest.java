@@ -3,7 +3,6 @@ package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.usecase.domain.aggregate.entities.ExternalIdentityEntity;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
 import co.edu.uco.infraestructure.secondaryadapters.repository.data.ExternalIdentitySurrealMapper;
 import com.surrealdb.Array;
@@ -55,7 +54,7 @@ class ExternalIdentitySurrealRepositoryAdapterImplTest {
     void findByIssuerAndSubject_returnsIdentity_whenDocumentExists() {
         UUID id = UUID.randomUUID();
         doReturn(responseWithOne(externalIdentityDocument(id, "https://google.com", "u1",
-                "user@google.com", "HUMAN")))
+                "user@google.com")))
                 .when(surreal).query(anyString());
 
         Optional<ExternalIdentityEntity> result = adapter.findByIssuerAndSubject("https://google.com", "u1");
@@ -65,7 +64,6 @@ class ExternalIdentitySurrealRepositoryAdapterImplTest {
             assertThat(e.getIssuer()).isEqualTo("https://google.com");
             assertThat(e.getSubject()).isEqualTo("u1");
             assertThat(e.getEmail()).isEqualTo("user@google.com");
-            assertThat(e.getPrincipalType()).isEqualTo(PrincipalType.HUMAN);
         }));
         verifyQuery("SELECT * FROM external_identity WHERE issuer = 'https://google.com' AND subject = 'u1' LIMIT 1;");
     }
@@ -95,12 +93,12 @@ class ExternalIdentitySurrealRepositoryAdapterImplTest {
     void create_persistsExternalIdentity_withoutLoggingSensitiveData() {
         UUID id = UUID.randomUUID();
         ExternalIdentityEntity entity = externalIdentity(id, "https://google.com", "u1",
-                "user@google.com", PrincipalType.HUMAN);
+                "user@google.com");
 
         adapter.create(entity);
 
         verifyQuery("UPSERT external_identity:`" + id
-                + "` CONTENT { issuer: 'https://google.com', subject: 'u1', email: 'user@google.com', principal_type: 'HUMAN' };");
+                + "` CONTENT { issuer: 'https://google.com', subject: 'u1', email: 'user@google.com' };");
         verify(log).info("Executing SurrealQL create external identity");
         verifyNoMoreInteractions(log);
     }
@@ -109,31 +107,31 @@ class ExternalIdentitySurrealRepositoryAdapterImplTest {
     void create_escapesSlashInIssuer() {
         UUID id = UUID.randomUUID();
         ExternalIdentityEntity entity = externalIdentity(id, "https://auth.example.com", "u1",
-                null, PrincipalType.SERVICE);
+                null);
 
         adapter.create(entity);
 
         verifyQuery("UPSERT external_identity:`" + id
-                + "` CONTENT { issuer: 'https://auth.example.com', subject: 'u1', email: NONE, principal_type: 'SERVICE' };");
+                + "` CONTENT { issuer: 'https://auth.example.com', subject: 'u1', email: NONE };");
     }
 
     @Test
     void create_escapesQuoteInSubject() {
         UUID id = UUID.randomUUID();
         ExternalIdentityEntity entity = externalIdentity(id, "issuer", "it's me",
-                null, PrincipalType.HUMAN);
+                null);
 
         adapter.create(entity);
 
         verifyQuery("UPSERT external_identity:`" + id
-                + "` CONTENT { issuer: 'issuer', subject: 'it\\'s me', email: NONE, principal_type: 'HUMAN' };");
+                + "` CONTENT { issuer: 'issuer', subject: 'it\\'s me', email: NONE };");
     }
 
     @Test
     void create_throwsBusinessException_whenQueryFails() {
         RuntimeException cause = new RuntimeException("db down");
         ExternalIdentityEntity entity = externalIdentity(UUID.randomUUID(), "issuer", "subject",
-                null, PrincipalType.HUMAN);
+                null);
         doThrow(cause).when(surreal).query(anyString());
 
         assertThatThrownBy(() -> adapter.create(entity))
@@ -144,10 +142,10 @@ class ExternalIdentitySurrealRepositoryAdapterImplTest {
     }
 
     @Test
-    void update_mergesEmailAndPrincipalType_withoutLoggingIdentifierFields() {
+    void update_mergesEmailWithoutPrincipalType_withoutLoggingIdentifierFields() {
         UUID id = UUID.randomUUID();
         ExternalIdentityEntity entity = externalIdentity(id, "issuer", "subject",
-                "new@email.com", PrincipalType.SERVICE);
+                "new@email.com");
 
         adapter.update(entity);
 
@@ -156,10 +154,10 @@ class ExternalIdentitySurrealRepositoryAdapterImplTest {
         String sql = captor.getValue();
         assertThat(sql)
                 .contains("email: 'new@email.com'")
-                .contains("principal_type: 'SERVICE'")
                 .contains("time::now()")
-                .doesNotContain("issuer")
-                .doesNotContain("subject");
+                .doesNotContain("principal_type")
+                .doesNotContain("issuer:")
+                .doesNotContain("subject:");
         verify(log).info("Executing SurrealQL update external identity");
     }
 
@@ -167,7 +165,7 @@ class ExternalIdentitySurrealRepositoryAdapterImplTest {
     void update_throwsBusinessException_whenQueryFails() {
         RuntimeException cause = new RuntimeException("db down");
         ExternalIdentityEntity entity = externalIdentity(UUID.randomUUID(), "issuer", "subject",
-                null, PrincipalType.HUMAN);
+                null);
         doThrow(cause).when(surreal).query(anyString());
 
         assertThatThrownBy(() -> adapter.update(entity))
@@ -178,26 +176,22 @@ class ExternalIdentitySurrealRepositoryAdapterImplTest {
     }
 
     private ExternalIdentityEntity externalIdentity(final UUID id, final String issuer,
-                                                     final String subject, final String email,
-                                                     final PrincipalType principalType) {
+                                                     final String subject, final String email) {
         ExternalIdentityEntity entity = new ExternalIdentityEntity();
         entity.setId(id);
         entity.setIssuer(issuer);
         entity.setSubject(subject);
         entity.setEmail(email);
-        entity.setPrincipalType(principalType);
         return entity;
     }
 
     private Object externalIdentityDocument(final UUID id, final String issuer,
-                                             final String subject, final String email,
-                                             final String principalType) {
+                                             final String subject, final String email) {
         Object document = mock(Object.class);
         doReturn(recordIdValue(id)).when(document).get("id");
         doReturn(stringValue(issuer)).when(document).get("issuer");
         doReturn(stringValue(subject)).when(document).get("subject");
         doReturn(stringValue(email)).when(document).get("email");
-        doReturn(stringValue(principalType)).when(document).get("principal_type");
         return document;
     }
 

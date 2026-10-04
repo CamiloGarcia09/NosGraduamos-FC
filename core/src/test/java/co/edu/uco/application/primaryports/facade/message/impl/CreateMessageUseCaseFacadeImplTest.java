@@ -3,7 +3,6 @@ package co.edu.uco.application.primaryports.facade.message.impl;
 import co.edu.uco.application.primaryports.dto.message.CreateMessageDTO;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.MessageAccessContext;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.application.usecase.handling.HandlingCreateMessagePort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +37,7 @@ class CreateMessageUseCaseFacadeImplTest {
     void execute_delegatesMessageAndAuthenticatedIdentityContext() {
         CreateMessageDTO dto = new CreateMessageDTO();
         ExternalIdentity identity = new ExternalIdentity(
-                "issuer", "subject", "user@example.com", PrincipalType.HUMAN, Instant.MAX);
+                "issuer", "subject", "user@example.com", Instant.MAX);
         MessageAccessContext context = new MessageAccessContext(null, identity);
 
         facade.execute(dto, context);

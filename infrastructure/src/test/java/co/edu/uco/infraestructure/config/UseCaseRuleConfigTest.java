@@ -32,7 +32,6 @@ import co.edu.uco.application.usecase.domain.aggregate.entities.OrganizationEnti
 import co.edu.uco.application.usecase.domain.security.AuthorizationScopeType;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.application.usecase.handling.HandlingCreateOrganizationPort;
 import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
 import co.edu.uco.application.usecase.handling.HandlingCreateApplicationPort;
@@ -225,7 +224,7 @@ class UseCaseRuleConfigTest {
 
         verify(applicationValidator).validate(dto);
         verify(applicationRepository).create(any(ApplicationData.class),
-                eq(LANGUAGE_ID), any(), any(), eq(STATE_ID));
+                eq(LANGUAGE_ID), eq(STATE_ID));
         verify(log).info("Application created successfully with name: {}", "Messages");
         verifyNoInteractions(handlingActiveContextPort, authorizationCompositeValidator);
     }
@@ -306,7 +305,9 @@ class UseCaseRuleConfigTest {
         ApplicationData application = ApplicationData.build(applicationId, "App", organization);
         co.edu.uco.application.secondaryports.entity.EnvironmentData environment =
                 new co.edu.uco.application.secondaryports.entity.EnvironmentData(
-                        UUID.fromString("323e4567-e89b-12d3-a456-426614174000"), "Dev", application);
+                        UUID.fromString("323e4567-e89b-12d3-a456-426614174000"), application,
+                        new co.edu.uco.application.secondaryports.entity.EnvironmentTypeData(
+                                UUID.fromString("423e4567-e89b-12d3-a456-426614174000"), "Dev"));
         when(organizationRepository.findById(organizationId)).thenReturn(Optional.of(organization));
         when(applicationRepository.findById(applicationId.toString())).thenReturn(Optional.of(application));
         when(environmentRepository.findById(environment.getId().toString())).thenReturn(Optional.of(environment));
@@ -393,8 +394,6 @@ class UseCaseRuleConfigTest {
                 .name("Messages")
                 .organizationId("123e4567-e89b-12d3-a456-426614174000")
                 .languageId(LANGUAGE_ID)
-                .startDate("2025-01-01T00:00:00")
-                .endDate("2025-12-31T23:59:59")
                 .stateId(STATE_ID)
                 .build();
     }
@@ -408,6 +407,6 @@ class UseCaseRuleConfigTest {
     }
 
     private static ExternalIdentity identity() {
-        return new ExternalIdentity("issuer", "subject", null, PrincipalType.HUMAN, Instant.MAX);
+        return new ExternalIdentity("issuer", "subject", null, Instant.MAX);
     }
 }

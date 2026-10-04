@@ -2,7 +2,6 @@ package co.edu.uco.application.primaryports.facade.application.impl;
 
 import co.edu.uco.application.primaryports.dto.application.CreateApplicationDTO;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.application.usecase.handling.HandlingCreateApplicationPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,7 @@ class CreateApplicationUseCaseFacadeImplTest {
     void execute_delegatesApplicationAndIdentity() {
         CreateApplicationDTO dto = new CreateApplicationDTO();
         ExternalIdentity identity = new ExternalIdentity(
-                "issuer", "subject", "user@example.com", PrincipalType.HUMAN, Instant.MAX);
+                "issuer", "subject", "user@example.com", Instant.MAX);
 
         facade.execute(dto, identity);
 

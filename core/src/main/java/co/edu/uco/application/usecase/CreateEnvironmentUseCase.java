@@ -4,6 +4,7 @@ import co.edu.uco.application.primaryports.dto.environment.CreateEnvironmentDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.entity.EnvironmentData;
+import co.edu.uco.application.secondaryports.entity.EnvironmentTypeData;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
@@ -56,9 +57,10 @@ public final class CreateEnvironmentUseCase implements HandlingCreateEnvironment
 
         try {
             var application = ApplicationData.build(UtilUUID.getStringToUUID(dto.getApplicationId()), "");
-            var environment = new EnvironmentData(UtilUUID.getNewUUID(), dto.getName(), application);
+            var type = new EnvironmentTypeData(UtilUUID.getStringToUUID(dto.getTypeId()), "");
+            var environment = new EnvironmentData(UtilUUID.getNewUUID(), application, type);
             environmentRepository.create(environment, dto.getTypeId(), dto.getStateId());
-            log.info("Environment created successfully with name: {}", dto.getName());
+            log.info("Environment created successfully with type id: {}", dto.getTypeId());
         } catch (CrossWordsException ex) {
             throw ex;
         } catch (Exception ex) {

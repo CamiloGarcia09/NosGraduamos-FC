@@ -5,7 +5,6 @@ import co.edu.uco.application.primaryports.facade.message.CreateMessageUseCaseFa
 import co.edu.uco.application.secondaryports.presenter.PresenterPort;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.MessageAccessContext;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.crosscutting.exceptions.ForbiddenException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -73,7 +72,7 @@ class CreateMessageControllerImplTest {
     void createMessage_includesExternalIdentityWhenAttributeIsPresent() {
         CreateMessageDTO dto = CreateMessageDTO.builder().environmentId("env-body").build();
         ExternalIdentity identity = new ExternalIdentity(
-                "issuer", "subject", "user@example.com", PrincipalType.HUMAN, Instant.MAX);
+                "issuer", "subject", "user@example.com", Instant.MAX);
         when(request.getAttribute(ENVIRONMENT_ID_ATTRIBUTE)).thenReturn(null);
         when(request.getAttribute(EXTERNAL_IDENTITY_ATTRIBUTE)).thenReturn(identity);
 

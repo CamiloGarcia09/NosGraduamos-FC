@@ -10,7 +10,6 @@ import co.edu.uco.application.secondaryports.repository.ApplicationRepository;
 import co.edu.uco.application.usecase.domain.security.AuthorizationScopeType;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
 import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
 import co.edu.uco.application.usecase.validator.application.CreateApplicationCompositeValidator;
@@ -45,7 +44,7 @@ class CreateApplicationUseCaseTest {
     private static final String ORGANIZATION_ID = "123e4567-e89b-12d3-a456-426614174000";
     private static final String OTHER_ORGANIZATION_ID = "123e4567-e89b-12d3-a456-426614174002";
     private static final ExternalIdentity IDENTITY = new ExternalIdentity(
-            "issuer", "subject", "user@example.com", PrincipalType.HUMAN, Instant.MAX);
+            "issuer", "subject", "user@example.com", Instant.MAX);
 
     @Mock
     private ApplicationRepository applicationRepository;
@@ -76,8 +75,6 @@ class CreateApplicationUseCaseTest {
                 .name("Message App")
                 .organizationId(ORGANIZATION_ID)
                 .languageId("lang-1")
-                .startDate("2025-01-01T00:00:00")
-                .endDate("2025-12-31T23:59:59")
                 .stateId("state-1")
                 .build();
     }
@@ -90,7 +87,7 @@ class CreateApplicationUseCaseTest {
         useCase.createApplication(dto, null);
 
         verify(validator).validate(dto);
-        verify(applicationRepository).create(applicationCaptor.capture(), eq("lang-1"), any(), any(), eq("state-1"));
+        verify(applicationRepository).create(applicationCaptor.capture(), eq("lang-1"), eq("state-1"));
         ApplicationData capturedApplication = applicationCaptor.getValue();
         assertSoftly(softly -> {
             softly.assertThat(capturedApplication.getName()).isEqualTo("Message App");
@@ -114,7 +111,7 @@ class CreateApplicationUseCaseTest {
                 AuthorizationScopeType.ORGANIZATION, UUID.fromString(ORGANIZATION_ID));
         verify(validator).validate(dto);
         verify(applicationRepository).create(any(ApplicationData.class),
-                eq("lang-1"), any(), any(), eq("state-1"));
+                eq("lang-1"), eq("state-1"));
         verifyNoInteractions(catalogPort);
     }
 
@@ -177,7 +174,7 @@ class CreateApplicationUseCaseTest {
     @Test
     void createApplication_throwsBusinessException_whenRepositoryFails() {
         CreateApplicationDTO dto = validDto();
-        doThrow(new RuntimeException("db down")).when(applicationRepository).create(any(), anyString(), any(), any(), anyString());
+        doThrow(new RuntimeException("db down")).when(applicationRepository).create(any(), anyString(), anyString());
 
         assertThatThrownBy(() -> useCase.createApplication(dto, null))
                 .isInstanceOf(BusinessException.class)
@@ -190,7 +187,7 @@ class CreateApplicationUseCaseTest {
     void createApplication_rethrowsCrossWordsExceptionFromRepository() {
         CreateApplicationDTO dto = validDto();
         doThrow(BusinessRuleException.buildUserException("conflict"))
-                .when(applicationRepository).create(any(), anyString(), any(), any(), anyString());
+                .when(applicationRepository).create(any(), anyString(), anyString());
 
         assertThatThrownBy(() -> useCase.createApplication(dto, null))
                 .isInstanceOf(BusinessRuleException.class);

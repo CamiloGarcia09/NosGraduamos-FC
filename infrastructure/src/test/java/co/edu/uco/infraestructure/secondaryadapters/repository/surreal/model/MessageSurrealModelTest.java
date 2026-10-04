@@ -20,7 +20,7 @@ class MessageSurrealModelTest {
         assertThat(model.getTypeId()).isEmpty();
         assertThat(model.getCategoryId()).isEmpty();
         assertThat(model.getStatusId()).isEmpty();
-        assertThat(model.getApplication()).isEmpty();
+        assertThat(model.getApplicationId()).isEmpty();
         assertThat(model.getFunctionalityId()).isEmpty();
         assertThat(model.getCreatedAt()).isNotNull();
         assertThat(model.getUpdatedAt()).isNotNull();
@@ -41,7 +41,7 @@ class MessageSurrealModelTest {
         assertThat(model.getTypeId()).isEqualTo("type-1");
         assertThat(model.getCategoryId()).isEqualTo("cat-1");
         assertThat(model.getStatusId()).isEqualTo("st-1");
-        assertThat(model.getApplication()).isEqualTo("APP");
+        assertThat(model.getApplicationId()).isEqualTo("APP");
         assertThat(model.getFunctionalityId()).isEqualTo("func-1");
         assertThat(model.getCreatedAt()).isEqualTo(createdAt);
         assertThat(model.getUpdatedAt()).isEqualTo(updatedAt);

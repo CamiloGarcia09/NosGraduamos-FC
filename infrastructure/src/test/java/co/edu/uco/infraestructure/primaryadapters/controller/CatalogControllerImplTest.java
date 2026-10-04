@@ -4,7 +4,6 @@ import co.edu.uco.application.primaryports.dto.catalog.CatalogItemDTO;
 import co.edu.uco.application.primaryports.facade.catalog.FindCatalogUseCaseFacade;
 import co.edu.uco.application.secondaryports.presenter.PresenterPort;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +25,7 @@ import static co.edu.uco.infraestructure.config.InfrastructureConstant.EXTERNAL_
 class CatalogControllerImplTest {
 
     private static final ExternalIdentity IDENTITY = new ExternalIdentity(
-            "issuer", "subject", null, PrincipalType.HUMAN, Instant.MAX);
+            "issuer", "subject", null, Instant.MAX);
 
     @Mock
     private FindCatalogUseCaseFacade findCatalogUseCaseFacade;

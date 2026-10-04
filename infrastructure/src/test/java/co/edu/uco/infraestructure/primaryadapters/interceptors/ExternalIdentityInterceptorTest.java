@@ -4,7 +4,6 @@ import co.edu.uco.application.secondaryports.ErrorResponse;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.security.ExternalIdentityResolverPort;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.crosscutting.exceptions.UnauthorizedException;
 import co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.SerializerRegistry;
 import co.edu.uco.infraestructure.secondaryadapters.presenter.serializer.SerializerType;
@@ -71,7 +70,7 @@ class ExternalIdentityInterceptorTest {
 
     @Test
     void preHandle_setsExternalIdentity_whenBearerTokenIsValid() throws Exception {
-        var identity = new ExternalIdentity("issuer", "subject", "email", PrincipalType.HUMAN,
+        var identity = new ExternalIdentity("issuer", "subject", "email",
                 Instant.parse("2030-01-01T00:00:00Z"));
         when(request.getHeader("Authorization")).thenReturn("Bearer valid-token");
         when(identityResolver.resolve("valid-token")).thenReturn(identity);
@@ -84,7 +83,7 @@ class ExternalIdentityInterceptorTest {
 
     @Test
     void preHandle_acceptsCaseInsensitiveBearerScheme() throws Exception {
-        var identity = new ExternalIdentity("issuer", "subject", "email", PrincipalType.SERVICE,
+        var identity = new ExternalIdentity("issuer", "subject", "service@example.com",
                 Instant.parse("2030-01-01T00:00:00Z"));
         when(request.getHeader("Authorization")).thenReturn("bearer valid-token");
         when(identityResolver.resolve("valid-token")).thenReturn(identity);

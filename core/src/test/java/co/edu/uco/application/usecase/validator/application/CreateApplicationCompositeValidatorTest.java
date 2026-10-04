@@ -65,8 +65,6 @@ class CreateApplicationCompositeValidatorTest {
                 .name("Message App")
                 .organizationId(ORGANIZATION_ID)
                 .languageId(LANGUAGE_ID)
-                .startDate("2025-01-01T00:00:00")
-                .endDate("2025-12-31T23:59:59")
                 .stateId(STATE_ID)
                 .build();
     }
@@ -217,35 +215,6 @@ class CreateApplicationCompositeValidatorTest {
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("El idioma de la aplicación no existe."));
         verifyNoInteractions(recordExistsCatalogPort, applicationRepository);
-    }
-
-    @Test
-    void validate_throwsBusinessRule_whenStartDateIsEmpty() {
-        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_165.getCode()))
-                .thenReturn("La fecha de inicio de la aplicación es requerida.");
-        when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
-        CreateApplicationDTO dto = validDto();
-        dto.setStartDate("");
-
-        assertThatThrownBy(() -> validator.validate(dto))
-                .isInstanceOf(BusinessRuleException.class)
-                .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("La fecha de inicio de la aplicación es requerida."));
-    }
-
-    @Test
-    void validate_throwsBusinessRule_whenStartDateIsAfterEndDate() {
-        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_189.getCode()))
-                .thenReturn("La fecha de inicio no puede ser posterior a la fecha de fin.");
-        when(recordExistsCatalogPort.exists(any(), anyString())).thenReturn(true);
-        CreateApplicationDTO dto = validDto();
-        dto.setStartDate("2026-12-31T23:59:59");
-        dto.setEndDate("2025-01-01T00:00:00");
-
-        assertThatThrownBy(() -> validator.validate(dto))
-                .isInstanceOf(BusinessRuleException.class)
-                .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("La fecha de inicio no puede ser posterior a la fecha de fin."));
     }
 
     @Test

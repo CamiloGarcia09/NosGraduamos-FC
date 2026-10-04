@@ -20,13 +20,98 @@ tags:
     description: Consulta y seleccion del contexto activo de la identidad autenticada.
   - name: Catalogos
     description: Catalogos con identificadores UUID persistentes.
+  - name: Administracion
+    description: Creacion de aplicaciones, ambientes y funcionalidades.
 
 paths:
+  /messageucolab/v1/application:
+    post:
+      tags: [Administracion]
+      summary: Crear aplicacion
+      description: Crea una aplicacion asociada a una organizacion. El contrato no recibe fechas de inicio o fin.
+      operationId: createApplication
+      security:
+        - tokenAuth: []
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApplicationRequest'
+      responses:
+        '200':
+          description: Aplicacion creada correctamente.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /messageucolab/v1/application/environment:
+    post:
+      tags: [Administracion]
+      summary: Crear ambiente
+      description: Crea un ambiente identificado para el usuario por su tipo. Cada aplicacion admite como maximo un ambiente de cada tipo; no se recibe un nombre independiente.
+      operationId: createEnvironment
+      security:
+        - tokenAuth: []
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEnvironmentRequest'
+      responses:
+        '200':
+          description: Ambiente creado correctamente.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /messageucolab/v1/application/functionality:
+    post:
+      tags: [Administracion]
+      summary: Crear funcionalidad
+      description: Crea una funcionalidad para una aplicacion. El contrato no recibe fechas de inicio o fin.
+      operationId: createFunctionality
+      security:
+        - tokenAuth: []
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFunctionalityRequest'
+      responses:
+        '200':
+          description: Funcionalidad creada correctamente.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /messageucolab/v1/application/message:
     post:
       tags: [Mensajes]
       summary: Crear mensaje
-      description: Crea un mensaje en el ambiente del contexto activo. Todos los campos terminados en Id aceptan exclusivamente UUID persistentes.
+      description: Crea un mensaje en el ambiente del contexto activo. Todos los campos terminados en Id aceptan exclusivamente UUID persistentes. El cliente envia applicationId, no el nombre de la aplicacion; el nombre expuesto en las salidas se deriva en el servidor.
       operationId: createMessage
       security:
         - tokenAuth: []
@@ -356,6 +441,10 @@ components:
       description: Mensajes obtenidos correctamente.
     MessageFound:
       description: Mensaje encontrado.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MessageResponse'
     MessageTranslated:
       description: Mensaje traducido correctamente.
     CatalogFound:
@@ -382,9 +471,50 @@ components:
       description: Error interno del servidor.
 
   schemas:
+    CreateApplicationRequest:
+      type: object
+      required: [name, organizationId, languageId, stateId]
+      properties:
+        name:
+          type: string
+        organizationId:
+          type: string
+          format: uuid
+        languageId:
+          type: string
+          format: uuid
+        stateId:
+          type: string
+          format: uuid
+    CreateEnvironmentRequest:
+      type: object
+      required: [applicationId, typeId, stateId]
+      properties:
+        applicationId:
+          type: string
+          format: uuid
+        typeId:
+          type: string
+          format: uuid
+          description: Tipo que identifica y etiqueta el ambiente dentro de la aplicacion.
+        stateId:
+          type: string
+          format: uuid
+    CreateFunctionalityRequest:
+      type: object
+      required: [name, applicationId, stateId]
+      properties:
+        name:
+          type: string
+        applicationId:
+          type: string
+          format: uuid
+        stateId:
+          type: string
+          format: uuid
     CreateMessageRequest:
       type: object
-      required: [code, title, content, typeId, categoryId, statusId, applicationId, application,
+      required: [code, title, content, typeId, categoryId, statusId, applicationId,
         functionalityId, environmentId, messageEnvironmentStateId]
       properties:
         code:
@@ -408,8 +538,6 @@ components:
         applicationId:
           type: string
           format: uuid
-        application:
-          type: string
         functionalityId:
           type: string
           format: uuid
@@ -419,6 +547,37 @@ components:
         messageEnvironmentStateId:
           type: string
           format: uuid
+    Message:
+      type: object
+      required: [code, title, content, type, category, application, functionality]
+      properties:
+        code:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        type:
+          type: string
+        category:
+          type: string
+        application:
+          type: string
+          description: Nombre de la aplicacion derivado por el servidor a partir de applicationId.
+        functionality:
+          type: string
+    MessageResponse:
+      type: object
+      required: [data, errors]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+        errors:
+          type: array
+          items:
+            type: string
     CreateTokenRequest:
       type: object
       required: [expirationDate, environmentId]

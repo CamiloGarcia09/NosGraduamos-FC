@@ -12,19 +12,16 @@ import static co.edu.uco.crosscutting.helpers.UtilText.trim;
 @AllArgsConstructor
 public final class CreateEnvironmentDTO {
 
-    private String name;
     private String applicationId;
     private String typeId;
     private String stateId;
 
     public CreateEnvironmentDTO() {
-        setName(EMPTY);
         setApplicationId(EMPTY);
         setTypeId(EMPTY);
         setStateId(EMPTY);
     }
 
-    public void setName(String name) { this.name = trim(name); }
     public void setApplicationId(String applicationId) { this.applicationId = trim(applicationId); }
     public void setTypeId(String typeId) { this.typeId = trim(typeId); }
     public void setStateId(String stateId) { this.stateId = trim(stateId); }

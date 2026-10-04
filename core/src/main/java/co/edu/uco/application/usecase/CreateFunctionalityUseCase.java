@@ -22,7 +22,6 @@ import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionLocation;
 import co.edu.uco.crosscutting.helpers.UtilUUID;
 import org.springframework.stereotype.Component;
 
-import static co.edu.uco.crosscutting.helpers.UtilDate.parseDate;
 import static co.edu.uco.crosscutting.helpers.UtilUUID.getUUIDFromString;
 import static co.edu.uco.crosscutting.helpers.UtilUUID.isEqual;
 
@@ -60,9 +59,7 @@ public final class CreateFunctionalityUseCase implements HandlingCreateFunctiona
             var functionality = new FunctionalityData(
                     UtilUUID.getNewUUID(),
                     dto.getName(),
-                    application,
-                    parseDate(dto.getStartDate()),
-                    parseDate(dto.getEndDate())
+                    application
             );
             functionalityRepository.create(functionality, dto.getStateId());
             log.info("Functionality created successfully with name: {}", dto.getName());

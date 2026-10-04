@@ -33,7 +33,6 @@ public class AuthorizationQuerySurrealAdapter extends SurrealCatalogSupport impl
                                  final AuthorizationScopeType scopeType, final UUID scopeId) {
         final String sql = "SELECT true AS allowed FROM role_assignment WHERE "
                 + authorizationPredicate(identity, permission, organizationExpression(scopeType, scopeId))
-                + " AND " + scopePredicate(scopeType, scopeId)
                 + " LIMIT 1;";
         try {
             return queryOne(sql, QUERY_ERROR, row -> true).orElse(false);
@@ -50,10 +49,7 @@ public class AuthorizationQuerySurrealAdapter extends SurrealCatalogSupport impl
         final String organization = "$parent.organization_id";
         final String sql = "SELECT id AS authorized_id FROM application WHERE "
                 + "count((SELECT id FROM role_assignment WHERE "
-                 + authorizationPredicate(identity, permission, organization)
-                 + " AND ((scope_type = 'ORGANIZATION' AND organization_id = " + organization + ")"
-                 + " OR (scope_type = 'APPLICATION' AND application_id = $parent.id)"
-                 + " OR (scope_type = 'ENVIRONMENT' AND environment_id.application_id = $parent.id)))) > 0;";
+                 + authorizationPredicate(identity, permission, organization) + ")) > 0;";
         return queryIds(sql);
     }
 
@@ -66,10 +62,7 @@ public class AuthorizationQuerySurrealAdapter extends SurrealCatalogSupport impl
         final String sql = "SELECT id AS authorized_id FROM environment WHERE application_id = "
                 + application + " AND application_id.organization_id = " + organization
                 + " AND count((SELECT id FROM role_assignment WHERE "
-                + authorizationPredicate(identity, permission, organization)
-                + " AND ((scope_type = 'ORGANIZATION' AND organization_id = " + organization + ")"
-                + " OR (scope_type = 'APPLICATION' AND application_id = " + application + ")"
-                + " OR (scope_type = 'ENVIRONMENT' AND environment_id = $parent.id)))) > 0;";
+                + authorizationPredicate(identity, permission, organization) + ")) > 0;";
         return queryIds(sql);
     }
 
@@ -89,6 +82,7 @@ public class AuthorizationQuerySurrealAdapter extends SurrealCatalogSupport impl
                 + "(SELECT VALUE id FROM external_identity WHERE issuer = " + quote(identity.issuer())
                 + " AND subject = " + quote(identity.subject()) + "))"
                 + " AND membership_id.organization_id = " + organizationExpression
+                + " AND organization_id = " + organizationExpression
                 + " AND role_id IN (SELECT VALUE role_id FROM role_permission WHERE permission_id IN "
                 + "(SELECT VALUE id FROM permission WHERE code = " + quote(permission.name()) + "))";
     }
@@ -99,21 +93,6 @@ public class AuthorizationQuerySurrealAdapter extends SurrealCatalogSupport impl
             case ORGANIZATION -> scope;
             case APPLICATION -> ORGANIZATION_ID_QUERY_PREFIX + scope + ")[0]";
             case ENVIRONMENT -> "(SELECT VALUE application_id.organization_id FROM " + scope + ")[0]";
-        };
-    }
-
-    private String scopePredicate(final AuthorizationScopeType scopeType, final UUID scopeId) {
-        final String scope = recordIdLiteral(scopeTable(scopeType), scopeId.toString());
-        return switch (scopeType) {
-            case ORGANIZATION -> "scope_type = 'ORGANIZATION' AND organization_id = " + scope;
-            case APPLICATION -> "((scope_type = 'ORGANIZATION' AND organization_id IN "
-                    + ORGANIZATION_ID_QUERY_PREFIX + scope + "))"
-                    + " OR (scope_type = 'APPLICATION' AND application_id = " + scope + "))";
-            case ENVIRONMENT -> "((scope_type = 'ORGANIZATION' AND organization_id IN "
-                    + "(SELECT VALUE application_id.organization_id FROM " + scope + "))"
-                    + " OR (scope_type = 'APPLICATION' AND application_id IN "
-                    + "(SELECT VALUE application_id FROM " + scope + "))"
-                    + " OR (scope_type = 'ENVIRONMENT' AND environment_id = " + scope + "))";
         };
     }
 

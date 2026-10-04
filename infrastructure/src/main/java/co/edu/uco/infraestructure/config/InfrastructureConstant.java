@@ -4,16 +4,6 @@ public final class InfrastructureConstant {
 
     private InfrastructureConstant() {}
 
-    public static final String COLLECTION_TOKEN = "token";
-    public static final String COLLECTION_TOKEN_STATE = "token_state";
-    public static final String COLLECTION_MESSAGE_ENVIRONMENT = "message_environment";
-    public static final String COLLECTION_ENVIRONMENT = "environment";
-    public static final String COLLECTION_APPLICATION = "application";
-    public static final String COLLECTION_STATUS_MESSAGE_ENVIRONMENT = "status_message_environment";
-    public static final String COLLECTION_ENVIRONMENT_TYPE = "environment_type";
-    public static final String COLLECTION_REPRESENT_PARAMETER = "represent_parameter";
-    public static final String COLLECTION_PARAMETER = "parameter";
-
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_CREATION_DATE = "creation_date";

@@ -2,6 +2,7 @@ package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.entity.EnvironmentData;
+import co.edu.uco.application.secondaryports.entity.EnvironmentTypeData;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.EnvironmentCatalogRepository;
 import com.surrealdb.Object;
@@ -27,7 +28,7 @@ public class EnvironmentCatalogSurrealAdapter extends SurrealCatalogSupport impl
     @Override
     public List<EnvironmentData> findAllByApplicationId(final String applicationId) {
         final String appRecordId = "application:" + applicationId;
-        final String sql = "SELECT * FROM " + SURREAL_TABLE_ENVIRONMENT
+        final String sql = "SELECT *, type_id.name AS type_name FROM " + SURREAL_TABLE_ENVIRONMENT
                 + " WHERE application_id = " + quote(appRecordId)
                 + " OR application_id = " + recordIdLiteral("application", applicationId) + ";";
         return query(sql, "Error al consultar entornos en SurrealDB: " + sql, this::toEnvironmentData);
@@ -36,14 +37,18 @@ public class EnvironmentCatalogSurrealAdapter extends SurrealCatalogSupport impl
     private EnvironmentData toEnvironmentData(final Object obj) {
         final EnvironmentData data = EnvironmentData.build();
         data.setId(extractIdAsUUID(obj.get("id")));
-        data.setName(stringOf(obj.get("name")));
-
         final ApplicationData app = ApplicationData.build();
         final Value appIdValue = obj.get("application_id");
         if (!isNullObject(appIdValue)) {
             app.setId(extractIdAsUUID(appIdValue));
         }
         data.setApplication(app);
+
+        final Value typeIdValue = obj.get("type_id");
+        if (!isNullObject(typeIdValue)) {
+            data.setType(new EnvironmentTypeData(
+                    extractIdAsUUID(typeIdValue), stringOf(obj.get("type_name"))));
+        }
         return data;
     }
 }

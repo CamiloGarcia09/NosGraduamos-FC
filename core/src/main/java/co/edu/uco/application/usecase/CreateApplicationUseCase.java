@@ -21,7 +21,6 @@ import co.edu.uco.crosscutting.exceptions.ForbiddenException;
 import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionLocation;
 import co.edu.uco.crosscutting.helpers.UtilUUID;
 
-import static co.edu.uco.crosscutting.helpers.UtilDate.parseDate;
 import static co.edu.uco.crosscutting.helpers.UtilUUID.getUUIDFromString;
 import static co.edu.uco.crosscutting.helpers.UtilUUID.isEqual;
 
@@ -61,8 +60,6 @@ public final class CreateApplicationUseCase implements HandlingCreateApplication
             applicationRepository.create(
                     application,
                     dto.getLanguageId(),
-                    parseDate(dto.getStartDate()),
-                    parseDate(dto.getEndDate()),
                     dto.getStateId()
             );
             log.info("Application created successfully with name: {}", dto.getName());

@@ -4,6 +4,7 @@ import co.edu.uco.application.primaryports.dto.context.SelectActiveContextDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.entity.EnvironmentData;
+import co.edu.uco.application.secondaryports.entity.EnvironmentTypeData;
 import co.edu.uco.application.secondaryports.repository.ApplicationRepository;
 import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
 import co.edu.uco.application.secondaryports.repository.OrganizationRepository;
@@ -257,6 +258,7 @@ class SelectActiveContextCompositeValidatorTest {
     }
 
     private static EnvironmentData environment(UUID applicationId) {
-        return new EnvironmentData(ENVIRONMENT_ID, "Environment", ApplicationData.build(applicationId, "Application"));
+        return new EnvironmentData(ENVIRONMENT_ID, ApplicationData.build(applicationId, "Application"),
+                new EnvironmentTypeData(UUID.randomUUID(), "Environment"));
     }
 }

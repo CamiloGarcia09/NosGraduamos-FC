@@ -16,17 +16,15 @@ import static co.edu.uco.crosscutting.helpers.UtilUUID.getNewUUID;
 public final class EnvironmentSurrealModel {
 
     private UUID id;
-    private String name;
     private String applicationId;
     private String typeId;
     private String stateId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public EnvironmentSurrealModel(UUID id, String name, String applicationId, String typeId,
+    public EnvironmentSurrealModel(UUID id, String applicationId, String typeId,
                                    String stateId, LocalDateTime createdAt, LocalDateTime updatedAt) {
         setId(id);
-        setName(name);
         setApplicationId(applicationId);
         setTypeId(typeId);
         setStateId(stateId);
@@ -36,7 +34,6 @@ public final class EnvironmentSurrealModel {
 
     public EnvironmentSurrealModel() {
         setId(getNewUUID());
-        setName(EMPTY);
         setApplicationId(EMPTY);
         setTypeId(EMPTY);
         setStateId(EMPTY);
@@ -46,10 +43,6 @@ public final class EnvironmentSurrealModel {
 
     public void setId(UUID id) {
         this.id = getDefaultUUID(id);
-    }
-
-    public void setName(String name) {
-        this.name = trim(name);
     }
 
     public void setApplicationId(String applicationId) {

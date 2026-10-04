@@ -10,10 +10,8 @@ import com.surrealdb.Object;
 import com.surrealdb.Surreal;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.datetime;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.quote;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
 
@@ -51,16 +49,13 @@ public class ApplicationSurrealRepositoryAdapterImpl extends SurrealCatalogSuppo
     }
 
     @Override
-    public void create(final ApplicationData application, final String languageId, final LocalDateTime startDate,
-                       final LocalDateTime endDate, final String stateId) {
+    public void create(final ApplicationData application, final String languageId, final String stateId) {
         final String upsertSql = "UPSERT " + recordIdLiteral(SURREAL_TABLE_APPLICATION, application.getId().toString())
                  + " CONTENT { "
                  + "name: " + quote(application.getName()) + ", "
                 + "organization_id: " + recordIdLiteral(
                         SURREAL_TABLE_ORGANIZATION, application.getOrganization().getId().toString()) + ", "
                 + "language_id: " + recordIdLiteral(SURREAL_TABLE_LANGUAGE_BASE, languageId) + ", "
-                + "start_date: " + datetime(startDate) + ", "
-                + "end_date: " + datetime(endDate) + ", "
                 + "state_id: " + recordIdLiteral(SURREAL_TABLE_APPLICATION_STATE, stateId)
                 + " };";
         try {
