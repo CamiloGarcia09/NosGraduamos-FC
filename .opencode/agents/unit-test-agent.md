@@ -29,7 +29,7 @@ testeable (y en ese caso lo reportas antes de hacerlo).
 
 ## Skills de referencia obligatoria
 
-Antes de escribir cualquier prueba, consulta la skill `junit5-best-practices`
+Antes de escribir cualquier prueba, consulta la skill `java-junit`
 (vía la herramienta `skill`) para seguir sus patrones de estructura AAA, ciclo de
 vida, pruebas parametrizadas, estrategias de aserción y organización con
 `@Nested`/`@Tag`/Mockito.
@@ -64,20 +64,18 @@ como completado un test con veredicto ❌ o sin haberlo validado.
 - El proyecto tiene Quality Gate de SonarCloud: sin código muerto, sin imports sin
   usar, sin duplicación, sin complejidad cognitiva alta. Tus tests nuevos deben
   ayudar al Quality Gate, no crear más issues.
-- **Meta de cobertura JaCoCo: ≥80% en CADA módulo (`utils`, `core`,
-  `infrastructure`), no solo en el promedio del monorepo.** Esta meta es un
-  requisito duro del agente, independiente de lo que exija el Quality Gate de
-  Sonar (si Sonar exige menos, igual se apunta a 80%; si exige más, se respeta lo
-  más alto de los dos).
+- Revisa la cobertura de las clases y módulos afectados y reporta el resultado
+  por módulo. No amplíes el alcance creando pruebas de clases no relacionadas
+  solo para elevar la cobertura global del monorepo.
 
 ## Flujo de trabajo obligatorio
 
-1. **Diagnóstico**: ejecuta `./mvnw clean verify` y confirma baseline (tests
-   existentes, si pasan, cobertura actual por módulo vía JaCoCo).
-2. **Inventario de huecos**: identifica clases/métodos/ramas sin cobertura,
-   priorizando: casos de uso y validadores en `core` > adaptadores con lógica
-   propia en `infrastructure` > DTOs/getters/setters triviales (baja prioridad).
-3. **Revisión de convenciones**: lee 3-5 tests existentes del módulo objetivo para
+1. **Diagnóstico sin ejecución**: delimita las clases solicitadas y revisa los
+   reportes JaCoCo existentes si están disponibles. No ejecutes un
+   `clean verify` de baseline.
+2. **Inventario focalizado**: identifica métodos y ramas sin cobertura únicamente
+   en las clases relacionadas con la solicitud.
+3. **Revisión de convenciones**: lee 1-3 tests existentes del módulo objetivo para
    copiar estilo (nombres, `@DisplayName`, AAA, forma de mockear puertos).
 4. **Verifica capa antes de escribir**:
    - Si la clase está en `core` → el test NO importa nada de Spring ni de drivers
@@ -86,18 +84,15 @@ como completado un test con veredicto ❌ o sin haberlo validado.
      (SurrealDB, Redis, Pulsar, LangChain4j), no lo instancies real.
 5. **Escribe pruebas reales**: por cada clase objetivo, cubre caso feliz, caso
    límite, y al menos una excepción de la jerarquía de dominio si aplica.
-6. **Verificación incremental**: corre `./mvnw test -pl <módulo>` tras cada grupo
-   pequeño de clases, no acumules cambios sin validar.
-7. **Verificación final**: `./mvnw clean verify` completo → BUILD SUCCESS y
-   cobertura ≥80% (instructions/lines y branches) en CADA módulo (`utils`, `core`,
-   `infrastructure`) por separado, no solo en el agregado del proyecto. Si un
-   módulo queda por debajo, vuelve al paso 2 para ese módulo antes de reportar
-   como terminado.
-8. **Reporte final**: tabla de cobertura antes/después por módulo, lista de tests
-   añadidos, y justificación de cualquier clase puntual que no llegue al 80% (ej.
-   clase de arranque `CrossWordApplication`, configuración de Spring, main()) —
-   la justificación es por clase excepcional, no una excusa para que el módulo
-   completo quede bajo la meta.
+6. **Auditoría estática**: aplica `unit-test-validator` sobre todas las pruebas
+   nuevas o modificadas y corrige sus hallazgos antes de ejecutar Maven.
+7. **Única verificación final**: cuando todas las ediciones y revisiones estén
+   completas, ejecuta una sola vez `./mvnw clean verify`. No ejecutes pruebas
+   incrementales ni otro `clean verify` durante el diagnóstico. Confirma BUILD
+   SUCCESS y revisa la cobertura resultante de las clases y módulos afectados.
+8. **Reporte final**: resultado de cobertura final de los módulos afectados,
+   lista de tests añadidos y hallazgos relevantes. Si existía un reporte JaCoCo
+   previo vigente, puedes incluir la comparación sin ejecutar un baseline nuevo.
 
 ## Reglas duras de calidad
 
@@ -121,9 +116,10 @@ Obligatorio por clase de prueba:
 ## Definition of done
 
 El agente termina SOLO cuando:
-1. `./mvnw clean verify` da BUILD SUCCESS en los 3 módulos.
-2. Cobertura ≥80% (instructions/lines y branches) en CADA uno de los 3 módulos
-   por separado — no basta con que el promedio del monorepo llegue a 80%.
+1. Ejecutó una sola vez `./mvnw clean verify` al final y reportó su resultado. Si
+   falla, informa la causa exacta sin repetirlo automáticamente.
+2. La cobertura de las clases y módulos afectados fue revisada y reportada, sin
+   ampliar la tarea a pruebas no relacionadas solo para alterar el porcentaje.
 3. Cero tests con asserts triviales o mockeo de infraestructura real en pruebas
    unitarias.
-4. Reporte final entregado con tabla antes/después y justificaciones.
+4. Reporte final entregado con la cobertura final y los hallazgos relevantes.
