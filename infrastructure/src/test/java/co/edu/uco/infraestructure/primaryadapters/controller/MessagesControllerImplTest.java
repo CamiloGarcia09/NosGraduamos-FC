@@ -1,6 +1,7 @@
 package co.edu.uco.infraestructure.primaryadapters.controller;
 
 import co.edu.uco.application.primaryports.dto.message.MessageDTO;
+import co.edu.uco.application.primaryports.dto.message.TranslateMessageDTO;
 import co.edu.uco.application.primaryports.dto.message.TranslatedMessageDTO;
 import co.edu.uco.application.primaryports.dto.page.PageRequestDTO;
 import co.edu.uco.application.primaryports.facade.message.FindMessageByCodeAndEnvironmentUseCaseFacade;
@@ -108,16 +109,37 @@ class MessagesControllerImplTest {
         when(request.getAttribute("environmentId")).thenReturn("env-1");
         TranslatedMessageDTO dto = TranslatedMessageDTO.create("CODE", "es", "en", "T", "C", "TT", "TC",
                 "TYPE", "CAT", "APP", "FUNC", "provider", "model", 10);
+        TranslateMessageDTO body = new TranslateMessageDTO();
+        body.setSourceLanguage("es");
+        body.setTargetLanguage("en");
         when(translateMessageByCodeAndEnvironmentUseCaseFacade.execute(
                 eq("CODE"), any(MessageAccessContext.class), eq("es"), eq("en")))
                 .thenReturn(dto);
 
-        controller.translateByCodeMessageAndEnvironment("CODE", "es", "en", request, response);
+        controller.translateByCodeMessageAndEnvironment("CODE", body, request, response);
 
         ArgumentCaptor<MessageAccessContext> contextCaptor = ArgumentCaptor.forClass(MessageAccessContext.class);
         verify(translateMessageByCodeAndEnvironmentUseCaseFacade)
                 .execute(eq("CODE"), contextCaptor.capture(), eq("es"), eq("en"));
         assertThat(contextCaptor.getValue().legacyEnvironmentId()).isEqualTo("env-1");
+        verify(translationPresenter).presentRestSuccess(List.of(dto), request, response);
+    }
+
+    @Test
+    void translateByCodeMessageAndEnvironment_usesAutomaticSourceLanguageWhenBodyOmitsIt() {
+        when(request.getAttribute("environmentId")).thenReturn("env-1");
+        TranslatedMessageDTO dto = TranslatedMessageDTO.create("CODE", "auto", "en", "T", "C", "TT", "TC",
+                "TYPE", "CAT", "APP", "FUNC", "provider", "model", 10);
+        TranslateMessageDTO body = new TranslateMessageDTO();
+        body.setTargetLanguage("en");
+        when(translateMessageByCodeAndEnvironmentUseCaseFacade.execute(
+                eq("CODE"), any(MessageAccessContext.class), eq("auto"), eq("en")))
+                .thenReturn(dto);
+
+        controller.translateByCodeMessageAndEnvironment("CODE", body, request, response);
+
+        verify(translateMessageByCodeAndEnvironmentUseCaseFacade)
+                .execute(eq("CODE"), any(MessageAccessContext.class), eq("auto"), eq("en"));
         verify(translationPresenter).presentRestSuccess(List.of(dto), request, response);
     }
 

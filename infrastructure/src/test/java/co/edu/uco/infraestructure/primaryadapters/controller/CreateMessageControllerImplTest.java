@@ -51,7 +51,7 @@ class CreateMessageControllerImplTest {
 
     @Test
     void createMessage_buildsLegacyAccessContextAndPresentsSuccess() {
-        CreateMessageDTO dto = CreateMessageDTO.builder().environmentId("env-body").build();
+        CreateMessageDTO dto = CreateMessageDTO.builder().code("MSG-001").build();
         when(request.getAttribute(ENVIRONMENT_ID_ATTRIBUTE)).thenReturn("env-token");
         when(request.getAttribute(EXTERNAL_IDENTITY_ATTRIBUTE)).thenReturn(null);
 
@@ -70,7 +70,7 @@ class CreateMessageControllerImplTest {
 
     @Test
     void createMessage_includesExternalIdentityWhenAttributeIsPresent() {
-        CreateMessageDTO dto = CreateMessageDTO.builder().environmentId("env-body").build();
+        CreateMessageDTO dto = CreateMessageDTO.builder().code("MSG-001").build();
         ExternalIdentity identity = new ExternalIdentity(
                 "issuer", "subject", "user@example.com", Instant.MAX);
         when(request.getAttribute(ENVIRONMENT_ID_ATTRIBUTE)).thenReturn(null);

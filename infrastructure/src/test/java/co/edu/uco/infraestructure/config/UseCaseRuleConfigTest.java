@@ -17,6 +17,7 @@ import co.edu.uco.application.secondaryports.repository.ActiveContextRepository;
 import co.edu.uco.application.secondaryports.repository.ApplicationRepository;
 import co.edu.uco.application.secondaryports.repository.ApplicationCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.EnvironmentCatalogRepository;
+import co.edu.uco.application.secondaryports.repository.EnvironmentReferenceCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
 import co.edu.uco.application.secondaryports.repository.ExternalIdentityRepository;
 import co.edu.uco.application.secondaryports.repository.FunctionalityCatalogRepository;
@@ -28,6 +29,8 @@ import co.edu.uco.application.secondaryports.repository.RecordExistsCatalogPort;
 import co.edu.uco.application.secondaryports.repository.ReferenceCatalog;
 import co.edu.uco.application.secondaryports.security.AuthorizationQueryPort;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
+import co.edu.uco.application.secondaryports.entity.EnvironmentData;
+import co.edu.uco.application.secondaryports.entity.EnvironmentTypeData;
 import co.edu.uco.application.usecase.domain.aggregate.entities.OrganizationEntity;
 import co.edu.uco.application.usecase.domain.security.AuthorizationScopeType;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
@@ -53,14 +56,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.time.Clock;
 import java.time.Instant;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 
+import static co.edu.uco.application.CrosswordsConstant.STATE_ACTIVE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -123,6 +132,8 @@ class UseCaseRuleConfigTest {
     private ExternalIdentityRepository externalIdentityRepository;
     @Mock
     private EnvironmentRepository environmentRepository;
+    @Mock
+    private EnvironmentReferenceCatalogRepository environmentReferenceCatalogRepository;
     @Mock
     private ExternalIdentityRequiredRule externalIdentityRequiredRule;
     @Mock
@@ -213,20 +224,43 @@ class UseCaseRuleConfigTest {
     }
 
     @Test
-    void handlingCreateApplicationPort_connectsValidatorRepositoryAndLogger() {
+    void handlingCreateApplicationPort_connectsValidatorReferenceCatalogAndLogger() {
         when(loggerFactory.getLogger(any())).thenReturn(log);
+        when(environmentReferenceCatalogRepository.findAllTypes()).thenReturn(List.of(
+                new EnvironmentTypeData(UUID.fromString("423e4567-e89b-12d3-a456-426614174000"), "Develop"),
+                new EnvironmentTypeData(UUID.fromString("423e4567-e89b-12d3-a456-426614174001"), "Testing"),
+                new EnvironmentTypeData(UUID.fromString("423e4567-e89b-12d3-a456-426614174002"), "Production")));
+        when(environmentReferenceCatalogRepository.findStateIdByName(STATE_ACTIVE))
+                .thenReturn(Optional.of(UUID.fromString("523e4567-e89b-12d3-a456-426614174000")));
         CreateApplicationDTO dto = validApplicationDto();
         HandlingCreateApplicationPort port = config.handlingCreateApplicationPort(
-                applicationRepository, applicationValidator, handlingActiveContextPort,
-                authorizationCompositeValidator, catalogPort, loggerFactory);
+                applicationRepository, environmentReferenceCatalogRepository, applicationValidator,
+                handlingActiveContextPort, authorizationCompositeValidator, catalogPort, loggerFactory);
 
         port.createApplication(dto, null);
 
         verify(applicationValidator).validate(dto);
-        verify(applicationRepository).create(any(ApplicationData.class),
-                eq(LANGUAGE_ID), eq(STATE_ID));
+        verify(applicationRepository).createWithEnvironments(any(ApplicationData.class),
+                eq(LANGUAGE_ID), eq(STATE_ID),
+                argThat((List<EnvironmentData> environments) -> environments.size() == 3
+                        && environments.stream()
+                        .map(environment -> environment.getType().getName())
+                        .toList()
+                        .equals(List.of("Develop", "Testing", "Production"))),
+                eq("523e4567-e89b-12d3-a456-426614174000"));
         verify(log).info("Application created successfully with name: {}", "Messages");
         verifyNoInteractions(handlingActiveContextPort, authorizationCompositeValidator);
+    }
+
+    @Test
+    void useCaseRuleConfig_declaresNoBeanForTheRemovedManualEnvironmentCreationFlow() {
+        List<String> manualEnvironmentCreationBeans = Arrays.stream(UseCaseRuleConfig.class.getDeclaredMethods())
+                .map(Method::getName)
+                .filter(name -> name.toLowerCase(Locale.ROOT).contains("environment"))
+                .filter(name -> name.toLowerCase(Locale.ROOT).contains("create"))
+                .toList();
+
+        assertThat(manualEnvironmentCreationBeans).isEmpty();
     }
 
     @Test
@@ -379,14 +413,14 @@ class UseCaseRuleConfigTest {
     void createMessageCompositeValidator_rejectsNullDtoUsingCatalogMessage() {
         when(catalogPort.getMessage("FUN_010")).thenReturn("Datos invalidos");
         CreateMessageCompositeValidator composite = config.createMessageCompositeValidator(
-                catalogPort, recordExistsCatalogPort, environmentRepository, functionalityCatalogRepository);
+                catalogPort, recordExistsCatalogPort, functionalityCatalogRepository);
 
         assertThatThrownBy(() -> composite.validate((CreateMessageDTO) null, LANGUAGE_ID))
                 .isInstanceOf(BusinessRuleException.class)
                 .extracting("userMessage")
                 .isEqualTo("Datos invalidos");
 
-        verifyNoInteractions(recordExistsCatalogPort, environmentRepository, functionalityCatalogRepository);
+        verifyNoInteractions(recordExistsCatalogPort, functionalityCatalogRepository);
     }
 
     private CreateApplicationDTO validApplicationDto() {

@@ -46,10 +46,7 @@ class MessageCatalogIdUuidRuleTest {
                         (BiConsumer<CreateMessageDTO, String>) CreateMessageDTO::setCategoryId),
                 Arguments.of("El estado del mensaje",
                         (Function<CreateMessageDTO, String>) CreateMessageDTO::getStatusId,
-                        (BiConsumer<CreateMessageDTO, String>) CreateMessageDTO::setStatusId),
-                Arguments.of("El estado del mensaje en el ambiente",
-                        (Function<CreateMessageDTO, String>) CreateMessageDTO::getMessageEnvironmentStateId,
-                        (BiConsumer<CreateMessageDTO, String>) CreateMessageDTO::setMessageEnvironmentStateId));
+                        (BiConsumer<CreateMessageDTO, String>) CreateMessageDTO::setStatusId));
     }
 
     private static Stream<Arguments> catalogIdExtractors() {

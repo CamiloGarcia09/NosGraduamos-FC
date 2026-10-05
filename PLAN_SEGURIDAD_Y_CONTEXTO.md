@@ -275,7 +275,6 @@ RoleAssignment de Organizacion
 - `MESSAGE_CREATE`
 - `MESSAGE_TRANSLATE`
 - `APPLICATION_CREATE`
-- `ENVIRONMENT_CREATE`
 - `FUNCTIONALITY_CREATE`
 
 ### Alcance
@@ -343,7 +342,7 @@ ActiveContext
 - [x] Traduccion de mensajes.
 - [x] Creacion de mensajes.
 - [x] Consulta de catalogos.
-- [x] Administracion de aplicaciones, ambientes y funcionalidades.
+- [x] Administracion de aplicaciones y funcionalidades; los ambientes se aprovisionan automaticamente.
 
 ### Reglas
 
@@ -593,10 +592,10 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - `core/src/main/java/co/edu/uco/application/usecase/FindCatalogUseCase.java`: exige que `applicationId` del catalogo coincida con `ActiveContext.applicationId` cuando hay identidad; `403` `FUN_153` en desalineacion.
 - `core/src/main/java/co/edu/uco/application/primaryports/facade/application|environment|functionality/` (interfaces e impl de creacion): propagacion de `ExternalIdentity`.
 - `core/src/main/java/co/edu/uco/application/usecase/handling/HandlingCreate{Application,Environment,Functionality}Port.java`: firmas con `ExternalIdentity`.
-- `core/src/main/java/co/edu/uco/application/usecase/Create{Application,Environment,Functionality}UseCase.java`: autorizacion interna `authorizeAgainstActiveContext` con `APPLICATION_CREATE`/`ORGANIZATION`, `ENVIRONMENT_CREATE`/`APPLICATION` y `FUNCTIONALITY_CREATE`/`APPLICATION`; identity null conserva el flujo legado.
+- `core/src/main/java/co/edu/uco/application/usecase/Create{Application,Functionality}UseCase.java`: autorizacion interna `authorizeAgainstActiveContext` con `APPLICATION_CREATE`/`ORGANIZATION` y `FUNCTIONALITY_CREATE`/`APPLICATION`; identity null conserva el flujo legado. La aplicacion aprovisiona sus tres ambientes por defecto.
 - `infrastructure/src/main/java/co/edu/uco/infraestructure/primaryadapters/controller/Create{Message,Application,Environment,Functionality}ControllerImpl.java`: construccion de `MessageAccessContext` o `ExternalIdentity` desde atributos HTTP sin reglas de negocio.
 - `infrastructure/src/main/java/co/edu/uco/infraestructure/config/UseCaseRuleConfig.java`: beans `handlingFindCatalogPort` y `handlingCreateApplicationPort` con `HandlingActiveContextPort`, `AuthorizationCompositeValidator` y `CatalogPort`.
-- `core/src/test/java/co/edu/uco/application/primaryports/facade/message/impl/CreateMessageUseCaseFacadeImplTest.java` y los de facade de application/environment/functionality: delegacion con contexto tipado e identity null legado.
+- `core/src/test/java/co/edu/uco/application/primaryports/facade/message/impl/CreateMessageUseCaseFacadeImplTest.java` y los de facade de application/functionality: delegacion con contexto tipado e identity null legado.
 - `core/src/test/java/co/edu/uco/application/usecase/Create{Message,Application,Environment,Functionality}UseCaseTest.java` y `FindCatalogUseCaseTest.java`: pruebas de aislamiento (legacy null, match con `ActiveContext`, `403` `FUN_153`, permisos correctos, composite de autorizacion denegando).
 - `core/src/test/java/co/edu/uco/application/usecase/validator/message/CreateMessageCompositeValidatorTest.java` y pruebas de `validator/message/rule/`: environmentId opcional, match condicional, jerarquia y cortocircuito.
 - `infrastructure/src/test/java/co/edu/uco/infraestructure/primaryadapters/controller/CreateMessageControllerImplTest.java`: captors de `MessageAccessContext` legado y autenticado, y propagacion de fallos del facade.

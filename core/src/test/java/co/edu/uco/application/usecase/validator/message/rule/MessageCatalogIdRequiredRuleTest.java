@@ -43,11 +43,7 @@ class MessageCatalogIdRequiredRuleTest {
                 Arguments.of("El estado del mensaje",
                         (Function<CreateMessageDTO, String>) CreateMessageDTO::getStatusId,
                         (BiConsumer<CreateMessageDTO, String>) CreateMessageDTO::setStatusId,
-                        MessageCatalogCodeEnum.FUN_194),
-                Arguments.of("El estado del mensaje en el ambiente",
-                        (Function<CreateMessageDTO, String>) CreateMessageDTO::getMessageEnvironmentStateId,
-                        (BiConsumer<CreateMessageDTO, String>) CreateMessageDTO::setMessageEnvironmentStateId,
-                        MessageCatalogCodeEnum.FUN_196));
+                        MessageCatalogCodeEnum.FUN_194));
     }
 
     private MessageCatalogIdRequiredRule rule(Function<CreateMessageDTO, String> extractor,

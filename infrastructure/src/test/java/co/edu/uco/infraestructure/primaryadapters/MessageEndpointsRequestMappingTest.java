@@ -1,0 +1,144 @@
+package co.edu.uco.infraestructure.primaryadapters;
+
+import co.edu.uco.application.primaryports.dto.message.CreateMessageDTO;
+import co.edu.uco.application.primaryports.dto.message.TranslateMessageDTO;
+import co.edu.uco.application.primaryports.dto.token.CreateTokenDTO;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
+class MessageEndpointsRequestMappingTest {
+
+    @Nested
+    class MessagesControllerEndpoints {
+
+        @Test
+        void classMapping_isAnchoredToTheV1MessagesResource() {
+            RequestMapping mapping = MessagesController.class.getAnnotation(RequestMapping.class);
+
+            assertThat(mapping).isNotNull();
+            assertThat(mapping.value()).containsExactly("${crosswords.api.path.messages}");
+        }
+
+        @Test
+        void listEndpoint_isGetWithoutCodeParameter() throws NoSuchMethodException {
+            Method method = MessagesController.class.getMethod("findByEnvironmentAndMessage",
+                    String.class, String.class, String.class, String.class,
+                    HttpServletRequest.class, HttpServletResponse.class);
+            GetMapping mapping = method.getAnnotation(GetMapping.class);
+
+            assertThat(mapping).isNotNull();
+            assertAll(
+                    () -> assertThat(mapping.params()).containsExactly("!code"),
+                    () -> assertThat(mapping.value()).isEmpty());
+        }
+
+        @Test
+        void findByCodeEndpoint_isGetBoundToTheCodeQueryParameter() throws NoSuchMethodException {
+            Method method = MessagesController.class.getMethod("findByCodeMessageAndEnvironment",
+                    String.class, HttpServletRequest.class, HttpServletResponse.class);
+            GetMapping mapping = method.getAnnotation(GetMapping.class);
+            RequestParam codeParameter = parameterAnnotation(method, 0, RequestParam.class);
+
+            assertThat(mapping).isNotNull();
+            assertThat(codeParameter).isNotNull();
+            assertAll(
+                    () -> assertThat(mapping.params()).containsExactly("code"),
+                    () -> assertThat(mapping.value()).isEmpty(),
+                    () -> assertThat(codeParameter.value()).isEqualTo("code"));
+        }
+
+        @Test
+        void translateEndpoint_isPostWithTranslateMessageBody() throws NoSuchMethodException {
+            Method method = MessagesController.class.getMethod("translateByCodeMessageAndEnvironment",
+                    String.class, TranslateMessageDTO.class, HttpServletRequest.class, HttpServletResponse.class);
+            PostMapping mapping = method.getAnnotation(PostMapping.class);
+            RequestBody bodyParameter = parameterAnnotation(method, 1, RequestBody.class);
+
+            assertThat(mapping).isNotNull();
+            assertThat(bodyParameter).isNotNull();
+            assertAll(
+                    () -> assertThat(mapping.value()).containsExactly("/{messageCode}/translations"),
+                    () -> assertThat(mapping.consumes()).containsExactly("application/json"),
+                    () -> assertThat(method.getParameters()[1].getType()).isEqualTo(TranslateMessageDTO.class));
+        }
+    }
+
+    @Nested
+    class CreateMessageControllerEndpoints {
+
+        @Test
+        void classMapping_isAnchoredToTheV1MessagesResource() {
+            RequestMapping mapping = CreateMessageController.class.getAnnotation(RequestMapping.class);
+
+            assertThat(mapping).isNotNull();
+            assertThat(mapping.value()).containsExactly("${crosswords.api.path.messages}");
+        }
+
+        @Test
+        void createEndpoint_isPostOnTheCollectionWithCreateMessageBody() throws NoSuchMethodException {
+            Method method = CreateMessageController.class.getMethod("createMessage",
+                    CreateMessageDTO.class, HttpServletRequest.class, HttpServletResponse.class);
+            PostMapping mapping = method.getAnnotation(PostMapping.class);
+            RequestBody bodyParameter = parameterAnnotation(method, 0, RequestBody.class);
+
+            assertThat(mapping).isNotNull();
+            assertThat(bodyParameter).isNotNull();
+            assertAll(
+                    () -> assertThat(mapping.value()).isEmpty(),
+                    () -> assertThat(mapping.consumes()).containsExactly("application/json"),
+                    () -> assertThat(method.getParameters()[0].getType()).isEqualTo(CreateMessageDTO.class));
+        }
+    }
+
+    @Nested
+    class TokenControllerEndpoints {
+
+        @Test
+        void classMapping_isAnchoredToTheV1ApplicationResource() {
+            RequestMapping mapping = TokenController.class.getAnnotation(RequestMapping.class);
+
+            assertThat(mapping).isNotNull();
+            assertThat(mapping.value()).containsExactly("${crosswords.api.path.application}");
+        }
+
+        @Test
+        void createTokenEndpoint_keepsApplicationIdPathVariableAndBody() throws NoSuchMethodException {
+            Method method = TokenController.class.getMethod("createToken",
+                    CreateTokenDTO.class, String.class, HttpServletRequest.class, HttpServletResponse.class);
+            PostMapping mapping = method.getAnnotation(PostMapping.class);
+            RequestBody bodyParameter = parameterAnnotation(method, 0, RequestBody.class);
+            PathVariable applicationIdParameter = parameterAnnotation(method, 1, PathVariable.class);
+
+            assertThat(mapping).isNotNull();
+            assertThat(bodyParameter).isNotNull();
+            assertThat(applicationIdParameter).isNotNull();
+            assertAll(
+                    () -> assertThat(mapping.value()).containsExactly("${crosswords.api.path.token.application}"),
+                    () -> assertThat(method.getParameters()[1].getType()).isEqualTo(String.class));
+        }
+    }
+
+    private static <A extends Annotation> A parameterAnnotation(Method method, int parameterIndex,
+                                                                Class<A> annotationType) {
+        for (Annotation annotation : method.getParameterAnnotations()[parameterIndex]) {
+            if (annotationType.isInstance(annotation)) {
+                return annotationType.cast(annotation);
+            }
+        }
+        return null;
+    }
+}

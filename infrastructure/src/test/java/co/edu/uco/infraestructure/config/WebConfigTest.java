@@ -10,11 +10,9 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistration
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.WEB_CONFIG_API_APPLICATION;
-import static co.edu.uco.infraestructure.config.InfrastructureConstant.WEB_CONFIG_API_CREATE_MESSAGE;
-import static co.edu.uco.infraestructure.config.InfrastructureConstant.WEB_CONFIG_API_MESSAGE;
-import static co.edu.uco.infraestructure.config.InfrastructureConstant.WEB_CONFIG_API_MESSAGE_CODE;
-import static co.edu.uco.infraestructure.config.InfrastructureConstant.WEB_CONFIG_API_MESSAGE_CODE_TRANSLATION;
-import static co.edu.uco.infraestructure.config.InfrastructureConstant.WEB_CONFIG_API_MESSAGE_LIST;
+import static co.edu.uco.infraestructure.config.InfrastructureConstant.WEB_CONFIG_API_MESSAGES;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,29 +35,28 @@ class WebConfigTest {
     private InterceptorRegistration tokenHeaderRegistration;
 
     @Test
-    void addInterceptors_protectsMessageListWithTokenInterceptor() {
+    void addInterceptors_protectsMessagesEndpointsWithTokenInterceptor() {
         when(registry.addInterceptor(loggingConfig)).thenReturn(loggingRegistration);
         when(registry.addInterceptor(acceptHeaderInterceptor)).thenReturn(acceptHeaderRegistration);
         when(acceptHeaderRegistration.addPathPatterns("/messageucolab/v1/**"))
                 .thenReturn(acceptHeaderRegistration);
         when(registry.addInterceptor(tokenHeaderInterceptor)).thenReturn(tokenHeaderRegistration);
         when(tokenHeaderRegistration.addPathPatterns(
-                WEB_CONFIG_API_MESSAGE,
                 WEB_CONFIG_API_APPLICATION,
-                WEB_CONFIG_API_MESSAGE_LIST,
-                WEB_CONFIG_API_MESSAGE_CODE,
-                WEB_CONFIG_API_MESSAGE_CODE_TRANSLATION,
-                WEB_CONFIG_API_CREATE_MESSAGE)).thenReturn(tokenHeaderRegistration);
+                WEB_CONFIG_API_MESSAGES)).thenReturn(tokenHeaderRegistration);
 
         new WebConfig(loggingConfig, acceptHeaderInterceptor, tokenHeaderInterceptor).addInterceptors(registry);
 
         verify(tokenHeaderRegistration).addPathPatterns(
-                WEB_CONFIG_API_MESSAGE,
                 WEB_CONFIG_API_APPLICATION,
-                WEB_CONFIG_API_MESSAGE_LIST,
-                WEB_CONFIG_API_MESSAGE_CODE,
-                WEB_CONFIG_API_MESSAGE_CODE_TRANSLATION,
-                WEB_CONFIG_API_CREATE_MESSAGE);
+                WEB_CONFIG_API_MESSAGES);
         verify(tokenHeaderRegistration).order(0);
+    }
+
+    @Test
+    void constants_mapMessagesResourceAndApplicationMessageResource() {
+        assertAll(
+                () -> assertThat(WEB_CONFIG_API_MESSAGES).isEqualTo("/messageucolab/v1/messages/**"),
+                () -> assertThat(WEB_CONFIG_API_APPLICATION).isEqualTo("/messageucolab/v1/application/**/message/*"));
     }
 }

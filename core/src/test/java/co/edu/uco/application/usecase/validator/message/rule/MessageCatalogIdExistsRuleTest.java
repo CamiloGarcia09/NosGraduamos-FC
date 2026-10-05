@@ -50,11 +50,7 @@ class MessageCatalogIdExistsRuleTest {
                 Arguments.of("El estado del mensaje",
                         (Function<CreateMessageDTO, String>) CreateMessageDTO::getStatusId,
                         (BiConsumer<CreateMessageDTO, String>) CreateMessageDTO::setStatusId,
-                        ReferenceCatalog.MESSAGE_STATE, MessageCatalogCodeEnum.FUN_195),
-                Arguments.of("El estado del mensaje en el ambiente",
-                        (Function<CreateMessageDTO, String>) CreateMessageDTO::getMessageEnvironmentStateId,
-                        (BiConsumer<CreateMessageDTO, String>) CreateMessageDTO::setMessageEnvironmentStateId,
-                        ReferenceCatalog.MESSAGE_ENVIRONMENT_STATE, MessageCatalogCodeEnum.FUN_197));
+                        ReferenceCatalog.MESSAGE_STATE, MessageCatalogCodeEnum.FUN_195));
     }
 
     private MessageCatalogIdExistsRule rule(Function<CreateMessageDTO, String> extractor,

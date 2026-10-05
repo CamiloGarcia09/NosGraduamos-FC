@@ -29,7 +29,7 @@ public final class MessageFunctionalityBelongsApplicationRule
 
     private static boolean belongsToApplication(CreateMessageValidationContext context,
                                                 FunctionalityCatalogRepository functionalityRepository) {
-        UUID applicationId = getUUIDFromString(context.dto().getApplicationId());
+        UUID applicationId = getUUIDFromString(context.applicationId());
         UUID functionalityId = getUUIDFromString(context.dto().getFunctionalityId());
         List<FunctionalityData> functionalities =
                 functionalityRepository.findAllByApplicationId(getStringFromUUID(applicationId));

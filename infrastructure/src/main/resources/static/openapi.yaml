@@ -21,14 +21,14 @@ tags:
   - name: Catalogos
     description: Catalogos con identificadores UUID persistentes.
   - name: Administracion
-    description: Creacion de aplicaciones, ambientes y funcionalidades.
+    description: Creacion de aplicaciones y funcionalidades.
 
 paths:
   /messageucolab/v1/application:
     post:
       tags: [Administracion]
       summary: Crear aplicacion
-      description: Crea una aplicacion asociada a una organizacion. El contrato no recibe fechas de inicio o fin.
+      description: Crea una aplicacion asociada a una organizacion y aprovisiona atomicamente sus ambientes Develop, Testing y Production en estado Active.
       operationId: createApplication
       security:
         - tokenAuth: []
@@ -51,35 +51,6 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /messageucolab/v1/application/environment:
-    post:
-      tags: [Administracion]
-      summary: Crear ambiente
-      description: Crea un ambiente identificado para el usuario por su tipo. Cada aplicacion admite como maximo un ambiente de cada tipo; no se recibe un nombre independiente.
-      operationId: createEnvironment
-      security:
-        - tokenAuth: []
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateEnvironmentRequest'
-      responses:
-        '200':
-          description: Ambiente creado correctamente.
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
   /messageucolab/v1/application/functionality:
     post:
       tags: [Administracion]
@@ -98,33 +69,6 @@ paths:
       responses:
         '200':
           description: Funcionalidad creada correctamente.
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-  /messageucolab/v1/application/message:
-    post:
-      tags: [Mensajes]
-      summary: Crear mensaje
-      description: Crea un mensaje en el ambiente del contexto activo. Todos los campos terminados en Id aceptan exclusivamente UUID persistentes. El cliente envia applicationId, no el nombre de la aplicacion; el nombre expuesto en las salidas se deriva en el servidor.
-      operationId: createMessage
-      security:
-        - tokenAuth: []
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateMessageRequest'
-      responses:
-        '200':
-          description: Mensaje creado correctamente.
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -161,16 +105,46 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /messageucolab/v1/application/messages:
+  /messageucolab/v1/messages:
+    post:
+      tags: [Mensajes]
+      summary: Crear mensaje
+      description: Crea un mensaje en el ambiente autenticado. La aplicacion y el ambiente se derivan del contexto activo o del Token legacy.
+      operationId: createMessage
+      security:
+        - tokenAuth: []
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMessageRequest'
+      responses:
+        '200':
+          description: Mensaje creado correctamente.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     get:
       tags: [Mensajes]
-      summary: Listar mensajes por ambiente
-      description: Retorna los mensajes paginados del ambiente legado o del contexto activo de la identidad.
-      operationId: findMessagesByEnvironment
+      summary: Consultar mensajes
+      description: Busca un mensaje por code cuando se envia ese parametro; de lo contrario retorna los mensajes paginados del ambiente autenticado.
+      operationId: findMessages
       security:
         - tokenAuth: []
         - bearerAuth: []
       parameters:
+        - name: code
+          in: query
+          description: Codigo funcional del mensaje. Cuando se informa, la consulta retorna ese mensaje.
+          schema:
+            type: string
         - name: page
           in: query
           description: Numero de pagina, empezando en 1.
@@ -215,35 +189,8 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /messageucolab/v1/application/messages/{messageCode}:
-    get:
-      tags: [Mensajes]
-      summary: Buscar mensaje por codigo
-      description: Obtiene un mensaje por codigo dentro del ambiente legado o del contexto activo de la identidad.
-      operationId: findMessageByCode
-      security:
-        - tokenAuth: []
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/MessageCode'
-      responses:
-        '200':
-          $ref: '#/components/responses/MessageFound'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '406':
-          $ref: '#/components/responses/NotAcceptable'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-  /messageucolab/v1/application/messages/{messageCode}/translation:
-    get:
+  /messageucolab/v1/messages/{messageCode}/translations:
+    post:
       tags: [Mensajes]
       summary: Traducir mensaje
       description: Traduce un mensaje del ambiente legado o del contexto activo de la identidad sin guardar la traduccion.
@@ -253,20 +200,12 @@ paths:
         - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/MessageCode'
-        - name: sourceLanguage
-          in: query
-          description: Idioma origen. Por defecto se detecta automaticamente.
-          schema:
-            type: string
-            default: auto
-            example: auto
-        - name: targetLanguage
-          in: query
-          required: true
-          description: Idioma destino.
-          schema:
-            type: string
-            example: en
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TranslateMessageRequest'
       responses:
         '200':
           $ref: '#/components/responses/MessageTranslated'
@@ -486,20 +425,6 @@ components:
         stateId:
           type: string
           format: uuid
-    CreateEnvironmentRequest:
-      type: object
-      required: [applicationId, typeId, stateId]
-      properties:
-        applicationId:
-          type: string
-          format: uuid
-        typeId:
-          type: string
-          format: uuid
-          description: Tipo que identifica y etiqueta el ambiente dentro de la aplicacion.
-        stateId:
-          type: string
-          format: uuid
     CreateFunctionalityRequest:
       type: object
       required: [name, applicationId, stateId]
@@ -514,8 +439,7 @@ components:
           format: uuid
     CreateMessageRequest:
       type: object
-      required: [code, title, content, typeId, categoryId, statusId, applicationId,
-        functionalityId, environmentId, messageEnvironmentStateId]
+      required: [code, title, content, typeId, categoryId, statusId, functionalityId]
       properties:
         code:
           type: string
@@ -535,18 +459,20 @@ components:
         statusId:
           type: string
           format: uuid
-        applicationId:
-          type: string
-          format: uuid
         functionalityId:
           type: string
           format: uuid
-        environmentId:
+    TranslateMessageRequest:
+      type: object
+      required: [targetLanguage]
+      properties:
+        sourceLanguage:
           type: string
-          format: uuid
-        messageEnvironmentStateId:
+          default: auto
+          example: auto
+        targetLanguage:
           type: string
-          format: uuid
+          example: en
     Message:
       type: object
       required: [code, title, content, type, category, application, functionality]

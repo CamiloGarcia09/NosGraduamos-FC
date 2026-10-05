@@ -7,6 +7,7 @@ import co.edu.uco.application.secondaryports.repository.ApplicationRepository;
 import co.edu.uco.application.secondaryports.repository.ActiveContextRepository;
 import co.edu.uco.application.secondaryports.repository.ApplicationCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
+import co.edu.uco.application.secondaryports.repository.EnvironmentReferenceCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.ExternalIdentityRepository;
 import co.edu.uco.application.secondaryports.repository.EnvironmentCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.FunctionalityCatalogRepository;
@@ -147,10 +148,9 @@ public class UseCaseRuleConfig {
     CreateMessageCompositeValidator createMessageCompositeValidator(
             CatalogPort catalogPort,
             RecordExistsCatalogPort recordExistsCatalogPort,
-            EnvironmentRepository environmentRepository,
             FunctionalityCatalogRepository functionalityCatalogRepository) {
         return new CreateMessageCompositeValidator(
-                catalogPort, recordExistsCatalogPort, environmentRepository, functionalityCatalogRepository);
+                catalogPort, recordExistsCatalogPort, functionalityCatalogRepository);
     }
 
     @Bean
@@ -190,13 +190,14 @@ public class UseCaseRuleConfig {
     @Bean
     HandlingCreateApplicationPort handlingCreateApplicationPort(
             ApplicationRepository applicationRepository,
+            EnvironmentReferenceCatalogRepository environmentReferenceCatalogRepository,
             CreateApplicationCompositeValidator validator,
             HandlingActiveContextPort handlingActiveContextPort,
             AuthorizationCompositeValidator authorizationCompositeValidator,
             CatalogPort catalogPort,
             LoggingPortFactory loggerFactory) {
         return new CreateApplicationUseCase(
-                applicationRepository, validator, handlingActiveContextPort,
+                applicationRepository, environmentReferenceCatalogRepository, validator, handlingActiveContextPort,
                 authorizationCompositeValidator, catalogPort, loggerFactory);
     }
 

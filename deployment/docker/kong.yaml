@@ -4,27 +4,20 @@ services:
   - name: message-service
     url: http://host.docker.internal:${MESSAGEUCOLAB_PORT}
     routes:
-      - name: get-message-by-code
-        paths:
-          - ~/messageucolab/v1/application/messages/[^/]+$
-        methods:
-          - GET
-        regex_priority: 10
-        strip_path: false
-
       - name: translate-message-by-code
         paths:
-          - ~/messageucolab/v1/application/messages/[^/]+/translation$
+          - ~/messageucolab/v1/messages/[^/]+/translations$
         methods:
-          - GET
+          - POST
         regex_priority: 20
         strip_path: false
 
-      - name: get-messages-by-environment
+      - name: messages
         paths:
-          - /messageucolab/v1/application/messages
+          - /messageucolab/v1/messages
         methods:
           - GET
+          - POST
         strip_path: false
 
       - name: create-token
@@ -35,24 +28,9 @@ services:
         regex_priority: 10
         strip_path: false
 
-      - name: create-message
-        paths:
-          - /messageucolab/v1/application/message
-        methods:
-          - POST
-        strip_path: false
-
       - name: create-application
         paths:
           - ~/messageucolab/v1/application$
-        methods:
-          - POST
-        regex_priority: 10
-        strip_path: false
-
-      - name: create-environment
-        paths:
-          - ~/messageucolab/v1/application/environment$
         methods:
           - POST
         regex_priority: 10

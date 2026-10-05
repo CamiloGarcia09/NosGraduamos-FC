@@ -37,12 +37,8 @@ public class WebConfig implements WebMvcConfigurer {
                 );
         registry.addInterceptor(tokenHeaderInterceptor)
                 .addPathPatterns(
-                        WEB_CONFIG_API_MESSAGE,
                         WEB_CONFIG_API_APPLICATION,
-                        WEB_CONFIG_API_MESSAGE_LIST,
-                        WEB_CONFIG_API_MESSAGE_CODE,
-                        WEB_CONFIG_API_MESSAGE_CODE_TRANSLATION,
-                        WEB_CONFIG_API_CREATE_MESSAGE
+                        WEB_CONFIG_API_MESSAGES
                 )
                 .order(0);
     }

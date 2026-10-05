@@ -7,6 +7,9 @@ services:
       - name: messageucolab-api
         paths:
           - /messageucolab/v1/application
+          - /messageucolab/v1/messages
+          - /messageucolab/v1/catalog
+          - /messageucolab/v1/me
         strip_path: false
 
       - name: messageucolab-health
