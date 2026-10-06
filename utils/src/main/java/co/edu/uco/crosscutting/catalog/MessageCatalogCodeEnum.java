@@ -814,7 +814,16 @@ public enum MessageCatalogCodeEnum {
     FUN_196("FUN_196"),
 
     /** El estado del mensaje en el ambiente no existe. */
-    FUN_197("FUN_197");
+    FUN_197("FUN_197"),
+
+    /** El sufijo del código del mensaje supera la longitud máxima. */
+    FUN_198("FUN_198"),
+
+    /** El sufijo del código del mensaje tiene un formato inválido. */
+    FUN_199("FUN_199"),
+
+    /** Ya existe un mensaje con el mismo código para la aplicación. */
+    FUN_200("FUN_200");
 
     // =========================================================================
 

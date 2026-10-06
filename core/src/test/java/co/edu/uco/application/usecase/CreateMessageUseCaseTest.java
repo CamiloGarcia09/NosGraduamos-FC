@@ -99,7 +99,7 @@ class CreateMessageUseCaseTest {
 
     private CreateMessageDTO validDto() {
         return CreateMessageDTO.builder()
-                .code("MSG-001")
+                .code("WELCOME")
                 .title("A valid title")
                 .content("A valid message content")
                 .typeId(TYPE_UUID)
@@ -163,7 +163,27 @@ class CreateMessageUseCaseTest {
         order.verify(messageEnvironmentStateRepository).findAll();
         order.verify(createMessageRepository)
                 .createMessage(any(), eq("env-1"), eq(ACTIVE_STATE_UUID));
-        verify(log).info("Message created successfully with code: {}", "MSG-001");
+        verify(log).info("Message created successfully with code: {}", "MSG_WELCOME");
+    }
+
+    @Test
+    void createMessage_persistsAndLogsNormalizedCode_whenDtoCodeIsRawSuffix() {
+        CreateMessageDTO dto = validDto();
+        dto.setCode("  wel  come  ");
+        MessageAccessContext context = legacyContext();
+        stubEnvironmentResolvingTo("env-1", APP_UUID);
+        stubActiveStateFoundAmongForeignOnes();
+        ArgumentCaptor<MessageData> messageCaptor = ArgumentCaptor.forClass(MessageData.class);
+
+        useCase.createMessage(dto, context);
+
+        verify(createMessageRepository).createMessage(messageCaptor.capture(), eq("env-1"),
+                eq(ACTIVE_STATE_UUID));
+        assertAll(
+                () -> assertThat(messageCaptor.getValue().getCode())
+                        .isEqualTo("MSG_WEL_COME"),
+                () -> verify(log).info("Message created successfully with code: {}",
+                        "MSG_WEL_COME"));
     }
 
     @Test

@@ -22,6 +22,7 @@ import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
 import co.edu.uco.application.secondaryports.repository.ExternalIdentityRepository;
 import co.edu.uco.application.secondaryports.repository.FunctionalityCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.MessageCategoryCatalogRepository;
+import co.edu.uco.application.secondaryports.repository.MessageCodeQueryPort;
 import co.edu.uco.application.secondaryports.repository.MessageEnvironmentStateCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.MessageStateCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.MessageTypeCatalogRepository;
@@ -114,6 +115,8 @@ class UseCaseRuleConfigTest {
     private EnvironmentCatalogRepository environmentCatalogRepository;
     @Mock
     private FunctionalityCatalogRepository functionalityCatalogRepository;
+    @Mock
+    private MessageCodeQueryPort messageCodeQueryPort;
     @Mock
     private MessageTypeCatalogRepository messageTypeCatalogRepository;
     @Mock
@@ -413,14 +416,14 @@ class UseCaseRuleConfigTest {
     void createMessageCompositeValidator_rejectsNullDtoUsingCatalogMessage() {
         when(catalogPort.getMessage("FUN_010")).thenReturn("Datos invalidos");
         CreateMessageCompositeValidator composite = config.createMessageCompositeValidator(
-                catalogPort, recordExistsCatalogPort, functionalityCatalogRepository);
+                catalogPort, recordExistsCatalogPort, functionalityCatalogRepository, messageCodeQueryPort);
 
         assertThatThrownBy(() -> composite.validate((CreateMessageDTO) null, LANGUAGE_ID))
                 .isInstanceOf(BusinessRuleException.class)
                 .extracting("userMessage")
                 .isEqualTo("Datos invalidos");
 
-        verifyNoInteractions(recordExistsCatalogPort, functionalityCatalogRepository);
+        verifyNoInteractions(recordExistsCatalogPort, functionalityCatalogRepository, messageCodeQueryPort);
     }
 
     private CreateApplicationDTO validApplicationDto() {

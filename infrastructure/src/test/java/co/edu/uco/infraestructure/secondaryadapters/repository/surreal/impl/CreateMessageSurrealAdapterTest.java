@@ -20,7 +20,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -89,14 +88,14 @@ class CreateMessageSurrealAdapterTest {
     }
 
     @Test
-    void createMessage_persistsMessageAndMessageEnvironmentWithUuidRecordIds() {
+    void createMessage_executesMessageAndEnvironmentUpsertsInsideASingleTransaction() {
         MessageData message = buildMessage();
 
         adapter.createMessage(message, ENVIRONMENT_ID, MESSAGE_ENVIRONMENT_STATE_ID);
 
         ArgumentCaptor<String> queries = ArgumentCaptor.forClass(String.class);
-        verify(surreal, times(2)).query(queries.capture());
-        List<String> executed = queries.getAllValues();
+        verify(surreal, times(1)).query(queries.capture());
+        String transaction = queries.getValue();
 
         String expectedMessageUpsert = "UPSERT message:`" + MESSAGE_ID + "` CONTENT { "
                 + "code: 'MSG-001', "
@@ -107,16 +106,45 @@ class CreateMessageSurrealAdapterTest {
                 + "status_id: message_state:`" + STATUS_ID + "`, "
                 + "application_id: application:`" + APP_ID + "`, "
                 + "functionality_id: functionality:`" + FUNCTIONALITY_ID + "` };";
+        int messageUpsertIndex = transaction.indexOf("UPSERT message:`");
+        int environmentUpsertIndex = transaction.indexOf("UPSERT message_environment:`");
 
         assertAll(
-                () -> assertThat(executed.get(0)).isEqualTo(expectedMessageUpsert),
-                () -> assertThat(executed.get(1))
-                        .startsWith("UPSERT message_environment:`")
+                () -> assertThat(transaction).startsWith("BEGIN TRANSACTION;"),
+                () -> assertThat(transaction).endsWith("COMMIT TRANSACTION;"),
+                () -> assertThat(transaction).contains(expectedMessageUpsert),
+                () -> assertThat(messageUpsertIndex).isPositive(),
+                () -> assertThat(environmentUpsertIndex).isGreaterThan(messageUpsertIndex),
+                () -> assertThat(transaction)
                         .contains("message_id: message:`" + MESSAGE_ID + "`")
                         .contains("environment_id: environment:`" + ENVIRONMENT_ID + "`")
                         .contains("state_data_id: message_environment_state:`"
                                 + MESSAGE_ENVIRONMENT_STATE_ID + "`"));
-        verify(log, times(2)).info(anyString(), anyString());
+        verify(log).info(
+                "Creating message and environment relation atomically for message: {}",
+                MESSAGE_ID.toString());
+    }
+
+    @Test
+    void createMessage_stripsTablePrefix_whenIdsArriveAsRecordIds() {
+        MessageData message = buildMessage();
+
+        adapter.createMessage(message, "environment:" + ENVIRONMENT_ID,
+                "message_environment_state:" + MESSAGE_ENVIRONMENT_STATE_ID);
+
+        ArgumentCaptor<String> queries = ArgumentCaptor.forClass(String.class);
+        verify(surreal, times(1)).query(queries.capture());
+        String transaction = queries.getValue();
+
+        assertAll(
+                () -> assertThat(transaction).contains(
+                        "environment_id: environment:`" + ENVIRONMENT_ID + "`"),
+                () -> assertThat(transaction).contains(
+                        "state_data_id: message_environment_state:`"
+                                + MESSAGE_ENVIRONMENT_STATE_ID + "`"),
+                () -> assertThat(transaction).doesNotContain("environment:`environment:"),
+                () -> assertThat(transaction)
+                        .doesNotContain("message_environment_state:`message_environment_state:"));
     }
 
     @Test

@@ -755,6 +755,9 @@ ON message TYPE datetime VALUE time::now();
 DEFINE INDEX IF NOT EXISTS message_code_idx
 ON message FIELDS code;
 
+DEFINE INDEX IF NOT EXISTS message_application_code_idx
+ON message FIELDS application_id, code UNIQUE;
+
 DEFINE INDEX IF NOT EXISTS message_catalogs_idx
 ON message FIELDS type_id, category_id, status_id;
 
@@ -1365,7 +1368,7 @@ UPSERT active_context:`1d6c8f43-9a25-4b7e-b031-8f2d5c7a964e` CONTENT {
 };
 
 UPSERT message:`b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c` CONTENT {
-    code: "DEMO_WELCOME",
+    code: "MSG_WELCOME",
     title: "Welcome",
     content: "Welcome to MessageUcoLab",
     type_id: message_type:`0c71601d-96b3-417e-b385-06b10ba126d9`,
@@ -1388,7 +1391,7 @@ UPSERT message_environment:`2e7a4c91-6b35-48fd-a2e8-1c9d5f703b64` CONTENT {
 UPSERT message_data_collection:`b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c` CONTENT {
     source_id: "message:b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c",
     message_id: "message:b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c",
-    code: "DEMO_WELCOME",
+    code: "MSG_WELCOME",
     title: "Welcome",
     content: "Welcome to MessageUcoLab",
     type: { id: "message_type:0c71601d-96b3-417e-b385-06b10ba126d9", name: "Functional" },
@@ -1407,7 +1410,7 @@ UPSERT message_environment_readmodel:`2e7a4c91-6b35-48fd-a2e8-1c9d5f703b64` CONT
     environment: { id: "environment:7b3e5d91-a2c8-46f0-9d14-5e7a1b6c3f82" },
     message: {
         id: "message:b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c",
-        code: "DEMO_WELCOME",
+        code: "MSG_WELCOME",
         title: "Welcome",
         content: "Welcome to MessageUcoLab",
         type: { id: "message_type:0c71601d-96b3-417e-b385-06b10ba126d9", name: "Functional" },

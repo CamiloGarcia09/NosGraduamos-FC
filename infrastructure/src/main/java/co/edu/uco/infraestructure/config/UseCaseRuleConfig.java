@@ -12,6 +12,7 @@ import co.edu.uco.application.secondaryports.repository.ExternalIdentityReposito
 import co.edu.uco.application.secondaryports.repository.EnvironmentCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.FunctionalityCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.MessageCategoryCatalogRepository;
+import co.edu.uco.application.secondaryports.repository.MessageCodeQueryPort;
 import co.edu.uco.application.secondaryports.repository.MessageEnvironmentStateCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.MessageStateCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.MessageTypeCatalogRepository;
@@ -148,9 +149,10 @@ public class UseCaseRuleConfig {
     CreateMessageCompositeValidator createMessageCompositeValidator(
             CatalogPort catalogPort,
             RecordExistsCatalogPort recordExistsCatalogPort,
-            FunctionalityCatalogRepository functionalityCatalogRepository) {
+            FunctionalityCatalogRepository functionalityCatalogRepository,
+            MessageCodeQueryPort messageCodeQueryPort) {
         return new CreateMessageCompositeValidator(
-                catalogPort, recordExistsCatalogPort, functionalityCatalogRepository);
+                catalogPort, recordExistsCatalogPort, functionalityCatalogRepository, messageCodeQueryPort);
     }
 
     @Bean

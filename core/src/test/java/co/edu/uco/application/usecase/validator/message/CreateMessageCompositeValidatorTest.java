@@ -5,10 +5,12 @@ import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.entity.FunctionalityData;
 import co.edu.uco.application.secondaryports.repository.FunctionalityCatalogRepository;
+import co.edu.uco.application.secondaryports.repository.MessageCodeQueryPort;
 import co.edu.uco.application.secondaryports.repository.RecordExistsCatalogPort;
 import co.edu.uco.application.secondaryports.repository.ReferenceCatalog;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
+import co.edu.uco.crosscutting.exceptions.ConflictException;
 import co.edu.uco.crosscutting.exceptions.ForbiddenException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +55,12 @@ class CreateMessageCompositeValidatorTest {
     private static final String DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
     private static final String INVALID_UUID = "not-a-uuid";
     private static final String FUNCTIONALITY_OUTSIDE_APPLICATION = "Functionality outside application";
+    private static final String VALID_CODE = "WELCOME";
+    private static final String NORMALIZED_CODE = "MSG_WELCOME";
+    private static final String CODE_TOO_LONG_MESSAGE = "El sufijo del código supera 10 caracteres.";
+    private static final String CODE_FORMAT_MESSAGE = "El sufijo del código tiene un formato inválido.";
+    private static final String DUPLICATED_CODE_MESSAGE = "Ya existe un mensaje con ese código.";
+    private static final String INVALID_FUNCTIONALITY_UUID_MESSAGE = "El id de la funcionalidad no es un UUID válido.";
 
     @Mock
     private CatalogPort catalogPort;
@@ -60,18 +68,20 @@ class CreateMessageCompositeValidatorTest {
     private RecordExistsCatalogPort recordExistsCatalogPort;
     @Mock
     private FunctionalityCatalogRepository functionalityCatalogRepository;
+    @Mock
+    private MessageCodeQueryPort messageCodeQueryPort;
 
     private CreateMessageCompositeValidator validator;
 
     @BeforeEach
     void setUp() {
         validator = new CreateMessageCompositeValidator(catalogPort, recordExistsCatalogPort,
-                functionalityCatalogRepository);
+                functionalityCatalogRepository, messageCodeQueryPort);
     }
 
     private CreateMessageDTO.CreateMessageDTOBuilder validDtoBuilder() {
         return CreateMessageDTO.builder()
-                .code("MSG-001")
+                .code(VALID_CODE)
                 .title("A valid title")
                 .content("A valid message content")
                 .typeId(TYPE_ID)
@@ -137,17 +147,22 @@ class CreateMessageCompositeValidatorTest {
     }
 
     @Test
-    void validate_runsCatalogReferencesThenFunctionalityCheckAgainstDerivedApplicationInOrder() {
+    void validate_runsCatalogReferencesThenFunctionalityCheckThenDuplicatedCodeCheckInOrder() {
         stubCatalogReferences();
         stubFunctionalityBelongingToDerivedApplication();
+        when(messageCodeQueryPort.existsByCodeAndApplicationId(NORMALIZED_CODE, APPLICATION_ID_TEXT))
+                .thenReturn(false);
 
         validator.validate(validDto(), APPLICATION_ID_TEXT);
 
-        InOrder order = inOrder(recordExistsCatalogPort, functionalityCatalogRepository);
+        InOrder order = inOrder(recordExistsCatalogPort, functionalityCatalogRepository,
+                messageCodeQueryPort);
         order.verify(recordExistsCatalogPort).exists(ReferenceCatalog.MESSAGE_TYPE, TYPE_ID);
         order.verify(recordExistsCatalogPort).exists(ReferenceCatalog.MESSAGE_CATEGORY, CATEGORY_ID);
         order.verify(recordExistsCatalogPort).exists(ReferenceCatalog.MESSAGE_STATE, STATUS_ID);
         order.verify(functionalityCatalogRepository).findAllByApplicationId(APPLICATION_ID_TEXT);
+        order.verify(messageCodeQueryPort)
+                .existsByCodeAndApplicationId(NORMALIZED_CODE, APPLICATION_ID_TEXT);
     }
 
     @Test
@@ -387,6 +402,92 @@ class CreateMessageCompositeValidatorTest {
                         .isEqualTo("The functionality id is required"));
 
         verifyNoInteractions(functionalityCatalogRepository);
+    }
+
+    @Test
+    void validate_throwsBusinessRuleUsingFun198_whenCodeSuffixExceedsTenCharacters() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_198.getCode()))
+                .thenReturn(CODE_TOO_LONG_MESSAGE);
+        CreateMessageDTO dto = validDtoBuilder().code("SUFFIXTOOLONG").build();
+
+        assertThatThrownBy(() -> validator.validate(dto, APPLICATION_ID_TEXT))
+                .isInstanceOf(BusinessRuleException.class)
+                .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
+                        .isEqualTo(CODE_TOO_LONG_MESSAGE));
+
+        assertAll(
+                () -> verify(catalogPort).getMessage(MessageCatalogCodeEnum.FUN_198.getCode()),
+                () -> verifyNoInteractions(recordExistsCatalogPort, functionalityCatalogRepository,
+                        messageCodeQueryPort));
+    }
+
+    @Test
+    void validate_throwsBusinessRuleUsingFun199_whenCodeSuffixIsNotAlphanumericOrSpace() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_199.getCode()))
+                .thenReturn(CODE_FORMAT_MESSAGE);
+        CreateMessageDTO dto = validDtoBuilder().code("MSG-001").build();
+
+        assertThatThrownBy(() -> validator.validate(dto, APPLICATION_ID_TEXT))
+                .isInstanceOf(BusinessRuleException.class)
+                .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
+                        .isEqualTo(CODE_FORMAT_MESSAGE));
+
+        assertAll(
+                () -> verify(catalogPort).getMessage(MessageCatalogCodeEnum.FUN_199.getCode()),
+                () -> verifyNoInteractions(recordExistsCatalogPort, functionalityCatalogRepository,
+                        messageCodeQueryPort));
+    }
+
+    @Test
+    void validate_throwsBusinessRuleUsingFun038_whenFunctionalityIdIsNotAValidUuid() {
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_038.getCode()))
+                .thenReturn(INVALID_FUNCTIONALITY_UUID_MESSAGE);
+        CreateMessageDTO dto = validDtoBuilder().functionalityId(INVALID_UUID).build();
+
+        assertThatThrownBy(() -> validator.validate(dto, APPLICATION_ID_TEXT))
+                .isInstanceOf(BusinessRuleException.class)
+                .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
+                        .isEqualTo(INVALID_FUNCTIONALITY_UUID_MESSAGE));
+
+        assertAll(
+                () -> verify(catalogPort).getMessage(MessageCatalogCodeEnum.FUN_038.getCode()),
+                () -> verifyNoInteractions(recordExistsCatalogPort, functionalityCatalogRepository,
+                        messageCodeQueryPort));
+    }
+
+    @Test
+    void validate_queriesNormalizedCode_whenDtoSuffixUsesLowerCaseAndConsecutiveSpaces() {
+        stubCatalogReferences();
+        stubFunctionalityBelongingToDerivedApplication();
+        CreateMessageDTO dto = validDtoBuilder().code("wel  come").build();
+        when(messageCodeQueryPort.existsByCodeAndApplicationId("MSG_WEL_COME",
+                APPLICATION_ID_TEXT)).thenReturn(false);
+
+        assertDoesNotThrow(() -> validator.validate(dto, APPLICATION_ID_TEXT));
+
+        verify(messageCodeQueryPort)
+                .existsByCodeAndApplicationId("MSG_WEL_COME", APPLICATION_ID_TEXT);
+    }
+
+    @Test
+    void validate_throwsConflictUsingFun200_whenCodeIsAlreadyRegisteredForTheApplication() {
+        stubCatalogReferences();
+        stubFunctionalityBelongingToDerivedApplication();
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_200.getCode()))
+                .thenReturn(DUPLICATED_CODE_MESSAGE);
+        when(messageCodeQueryPort.existsByCodeAndApplicationId(NORMALIZED_CODE, APPLICATION_ID_TEXT))
+                .thenReturn(true);
+
+        assertThatThrownBy(() -> validator.validate(validDto(), APPLICATION_ID_TEXT))
+                .isInstanceOf(ConflictException.class)
+                .satisfies(exception -> assertThat((ConflictException) exception)
+                        .extracting(ConflictException::getHttpStatus, ConflictException::getUserMessage)
+                        .containsExactly(409, DUPLICATED_CODE_MESSAGE));
+
+        assertAll(
+                () -> verify(catalogPort).getMessage(MessageCatalogCodeEnum.FUN_200.getCode()),
+                () -> verify(messageCodeQueryPort)
+                        .existsByCodeAndApplicationId(NORMALIZED_CODE, APPLICATION_ID_TEXT));
     }
 
     private static FunctionalityData functionality(UUID functionalityId, UUID applicationId) {

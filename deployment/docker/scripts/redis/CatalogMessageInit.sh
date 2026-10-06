@@ -293,5 +293,8 @@ redis_hset "FUN_194" "Message state required" "The message state is required." "
 redis_hset "FUN_195" "Message state not found" "The message state does not exist." "FUNCTIONAL" "ERROR"
 redis_hset "FUN_196" "Message environment state required" "The message environment state is required." "FUNCTIONAL" "ERROR"
 redis_hset "FUN_197" "Message environment state not found" "The message environment state does not exist." "FUNCTIONAL" "ERROR"
+redis_hset "FUN_198" "Message code suffix too long" "The message code suffix cannot exceed 10 characters." "FUNCTIONAL" "ERROR"
+redis_hset "FUN_199" "Invalid message code suffix" "The message code suffix can only contain unaccented letters, numbers, and spaces." "FUNCTIONAL" "ERROR"
+redis_hset "FUN_200" "Message code duplicated" "A message with the same code already exists for the application." "FUNCTIONAL" "ERROR"
 
 echo "Message catalog loaded successfully."

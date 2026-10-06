@@ -443,7 +443,10 @@ components:
       properties:
         code:
           type: string
-          example: DEMO_WELCOME
+          description: Suffix used to build MSG_{suffix}; spaces are normalized to underscores.
+          maxLength: 10
+          pattern: '^[A-Za-z0-9 ]+$'
+          example: WELCOME
         title:
           type: string
           example: Welcome message

@@ -31,6 +31,7 @@ import static co.edu.uco.application.CrosswordsConstant.STATE_ACTIVE;
 import static co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum.FUN_035;
 import static co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum.FUN_197;
 import static co.edu.uco.crosscutting.helpers.UtilText.EMPTY;
+import static co.edu.uco.crosscutting.helpers.UtilMessageCode.normalize;
 import static co.edu.uco.crosscutting.helpers.UtilUUID.getStringFromUUID;
 
 @Component
@@ -70,11 +71,12 @@ public final class CreateMessageUseCase implements HandlingCreateMessagePort {
                 .orElseThrow(() -> ForbiddenException.buildUserException(catalogPort.getMessage(FUN_035.getCode())));
         validator.validate(dto, applicationId);
         var messageEnvironmentStateId = activeMessageEnvironmentStateId();
+        var normalizedCode = normalize(dto.getCode());
 
         try {
             var messageData = new MessageData(
                     UtilUUID.getNewUUID(),
-                    dto.getCode(),
+                    normalizedCode,
                     dto.getTitle(),
                     dto.getContent(),
                     new MessageTypeData(UtilUUID.getStringToUUID(dto.getTypeId()), ""),
@@ -94,7 +96,7 @@ public final class CreateMessageUseCase implements HandlingCreateMessagePort {
                     messageEnvironmentStateId
             );
 
-            log.info("Message created successfully with code: {}", dto.getCode());
+            log.info("Message created successfully with code: {}", normalizedCode);
         } catch (CrossWordsException ex) {
             throw ex;
         } catch (Exception ex) {

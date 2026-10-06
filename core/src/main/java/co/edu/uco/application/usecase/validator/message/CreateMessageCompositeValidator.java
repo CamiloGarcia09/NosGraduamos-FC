@@ -3,18 +3,23 @@ package co.edu.uco.application.usecase.validator.message;
 import co.edu.uco.application.primaryports.dto.message.CreateMessageDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.repository.FunctionalityCatalogRepository;
+import co.edu.uco.application.secondaryports.repository.MessageCodeQueryPort;
 import co.edu.uco.application.secondaryports.repository.RecordExistsCatalogPort;
 import co.edu.uco.application.usecase.validator.CompositeValidator;
 import co.edu.uco.application.usecase.validator.Validator;
 import co.edu.uco.application.usecase.validator.message.rule.MessageCatalogIdExistsRule;
 import co.edu.uco.application.usecase.validator.message.rule.MessageCatalogIdRequiredRule;
 import co.edu.uco.application.usecase.validator.message.rule.MessageCatalogIdUuidRule;
+import co.edu.uco.application.usecase.validator.message.rule.MessageCodeDuplicatedRule;
+import co.edu.uco.application.usecase.validator.message.rule.MessageCodeFormatRule;
+import co.edu.uco.application.usecase.validator.message.rule.MessageCodeMaxLengthRule;
 import co.edu.uco.application.usecase.validator.message.rule.MessageCodeRequiredRule;
 import co.edu.uco.application.usecase.validator.message.rule.MessageContentMaxLengthRule;
 import co.edu.uco.application.usecase.validator.message.rule.MessageContentMinLengthRule;
 import co.edu.uco.application.usecase.validator.message.rule.MessageContentRequiredRule;
 import co.edu.uco.application.usecase.validator.message.rule.MessageFunctionalityBelongsApplicationRule;
 import co.edu.uco.application.usecase.validator.message.rule.MessageFunctionalityIdRequiredRule;
+import co.edu.uco.application.usecase.validator.message.rule.MessageFunctionalityIdUuidRule;
 import co.edu.uco.application.usecase.validator.message.rule.MessageTitleMaxLengthRule;
 import co.edu.uco.application.usecase.validator.message.rule.MessageTitleMinLengthRule;
 import co.edu.uco.application.usecase.validator.message.rule.MessageTitleRequiredRule;
@@ -35,9 +40,12 @@ public final class CreateMessageCompositeValidator extends CompositeValidator<Cr
 
     public CreateMessageCompositeValidator(CatalogPort catalogPort,
                                            RecordExistsCatalogPort recordExistsCatalogPort,
-                                           FunctionalityCatalogRepository functionalityCatalogRepository) {
+                                           FunctionalityCatalogRepository functionalityCatalogRepository,
+                                           MessageCodeQueryPort messageCodeQueryPort) {
         super(List.of(
                 forDto(new MessageCodeRequiredRule(catalogPort)),
+                forDto(new MessageCodeMaxLengthRule(catalogPort)),
+                forDto(new MessageCodeFormatRule(catalogPort)),
                 forDto(new MessageTitleRequiredRule(catalogPort)),
                 forDto(new MessageTitleMinLengthRule(catalogPort)),
                 forDto(new MessageTitleMaxLengthRule(catalogPort)),
@@ -45,6 +53,7 @@ public final class CreateMessageCompositeValidator extends CompositeValidator<Cr
                 forDto(new MessageContentMinLengthRule(catalogPort)),
                 forDto(new MessageContentMaxLengthRule(catalogPort)),
                 forDto(new MessageFunctionalityIdRequiredRule(catalogPort)),
+                forDto(new MessageFunctionalityIdUuidRule(catalogPort)),
                 forDto(new MessageCatalogIdRequiredRule(catalogPort, CreateMessageDTO::getTypeId, FUN_190)),
                 forDto(new MessageCatalogIdUuidRule(catalogPort, CreateMessageDTO::getTypeId)),
                 forDto(new MessageCatalogIdExistsRule(catalogPort, recordExistsCatalogPort,
@@ -57,7 +66,8 @@ public final class CreateMessageCompositeValidator extends CompositeValidator<Cr
                 forDto(new MessageCatalogIdUuidRule(catalogPort, CreateMessageDTO::getStatusId)),
                 forDto(new MessageCatalogIdExistsRule(catalogPort, recordExistsCatalogPort,
                         CreateMessageDTO::getStatusId, MESSAGE_STATE, FUN_195)),
-                new MessageFunctionalityBelongsApplicationRule(catalogPort, functionalityCatalogRepository)
+                new MessageFunctionalityBelongsApplicationRule(catalogPort, functionalityCatalogRepository),
+                new MessageCodeDuplicatedRule(catalogPort, messageCodeQueryPort)
         ), catalogPort);
     }
 
