@@ -1,9 +1,11 @@
 package co.edu.uco.infraestructure.deployment;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -11,14 +13,17 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Contrato estático del script de inicialización de SurrealDB.
@@ -30,11 +35,28 @@ import static org.junit.jupiter.api.Assertions.assertAll;
  * Docker. Esta clase fija en cada build el contrato declarativo que hace posible esas
  * invariantes: definiciones de campo, captura de la hora de la semilla y recreación
  * idempotente de los registros deterministas.</p>
+ *
+ * <p>La semilla de la aplicación demo fija además exactamente tres environments deterministas
+ * (Develop, Testing y Production) que comparten aplicación, estado Active y la captura
+ * {@code $init_now} de los timestamps.</p>
+ *
+ * <p>El archivo se localiza subiendo por los ancestros del directorio de trabajo de Maven. Cuando ese
+ * árbol no contiene {@code deployment/} (etapa de build de la imagen Docker, que solo copia poms y
+ * {@code src}), el contrato se omite en lugar de romper el build; si {@code deployment/} sí está pero el
+ * script no, la prueba falla para denunciar un archivo movido o renombrado.</p>
  */
 class SurrealInitScriptContractTest {
 
     private static final Path SCRIPT_RELATIVE_PATH =
             Path.of("deployment", "docker", "scripts", "surreal", "surreal-init.surql");
+
+    private static final Path DEPLOYMENT_DIRECTORY = Path.of("deployment");
+
+    private static final Path MODULE_DIRECTORY = Path.of("infrastructure");
+
+    private static final String SCRIPT_NOT_PACKAGED_MESSAGE = SCRIPT_RELATIVE_PATH
+            + " no está disponible y deployment/ tampoco forma parte de este contexto de build; el contrato "
+            + "solo aplica donde el árbol de fuentes completo está presente";
 
     private static final Pattern COMMENT = Pattern.compile("--[^\\r\\n]*");
     private static final Pattern CREATED_AT_DEFINITION =
@@ -53,6 +75,23 @@ class SurrealInitScriptContractTest {
             Pattern.CASE_INSENSITIVE);
     private static final Pattern INIT_NOW_CAPTURE =
             Pattern.compile("^LET\\s+\\$init_now\\s*=\\s*time::now\\(\\)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern SEED_FIELD = Pattern.compile("\\b([a-z_]+)\\s*:\\s*([^,}\\r\\n]+)");
+    private static final Pattern CATALOG_UPSERT =
+            Pattern.compile("^UPSERT\\s+([a-z_]+):`([^`]+)`", Pattern.CASE_INSENSITIVE);
+    private static final Pattern CATALOG_NAME = Pattern.compile("\\bname\\s*:\\s*\"([^\"]*)\"");
+    private static final Pattern RECORD_ID = Pattern.compile("^[a-z_]+:`([^`]+)`$", Pattern.CASE_INSENSITIVE);
+
+    private static final int DEMO_ENVIRONMENT_COUNT = 3;
+
+    private static final List<String> DEMO_ENVIRONMENT_TYPES = List.of("Develop", "Testing", "Production");
+
+    private static final List<String> ENVIRONMENT_TIMESTAMP_FIELDS = List.of("created_at", "updated_at");
+
+    private static final String DEMO_ENVIRONMENT_PREFIX = "UPSERT environment:`";
+
+    private static final String DEMO_APPLICATION_PREFIX = "UPSERT application:`";
+
+    private static final String INIT_NOW_VALUE = "$init_now";
 
     private static final Set<String> TABLES_WITH_IMMUTABLE_CREATED_AT = Set.of(
             "domain_events", "organization", "external_identity", "application", "environment",
@@ -66,12 +105,25 @@ class SurrealInitScriptContractTest {
 
     @BeforeEach
     void loadInitScript() {
-        script = readInitScript();
+        Path startDirectory = Path.of("").toAbsolutePath();
+        Path scriptPath = findInitScript(startDirectory);
+        if (scriptPath != null) {
+            script = readInitScript(scriptPath);
+        } else if (hasDeploymentContext(startDirectory)) {
+            fail(String.format(
+                    "%s forma parte del árbol de fuentes, por tanto %s debe existir buscando hacia arriba desde %s",
+                    DEPLOYMENT_DIRECTORY, SCRIPT_RELATIVE_PATH, startDirectory));
+        }
     }
 
     @Nested
     @DisplayName("created_at es inmutable en las once tablas que lo declara")
     class ImmutableCreatedAt {
+
+        @BeforeEach
+        void assumeScriptAvailable() {
+            Assumptions.assumeTrue(script != null, SCRIPT_NOT_PACKAGED_MESSAGE);
+        }
 
         @Test
         @DisplayName("Toda definición de created_at usa DEFAULT time::now() con READONLY, nunca VALUE")
@@ -106,6 +158,11 @@ class SurrealInitScriptContractTest {
     @Nested
     @DisplayName("La semilla toma la hora de la captura $init_now en vez de fechas fijas")
     class SeedTimestampsUseCapturedNow {
+
+        @BeforeEach
+        void assumeScriptAvailable() {
+            Assumptions.assumeTrue(script != null, SCRIPT_NOT_PACKAGED_MESSAGE);
+        }
 
         @Test
         @DisplayName("Todo created_at, updated_at o generated_at de la semilla vale $init_now")
@@ -152,6 +209,11 @@ class SurrealInitScriptContractTest {
     @DisplayName("El init puede reejecutarse porque la semilla se borra antes de recrearse")
     class ReExecutionIsIdempotent {
 
+        @BeforeEach
+        void assumeScriptAvailable() {
+            Assumptions.assumeTrue(script != null, SCRIPT_NOT_PACKAGED_MESSAGE);
+        }
+
         @Test
         @DisplayName("Cada registro de la semilla se elimina antes de su UPSERT y no se duplica")
         void seedRecords_areDeletedBeforeUpsert() {
@@ -159,14 +221,17 @@ class SurrealInitScriptContractTest {
         }
 
         @Test
-        @DisplayName("La semilla recrea los diecinueve registros deterministas sin repetir ninguno")
-        void seedRecords_keepNineteenDeterministicTargets() {
+        @DisplayName("La semilla recrea los veintiún registros deterministas sin repetir ninguno")
+        void seedRecords_keepTwentyOneDeterministicTargets() {
             List<String> targets = seedUpsertTargets(script);
 
             assertAll(
                     () -> assertThat(targets).doesNotHaveDuplicates(),
-                    () -> assertThat(targets).hasSize(19),
+                    () -> assertThat(targets).hasSize(21),
                     () -> assertThat(targets).contains("organization:`8f2d3a10-6b47-4c91-a5e8-2d7f9b3c1a40`",
+                            "environment:`7b3e5d91-a2c8-46f0-9d14-5e7a1b6c3f82`",
+                            "environment:`ebe114e4-01d4-427b-9773-b63325ddd55c`",
+                            "environment:`de1b8223-1e9c-4807-beec-b2c1cff44e73`",
                             "message:`b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c`",
                             "message_environment_readmodel:`2e7a4c91-6b35-48fd-a2e8-1c9d5f703b64`"));
         }
@@ -183,12 +248,109 @@ class SurrealInitScriptContractTest {
         }
     }
 
-    private static String readInitScript() {
-        Path scriptPath = findInitScript();
-        assertThat(scriptPath)
-                .as("%s debe existir buscando hacia arriba desde %s", SCRIPT_RELATIVE_PATH,
-                        Path.of("").toAbsolutePath())
-                .isNotNull();
+    @Nested
+    @DisplayName("La aplicación demo se siembra con exactamente tres environments: Develop, Testing y Production")
+    class DemoApplicationEnvironments {
+
+        @BeforeEach
+        void assumeScriptAvailable() {
+            Assumptions.assumeTrue(script != null, SCRIPT_NOT_PACKAGED_MESSAGE);
+        }
+
+        @Test
+        @DisplayName("Los tres environments comparten aplicación, estado Active, tipos y timestamps $init_now")
+        void seedEnvironments_demoApplication_shareApplicationActiveStateTypesAndInitNow() {
+            assertThat(demoEnvironmentViolations(script)).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Se denuncia el recuento si la semilla deja de recrear exactamente tres environments")
+        void seedEnvironments_reportViolation_whenOnlyTwoEnvironmentsAreSeeded() {
+            String regression = script.replace(
+                    "UPSERT environment:`ebe114e4-01d4-427b-9773-b63325ddd55c` CONTENT",
+                    "UPSERT environment_draft:`ebe114e4-01d4-427b-9773-b63325ddd55c` CONTENT");
+
+            assertThat(demoEnvironmentViolations(regression))
+                    .anySatisfy(violation -> assertThat(violation).contains("exactamente 3"));
+        }
+
+        @Test
+        @DisplayName("Se denuncia la semilla si el environment de Testing adopta el tipo Develop")
+        void seedEnvironments_reportViolation_whenTestingEnvironmentTypeIsReplacedByDevelop() {
+            String regression = script.replace(
+                    "type_id: environment_type:`19b374bd-503a-4e65-b729-4c2442a69a4e`",
+                    "type_id: environment_type:`3ba48618-abb9-40c2-b700-e4413dd9332b`");
+
+            assertThat(demoEnvironmentViolations(regression))
+                    .anySatisfy(violation -> assertThat(violation).contains("Testing"));
+        }
+
+        @Test
+        @DisplayName("Se denuncia la semilla si los environments dejan de compartir el estado Active")
+        void seedEnvironments_reportViolation_whenActiveStateIsReplacedByInactive() {
+            String regression = script.replace(
+                    "state_id: environment_state:`e6e00788-eda8-40fd-aa31-5763133e8834`",
+                    "state_id: environment_state:`ec30283f-2b63-485e-ab7a-5bd6f44c8878`");
+
+            assertThat(demoEnvironmentViolations(regression))
+                    .anySatisfy(violation -> assertThat(violation).contains("state_id"));
+        }
+
+        @Test
+        @DisplayName("Se denuncia la semilla si los environments dejan de apuntar a la aplicación demo")
+        void seedEnvironments_reportViolation_whenDemoApplicationIsReplaced() {
+            String regression = script.replace(
+                    "application_id: application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23`,",
+                    "application_id: application:`22222222-2222-2222-2222-222222222222`,");
+
+            assertThat(demoEnvironmentViolations(regression))
+                    .anySatisfy(violation -> assertThat(violation).contains("application_id"));
+        }
+    }
+
+    @Nested
+    @DisplayName("El script se localiza subiendo por los ancestros del directorio de trabajo")
+    class ScriptResolution {
+
+        @Test
+        @DisplayName("Encuentra surreal-init.surql al subir desde un subdirectorio cuando deployment/ está incluido")
+        void findInitScript_nestedDirectory_returnsScriptWhenDeploymentIsPackaged(@TempDir Path sandbox)
+                throws IOException {
+            Path expectedScript = sandbox.resolve(SCRIPT_RELATIVE_PATH);
+            Files.createDirectories(expectedScript.getParent());
+            Files.writeString(expectedScript, "-- contrato", StandardCharsets.UTF_8);
+            Path startDirectory = Files.createDirectories(sandbox.resolve(MODULE_DIRECTORY).resolve("target"));
+
+            Path scriptPath = findInitScript(startDirectory);
+
+            assertThat(scriptPath).isEqualTo(expectedScript);
+        }
+
+        @Test
+        @DisplayName("Sin deployment/ en los ancestros no encuentra el script ni contexto empaquetado")
+        void findInitScript_withoutDeploymentContext_returnsNullAndReportsUnpackagedContext(@TempDir Path sandbox)
+                throws IOException {
+            Path startDirectory = Files.createDirectories(sandbox.resolve(MODULE_DIRECTORY));
+
+            assertAll(
+                    () -> assertThat(findInitScript(startDirectory)).isNull(),
+                    () -> assertThat(hasDeploymentContext(startDirectory)).isFalse());
+        }
+
+        @Test
+        @DisplayName("Con deployment/ presente pero sin el script, el contexto se detecta para fallar en vez de omitir")
+        void hasDeploymentContext_deploymentWithoutScript_reportsPackagedContext(@TempDir Path sandbox)
+                throws IOException {
+            Path startDirectory = Files.createDirectories(sandbox.resolve(MODULE_DIRECTORY));
+            Files.createDirectories(sandbox.resolve(DEPLOYMENT_DIRECTORY).resolve("docker"));
+
+            assertAll(
+                    () -> assertThat(hasDeploymentContext(startDirectory)).isTrue(),
+                    () -> assertThat(findInitScript(startDirectory)).isNull());
+        }
+    }
+
+    private static String readInitScript(Path scriptPath) {
         try {
             return Files.readString(scriptPath, StandardCharsets.UTF_8);
         } catch (IOException exception) {
@@ -196,8 +358,8 @@ class SurrealInitScriptContractTest {
         }
     }
 
-    private static Path findInitScript() {
-        Path directory = Path.of("").toAbsolutePath();
+    private static Path findInitScript(Path startDirectory) {
+        Path directory = startDirectory;
         while (directory != null) {
             Path candidate = directory.resolve(SCRIPT_RELATIVE_PATH);
             if (Files.isRegularFile(candidate)) {
@@ -206,6 +368,17 @@ class SurrealInitScriptContractTest {
             directory = directory.getParent();
         }
         return null;
+    }
+
+    private static boolean hasDeploymentContext(Path startDirectory) {
+        Path directory = startDirectory;
+        while (directory != null) {
+            if (Files.isDirectory(directory.resolve(DEPLOYMENT_DIRECTORY))) {
+                return true;
+            }
+            directory = directory.getParent();
+        }
+        return false;
     }
 
     private static List<String> createdAtFieldViolations(String initScript) {
@@ -250,7 +423,7 @@ class SurrealInitScriptContractTest {
             Matcher assignment = TIMESTAMP_ASSIGNMENT.matcher(statement);
             while (assignment.find()) {
                 String value = assignment.group(2).trim();
-                if (!"$init_now".equals(value)) {
+                if (!INIT_NOW_VALUE.equals(value)) {
                     violations.add(assignment.group(1) + " de " + targetOf(statement) + " vale " + value);
                 }
             }
@@ -295,6 +468,164 @@ class SurrealInitScriptContractTest {
             targets.add(targetOf(statement));
         }
         return targets;
+    }
+
+    private static List<String> demoEnvironmentViolations(String initScript) {
+        List<String> environments = seedEnvironmentUpserts(initScript);
+        Map<String, String> typeNames = catalogNames(initScript, "environment_type");
+        String application = seedApplicationReference(initScript);
+        String activeState = recordReference("environment_state",
+                idNamed(catalogNames(initScript, "environment_state"), "Active"));
+
+        List<String> violations = new ArrayList<>(environmentCountViolations(environments.size()));
+        violations.addAll(sharedEnvironmentViolations(environments, application, activeState));
+        violations.addAll(environmentTimestampViolations(environments));
+        violations.addAll(environmentTypeViolations(environments, typeNames));
+        return violations;
+    }
+
+    private static List<String> environmentCountViolations(int environmentCount) {
+        if (environmentCount == DEMO_ENVIRONMENT_COUNT) {
+            return List.of();
+        }
+        return List.of("La semilla debe recrear exactamente " + DEMO_ENVIRONMENT_COUNT
+                + " environments de la aplicación demo, pero recrea " + environmentCount);
+    }
+
+    private static List<String> sharedEnvironmentViolations(List<String> environments, String application,
+            String activeState) {
+        List<String> violations = new ArrayList<>();
+        if (application == null) {
+            violations.add("La semilla no recrea la aplicación demo que deben compartir los environments");
+        }
+        if (activeState == null) {
+            violations.add("El catálogo environment_state no define el estado Active compartido");
+        }
+        if (application == null || activeState == null) {
+            return violations;
+        }
+        for (String environment : environments) {
+            Map<String, String> fields = seedFields(environment);
+            String target = targetOf(environment);
+            addMismatch(violations, "application_id", target, fields.get("application_id"), application);
+            addMismatch(violations, "state_id", target, fields.get("state_id"), activeState);
+        }
+        return violations;
+    }
+
+    private static List<String> environmentTimestampViolations(List<String> environments) {
+        List<String> violations = new ArrayList<>();
+        for (String environment : environments) {
+            Map<String, String> fields = seedFields(environment);
+            String target = targetOf(environment);
+            for (String field : ENVIRONMENT_TIMESTAMP_FIELDS) {
+                addMismatch(violations, field, target, fields.get(field), INIT_NOW_VALUE);
+            }
+        }
+        return violations;
+    }
+
+    private static List<String> environmentTypeViolations(List<String> environments, Map<String, String> typeNames) {
+        List<String> violations = new ArrayList<>();
+        Map<String, Integer> occurrences = new LinkedHashMap<>();
+        for (String environment : environments) {
+            String target = targetOf(environment);
+            String typeReference = seedFields(environment).get("type_id");
+            String typeName = typeReference == null ? null : typeNames.get(recordId(typeReference));
+            if (typeName == null) {
+                violations.add("type_id de " + target + " no resuelve a un environment_type sembrado: "
+                        + typeReference);
+            } else {
+                occurrences.merge(typeName, 1, Integer::sum);
+            }
+        }
+        violations.addAll(environmentTypeCoverageViolations(occurrences));
+        return violations;
+    }
+
+    private static List<String> environmentTypeCoverageViolations(Map<String, Integer> occurrences) {
+        List<String> violations = new ArrayList<>();
+        for (String expectedType : DEMO_ENVIRONMENT_TYPES) {
+            int count = occurrences.getOrDefault(expectedType, 0);
+            if (count != 1) {
+                violations.add("El environment_type " + expectedType + " debe aparecer una sola vez, aparece "
+                        + count);
+            }
+        }
+        for (String unexpectedType : occurrences.keySet()) {
+            if (!DEMO_ENVIRONMENT_TYPES.contains(unexpectedType)) {
+                violations.add("El environment_type " + unexpectedType + " no es Develop, Testing ni Production");
+            }
+        }
+        return violations;
+    }
+
+    private static void addMismatch(List<String> violations, String field, String target, String actual,
+            String expected) {
+        if (!expected.equals(actual)) {
+            violations.add(field + " de " + target + " vale " + actual + " y debe ser " + expected);
+        }
+    }
+
+    private static List<String> seedEnvironmentUpserts(String initScript) {
+        List<String> environments = new ArrayList<>();
+        for (String statement : seedUpserts(initScript)) {
+            if (statement.startsWith(DEMO_ENVIRONMENT_PREFIX)) {
+                environments.add(statement);
+            }
+        }
+        return environments;
+    }
+
+    private static String seedApplicationReference(String initScript) {
+        for (String statement : seedUpserts(initScript)) {
+            if (statement.startsWith(DEMO_APPLICATION_PREFIX)) {
+                return targetOf(statement);
+            }
+        }
+        return null;
+    }
+
+    private static Map<String, String> catalogNames(String initScript, String table) {
+        Map<String, String> names = new LinkedHashMap<>();
+        for (String statement : statements(initScript)) {
+            Matcher target = CATALOG_UPSERT.matcher(statement);
+            if (!target.find() || !table.equals(target.group(1))) {
+                continue;
+            }
+            Matcher name = CATALOG_NAME.matcher(statement);
+            if (name.find()) {
+                names.put(target.group(2), name.group(1));
+            }
+        }
+        return names;
+    }
+
+    private static String idNamed(Map<String, String> catalog, String name) {
+        return catalog.entrySet().stream()
+                .filter(entry -> name.equals(entry.getValue()))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private static String recordReference(String table, String id) {
+        return id == null ? null : table + ":`" + id + "`";
+    }
+
+    private static String recordId(String recordReference) {
+        Matcher matcher = RECORD_ID.matcher(recordReference);
+        return matcher.find() ? matcher.group(1) : recordReference;
+    }
+
+    private static Map<String, String> seedFields(String statement) {
+        Map<String, String> fields = new LinkedHashMap<>();
+        int contentIndex = statement.indexOf('{');
+        Matcher matcher = SEED_FIELD.matcher(contentIndex < 0 ? statement : statement.substring(contentIndex));
+        while (matcher.find()) {
+            fields.putIfAbsent(matcher.group(1), matcher.group(2).trim());
+        }
+        return fields;
     }
 
     private static Set<String> tablesDefining(String initScript, Pattern definition) {

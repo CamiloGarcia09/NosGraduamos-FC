@@ -1266,6 +1266,8 @@ DELETE external_identity:`1d6c8f43-9a25-4b7e-b031-8f2d5c7a964e`;
 DELETE role:`3762dbe9-eed2-42c3-a6b0-678ce2e8c6a9`;
 DELETE role:simulated_security_admin;
 DELETE functionality:`5a8e2c74-1d39-4f6b-b7c2-0e9a3d5f8164`;
+DELETE environment:`de1b8223-1e9c-4807-beec-b2c1cff44e73`;
+DELETE environment:`ebe114e4-01d4-427b-9773-b63325ddd55c`;
 DELETE environment:`7b3e5d91-a2c8-46f0-9d14-5e7a1b6c3f82`;
 DELETE application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23`;
 DELETE organization:`8f2d3a10-6b47-4c91-a5e8-2d7f9b3c1a40`;
@@ -1280,13 +1282,13 @@ DELETE application:`22222222-2222-2222-2222-222222222222`;
 DELETE organization:`11111111-1111-1111-1111-111111111111`;
 
 UPSERT organization:`8f2d3a10-6b47-4c91-a5e8-2d7f9b3c1a40` CONTENT {
-    name: "MessageUcoLab Demo",
+    name: "UCO",
     created_at: $init_now,
     updated_at: $init_now
 };
 
 UPSERT application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23` CONTENT {
-    name: "Demo Application",
+    name: "Arquisoft",
     organization_id: organization:`8f2d3a10-6b47-4c91-a5e8-2d7f9b3c1a40`,
     language_id: language_base:`6319ca87-47b3-4e0e-994f-3166378988f2`,
     state_id: application_state:`dfb7a7cb-66f6-4b73-a1d8-803336f72ebe`,
@@ -1297,6 +1299,22 @@ UPSERT application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23` CONTENT {
 UPSERT environment:`7b3e5d91-a2c8-46f0-9d14-5e7a1b6c3f82` CONTENT {
     application_id: application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23`,
     type_id: environment_type:`3ba48618-abb9-40c2-b700-e4413dd9332b`,
+    state_id: environment_state:`e6e00788-eda8-40fd-aa31-5763133e8834`,
+    created_at: $init_now,
+    updated_at: $init_now
+};
+
+UPSERT environment:`ebe114e4-01d4-427b-9773-b63325ddd55c` CONTENT {
+    application_id: application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23`,
+    type_id: environment_type:`19b374bd-503a-4e65-b729-4c2442a69a4e`,
+    state_id: environment_state:`e6e00788-eda8-40fd-aa31-5763133e8834`,
+    created_at: $init_now,
+    updated_at: $init_now
+};
+
+UPSERT environment:`de1b8223-1e9c-4807-beec-b2c1cff44e73` CONTENT {
+    application_id: application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23`,
+    type_id: environment_type:`71ff34c1-1f4b-4858-943e-771907071c02`,
     state_id: environment_state:`e6e00788-eda8-40fd-aa31-5763133e8834`,
     created_at: $init_now,
     updated_at: $init_now

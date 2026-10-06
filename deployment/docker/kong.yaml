@@ -4,49 +4,24 @@ services:
   - name: message-service
     url: http://host.docker.internal:${MESSAGEUCOLAB_PORT}
     routes:
-      - name: translate-message-by-code
+      - name: messageucolab-api
         paths:
-          - ~/messageucolab/v1/messages/[^/]+/translations$
-        methods:
-          - POST
-        regex_priority: 20
+          - /messageucolab/v1
         strip_path: false
 
-      - name: messages
+      - name: messageucolab-health
         paths:
-          - /messageucolab/v1/messages
-        methods:
-          - GET
-          - POST
-        strip_path: false
-
-      - name: create-token
-        paths:
-          - ~/messageucolab/v1/application/[^/]+/token$
-        methods:
-          - POST
-        regex_priority: 10
-        strip_path: false
-
-      - name: create-application
-        paths:
-          - ~/messageucolab/v1/application$
-        methods:
-          - POST
-        regex_priority: 10
-        strip_path: false
-
-      - name: catalog
-        paths:
-          - /messageucolab/v1/catalog
+          - /actuator/health
         methods:
           - GET
         strip_path: false
 
-      - name: identity-context
+      - name: messageucolab-swagger
         paths:
-          - /messageucolab/v1/me
+          - /swagger-ui
+          - /swagger-ui.html
+          - /openapi.yaml
+          - /v3/api-docs
         methods:
           - GET
-          - PUT
         strip_path: false
