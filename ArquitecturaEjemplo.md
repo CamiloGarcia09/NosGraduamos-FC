@@ -428,6 +428,9 @@ y en SurrealDB (`surreal-init.surql`, `surreal-seed.dev.surql`).
   Los valores leídos mediante el SDK de SurrealDB y los timestamps copiados a proyecciones se convierten
   a UTC antes de usarse. Los campos generados por el esquema con `time::now()` continúan siendo la fuente
   de los timestamps de auditoría.
+- En SurrealDB, `created_at` se asigna con la fecha UTC actual al crear el registro y permanece inmutable;
+  `updated_at` se renueva con la fecha UTC actual en cada escritura. Los registros del seed comparten el
+  instante UTC capturado al iniciar su recreación, sin fechas fijas de ejemplo.
 - Este cambio aplica a escrituras nuevas. Los registros históricos no se desplazan automáticamente,
   porque un valor antiguo sin información confiable sobre su zona de origen no puede corregirse de forma
   segura mediante una migración global.

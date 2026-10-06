@@ -19,7 +19,7 @@ DEFINE FIELD IF NOT EXISTS aggregate_type ON domain_events TYPE string;
 DEFINE FIELD IF NOT EXISTS version        ON domain_events TYPE int;
 DEFINE FIELD OVERWRITE payload            ON domain_events TYPE object FLEXIBLE;
 DEFINE FIELD OVERWRITE metadata           ON domain_events TYPE object FLEXIBLE;
-DEFINE FIELD IF NOT EXISTS created_at     ON domain_events TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at         ON domain_events TYPE datetime DEFAULT time::now() READONLY;
 DEFINE FIELD IF NOT EXISTS created_by     ON domain_events TYPE option<string>;
 DEFINE FIELD IF NOT EXISTS correlation_id ON domain_events TYPE option<string>;
 DEFINE FIELD IF NOT EXISTS causation_id   ON domain_events TYPE option<string>;
@@ -107,8 +107,8 @@ DEFINE TABLE IF NOT EXISTS organization SCHEMAFULL CHANGEFEED 7d;
 DEFINE FIELD IF NOT EXISTS name
 ON organization TYPE string;
 
-DEFINE FIELD IF NOT EXISTS created_at
-ON organization TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON organization TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE FIELD IF NOT EXISTS updated_at
 ON organization TYPE datetime VALUE time::now();
@@ -131,8 +131,8 @@ ON external_identity TYPE string;
 DEFINE FIELD IF NOT EXISTS email
 ON external_identity TYPE option<string>;
 
-DEFINE FIELD IF NOT EXISTS created_at
-ON external_identity TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON external_identity TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE FIELD IF NOT EXISTS updated_at
 ON external_identity TYPE datetime VALUE time::now();
@@ -158,8 +158,8 @@ ON application TYPE record<language_base>;
 DEFINE FIELD IF NOT EXISTS state_id
 ON application TYPE record<application_state>;
 
-DEFINE FIELD IF NOT EXISTS created_at
-ON application TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON application TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE FIELD IF NOT EXISTS updated_at
 ON application TYPE datetime VALUE time::now();
@@ -302,8 +302,8 @@ ON environment TYPE record<environment_type>;
 DEFINE FIELD IF NOT EXISTS state_id
 ON environment TYPE record<environment_state>;
 
-DEFINE FIELD IF NOT EXISTS created_at
-ON environment TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON environment TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE FIELD IF NOT EXISTS updated_at
 ON environment TYPE datetime VALUE time::now();
@@ -362,8 +362,8 @@ ON membership TYPE record<external_identity>;
 DEFINE FIELD IF NOT EXISTS organization_id
 ON membership TYPE record<organization>;
 
-DEFINE FIELD IF NOT EXISTS created_at
-ON membership TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON membership TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE INDEX IF NOT EXISTS membership_identity_organization_idx
 ON membership FIELDS identity_id, organization_id UNIQUE;
@@ -404,8 +404,8 @@ DEFINE TABLE IF NOT EXISTS role SCHEMAFULL;
 DEFINE FIELD IF NOT EXISTS name
 ON role TYPE string;
 
-DEFINE FIELD IF NOT EXISTS created_at
-ON role TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON role TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE INDEX IF NOT EXISTS role_name_idx
 ON role FIELDS name UNIQUE;
@@ -435,8 +435,8 @@ ON role_assignment TYPE record<role>;
 DEFINE FIELD IF NOT EXISTS organization_id
 ON role_assignment TYPE record<organization>;
 
-DEFINE FIELD IF NOT EXISTS created_at
-ON role_assignment TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON role_assignment TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE INDEX IF NOT EXISTS role_assignment_membership_idx
 ON role_assignment FIELDS membership_id;
@@ -548,8 +548,8 @@ ON functionality TYPE record<application>;
 DEFINE FIELD IF NOT EXISTS state_id
 ON functionality TYPE record<functionality_state>;
 
-DEFINE FIELD IF NOT EXISTS created_at
-ON functionality TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON functionality TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE FIELD IF NOT EXISTS updated_at
 ON functionality TYPE datetime VALUE time::now();
@@ -746,8 +746,8 @@ ON message TYPE option<record<application>>;
 DEFINE FIELD IF NOT EXISTS functionality_id
 ON message TYPE option<record<functionality>>;
 
-DEFINE FIELD IF NOT EXISTS created_at
-ON message TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON message TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE FIELD IF NOT EXISTS updated_at
 ON message TYPE datetime VALUE time::now();
@@ -861,8 +861,8 @@ ON message_environment TYPE record<environment>;
 DEFINE FIELD IF NOT EXISTS state_data_id
 ON message_environment TYPE record<message_environment_state>;
 
-DEFINE FIELD IF NOT EXISTS created_at
-ON message_environment TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON message_environment TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE FIELD IF NOT EXISTS updated_at
 ON message_environment TYPE datetime VALUE time::now();
@@ -1240,6 +1240,8 @@ WHERE permission_id = permission:functionality_create;
 
 -- Recreate only this seed's deterministic records. SurrealDB 3.1.4 can
 -- report a self-conflict when UPSERT CONTENT meets an existing unique value.
+LET $init_now = time::now();
+
 DELETE message_environment_readmodel:`2e7a4c91-6b35-48fd-a2e8-1c9d5f703b64`;
 DELETE message_data_collection:`b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c`;
 DELETE message_environment:`2e7a4c91-6b35-48fd-a2e8-1c9d5f703b64`;
@@ -1279,8 +1281,8 @@ DELETE organization:`11111111-1111-1111-1111-111111111111`;
 
 UPSERT organization:`8f2d3a10-6b47-4c91-a5e8-2d7f9b3c1a40` CONTENT {
     name: "MessageUcoLab Demo",
-    created_at: d'2026-01-01T00:00:00Z',
-    updated_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now,
+    updated_at: $init_now
 };
 
 UPSERT application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23` CONTENT {
@@ -1288,43 +1290,43 @@ UPSERT application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23` CONTENT {
     organization_id: organization:`8f2d3a10-6b47-4c91-a5e8-2d7f9b3c1a40`,
     language_id: language_base:`6319ca87-47b3-4e0e-994f-3166378988f2`,
     state_id: application_state:`dfb7a7cb-66f6-4b73-a1d8-803336f72ebe`,
-    created_at: d'2026-01-01T00:00:00Z',
-    updated_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now,
+    updated_at: $init_now
 };
 
 UPSERT environment:`7b3e5d91-a2c8-46f0-9d14-5e7a1b6c3f82` CONTENT {
     application_id: application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23`,
     type_id: environment_type:`3ba48618-abb9-40c2-b700-e4413dd9332b`,
     state_id: environment_state:`e6e00788-eda8-40fd-aa31-5763133e8834`,
-    created_at: d'2026-01-01T00:00:00Z',
-    updated_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now,
+    updated_at: $init_now
 };
 
 UPSERT functionality:`5a8e2c74-1d39-4f6b-b7c2-0e9a3d5f8164` CONTENT {
     name: "General Messages",
     application_id: application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23`,
     state_id: functionality_state:`407de974-c8aa-43e2-a5cf-22dc7c44054b`,
-    created_at: d'2026-01-01T00:00:00Z',
-    updated_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now,
+    updated_at: $init_now
 };
 
 UPSERT external_identity:`1d6c8f43-9a25-4b7e-b031-8f2d5c7a964e` CONTENT {
     issuer: "https://issuer.example",
     subject: "subject-1",
     email: "user@example.com",
-    created_at: d'2026-01-01T00:00:00Z',
-    updated_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now,
+    updated_at: $init_now
 };
 
 UPSERT membership:`e9a4b2c7-3d81-4f56-a0e9-6c1b8d2f7435` CONTENT {
     identity_id: external_identity:`1d6c8f43-9a25-4b7e-b031-8f2d5c7a964e`,
     organization_id: organization:`8f2d3a10-6b47-4c91-a5e8-2d7f9b3c1a40`,
-    created_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now
 };
 
 UPSERT role:`3762dbe9-eed2-42c3-a6b0-678ce2e8c6a9` CONTENT {
     name: "Simulated Security Administrator",
-    created_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now
 };
 
 UPSERT role_permission:`70cc345c-3b96-459d-857b-29b0fea9bb0e` CONTENT {
@@ -1356,7 +1358,7 @@ UPSERT role_assignment:`3c7f1a82-5e94-4b6d-8a23-9d0e7f4c1b65` CONTENT {
     membership_id: membership:`e9a4b2c7-3d81-4f56-a0e9-6c1b8d2f7435`,
     role_id: role:`3762dbe9-eed2-42c3-a6b0-678ce2e8c6a9`,
     organization_id: organization:`8f2d3a10-6b47-4c91-a5e8-2d7f9b3c1a40`,
-    created_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now
 };
 
 UPSERT active_context:`1d6c8f43-9a25-4b7e-b031-8f2d5c7a964e` CONTENT {
@@ -1364,7 +1366,7 @@ UPSERT active_context:`1d6c8f43-9a25-4b7e-b031-8f2d5c7a964e` CONTENT {
     organization_id: organization:`8f2d3a10-6b47-4c91-a5e8-2d7f9b3c1a40`,
     application_id: application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23`,
     environment_id: environment:`7b3e5d91-a2c8-46f0-9d14-5e7a1b6c3f82`,
-    updated_at: d'2026-01-01T00:00:00Z'
+    updated_at: $init_now
 };
 
 UPSERT message:`b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c` CONTENT {
@@ -1376,16 +1378,16 @@ UPSERT message:`b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c` CONTENT {
     status_id: message_state:`4223b3dc-c991-4603-a746-d37ce5ecd976`,
     application_id: application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23`,
     functionality_id: functionality:`5a8e2c74-1d39-4f6b-b7c2-0e9a3d5f8164`,
-    created_at: d'2026-01-01T00:00:00Z',
-    updated_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now,
+    updated_at: $init_now
 };
 
 UPSERT message_environment:`2e7a4c91-6b35-48fd-a2e8-1c9d5f703b64` CONTENT {
     message_id: message:`b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c`,
     environment_id: environment:`7b3e5d91-a2c8-46f0-9d14-5e7a1b6c3f82`,
     state_data_id: message_environment_state:`10ddbab2-352e-48de-b9eb-de0895ddb944`,
-    created_at: d'2026-01-01T00:00:00Z',
-    updated_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now,
+    updated_at: $init_now
 };
 
 UPSERT message_data_collection:`b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c` CONTENT {
@@ -1399,7 +1401,7 @@ UPSERT message_data_collection:`b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c` CONTENT {
     status: { id: "message_state:4223b3dc-c991-4603-a746-d37ce5ecd976", name: "Active" },
     functionality: { id: "functionality:5a8e2c74-1d39-4f6b-b7c2-0e9a3d5f8164", name: "General Messages" },
     projection_version: 1,
-    generated_at: d'2026-01-01T00:00:00Z'
+    generated_at: $init_now
 };
 
 UPSERT message_environment_readmodel:`2e7a4c91-6b35-48fd-a2e8-1c9d5f703b64` CONTENT {
@@ -1420,5 +1422,5 @@ UPSERT message_environment_readmodel:`2e7a4c91-6b35-48fd-a2e8-1c9d5f703b64` CONT
     },
     status: { id: "message_environment_state:10ddbab2-352e-48de-b9eb-de0895ddb944", name: "Active" },
     projection_version: 1,
-    generated_at: d'2026-01-01T00:00:00Z'
+    generated_at: $init_now
 };
