@@ -1,7 +1,6 @@
 package co.edu.uco.infraestructure.secondaryadapters.security;
 
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.crosscutting.exceptions.UnauthorizedException;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -36,7 +35,6 @@ class SimulatedExternalIdentityAdapterTest {
                         "components.security.simulated.issuer=https://issuer.example",
                         "components.security.simulated.subject=subject-1",
                         "components.security.simulated.email=user@example.com",
-                        "components.security.simulated.principal-type=HUMAN",
                         "components.security.simulated.expiration=2999-01-01T00:00:00Z"
                 )
                 .run(context -> {
@@ -47,14 +45,12 @@ class SimulatedExternalIdentityAdapterTest {
                                     ExternalIdentity::issuer,
                                     ExternalIdentity::subject,
                                     ExternalIdentity::email,
-                                    ExternalIdentity::principalType,
                                     ExternalIdentity::expiration
                             )
                             .containsExactly(
                                     "https://issuer.example",
                                     "subject-1",
                                     "user@example.com",
-                                    PrincipalType.HUMAN,
                                     Instant.parse("2999-01-01T00:00:00Z")
                             );
                 });
@@ -71,14 +67,12 @@ class SimulatedExternalIdentityAdapterTest {
                         ExternalIdentity::issuer,
                         ExternalIdentity::subject,
                         ExternalIdentity::email,
-                        ExternalIdentity::principalType,
                         ExternalIdentity::expiration
                 )
                 .containsExactly(
                         "https://issuer.example",
                         "subject-1",
                         "user@example.com",
-                        PrincipalType.HUMAN,
                         NOW.plusSeconds(60)
                 );
     }
@@ -96,7 +90,7 @@ class SimulatedExternalIdentityAdapterTest {
     @Test
     void resolve_throwsUnauthorized_whenConfiguredTokenIsEmpty() {
         var adapter = new SimulatedExternalIdentityAdapter(
-                "", "issuer", "subject", "email", PrincipalType.SERVICE,
+                "", "issuer", "subject", "email",
                 NOW.plusSeconds(60), Clock.fixed(NOW, ZoneOffset.UTC));
 
         assertThatThrownBy(() -> adapter.resolve(""))
@@ -125,7 +119,6 @@ class SimulatedExternalIdentityAdapterTest {
                 "https://issuer.example",
                 "subject-1",
                 "user@example.com",
-                PrincipalType.HUMAN,
                 expiration,
                 Clock.fixed(NOW, ZoneOffset.UTC)
         );

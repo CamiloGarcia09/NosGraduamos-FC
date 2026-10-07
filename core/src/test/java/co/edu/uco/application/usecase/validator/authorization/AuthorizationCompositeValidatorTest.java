@@ -5,7 +5,6 @@ import co.edu.uco.application.secondaryports.security.AuthorizationQueryPort;
 import co.edu.uco.application.usecase.domain.security.AuthorizationScopeType;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
@@ -40,7 +39,7 @@ class AuthorizationCompositeValidatorTest {
 
     private static final UUID SCOPE_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614175000");
     private static final ExternalIdentity IDENTITY = new ExternalIdentity(
-            "issuer", "subject", null, PrincipalType.HUMAN, Instant.MAX);
+            "issuer", "subject", null, Instant.MAX);
 
     @Mock
     private AuthorizationQueryPort authorizationQueryPort;

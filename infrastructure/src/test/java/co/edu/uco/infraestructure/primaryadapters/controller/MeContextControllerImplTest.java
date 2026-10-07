@@ -7,7 +7,6 @@ import co.edu.uco.application.primaryports.dto.context.SelectActiveContextDTO;
 import co.edu.uco.application.primaryports.facade.context.ActiveContextUseCaseFacade;
 import co.edu.uco.application.secondaryports.presenter.PresenterPort;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +26,7 @@ import static org.mockito.Mockito.when;
 class MeContextControllerImplTest {
 
     private static final ExternalIdentity IDENTITY = new ExternalIdentity(
-            "issuer", "subject", "user@example.com", PrincipalType.HUMAN, Instant.MAX);
+            "issuer", "subject", "user@example.com", Instant.MAX);
 
     @Mock
     private ActiveContextUseCaseFacade facade;

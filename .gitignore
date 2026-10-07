@@ -48,6 +48,8 @@ infrastructure/azure/local/devops-service-connection.local.json
 
 build.log
 
-### opencode ###
-opencode.jsonc
-
+### OpenCode ###
+.opencode/node_modules/
+.opencode/package.json
+.opencode/package-lock.json
+.opencode/bun.lock

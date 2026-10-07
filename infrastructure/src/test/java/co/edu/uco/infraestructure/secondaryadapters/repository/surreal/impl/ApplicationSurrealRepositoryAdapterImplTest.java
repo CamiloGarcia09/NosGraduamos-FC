@@ -1,6 +1,8 @@
 package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
+import co.edu.uco.application.secondaryports.entity.EnvironmentData;
+import co.edu.uco.application.secondaryports.entity.EnvironmentTypeData;
 import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.usecase.domain.aggregate.entities.OrganizationEntity;
@@ -12,18 +14,22 @@ import com.surrealdb.Response;
 import com.surrealdb.Surreal;
 import com.surrealdb.Value;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -31,11 +37,19 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicationSurrealRepositoryAdapterImplTest {
+
+    private static final String APPLICATION_ID = "123e4567-e89b-12d3-a456-426614174000";
+    private static final String ORGANIZATION_ID = "223e4567-e89b-12d3-a456-426614174000";
+    private static final String LANGUAGE_ID = "lang-1";
+    private static final String STATE_ID = "state-1";
+    private static final String ENVIRONMENT_STATE_ID = "523e4567-e89b-12d3-a456-426614174000";
+    private static final String ENVIRONMENT_STATE_RECORD =
+            "environment_state:`" + ENVIRONMENT_STATE_ID + "`";
 
     @Mock
     private Surreal surreal;
@@ -98,6 +112,49 @@ class ApplicationSurrealRepositoryAdapterImplTest {
         Response response = mock(Response.class);
         when(response.size()).thenReturn(0);
         return response;
+    }
+
+    private ApplicationData application() {
+        OrganizationEntity organization = new OrganizationEntity();
+        organization.setId(UUID.fromString(ORGANIZATION_ID));
+        organization.setName("UCO");
+        return ApplicationData.build(UUID.fromString(APPLICATION_ID), "App", organization);
+    }
+
+    private EnvironmentData environment(final String environmentId, final ApplicationData application,
+                                        final String typeId) {
+        return new EnvironmentData(UUID.fromString(environmentId), application,
+                new EnvironmentTypeData(UUID.fromString(typeId), "Develop"));
+    }
+
+    private List<EnvironmentData> threeEnvironments(final ApplicationData application) {
+        return List.of(
+                environment("323e4567-e89b-12d3-a456-426614174000", application,
+                        "423e4567-e89b-12d3-a456-426614174000"),
+                environment("323e4567-e89b-12d3-a456-426614174001", application,
+                        "423e4567-e89b-12d3-a456-426614174002"),
+                environment("323e4567-e89b-12d3-a456-426614174003", application,
+                        "423e4567-e89b-12d3-a456-426614174004"));
+    }
+
+    private String expectedTransaction(final List<EnvironmentData> environments) {
+        final String applicationUpsert = "UPSERT application:`" + APPLICATION_ID + "` CONTENT { "
+                + "name: 'App', organization_id: organization:`" + ORGANIZATION_ID + "`, "
+                + "language_id: language_base:`" + LANGUAGE_ID + "`, "
+                + "state_id: application_state:`" + STATE_ID + "` };";
+        final StringBuilder transaction = new StringBuilder("BEGIN TRANSACTION;")
+                .append(applicationUpsert);
+        environments.forEach(environment -> transaction
+                .append("UPSERT environment:`").append(environment.getId()).append("` CONTENT { ")
+                .append("application_id: application:`").append(APPLICATION_ID).append("`, ")
+                .append("type_id: environment_type:`").append(environment.getType().getId()).append("`, ")
+                .append("state_id: ").append(ENVIRONMENT_STATE_RECORD)
+                .append(" };"));
+        return transaction.append("COMMIT TRANSACTION;").toString();
+    }
+
+    private static long countOccurrences(final String text, final String token) {
+        return text.split(Pattern.quote(token), -1).length - 1L;
     }
 
     @Test
@@ -176,36 +233,62 @@ class ApplicationSurrealRepositoryAdapterImplTest {
     }
 
     @Test
-    void create_persistsApplicationWithOrganizationUsingExactUpsert() {
-        UUID applicationId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-        UUID organizationId = UUID.fromString("223e4567-e89b-12d3-a456-426614174000");
-        OrganizationEntity organization = new OrganizationEntity();
-        organization.setId(organizationId);
-        organization.setName("UCO");
-        ApplicationData application = ApplicationData.build(applicationId, "App", organization);
-        LocalDateTime startDate = LocalDateTime.of(2025, 1, 1, 10, 15, 30);
-        LocalDateTime endDate = LocalDateTime.of(2025, 12, 31, 18, 45, 0);
-        String expectedUpsert = "UPSERT application:`123e4567-e89b-12d3-a456-426614174000` CONTENT { "
-                + "name: 'App', organization_id: organization:`223e4567-e89b-12d3-a456-426614174000`, "
-                + "language_id: language_base:`lang-1`, start_date: d'2025-01-01T10:15:30Z', "
-                + "end_date: d'2025-12-31T18:45:00Z', state_id: application_state:`state-1` };";
+    @DisplayName("Persiste la aplicación y sus tres ambientes en una única transacción SurrealQL")
+    void createWithEnvironments_executesOneTransactionWithApplicationAndThreeEnvironmentUpserts() {
+        ApplicationData application = application();
+        List<EnvironmentData> environments = threeEnvironments(application);
 
-        adapter.create(application, "lang-1", startDate, endDate, "state-1");
+        adapter.createWithEnvironments(application, LANGUAGE_ID, STATE_ID, environments,
+                ENVIRONMENT_STATE_ID);
 
-        verify(surreal).query(expectedUpsert);
-        verify(log).info("Executing SurrealQL upsert application: {}", expectedUpsert);
+        ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
+        verify(surreal).query(queryCaptor.capture());
+        String query = queryCaptor.getValue();
+        assertAll(
+                () -> assertThat(query).startsWith("BEGIN TRANSACTION;"),
+                () -> assertThat(query).endsWith("COMMIT TRANSACTION;"),
+                () -> assertThat(countOccurrences(query, "BEGIN TRANSACTION;")).isEqualTo(1),
+                () -> assertThat(countOccurrences(query, "COMMIT TRANSACTION;")).isEqualTo(1),
+                () -> assertThat(countOccurrences(query, "UPSERT application:`")).isEqualTo(1),
+                () -> assertThat(countOccurrences(query, "UPSERT environment:`")).isEqualTo(3),
+                () -> assertThat(countOccurrences(query, ENVIRONMENT_STATE_RECORD)).isEqualTo(3),
+                () -> assertThat(query).contains("language_id: language_base:`" + LANGUAGE_ID + "`"),
+                () -> assertThat(query).contains("state_id: application_state:`" + STATE_ID + "`"),
+                () -> assertThat(query).contains("organization_id: organization:`" + ORGANIZATION_ID + "`"));
+        verify(log).info("Creating application and {} default environments atomically", 3);
         verifyNoMoreInteractions(surreal);
     }
 
     @Test
-    void create_throwsBusinessException_whenQueryFails() {
-        ApplicationData application = ApplicationData.build();
-        doThrow(new RuntimeException("db down")).when(surreal).query(anyString());
+    @DisplayName("Genera el statement exacto con los ids de ambiente, tipo y estado correctos")
+    void createWithEnvironments_buildsExactSurrealqlStatement() {
+        ApplicationData application = application();
+        List<EnvironmentData> environments = threeEnvironments(application);
+        String expectedQuery = expectedTransaction(environments);
 
-        assertThatThrownBy(() -> adapter.create(application, "lang-1", LocalDateTime.now(), LocalDateTime.now(), "state-1"))
+        adapter.createWithEnvironments(application, LANGUAGE_ID, STATE_ID, environments,
+                ENVIRONMENT_STATE_ID);
+
+        verify(surreal).query(expectedQuery);
+        verifyNoMoreInteractions(surreal);
+    }
+
+    @Test
+    @DisplayName("Lanza BusinessException técnica cuando la transacción SurrealDB falla")
+    void createWithEnvironments_throwsTechnicalBusinessException_whenQueryFails() {
+        ApplicationData application = application();
+        RuntimeException cause = new RuntimeException("db down");
+        doThrow(cause).when(surreal).query(anyString());
+
+        assertThatThrownBy(() -> adapter.createWithEnvironments(application, LANGUAGE_ID, STATE_ID,
+                threeEnvironments(application), ENVIRONMENT_STATE_ID))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(ex -> assertThat(((BusinessException) ex).getTechnicalMessage())
-                        .isEqualTo("Error al persistir la aplicación en la base de datos SurrealDB"));
-        verify(log).error(anyString(), any(RuntimeException.class));
+                .satisfies(ex -> assertSoftly(softly -> {
+                    softly.assertThat(((BusinessException) ex).getTechnicalMessage())
+                            .isEqualTo("Error al persistir la aplicación y sus ambientes en la base de datos SurrealDB");
+                    softly.assertThat(((BusinessException) ex).getRootException()).isSameAs(cause);
+                }));
+        verify(log).error(eq("Error al persistir la aplicación y sus ambientes en SurrealDB"),
+                any(RuntimeException.class));
     }
 }

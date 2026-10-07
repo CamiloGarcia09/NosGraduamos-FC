@@ -1,6 +1,7 @@
 package co.edu.uco.infraestructure.primaryadapters.controller;
 
 import co.edu.uco.application.primaryports.dto.message.MessageDTO;
+import co.edu.uco.application.primaryports.dto.message.TranslateMessageDTO;
 import co.edu.uco.application.primaryports.dto.message.TranslatedMessageDTO;
 import co.edu.uco.application.primaryports.dto.page.PageRequestDTO;
 import co.edu.uco.application.primaryports.facade.message.FindMessageByCodeAndEnvironmentUseCaseFacade;
@@ -80,16 +81,15 @@ final class MessagesControllerImpl implements MessagesController {
         @Override
         public void translateByCodeMessageAndEnvironment(
                         String messageCode,
-                        String sourceLanguage,
-                        String targetLanguage,
+                        TranslateMessageDTO translateMessageDTO,
                         HttpServletRequest httpServletRequest,
                         HttpServletResponse httpServletResponse) {
                 var accessContext = accessContext(httpServletRequest);
                 var translatedMessageDTO = translateMessageByCodeAndEnvironmentUseCaseFacade.execute(
                                 messageCode,
                                 accessContext,
-                                sourceLanguage,
-                                targetLanguage);
+                                translateMessageDTO.getSourceLanguage(),
+                                translateMessageDTO.getTargetLanguage());
                 translationPresenter.presentRestSuccess(List.of(translatedMessageDTO), httpServletRequest,
                                 httpServletResponse);
         }

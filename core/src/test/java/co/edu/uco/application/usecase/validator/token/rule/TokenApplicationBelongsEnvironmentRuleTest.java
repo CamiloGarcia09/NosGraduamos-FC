@@ -4,6 +4,7 @@ import co.edu.uco.application.primaryports.dto.token.CreateTokenDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.entity.EnvironmentData;
+import co.edu.uco.application.secondaryports.entity.EnvironmentTypeData;
 import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
 import co.edu.uco.application.usecase.validator.token.TokenValidationContext;
 import co.edu.uco.crosscutting.exceptions.BusinessRuleException;
@@ -48,8 +49,9 @@ class TokenApplicationBelongsEnvironmentRuleTest {
     }
 
     private EnvironmentData environmentBelongingTo(UUID applicationId) {
-        return new EnvironmentData(UUID.fromString(ENVIRONMENT_ID), "Production",
-                new ApplicationData(applicationId, "Message App"));
+        return new EnvironmentData(UUID.fromString(ENVIRONMENT_ID),
+                new ApplicationData(applicationId, "Message App"),
+                new EnvironmentTypeData(UUID.randomUUID(), "Production"));
     }
 
     @Test

@@ -18,11 +18,7 @@ public final class CreateMessageDTO {
     private String typeId;
     private String categoryId;
     private String statusId;
-    private String applicationId;
-    private String application;
     private String functionalityId;
-    private String environmentId;
-    private String messageEnvironmentStateId;
 
     public CreateMessageDTO() {
         setCode(EMPTY);
@@ -31,11 +27,7 @@ public final class CreateMessageDTO {
         setTypeId(EMPTY);
         setCategoryId(EMPTY);
         setStatusId(EMPTY);
-        setApplicationId(EMPTY);
-        setApplication(EMPTY);
         setFunctionalityId(EMPTY);
-        setEnvironmentId(EMPTY);
-        setMessageEnvironmentStateId(EMPTY);
     }
 
     public void setCode(String code) { this.code = trim(code); }
@@ -44,9 +36,5 @@ public final class CreateMessageDTO {
     public void setTypeId(String typeId) { this.typeId = trim(typeId); }
     public void setCategoryId(String categoryId) { this.categoryId = trim(categoryId); }
     public void setStatusId(String statusId) { this.statusId = trim(statusId); }
-    public void setApplicationId(String applicationId) { this.applicationId = trim(applicationId); }
-    public void setApplication(String application) { this.application = trim(application); }
     public void setFunctionalityId(String functionalityId) { this.functionalityId = trim(functionalityId); }
-    public void setEnvironmentId(String environmentId) { this.environmentId = trim(environmentId); }
-    public void setMessageEnvironmentStateId(String messageEnvironmentStateId) { this.messageEnvironmentStateId = trim(messageEnvironmentStateId); }
 }

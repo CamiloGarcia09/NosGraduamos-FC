@@ -54,8 +54,6 @@ class CreateFunctionalityCompositeValidatorTest {
         return CreateFunctionalityDTO.builder()
                 .name("Search messages")
                 .applicationId(APP_UUID)
-                .startDate("2025-01-01T00:00:00")
-                .endDate("2025-12-31T23:59:59")
                 .stateId(STATE_ID)
                 .build();
     }
@@ -155,49 +153,6 @@ class CreateFunctionalityCompositeValidatorTest {
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
                         .isEqualTo("El uuid no es valido"));
         verifyNoInteractions(applicationRepository, recordExistsCatalogPort, functionalityRepository);
-    }
-
-    @Test
-    void validate_throwsBusinessRule_whenStartDateIsEmpty() {
-        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_182.getCode()))
-                .thenReturn("La fecha de inicio de la funcionalidad es requerida.");
-        when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
-        CreateFunctionalityDTO dto = validDto();
-        dto.setStartDate("");
-
-        assertThatThrownBy(() -> validator.validate(dto))
-                .isInstanceOf(BusinessRuleException.class)
-                .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("La fecha de inicio de la funcionalidad es requerida."));
-    }
-
-    @Test
-    void validate_throwsBusinessRule_whenEndDateIsEmpty() {
-        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_183.getCode()))
-                .thenReturn("La fecha de fin de la funcionalidad es requerida.");
-        when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
-        CreateFunctionalityDTO dto = validDto();
-        dto.setEndDate("");
-
-        assertThatThrownBy(() -> validator.validate(dto))
-                .isInstanceOf(BusinessRuleException.class)
-                .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("La fecha de fin de la funcionalidad es requerida."));
-    }
-
-    @Test
-    void validate_throwsBusinessRule_whenStartDateIsAfterEndDate() {
-        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_189.getCode()))
-                .thenReturn("La fecha de inicio no puede ser posterior a la fecha de fin.");
-        when(applicationRepository.existsById(APP_UUID)).thenReturn(true);
-        CreateFunctionalityDTO dto = validDto();
-        dto.setStartDate("2026-12-31T23:59:59");
-        dto.setEndDate("2025-01-01T00:00:00");
-
-        assertThatThrownBy(() -> validator.validate(dto))
-                .isInstanceOf(BusinessRuleException.class)
-                .satisfies(ex -> assertThat(((BusinessRuleException) ex).getUserMessage())
-                        .isEqualTo("La fecha de inicio no puede ser posterior a la fecha de fin."));
     }
 
     @Test

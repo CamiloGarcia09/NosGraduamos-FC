@@ -5,7 +5,6 @@ import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.usecase.domain.security.AuthorizationScopeType;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
 import com.surrealdb.Array;
 import com.surrealdb.Object;
@@ -50,11 +49,11 @@ class AuthorizationQuerySurrealAdapterTest {
     void setUp() {
         when(loggerFactory.getLogger(AuthorizationQuerySurrealAdapter.class)).thenReturn(log);
         adapter = new AuthorizationQuerySurrealAdapter(surreal, loggerFactory);
-        identity = new ExternalIdentity("issuer", "subject", null, PrincipalType.HUMAN, Instant.MAX);
+        identity = new ExternalIdentity("issuer", "subject", null, Instant.MAX);
     }
 
     @Test
-    void hasPermission_returnsTrueForApplicationScopeAndIncludesInheritedScopeChecks() {
+    void hasPermission_returnsTrueForApplicationScopeAndInheritsApplicationOrganization() {
         UUID applicationId = UUID.randomUUID();
         doReturn(responseWith(mock(Object.class))).when(surreal).query(anyString());
 
@@ -68,8 +67,8 @@ class AuthorizationQuerySurrealAdapterTest {
                 .contains("membership_id.organization_id = (SELECT VALUE organization_id FROM application:`"
                         + applicationId + "`)[0]")
                 .contains("permission WHERE code = 'MESSAGE_READ'")
-                .contains("scope_type = 'ORGANIZATION'")
-                .contains("scope_type = 'APPLICATION' AND application_id = application:`" + applicationId + "`");
+                .contains("organization_id = (SELECT VALUE organization_id FROM application:`"
+                        + applicationId + "`)[0]");
     }
 
     @Test
@@ -83,7 +82,22 @@ class AuthorizationQuerySurrealAdapterTest {
     }
 
     @Test
-    void hasPermissionForEnvironment_checksAllInheritedScopesWithinEnvironmentOrganization() {
+    void hasPermission_usesOrganizationScope_whenScopeIsOrganization() {
+        UUID organizationId = UUID.randomUUID();
+        doReturn(emptyResponse()).when(surreal).query(anyString());
+
+        adapter.hasPermission(identity, PermissionCode.MESSAGE_CREATE,
+                AuthorizationScopeType.ORGANIZATION, organizationId);
+
+        assertThat(capturedQuery())
+                .contains("membership_id.organization_id = organization:`" + organizationId + "`")
+                .contains("organization_id = organization:`" + organizationId + "`")
+                .doesNotContain("application_id")
+                .doesNotContain("environment_id");
+    }
+
+    @Test
+    void hasPermissionForEnvironment_infersOrganizationFromEnvironmentApplication() {
         UUID environmentId = UUID.randomUUID();
         doReturn(emptyResponse()).when(surreal).query(anyString());
 
@@ -91,11 +105,10 @@ class AuthorizationQuerySurrealAdapterTest {
                 AuthorizationScopeType.ENVIRONMENT, environmentId);
 
         assertThat(capturedQuery())
+                .contains("membership_id.organization_id = (SELECT VALUE application_id.organization_id FROM environment:`"
+                        + environmentId + "`)[0]")
                 .contains("organization_id = (SELECT VALUE application_id.organization_id FROM environment:`"
-                        + environmentId + "`)")
-                .contains("scope_type = 'ORGANIZATION'")
-                .contains("scope_type = 'APPLICATION'")
-                .contains("scope_type = 'ENVIRONMENT' AND environment_id = environment:`" + environmentId + "`");
+                        + environmentId + "`)[0]");
     }
 
     @Test
@@ -113,9 +126,7 @@ class AuthorizationQuerySurrealAdapterTest {
                 .contains("membership WHERE identity_id IN")
                 .contains("membership WHERE identity_id IN (SELECT VALUE id FROM external_identity")
                 .contains("AND membership_id.organization_id = $parent.organization_id")
-                .contains("scope_type = 'ORGANIZATION' AND organization_id = $parent.organization_id")
-                .contains("application_id = $parent.id")
-                .contains("environment_id.application_id = $parent.id")
+                .contains("AND organization_id = $parent.organization_id")
                 .doesNotContain("active");
     }
 
@@ -135,14 +146,14 @@ class AuthorizationQuerySurrealAdapterTest {
                 .contains("membership WHERE identity_id IN")
                 .contains("AND membership_id.organization_id = (SELECT VALUE organization_id FROM application:`"
                         + applicationId + "`)[0]")
-                .contains("scope_type = 'APPLICATION' AND application_id = application:`" + applicationId + "`")
-                .contains("scope_type = 'ENVIRONMENT' AND environment_id = $parent.id");
+                .contains("AND organization_id = (SELECT VALUE organization_id FROM application:`"
+                        + applicationId + "`)[0]");
     }
 
     @Test
     void queryEscapesIdentityComponents() {
         ExternalIdentity quotedIdentity = new ExternalIdentity("is'suer", "sub\\ject", null,
-                PrincipalType.SERVICE, Instant.MAX);
+                Instant.MAX);
         doReturn(emptyResponse()).when(surreal).query(anyString());
 
         adapter.hasPermission(quotedIdentity, PermissionCode.CONTEXT_SELECT,

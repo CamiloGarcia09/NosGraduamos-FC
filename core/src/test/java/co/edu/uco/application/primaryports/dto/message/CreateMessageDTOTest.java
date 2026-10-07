@@ -18,11 +18,7 @@ class CreateMessageDTOTest {
                 () -> assertEquals("", dto.getTypeId()),
                 () -> assertEquals("", dto.getCategoryId()),
                 () -> assertEquals("", dto.getStatusId()),
-                () -> assertEquals("", dto.getApplicationId()),
-                () -> assertEquals("", dto.getApplication()),
-                () -> assertEquals("", dto.getFunctionalityId()),
-                () -> assertEquals("", dto.getEnvironmentId()),
-                () -> assertEquals("", dto.getMessageEnvironmentStateId()));
+                () -> assertEquals("", dto.getFunctionalityId()));
     }
 
     @Test
@@ -34,11 +30,7 @@ class CreateMessageDTOTest {
         dto.setTypeId("  type  ");
         dto.setCategoryId("  cat  ");
         dto.setStatusId("  status  ");
-        dto.setApplicationId("  app-1  ");
-        dto.setApplication("  App  ");
         dto.setFunctionalityId("  func-1  ");
-        dto.setEnvironmentId("  env-1  ");
-        dto.setMessageEnvironmentStateId("  state-1  ");
 
         assertAll(
                 () -> assertEquals("MSG-001", dto.getCode()),
@@ -47,11 +39,7 @@ class CreateMessageDTOTest {
                 () -> assertEquals("type", dto.getTypeId()),
                 () -> assertEquals("cat", dto.getCategoryId()),
                 () -> assertEquals("status", dto.getStatusId()),
-                () -> assertEquals("app-1", dto.getApplicationId()),
-                () -> assertEquals("App", dto.getApplication()),
-                () -> assertEquals("func-1", dto.getFunctionalityId()),
-                () -> assertEquals("env-1", dto.getEnvironmentId()),
-                () -> assertEquals("state-1", dto.getMessageEnvironmentStateId()));
+                () -> assertEquals("func-1", dto.getFunctionalityId()));
     }
 
     @Test
@@ -63,11 +51,7 @@ class CreateMessageDTOTest {
                 .typeId("type")
                 .categoryId("cat")
                 .statusId("status")
-                .applicationId("app-1")
-                .application("App")
                 .functionalityId("func-1")
-                .environmentId("env-1")
-                .messageEnvironmentStateId("state-1")
                 .build();
 
         assertAll(
@@ -77,10 +61,15 @@ class CreateMessageDTOTest {
                 () -> assertEquals("type", dto.getTypeId()),
                 () -> assertEquals("cat", dto.getCategoryId()),
                 () -> assertEquals("status", dto.getStatusId()),
-                () -> assertEquals("app-1", dto.getApplicationId()),
-                () -> assertEquals("App", dto.getApplication()),
-                () -> assertEquals("func-1", dto.getFunctionalityId()),
-                () -> assertEquals("env-1", dto.getEnvironmentId()),
-                () -> assertEquals("state-1", dto.getMessageEnvironmentStateId()));
+                () -> assertEquals("func-1", dto.getFunctionalityId()));
+    }
+
+    @Test
+    void setters_normalizeNullToEmpty() {
+        CreateMessageDTO dto = CreateMessageDTO.builder().code("MSG-001").build();
+
+        dto.setCode(null);
+
+        assertEquals("", dto.getCode());
     }
 }

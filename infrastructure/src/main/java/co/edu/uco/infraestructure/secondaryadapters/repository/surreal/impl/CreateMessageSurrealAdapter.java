@@ -56,7 +56,6 @@ public class CreateMessageSurrealAdapter implements CreateMessageRepository {
                 + "category_id: " + toRecordId(TABLE_MESSAGE_CATEGORY, categoryId) + ", "
                 + "status_id: " + toRecordId(TABLE_MESSAGE_STATE, statusId) + ", "
                 + "application_id: " + toRecordId(TABLE_APPLICATION, appId) + ", "
-                + "application: " + quote(message.getApplication()) + ", "
                 + "functionality_id: " + toRecordId(TABLE_FUNCTIONALITY, funcId)
                 + " };";
 
@@ -66,12 +65,14 @@ public class CreateMessageSurrealAdapter implements CreateMessageRepository {
                 + "state_data_id: " + toRecordId(TABLE_MESSAGE_ENV_STATE, messageEnvironmentStateId)
                 + " };";
 
-        try {
-            log.info("Executing SurrealQL upsert message: {}", upsertMessageSql);
-            surreal.query(upsertMessageSql);
+        String transactionSql = "BEGIN TRANSACTION;"
+                + upsertMessageSql
+                + upsertMessageEnvSql
+                + "COMMIT TRANSACTION;";
 
-            log.info("Executing SurrealQL upsert message_environment: {}", upsertMessageEnvSql);
-            surreal.query(upsertMessageEnvSql);
+        try {
+            log.info("Creating message and environment relation atomically for message: {}", messageId);
+            surreal.query(transactionSql);
         } catch (Exception ex) {
             log.error(CatalogPortStaticRef.getMessage(MessageCatalogCodeEnum.TCH_066.getCode()), ex);
             throw BusinessException.buildTechnicalException(

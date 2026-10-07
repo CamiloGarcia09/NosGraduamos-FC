@@ -1,7 +1,6 @@
 package co.edu.uco.application.usecase.domain.aggregate.entities;
 
 import co.edu.uco.application.usecase.domain.aggregate.Entity;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import lombok.Getter;
 
 import java.util.UUID;
@@ -16,7 +15,6 @@ public final class ExternalIdentityEntity extends Entity<UUID> {
     private String issuer;
     private String subject;
     private String email;
-    private PrincipalType principalType;
 
     @Override
     public void setId(final UUID id) {
@@ -35,7 +33,4 @@ public final class ExternalIdentityEntity extends Entity<UUID> {
         this.email = email == null ? null : trim(email);
     }
 
-    public void setPrincipalType(final PrincipalType principalType) {
-        this.principalType = principalType;
-    }
 }

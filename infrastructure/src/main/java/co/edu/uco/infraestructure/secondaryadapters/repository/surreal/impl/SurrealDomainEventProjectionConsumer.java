@@ -122,11 +122,8 @@ public final class SurrealDomainEventProjectionConsumer {
                         organizationId, findByRecordId(organizationId), "name")
                 + ", language_id: " + quote(languageId)
                 + ", language: " + catalogLiteral(languageId, findByRecordId(languageId), "language", "code")
-                + ", start_date: " + literal(record.get("start_date"))
-                + ", end_date: " + literal(record.get("end_date"))
                 + ", state_id: " + quote(stateId)
                 + ", state: " + catalogLiteral(stateId, findByRecordId(stateId), "name")
-                + ", version: " + literal(record.get("version"))
                 + ", created_at: " + literal(record.get("created_at"))
                 + ", updated_at: " + literal(record.get("updated_at"))
                 + projectionFooter(event)
@@ -155,14 +152,13 @@ public final class SurrealDomainEventProjectionConsumer {
 
         final String content = "{ "
                 + projectionHeader(event, "environment_id")
-                + ", name: " + literal(record.get("name"))
+                + ", name: " + catalogFieldLiteral(typeId, "name")
                 + ", application_id: " + quote(applicationId)
                 + ", application: " + catalogLiteral(applicationId, findByRecordId(applicationId), "name")
                 + ", type_id: " + quote(typeId)
                 + ", type: " + catalogLiteral(typeId, findByRecordId(typeId), "name")
                 + ", state_id: " + quote(stateId)
                 + ", state: " + catalogLiteral(stateId, findByRecordId(stateId), "name")
-                + ", version: " + literal(record.get("version"))
                 + ", created_at: " + literal(record.get("created_at"))
                 + ", updated_at: " + literal(record.get("updated_at"))
                 + projectionFooter(event)
@@ -190,7 +186,7 @@ public final class SurrealDomainEventProjectionConsumer {
         final String statusId = recordString(record.get("status_id"));
         final String applicationId = recordString(record.get("application_id"));
         final String functionalityId = recordString(record.get("functionality_id"));
-        final String applicationName = applicationName(record, applicationId);
+        final String applicationName = applicationName(applicationId);
 
         final String content = "{ "
                 + projectionHeader(event, "message_id")
@@ -208,7 +204,6 @@ public final class SurrealDomainEventProjectionConsumer {
                 + ", application_ref: " + catalogLiteral(applicationId, findByRecordId(applicationId), "name")
                 + ", functionality_id: " + quote(functionalityId)
                 + ", functionality: " + catalogLiteral(functionalityId, findByRecordId(functionalityId), "name")
-                + ", version: " + literal(record.get("version"))
                 + ", created_at: " + literal(record.get("created_at"))
                 + ", updated_at: " + literal(record.get("updated_at"))
                 + projectionFooter(event)
@@ -245,10 +240,9 @@ public final class SurrealDomainEventProjectionConsumer {
                 + ", message_id: " + quote(messageId)
                 + ", environment_id: " + quote(environmentId)
                 + ", state_data_id: " + quote(stateId)
-                + ", environment: " + catalogLiteral(environmentId, findByRecordId(environmentId), "name")
+                + ", environment: " + environmentLiteral(environmentId)
                 + ", message: " + messageLiteral
                 + ", status: " + catalogLiteral(stateId, findByRecordId(stateId), "name")
-                + ", version: " + literal(record.get("version"))
                 + ", created_at: " + literal(record.get("created_at"))
                 + ", updated_at: " + literal(record.get("updated_at"))
                 + projectionFooter(event)
@@ -270,19 +264,27 @@ public final class SurrealDomainEventProjectionConsumer {
                 + ", type: " + catalogLiteral(typeId, findByRecordId(typeId), "name")
                 + ", category: " + catalogLiteral(categoryId, findByRecordId(categoryId), "name")
                 + ", status: " + catalogLiteral(statusId, findByRecordId(statusId), "name")
-                + ", application: " + quote(applicationName(message, applicationId))
+                + ", application: " + quote(applicationName(applicationId))
                 + ", functionality: " + catalogLiteral(functionalityId, findByRecordId(functionalityId), "name")
                 + " }";
     }
 
-    private String applicationName(final com.surrealdb.Object record, final String applicationId) {
-        final String denormalizedName = stringOf(record.get("application"));
-        if (!denormalizedName.isBlank()) {
-            return denormalizedName;
-        }
+    private String applicationName(final String applicationId) {
         return findByRecordId(applicationId)
                 .map(application -> stringOf(application.get("name")))
                 .orElse("");
+    }
+
+    private String environmentLiteral(final String environmentId) {
+        final Optional<com.surrealdb.Object> environment = findByRecordId(environmentId);
+        final String typeId = environment.map(value -> recordString(value.get("type_id"))).orElse("");
+        return "{ id: " + quote(environmentId) + ", name: " + catalogFieldLiteral(typeId, "name") + " }";
+    }
+
+    private String catalogFieldLiteral(final String recordId, final String fieldName) {
+        return findByRecordId(recordId)
+                .map(record -> literal(record.get(fieldName)))
+                .orElse("NONE");
     }
 
     private void upsertRawDomainEventDocument(final DomainEvent event) {

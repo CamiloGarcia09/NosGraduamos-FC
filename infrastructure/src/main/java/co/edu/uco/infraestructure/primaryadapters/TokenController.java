@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import static co.edu.uco.infraestructure.config.InfrastructureConstant.FIELD_ID;
 
-@RequestMapping("${crosswords.api.path.message}")
+@RequestMapping("${crosswords.api.path.application}")
 public interface TokenController {
 
     @PostMapping(

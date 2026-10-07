@@ -738,12 +738,6 @@ public enum MessageCatalogCodeEnum {
     /** El idioma de la aplicación no existe. */
     FUN_164("FUN_164"),
 
-    /** La fecha de inicio de la aplicación es requerida. */
-    FUN_165("FUN_165"),
-
-    /** La fecha de fin de la aplicación es requerida. */
-    FUN_166("FUN_166"),
-
     /** El estado de la aplicación es requerido. */
     FUN_167("FUN_167"),
 
@@ -752,12 +746,6 @@ public enum MessageCatalogCodeEnum {
 
     /** Ya existe una aplicación con el nombre proporcionado. */
     FUN_169("FUN_169"),
-
-    /** El nombre del entorno es requerido. */
-    FUN_170("FUN_170"),
-
-    /** El nombre del entorno no puede superar los 50 caracteres. */
-    FUN_171("FUN_171"),
 
     /** El id de la aplicación es requerido. */
     FUN_172("FUN_172"),
@@ -777,7 +765,7 @@ public enum MessageCatalogCodeEnum {
     /** El estado del entorno no existe. */
     FUN_177("FUN_177"),
 
-    /** Ya existe un entorno con el mismo nombre para la aplicación. */
+    /** Ya existe un entorno del mismo tipo para la aplicación. */
     FUN_178("FUN_178"),
 
     /** El nombre de la funcionalidad es requerido. */
@@ -788,12 +776,6 @@ public enum MessageCatalogCodeEnum {
 
     /** La aplicación a la que se asocia la funcionalidad no existe. */
     FUN_181("FUN_181"),
-
-    /** La fecha de inicio de la funcionalidad es requerida. */
-    FUN_182("FUN_182"),
-
-    /** La fecha de fin de la funcionalidad es requerida. */
-    FUN_183("FUN_183"),
 
     /** El estado de la funcionalidad es requerido. */
     FUN_184("FUN_184"),
@@ -809,9 +791,6 @@ public enum MessageCatalogCodeEnum {
 
     /** El id de la funcionalidad es requerido. */
     FUN_188("FUN_188"),
-
-    /** La fecha de inicio no puede ser posterior a la fecha de fin. */
-    FUN_189("FUN_189"),
 
     /** El tipo del mensaje es requerido. */
     FUN_190("FUN_190"),
@@ -835,7 +814,16 @@ public enum MessageCatalogCodeEnum {
     FUN_196("FUN_196"),
 
     /** El estado del mensaje en el ambiente no existe. */
-    FUN_197("FUN_197");
+    FUN_197("FUN_197"),
+
+    /** El sufijo del código del mensaje supera la longitud máxima. */
+    FUN_198("FUN_198"),
+
+    /** El sufijo del código del mensaje tiene un formato inválido. */
+    FUN_199("FUN_199"),
+
+    /** Ya existe un mensaje con el mismo código para la aplicación. */
+    FUN_200("FUN_200");
 
     // =========================================================================
 

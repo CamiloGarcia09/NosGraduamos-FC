@@ -30,11 +30,11 @@ Aplicacion obligatoria de esta ley:
 
 | Campo | Valor |
 |---|---|
-| Ultima actualizacion | 2026-09-26 |
+| Ultima actualizacion | 2026-09-28 |
 | Estado global | Implementacion gradual en curso |
 | Fase actual | Fase 6 - Integrar el proveedor real |
 | Proxima implementacion | Implementar el adaptador del proveedor real de identidad |
-| Bloqueo actual | Ninguno; antes de desplegar sobre una base existente se requiere backfill o recreacion del volumen |
+| Bloqueo actual | Ninguno; el esquema final requiere una instalacion nueva y no migra volumenes existentes |
 
 ### Convenciones de estado
 
@@ -63,9 +63,15 @@ Aplicacion obligatoria de esta ley:
 - Durante la convivencia, la ausencia de `Authorization` permite continuar con el flujo legado; si el header se envia, debe ser un Bearer valido o la peticion recibe `401`.
 - El simulador de identidad externa permanece deshabilitado por defecto y todos sus datos se suministran mediante configuracion externa.
 - Toda Aplicacion nueva debe pertenecer a una Organizacion existente; no se asignara una organizacion artificial por defecto a datos historicos.
-- Las bases existentes con aplicaciones sin `organization_id` requieren un backfill explicito o recreacion del volumen antes de aplicar el esquema obligatorio.
-- Los permisos asignados a una Organizacion se heredan por sus Aplicaciones y Ambientes; los asignados a una Aplicacion se heredan por sus Ambientes; los asignados a un Ambiente no conceden permiso sobre toda la Aplicacion.
+- El esquema final solo soporta instalaciones nuevas. No se ofrece backfill ni migracion para volumenes existentes; se debe crear un volumen nuevo.
+- Las asignaciones de rol pertenecen exclusivamente a una Organizacion y sus permisos aplican a las Aplicaciones y Ambientes de esa Organizacion. No existen `scope_type`, `application_id` ni `environment_id` en una asignacion.
 - Las asignaciones son aditivas y no se modelan denegaciones explicitas en la Fase 3.
+- La identidad externa conserva `issuer + subject` como llave estable y correo informativo; no modela un tipo de principal.
+- La creacion de Aplicacion y Funcionalidad no recibe fechas de inicio o fin.
+- La creacion de Ambiente no recibe nombre: el tipo de ambiente es su etiqueta visible y solo puede existir un ambiente de cada tipo por Aplicacion.
+- La creacion de Mensaje conserva `applicationId` y no recibe el nombre `application`; el servidor deriva ese nombre para las salidas.
+- Los agregados fuente no conservan los campos auxiliares `version` ni `seed_key` definidos por el usuario. Las versiones tecnicas de eventos de dominio y proyecciones permanecen vigentes.
+- Se eliminan las tablas y entidades persistentes `parameter` y `represent_parameter`; `CatalogParameterPort` y `parameter.properties` permanecen como mecanismo de configuracion tecnica.
 - Durante la convivencia, los catalogos jerarquicos conservan el comportamiento legado sin identidad externa; con identidad externa filtran recursos por `CONTEXT_SELECT` y rechazan con `403` los accesos fuera del alcance autorizado.
 
 ## Convencion vigente de validacion
@@ -93,7 +99,7 @@ Reglas obligatorias para las siguientes fases:
 
 Ordenes que forman parte del contrato actual:
 
-- Aplicacion: nombre, Organizacion requerida, UUID de Organizacion, existencia de Organizacion, catalogos, fechas, estado y duplicidad.
+- Aplicacion: nombre, Organizacion requerida, UUID de Organizacion, existencia de Organizacion, catalogos, estado y duplicidad.
 - Contexto activo: identificadores requeridos, tres UUID, existencia de Organizacion/Aplicacion/Ambiente y las dos relaciones jerarquicas.
 - Autorizacion: identidad requerida antes de consultar permisos.
 - Mensaje: campos y catalogos antes del ambiente autenticado, existencia del ambiente y relaciones con Aplicacion y Funcionalidad.
@@ -233,7 +239,7 @@ Existe un contrato documentado con el proveedor que permite validar tokens sin a
 
 - [x] Crear en `core` un modelo de identidad sin dependencias web o de Spring.
 - [x] Crear un puerto para validar y resolver una identidad externa.
-- [x] Hacer que el resultado incluya `issuer`, `subject`, correo, tipo de principal y expiracion.
+- [x] Hacer que el resultado incluya `issuer`, `subject`, correo y expiracion.
 - [x] Reemplazar conceptualmente la generacion del adaptador simulado por validacion de identidad.
 - [x] Activar el simulador solamente mediante perfil o propiedad explicita de desarrollo.
 - [x] Recibir el token externo mediante `Authorization: Bearer`.
@@ -259,7 +265,7 @@ ExternalIdentity
 Membership
 Role
 Permission
-RoleAssignment con alcance
+RoleAssignment de Organizacion
 ```
 
 ### Permisos iniciales propuestos
@@ -269,7 +275,6 @@ RoleAssignment con alcance
 - `MESSAGE_CREATE`
 - `MESSAGE_TRANSLATE`
 - `APPLICATION_CREATE`
-- `ENVIRONMENT_CREATE`
 - `FUNCTIONALITY_CREATE`
 
 ### Alcance
@@ -284,7 +289,7 @@ RoleAssignment con alcance
 - [x] Crear la entidad y persistencia de Organizacion.
 - [x] Asociar cada Aplicacion con una Organizacion.
 - [x] Persistir identidades externas por `issuer + subject`.
-- [x] Modelar membresias, roles, permisos y asignaciones con alcance.
+- [x] Modelar membresias, roles, permisos y asignaciones por Organizacion.
 - [x] Crear puertos de consulta de autorizaciones en `core`.
 - [x] Implementar politicas de autorizacion como reglas de negocio.
 - [x] Diferenciar consistentemente `401` y `403`.
@@ -293,7 +298,7 @@ RoleAssignment con alcance
 
 ### Criterio de salida
 
-- [x] MessageUcoLab puede responder si una identidad tiene un permiso sobre una organizacion, aplicacion o ambiente sin depender de roles internos del proveedor.
+- [x] MessageUcoLab puede responder si una identidad tiene un permiso en una Organizacion y aplicarlo a sus Aplicaciones o Ambientes sin depender de roles internos del proveedor.
 
 ## Fase 4 - Implementar contexto activo
 
@@ -337,7 +342,7 @@ ActiveContext
 - [x] Traduccion de mensajes.
 - [x] Creacion de mensajes.
 - [x] Consulta de catalogos.
-- [x] Administracion de aplicaciones, ambientes y funcionalidades.
+- [x] Administracion de aplicaciones y funcionalidades; los ambientes se aprovisionan automaticamente.
 
 ### Reglas
 
@@ -450,8 +455,7 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - `utils/src/test/java/co/edu/uco/crosscutting/exceptions/UnauthorizedExceptionTest.java`: verifica mensaje, tipo, ubicacion y estado `401`.
 - `utils/src/test/java/co/edu/uco/crosscutting/exceptions/ForbiddenExceptionTest.java`: verifica mensaje, tipo, ubicacion y estado `403`.
 - `infrastructure/src/test/java/co/edu/uco/infraestructure/primaryadapters/interceptors/TokenHeaderInterceptorTest.java`: verifica `401` en todos los rechazos del token legado.
-- `core/src/main/java/co/edu/uco/application/usecase/domain/security/ExternalIdentity.java`: identidad externa inmutable con emisor, sujeto, correo, tipo de principal y expiracion, sin contexto de negocio.
-- `core/src/main/java/co/edu/uco/application/usecase/domain/security/PrincipalType.java`: tipos iniciales de principal humano y servicio.
+- `core/src/main/java/co/edu/uco/application/usecase/domain/security/ExternalIdentity.java`: identidad externa inmutable con emisor, sujeto, correo y expiracion, sin contexto de negocio ni tipo de principal.
 - `core/src/main/java/co/edu/uco/application/secondaryports/security/ExternalIdentityResolverPort.java`: puerto independiente del proveedor para validar y resolver identidades.
 - `core/src/main/java/co/edu/uco/application/secondaryports/security/SecurityPort.java`: retirado junto con el contrato obsoleto de generacion de tokens simulados.
 - `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/security/SimulatedExternalIdentityAdapter.java`: resolucion simulada, validacion de token y expiracion UTC sin registrar ni cachear credenciales.
@@ -465,15 +469,15 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - `infrastructure/src/test/java/co/edu/uco/infraestructure/primaryadapters/interceptors/ExternalIdentityInterceptorTest.java`: verifica Bearer valido y malformado, rechazo `401` y convivencia sin header externo.
 - `infrastructure/src/test/java/co/edu/uco/infraestructure/config/ExternalIdentityWebConfigTest.java`: verifica el registro del interceptor para la API v1.
 - `infrastructure/src/test/java/co/edu/uco/infraestructure/secondaryadapters/security/SecurityAdapterTest.java`: retirado con el adaptador obsoleto.
-- `core/src/main/java/co/edu/uco/application/usecase/domain/aggregate/entities/ExternalIdentityEntity.java`: entidad persistente de identidad externa con llave compuesta `issuer + subject`, correo informativo y tipo de principal.
+- `core/src/main/java/co/edu/uco/application/usecase/domain/aggregate/entities/ExternalIdentityEntity.java`: entidad persistente de identidad externa con llave compuesta `issuer + subject` y correo informativo.
 - `core/src/main/java/co/edu/uco/application/secondaryports/repository/ExternalIdentityRepository.java`: puerto de consulta por `issuer + subject` y persistencia de identidades externas.
-- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/model/ExternalIdentitySurrealModel.java`: representacion persistente de ExternalIdentity con campos `issuer`, `subject`, `email` y `principal_type`.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/model/ExternalIdentitySurrealModel.java`: representacion persistente de ExternalIdentity con campos `issuer`, `subject` y `email`.
 - `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/data/ExternalIdentitySurrealMapper.java`: conversion entre `ExternalIdentityEntity` y `ExternalIdentitySurrealModel`.
 - `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/impl/ExternalIdentitySurrealRepositoryAdapterImpl.java`: adaptador con consulta por `issuer + subject`, create, update y manejo de `NONE` para email nulo.
 - `deployment/docker/scripts/surreal/surreal-init.surql`: tabla `external_identity` SCHEMAFULL, campos, indice unico compuesto `(issuer, subject)` y campos de auditoria.
-- `core/src/test/java/co/edu/uco/application/usecase/domain/aggregate/entities/ExternalIdentityEntityTest.java`: cobertura de identificador, normalizacion de issuer/subject/email, aceptacion de null email y tipos de principal.
+- `core/src/test/java/co/edu/uco/application/usecase/domain/aggregate/entities/ExternalIdentityEntityTest.java`: cobertura de identificador, normalizacion de issuer/subject/email y aceptacion de null email.
 - `infrastructure/src/test/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/model/ExternalIdentitySurrealModelTest.java`: cobertura de construccion, normalizacion, null email y valores por defecto.
-- `infrastructure/src/test/java/co/edu/uco/infraestructure/secondaryadapters/repository/data/ExternalIdentitySurrealMapperTest.java`: cobertura del mapeo bidireccional con HUMAN, SERVICE y roundtrip.
+- `infrastructure/src/test/java/co/edu/uco/infraestructure/secondaryadapters/repository/data/ExternalIdentitySurrealMapperTest.java`: cobertura del mapeo bidireccional y roundtrip.
 - `infrastructure/src/test/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/impl/ExternalIdentitySurrealRepositoryAdapterImplTest.java`: cobertura de find por issuer+subject, create con escape de slash y comilla, update con campos exactos, logs saneados y excepcion tecnica.
 - `core/src/main/java/co/edu/uco/application/usecase/domain/aggregate/entities/OrganizationEntity.java`: entidad de Organizacion integrada con la jerarquia `Entity<UUID>` del proyecto.
 - `core/src/main/java/co/edu/uco/application/secondaryports/repository/OrganizationRepository.java`: puerto de creacion y consulta de organizaciones por identificador o nombre.
@@ -531,20 +535,19 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - `core/src/main/java/co/edu/uco/application/usecase/domain/aggregate/entities/MembershipEntity.java`: relacion de una identidad externa con una Organizacion.
 - `core/src/main/java/co/edu/uco/application/usecase/domain/aggregate/entities/RoleEntity.java`: rol de negocio independiente del proveedor de identidad.
 - `core/src/main/java/co/edu/uco/application/usecase/domain/aggregate/entities/PermissionEntity.java`: permiso tipado de negocio.
-- `core/src/main/java/co/edu/uco/application/usecase/domain/aggregate/entities/RoleAssignmentEntity.java`: asignacion de rol con alcance de Organizacion, Aplicacion o Ambiente.
+- `core/src/main/java/co/edu/uco/application/usecase/domain/aggregate/entities/RoleAssignmentEntity.java`: asignacion de rol perteneciente exclusivamente a una Organizacion.
 - `core/src/main/java/co/edu/uco/application/usecase/domain/security/PermissionCode.java`: catalogo tipado de los siete permisos iniciales.
-- `core/src/main/java/co/edu/uco/application/usecase/domain/security/AuthorizationScopeType.java`: tipos de alcance de autorizacion.
 - `core/src/main/java/co/edu/uco/application/secondaryports/security/AuthorizationQueryPort.java`: puerto para consultar permisos y recursos autorizados sin depender de SurrealDB.
 - `core/src/main/java/co/edu/uco/application/usecase/validator/authorization/AuthorizationCompositeValidator.java`: compone identidad requerida y permiso mediante `AuthorizationValidationContext`, preservando ausencia de identidad (`401`) y falta de permiso (`403`).
 - `core/src/main/java/co/edu/uco/application/usecase/validator/authorization/rule/ExternalIdentityRequiredRule.java` y `AuthorizationPermissionRule.java`: reglas concretas para `FUN_152` y `FUN_153`.
-- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/impl/AuthorizationQuerySurrealAdapter.java`: resolucion de permisos por `issuer + subject`, membresia, rol, permiso y alcance heredado.
+- `infrastructure/src/main/java/co/edu/uco/infraestructure/secondaryadapters/repository/surreal/impl/AuthorizationQuerySurrealAdapter.java`: resolucion de permisos por `issuer + subject`, membresia, rol, permiso y Organizacion del recurso.
 - `core/src/main/java/co/edu/uco/application/usecase/FindCatalogUseCase.java`: filtrado de Aplicaciones y Ambientes y proteccion del catalogo de Funcionalidades para identidades externas.
 - `core/src/main/java/co/edu/uco/application/usecase/handling/HandlingFindCatalogPort.java`, `core/src/main/java/co/edu/uco/application/primaryports/facade/catalog/FindCatalogUseCaseFacade.java` y su implementacion: propagacion tipada de identidad hacia los catalogos jerarquicos.
 - `infrastructure/src/main/java/co/edu/uco/infraestructure/primaryadapters/controller/CatalogControllerImpl.java`: entrega la identidad resuelta al facade sin implementar autorizacion en el controller.
 - `infrastructure/src/main/java/co/edu/uco/infraestructure/config/UseCaseRuleConfig.java`: composicion Spring de la regla, caso de uso y facade de catalogos fuera de `core`.
-- `deployment/docker/scripts/surreal/surreal-init.surql`: tablas, relaciones e indices de membresias, roles, permisos, relaciones rol-permiso y asignaciones con alcance; carga de permisos iniciales.
+- `deployment/docker/scripts/surreal/surreal-init.surql`: tablas, relaciones e indices de membresias, roles, permisos, relaciones rol-permiso y asignaciones por Organizacion; carga de permisos iniciales.
 - `utils/src/main/java/co/edu/uco/crosscutting/catalog/MessageCatalogCodeEnum.java` y `deployment/docker/scripts/redis/CatalogMessageInit.sh`: mensajes `FUN_152` y `FUN_153` para autenticacion requerida y permiso denegado.
-- Pruebas de autorizacion: cobertura de entidades y enums, regla `401`/`403`, herencia de alcances, aislamiento entre organizaciones y aplicaciones, filtrado de catalogos, propagacion HTTP, composicion Spring y consultas SurrealQL.
+- Pruebas de autorizacion: cobertura de entidades y enums, regla `401`/`403`, autorizacion por Organizacion, aislamiento entre organizaciones y aplicaciones, filtrado de catalogos, propagacion HTTP, composicion Spring y consultas SurrealQL.
 - `core/src/main/java/co/edu/uco/application/usecase/domain/aggregate/entities/ActiveContextEntity.java`: contexto activo persistente asociado a una identidad externa, Organizacion, Aplicacion, Ambiente y fecha UTC de actualizacion.
 - `core/src/main/java/co/edu/uco/application/secondaryports/repository/ActiveContextRepository.java`: puerto de persistencia del ultimo contexto por identidad externa.
 - `core/src/main/java/co/edu/uco/application/secondaryports/cache/ActiveContextCachePort.java`: puerto de cache distribuida tipado por `ExternalIdentity`, sin aceptar tokens.
@@ -589,10 +592,10 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - `core/src/main/java/co/edu/uco/application/usecase/FindCatalogUseCase.java`: exige que `applicationId` del catalogo coincida con `ActiveContext.applicationId` cuando hay identidad; `403` `FUN_153` en desalineacion.
 - `core/src/main/java/co/edu/uco/application/primaryports/facade/application|environment|functionality/` (interfaces e impl de creacion): propagacion de `ExternalIdentity`.
 - `core/src/main/java/co/edu/uco/application/usecase/handling/HandlingCreate{Application,Environment,Functionality}Port.java`: firmas con `ExternalIdentity`.
-- `core/src/main/java/co/edu/uco/application/usecase/Create{Application,Environment,Functionality}UseCase.java`: autorizacion interna `authorizeAgainstActiveContext` con `APPLICATION_CREATE`/`ORGANIZATION`, `ENVIRONMENT_CREATE`/`APPLICATION` y `FUNCTIONALITY_CREATE`/`APPLICATION`; identity null conserva el flujo legado.
+- `core/src/main/java/co/edu/uco/application/usecase/Create{Application,Functionality}UseCase.java`: autorizacion interna `authorizeAgainstActiveContext` con `APPLICATION_CREATE`/`ORGANIZATION` y `FUNCTIONALITY_CREATE`/`APPLICATION`; identity null conserva el flujo legado. La aplicacion aprovisiona sus tres ambientes por defecto.
 - `infrastructure/src/main/java/co/edu/uco/infraestructure/primaryadapters/controller/Create{Message,Application,Environment,Functionality}ControllerImpl.java`: construccion de `MessageAccessContext` o `ExternalIdentity` desde atributos HTTP sin reglas de negocio.
 - `infrastructure/src/main/java/co/edu/uco/infraestructure/config/UseCaseRuleConfig.java`: beans `handlingFindCatalogPort` y `handlingCreateApplicationPort` con `HandlingActiveContextPort`, `AuthorizationCompositeValidator` y `CatalogPort`.
-- `core/src/test/java/co/edu/uco/application/primaryports/facade/message/impl/CreateMessageUseCaseFacadeImplTest.java` y los de facade de application/environment/functionality: delegacion con contexto tipado e identity null legado.
+- `core/src/test/java/co/edu/uco/application/primaryports/facade/message/impl/CreateMessageUseCaseFacadeImplTest.java` y los de facade de application/functionality: delegacion con contexto tipado e identity null legado.
 - `core/src/test/java/co/edu/uco/application/usecase/Create{Message,Application,Environment,Functionality}UseCaseTest.java` y `FindCatalogUseCaseTest.java`: pruebas de aislamiento (legacy null, match con `ActiveContext`, `403` `FUN_153`, permisos correctos, composite de autorizacion denegando).
 - `core/src/test/java/co/edu/uco/application/usecase/validator/message/CreateMessageCompositeValidatorTest.java` y pruebas de `validator/message/rule/`: environmentId opcional, match condicional, jerarquia y cortocircuito.
 - `infrastructure/src/test/java/co/edu/uco/infraestructure/primaryadapters/controller/CreateMessageControllerImplTest.java`: captors de `MessageAccessContext` legado y autenticado, y propagacion de fallos del facade.
@@ -656,7 +659,7 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 - Suite `core`: 503 pruebas, 0 fallos, 0 errores y 0 omitidas.
 - Suite `infrastructure`: 412 pruebas, 0 fallos, 0 errores y 0 omitidas.
 - JaCoCo posterior al quinto incremento de la Fase 3: los controles de cobertura de linea y rama, configurados con minimo de 80 %, se cumplieron en todos los modulos.
-- Auditoria de persistencia de identidad externa: pruebas AAA sin asserts triviales ni deshabilitados, `core` sin Spring ni adaptadores concretos, escape SurrealQL verificado, email NONE/null manejado, update restringido a email y principal_type, logs sin datos sensibles, excepciones `BusinessException` INFRASTRUCTURE verificadas.
+- Auditoria de persistencia de identidad externa: pruebas AAA sin asserts triviales ni deshabilitados, `core` sin Spring ni adaptadores concretos, escape SurrealQL verificado, email NONE/null manejado, update restringido a email, logs sin datos sensibles, excepciones `BusinessException` INFRASTRUCTURE verificadas.
 - Reactor completo al finalizar la Fase 3 con `clean verify`: `utils`, `core` e `infrastructure` finalizaron correctamente.
 - Suite `utils`: 186 pruebas, 0 fallos, 0 errores y 0 omitidas.
 - Suite `core`: 537 pruebas, 0 fallos, 0 errores y 0 omitidas.
@@ -697,7 +700,7 @@ Una fase solo puede marcarse `COMPLETADA` cuando cumple sus criterios de salida 
 
 ### Pendiente inmediato
 
-Continuar con la Fase 6: integrar el proveedor real de identidad reemplazando al simulador sin modificar los casos de uso, con secretos y endpoints en configuracion externa. El endpoint REST de registro de organizaciones permanece pendiente hasta definir su permiso o politica de aprovisionamiento. Antes de desplegar los nuevos esquemas sobre datos existentes se debe ejecutar un backfill con la Organizacion correcta, provisionar identidades, membresias y asignaciones iniciales, o recrear el volumen de desarrollo.
+Continuar con la Fase 6: integrar el proveedor real de identidad reemplazando al simulador sin modificar los casos de uso, con secretos y endpoints en configuracion externa. El endpoint REST de registro de organizaciones permanece pendiente hasta definir su permiso o politica de aprovisionamiento. El esquema final se instala sobre un volumen nuevo; no se migran volumenes existentes.
 
 ## Historial de cambios
 
@@ -717,7 +720,7 @@ Continuar con la Fase 6: integrar el proveedor real de identidad reemplazando al
 | 2026-09-22 | Fase 3 | Se asocia obligatoriamente cada nueva Aplicacion con una Organizacion validada, persistida y proyectada, preservando referencias parciales internas y documentando la migracion de datos existentes | Fase 3 `PARCIAL`; jerarquia Organizacion-Aplicacion completada |
 | 2026-09-22 | Gobierno arquitectonico | Se establece como ley innegociable replicar la arquitectura y convenciones existentes antes de introducir cualquier clase o patron nuevo | Regla permanente y transversal a todas las fases |
 | 2026-09-22 | Fase 3 | Se implementa la entidad `ExternalIdentityEntity`, el puerto `ExternalIdentityRepository`, el esquema SurrealDB con indice unico compuesto `(issuer, subject)`, modelo, mapper, adaptador y pruebas unitarias completas de la persistencia de identidades externas | Fase 3 `PARCIAL`; persistencia de identidades externas completada |
-| 2026-09-22 | Fase 3 | Se modelan membresias, roles, permisos y asignaciones con alcance; se implementan el puerto y adaptador de consulta, la politica `401`/`403`, la herencia de alcances y el filtrado de catalogos con pruebas de aislamiento y verificacion completa del reactor | Fase 3 `COMPLETADA`; autorizacion de negocio verificada |
+| 2026-09-22 | Fase 3 | Se modelan membresias, roles, permisos y asignaciones por Organizacion; se implementan el puerto y adaptador de consulta, la politica `401`/`403` y el filtrado de catalogos con pruebas de aislamiento y verificacion completa del reactor | Fase 3 `COMPLETADA`; autorizacion de negocio verificada |
 | 2026-09-22 | Fase 4 | Se implementan el modelo y los puertos de contexto activo, su persistencia unica por identidad en SurrealDB y una cache Redis de mejor esfuerzo con TTL y claves SHA-256 derivadas de `issuer + subject` | Fase 4 `PARCIAL`; primera mitad completada y verificada |
 | 2026-09-22 | Fase 4 | Se implementan los endpoints de contextos disponibles, consulta y seleccion, con validacion de identidad, autorizacion `CONTEXT_SELECT`, jerarquia, recuperacion cache-aside, OpenAPI y pruebas completas | Fase 4 `COMPLETADA`; criterio de salida verificado |
 | 2026-09-22 | Fase 5 | Se migran la consulta, el listado y la traduccion de mensajes al contexto autorizado con `MessageAccessContext` y `MessageEnvironmentResolver`, convivencia de interceptores por orden, OpenAPI dual y pruebas con auditoria y Quality Gate verificados | Fase 5 `EN CURSO`; consulta, listado y traduccion migrados |

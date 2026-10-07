@@ -1,6 +1,5 @@
 package co.edu.uco.application.usecase.domain.aggregate.entities;
 
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -81,23 +80,5 @@ class ExternalIdentityEntityTest {
         entity.setEmail(null);
 
         assertThat(entity.getEmail()).isNull();
-    }
-
-    @Test
-    void setPrincipalType_acceptsHuman() {
-        ExternalIdentityEntity entity = new ExternalIdentityEntity();
-
-        entity.setPrincipalType(PrincipalType.HUMAN);
-
-        assertThat(entity.getPrincipalType()).isEqualTo(PrincipalType.HUMAN);
-    }
-
-    @Test
-    void setPrincipalType_acceptsService() {
-        ExternalIdentityEntity entity = new ExternalIdentityEntity();
-
-        entity.setPrincipalType(PrincipalType.SERVICE);
-
-        assertThat(entity.getPrincipalType()).isEqualTo(PrincipalType.SERVICE);
     }
 }

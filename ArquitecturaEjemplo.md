@@ -264,8 +264,7 @@ dto/keypair/   KeyPairDTO
 ```text
 MessageData, MessageEnvironmentData, MessageTranslationRequestData, MessageTranslationResponseData,
 MessageTypeData, MessageCategoryData, StatusMessageData, MessageEnvironmentStateData,
-EnvironmentData, EnvironmentType, ApplicationData, FunctionalityData, ParameterData,
-RepresentParameterData, TokenData, StatusTokenData
+EnvironmentData, EnvironmentType, ApplicationData, FunctionalityData, TokenData, StatusTokenData
 ```
 
 Son los modelos que viajan entre core y los adaptadores (no son entidades JPA ni Spring Data).
@@ -401,8 +400,15 @@ y en SurrealDB (`surreal-init.surql`, `surreal-seed.dev.surql`).
 - Tablas/colecciones (referencia en `InfrastructureConstant`): `token`, `token_state`,
   `message_environment`, `environment`, `application`, `message`, `message_type`,
   `message_category`, `message_state`, `message_environment_state`, `functionality`,
-  `environment_type`, `parameter`, `represent_parameter`, `domain_events`, y los read models.
+  `environment_type`, `domain_events`, y los read models.
+- No existen tablas, entidades de salida ni repositorios persistentes `parameter` o `represent_parameter`.
+  El puerto `CatalogParameterPort` y `CatalogParameterAdapter` se conservan porque resuelven configuracion
+  tecnica desde `parameter.properties`, no parametros persistidos del dominio.
+- Los agregados fuente no persisten los antiguos campos auxiliares `version` ni `seed_key`. Las versiones
+  tecnicas de `domain_events` y de las proyecciones se conservan para ordenar eventos y read models.
 - Requiere SurrealDB montado con el esquema de `deployment/docker/scripts/surreal-init.surql`.
+- El esquema actualizado solo se soporta en instalaciones nuevas. No hay migracion de volumenes existentes;
+  para adoptarlo se debe crear un volumen de SurrealDB nuevo.
 
 ### Política temporal UTC
 
@@ -422,6 +428,9 @@ y en SurrealDB (`surreal-init.surql`, `surreal-seed.dev.surql`).
   Los valores leídos mediante el SDK de SurrealDB y los timestamps copiados a proyecciones se convierten
   a UTC antes de usarse. Los campos generados por el esquema con `time::now()` continúan siendo la fuente
   de los timestamps de auditoría.
+- En SurrealDB, `created_at` se asigna con la fecha UTC actual al crear el registro y permanece inmutable;
+  `updated_at` se renueva con la fecha UTC actual en cada escritura. Los registros del seed comparten el
+  instante UTC capturado al iniciar su recreación, sin fechas fijas de ejemplo.
 - Este cambio aplica a escrituras nuevas. Los registros históricos no se desplazan automáticamente,
   porque un valor antiguo sin información confiable sobre su zona de origen no puede corregirse de forma
   segura mediante una migración global.
@@ -559,16 +568,17 @@ Además, los interceptores escriben sus propios errores (401 token, 406 Accept).
 
 ## Endpoints reales
 
-Base de mensajes: `crosswords.api.path.message=/messageucolab/v1/application`. Todas las rutas
+Base de mensajes: `crosswords.api.path.messages=/messageucolab/v1/messages`. Todas las rutas
 soportan respuesta en JSON, YAML, XML, text/plain y text/html según el header `Accept`.
 
 | Método | Ruta | Controlador | Token header |
 |---|---|---|---|
+| POST | `/messageucolab/v1/application` | CreateApplicationControllerImpl (crea aplicación y ambientes por defecto) | Sí |
 | POST | `/messageucolab/v1/application/{id}/token` | TokenControllerImpl (CrearToken) | No |
-| GET | `/messageucolab/v1/application/messages?page&size&sort&columnSort` | MessagesControllerImpl (listar por ambiente) | Sí |
-| GET | `/messageucolab/v1/application/messages/{messageCode}` | MessagesControllerImpl (por código y ambiente) | Sí |
-| GET | `/messageucolab/v1/application/messages/{messageCode}/translation?sourceLanguage&targetLanguage` | MessagesControllerImpl (traducir) | Sí |
-| POST | `/messageucolab/v1/application/message` | CreateMessageControllerImpl | Sí |
+| GET | `/messageucolab/v1/messages?page&size&sort&columnSort` | MessagesControllerImpl (listar por ambiente) | Sí |
+| GET | `/messageucolab/v1/messages?code={messageCode}` | MessagesControllerImpl (por código y ambiente) | Sí |
+| POST | `/messageucolab/v1/messages/{messageCode}/translations` | MessagesControllerImpl (traducir) | Sí |
+| POST | `/messageucolab/v1/messages` | CreateMessageControllerImpl | Sí |
 | GET | `/messageucolab/v1/catalog/applications` | CatalogControllerImpl | No |
 | GET | `/messageucolab/v1/catalog/applications/{applicationId}/environments` | CatalogControllerImpl | No |
 | GET | `/messageucolab/v1/catalog/applications/{applicationId}/functionalities` | CatalogControllerImpl | No |
@@ -583,7 +593,7 @@ Métricas: `http://localhost:8085/actuator/prometheus`.
 ## Flujo real de una consulta (lectura con caché)
 
 ```text
-1. GET /messageucolab/v1/application/messages/{messageCode> con header Token
+1. GET /messageucolab/v1/messages?code={messageCode} con header Token
 2. TokenHeaderInterceptor valida el token y resuelve environmentId (atributo de request)
 3. MessagesControllerImpl -> FindMessageByCodeAndEnvironmentUseCaseFacade.execute(code, environmentId)
 4. Facade -> HandlingFindMessageByCodeAndEnvironmentPort -> FindMessageByCodeAndEnvironmentUseCase
@@ -599,12 +609,13 @@ Métricas: `http://localhost:8085/actuator/prometheus`.
 ## Flujo real de una escritura (crear mensaje)
 
 ```text
-1. POST /messageucolab/v1/application/message (body CreateMessageDTO, header Token)
+1. POST /messageucolab/v1/messages (body CreateMessageDTO, header Token o Authorization Bearer)
 2. CreateMessageControllerImpl -> CreateMessageUseCaseFacade.execute(dto)
 3. Facade -> HandlingCreateMessagePort -> CreateMessageUseCase
-4. UseCase valida con CreateMessageCompositeValidator
-5. UseCase construye MessageData (id = UtilUUID.getNewUUID(), compone type/category/status/functionality)
-6. UseCase invoca CreateMessageRepository.createMessage(messageData, environmentId, messageEnvStateId)
+4. UseCase resuelve el ambiente autenticado y deriva de este el `applicationId`
+5. UseCase valida con CreateMessageCompositeValidator, incluida la pertenencia de la funcionalidad
+6. UseCase construye MessageData (id = UtilUUID.getNewUUID(), compone type/category/status/functionality) e invoca
+   CreateMessageRepository.createMessage(messageData, environmentId, activeMessageEnvironmentStateId)
 7. CreateMessageSurrealAdapter hace UPSERT en SurrealDB (tablas message + message_environment
    con record IDs a message_type/message_category/message_state/application/functionality/environment)
 8. El evento de dominio queda en domain_events; SurrealDomainEventProjectionConsumer (2s) lo

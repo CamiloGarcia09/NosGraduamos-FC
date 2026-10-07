@@ -6,7 +6,6 @@ import co.edu.uco.application.usecase.domain.security.AuthorizationScopeType;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
 import co.edu.uco.application.usecase.domain.security.MessageAccessContext;
 import co.edu.uco.application.usecase.domain.security.PermissionCode;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
 import co.edu.uco.application.usecase.validator.authorization.AuthorizationCompositeValidator;
 import co.edu.uco.crosscutting.exceptions.ForbiddenException;
@@ -29,7 +28,7 @@ class MessageEnvironmentResolverImplTest {
     private static final UUID ENVIRONMENT_ID =
             UUID.fromString("123e4567-e89b-12d3-a456-426614174003");
     private static final ExternalIdentity IDENTITY = new ExternalIdentity(
-            "issuer", "subject", "user@example.com", PrincipalType.HUMAN, Instant.MAX);
+            "issuer", "subject", "user@example.com", Instant.MAX);
 
     private final HandlingActiveContextPort activeContextPort = mock(HandlingActiveContextPort.class);
     private final AuthorizationCompositeValidator authorizationCompositeValidator =

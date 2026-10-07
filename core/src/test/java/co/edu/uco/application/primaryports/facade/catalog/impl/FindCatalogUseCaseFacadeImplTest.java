@@ -3,7 +3,6 @@ package co.edu.uco.application.primaryports.facade.catalog.impl;
 import co.edu.uco.application.primaryports.dto.catalog.CatalogItemDTO;
 import co.edu.uco.application.usecase.handling.HandlingFindCatalogPort;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +19,7 @@ import static org.mockito.Mockito.when;
 class FindCatalogUseCaseFacadeImplTest {
 
     private static final ExternalIdentity IDENTITY = new ExternalIdentity(
-            "issuer", "subject", null, PrincipalType.HUMAN, Instant.MAX);
+            "issuer", "subject", null, Instant.MAX);
 
     @Mock
     private HandlingFindCatalogPort handlingFindCatalogPort;

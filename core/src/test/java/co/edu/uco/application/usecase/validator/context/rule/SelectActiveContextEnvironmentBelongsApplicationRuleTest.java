@@ -4,6 +4,7 @@ import co.edu.uco.application.primaryports.dto.context.SelectActiveContextDTO;
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
 import co.edu.uco.application.secondaryports.entity.EnvironmentData;
+import co.edu.uco.application.secondaryports.entity.EnvironmentTypeData;
 import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.ConflictException;
@@ -48,8 +49,9 @@ class SelectActiveContextEnvironmentBelongsApplicationRuleTest {
     @Test
     void validate_doesNotThrow_whenEnvironmentBelongsToRequestedApplication() {
         when(environmentRepository.findById(ENVIRONMENT_ID)).thenReturn(Optional.of(
-                new EnvironmentData(UUID.fromString(ENVIRONMENT_ID), "Dev",
-                        ApplicationData.build(APPLICATION_ID, "App"))));
+                new EnvironmentData(UUID.fromString(ENVIRONMENT_ID),
+                        ApplicationData.build(APPLICATION_ID, "App"),
+                        new EnvironmentTypeData(UUID.randomUUID(), "Dev"))));
 
         assertThatCode(() -> rule.validate(context(APPLICATION_ID.toString())))
                 .doesNotThrowAnyException();
@@ -70,8 +72,9 @@ class SelectActiveContextEnvironmentBelongsApplicationRuleTest {
     @Test
     void validate_throwsConflictUsingFun160_whenEnvironmentBelongsToAnotherApplication() {
         when(environmentRepository.findById(ENVIRONMENT_ID)).thenReturn(Optional.of(
-                new EnvironmentData(UUID.fromString(ENVIRONMENT_ID), "Dev",
-                        ApplicationData.build(OTHER_APPLICATION_ID, "Other"))));
+                new EnvironmentData(UUID.fromString(ENVIRONMENT_ID),
+                        ApplicationData.build(OTHER_APPLICATION_ID, "Other"),
+                        new EnvironmentTypeData(UUID.randomUUID(), "Dev"))));
         when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_160.getCode()))
                 .thenReturn(CONFLICT_MESSAGE);
         SelectActiveContextDTO context = context(APPLICATION_ID.toString());

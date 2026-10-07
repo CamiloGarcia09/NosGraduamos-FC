@@ -1,0 +1,8 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "unit-test-agent": {
+      "model": "opencode/mimo-v2.6-flash-free"
+    }
+  }
+}

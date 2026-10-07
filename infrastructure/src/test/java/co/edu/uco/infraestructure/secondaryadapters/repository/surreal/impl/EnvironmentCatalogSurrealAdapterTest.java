@@ -12,6 +12,7 @@ import com.surrealdb.Value;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -22,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,11 +62,12 @@ class EnvironmentCatalogSurrealAdapterTest {
         return v;
     }
 
-    private Object environmentDocument(String uuid, String name, String appId) {
+    private Object environmentDocument(String uuid, String appId, String typeId, String typeName) {
         Object doc = mock(Object.class);
         doReturn(recordIdValue("environment", uuid)).when(doc).get("id");
-        doReturn(stringValue(name)).when(doc).get("name");
         doReturn(recordIdValue("application", appId)).when(doc).get("application_id");
+        doReturn(recordIdValue("environment_type", typeId)).when(doc).get("type_id");
+        doReturn(stringValue(typeName)).when(doc).get("type_name");
         return doc;
     }
 
@@ -85,33 +88,61 @@ class EnvironmentCatalogSurrealAdapterTest {
     }
 
     @Test
-    void findAllByApplicationId_mapsEnvironmentsWithApplicationId() {
+    void findAllByApplicationId_mapsEnvironmentsWithApplicationIdAndTypeName() {
         String uuid = UUID.randomUUID().toString();
         String appId = UUID.randomUUID().toString();
-        doReturn(responseWithOne(environmentDocument(uuid, "Prod", appId))).when(surreal).query(anyString());
+        String typeId = UUID.randomUUID().toString();
+        doReturn(responseWithOne(environmentDocument(uuid, appId, typeId, "Prod")))
+                .when(surreal).query(anyString());
 
         List<EnvironmentData> result = adapter.findAllByApplicationId(appId);
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getName()).isEqualTo("Prod");
-        assertThat(result.get(0).getId()).isEqualTo(UUID.fromString(uuid));
-        assertThat(result.get(0).getApplication().getId()).isEqualTo(UUID.fromString(appId));
+        assertThat(result).singleElement().satisfies(environment -> assertThat(environment)
+                .extracting(
+                        EnvironmentData::getId,
+                        value -> value.getApplication().getId(),
+                        value -> value.getType().getId(),
+                        value -> value.getType().getName())
+                .containsExactly(UUID.fromString(uuid), UUID.fromString(appId), UUID.fromString(typeId), "Prod"));
+        ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
+        verify(surreal).query(queryCaptor.capture());
+        assertThat(queryCaptor.getValue())
+                .contains("type_id.name AS type_name")
+                .contains("application_id = application:`" + appId + "`");
     }
 
     @Test
     void findAllByApplicationId_mapsEnvironmentWithoutApplicationId() {
         String uuid = UUID.randomUUID().toString();
+        String typeId = UUID.randomUUID().toString();
         Object doc = mock(Object.class);
         doReturn(recordIdValue("environment", uuid)).when(doc).get("id");
-        doReturn(stringValue("Dev")).when(doc).get("name");
+        doReturn(recordIdValue("environment_type", typeId)).when(doc).get("type_id");
+        doReturn(stringValue("Dev")).when(doc).get("type_name");
         doReturn(null).when(doc).get("application_id");
         doReturn(responseWithOne(doc)).when(surreal).query(anyString());
 
         List<EnvironmentData> result = adapter.findAllByApplicationId("app-1");
 
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getName()).isEqualTo("Dev");
         assertThat(result.get(0).getApplication()).isNotNull();
+        assertThat(result.get(0).getType().getName()).isEqualTo("Dev");
+    }
+
+    @Test
+    void findAllByApplicationId_keepsDefaultType_whenTypeDataIsMissing() {
+        String uuid = UUID.randomUUID().toString();
+        Object doc = mock(Object.class);
+        doReturn(recordIdValue("environment", uuid)).when(doc).get("id");
+        doReturn(recordIdValue("application", UUID.randomUUID().toString())).when(doc).get("application_id");
+        doReturn(null).when(doc).get("type_id");
+        doReturn(responseWithOne(doc)).when(surreal).query(anyString());
+
+        List<EnvironmentData> result = adapter.findAllByApplicationId("app-1");
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getType()).isNotNull();
+        assertThat(result.get(0).getType().getName()).isEmpty();
     }
 
     @Test

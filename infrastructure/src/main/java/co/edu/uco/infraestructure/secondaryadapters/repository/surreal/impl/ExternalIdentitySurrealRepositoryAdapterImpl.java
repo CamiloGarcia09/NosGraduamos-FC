@@ -3,7 +3,6 @@ package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.ExternalIdentityRepository;
 import co.edu.uco.application.usecase.domain.aggregate.entities.ExternalIdentityEntity;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.crosscutting.exceptions.BusinessException;
 import co.edu.uco.crosscutting.exceptions.enumeration.ExceptionLocation;
 import co.edu.uco.infraestructure.secondaryadapters.repository.data.ExternalIdentitySurrealMapper;
@@ -58,8 +57,7 @@ public class ExternalIdentitySurrealRepositoryAdapterImpl extends SurrealCatalog
                 + " CONTENT { "
                 + "issuer: " + quote(model.getIssuer()) + ", "
                 + "subject: " + quote(model.getSubject()) + ", "
-                + "email: " + quote(model.getEmail()) + ", "
-                + "principal_type: " + quote(model.getPrincipalType().name())
+                + "email: " + quote(model.getEmail())
                 + " };";
         executeWrite(sql,
                 "Executing SurrealQL create external identity",
@@ -74,7 +72,6 @@ public class ExternalIdentitySurrealRepositoryAdapterImpl extends SurrealCatalog
                 + recordIdLiteral(SURREAL_TABLE_EXTERNAL_IDENTITY, model.getId().toString())
                 + " MERGE { "
                 + "email: " + quote(model.getEmail()) + ", "
-                + "principal_type: " + quote(model.getPrincipalType().name()) + ", "
                 + "updated_at: time::now()"
                 + " };";
         executeWrite(sql,
@@ -88,8 +85,7 @@ public class ExternalIdentitySurrealRepositoryAdapterImpl extends SurrealCatalog
                 extractIdAsUUID(document.get("id")),
                 stringOf(document.get("issuer")),
                 stringOf(document.get("subject")),
-                nullableString(document.get("email")),
-                PrincipalType.valueOf(stringOf(document.get("principal_type"))));
+                nullableString(document.get("email")));
     }
 
     private String nullableString(final Value value) {

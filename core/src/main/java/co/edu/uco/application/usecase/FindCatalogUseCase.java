@@ -85,7 +85,7 @@ public final class FindCatalogUseCase implements HandlingFindCatalogPort {
                                                                final ExternalIdentity identity) {
         if (identity == null) {
             return environmentCatalogRepository.findAllByApplicationId(applicationId).stream()
-                    .map(env -> CatalogItemDTO.create(env.getId().toString(), env.getName()))
+                    .map(env -> CatalogItemDTO.create(env.getId().toString(), env.getType().getName()))
                     .toList();
         }
         requireApplicationInActiveContext(identity, applicationId);
@@ -98,7 +98,7 @@ public final class FindCatalogUseCase implements HandlingFindCatalogPort {
         }
         return environmentCatalogRepository.findAllByApplicationId(applicationId).stream()
                 .filter(environment -> authorizedIds.contains(environment.getId()))
-                .map(env -> CatalogItemDTO.create(env.getId().toString(), env.getName()))
+                .map(env -> CatalogItemDTO.create(env.getId().toString(), env.getType().getName()))
                 .toList();
     }
 

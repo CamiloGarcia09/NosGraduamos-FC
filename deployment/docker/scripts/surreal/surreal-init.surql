@@ -19,7 +19,7 @@ DEFINE FIELD IF NOT EXISTS aggregate_type ON domain_events TYPE string;
 DEFINE FIELD IF NOT EXISTS version        ON domain_events TYPE int;
 DEFINE FIELD OVERWRITE payload            ON domain_events TYPE object FLEXIBLE;
 DEFINE FIELD OVERWRITE metadata           ON domain_events TYPE object FLEXIBLE;
-DEFINE FIELD IF NOT EXISTS created_at     ON domain_events TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at         ON domain_events TYPE datetime DEFAULT time::now() READONLY;
 DEFINE FIELD IF NOT EXISTS created_by     ON domain_events TYPE option<string>;
 DEFINE FIELD IF NOT EXISTS correlation_id ON domain_events TYPE option<string>;
 DEFINE FIELD IF NOT EXISTS causation_id   ON domain_events TYPE option<string>;
@@ -107,11 +107,8 @@ DEFINE TABLE IF NOT EXISTS organization SCHEMAFULL CHANGEFEED 7d;
 DEFINE FIELD IF NOT EXISTS name
 ON organization TYPE string;
 
-DEFINE FIELD IF NOT EXISTS version
-ON organization TYPE int VALUE 1;
-
-DEFINE FIELD IF NOT EXISTS created_at
-ON organization TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON organization TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE FIELD IF NOT EXISTS updated_at
 ON organization TYPE datetime VALUE time::now();
@@ -134,11 +131,8 @@ ON external_identity TYPE string;
 DEFINE FIELD IF NOT EXISTS email
 ON external_identity TYPE option<string>;
 
-DEFINE FIELD IF NOT EXISTS principal_type
-ON external_identity TYPE string;
-
-DEFINE FIELD IF NOT EXISTS created_at
-ON external_identity TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON external_identity TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE FIELD IF NOT EXISTS updated_at
 ON external_identity TYPE datetime VALUE time::now();
@@ -152,9 +146,6 @@ ON external_identity FIELDS issuer, subject UNIQUE;
 
 DEFINE TABLE IF NOT EXISTS application SCHEMAFULL CHANGEFEED 7d;
 
-DEFINE FIELD IF NOT EXISTS seed_key
-ON application TYPE option<string>;
-
 DEFINE FIELD IF NOT EXISTS name
 ON application TYPE string;
 
@@ -164,20 +155,11 @@ ON application TYPE record<organization>;
 DEFINE FIELD IF NOT EXISTS language_id
 ON application TYPE record<language_base>;
 
-DEFINE FIELD IF NOT EXISTS start_date
-ON application TYPE datetime;
-
-DEFINE FIELD IF NOT EXISTS end_date
-ON application TYPE datetime;
-
 DEFINE FIELD IF NOT EXISTS state_id
 ON application TYPE record<application_state>;
 
-DEFINE FIELD IF NOT EXISTS version
-ON application TYPE int VALUE 1;
-
-DEFINE FIELD IF NOT EXISTS created_at
-ON application TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON application TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE FIELD IF NOT EXISTS updated_at
 ON application TYPE datetime VALUE time::now();
@@ -203,7 +185,7 @@ THEN (
         event_type: "APPLICATION_CREATED",
         aggregate_id: <string>$after.id,
         aggregate_type: "application",
-        version: $after.version,
+        version: 1,
         payload: $after,
         metadata: {
             source: "surrealdb-event"
@@ -220,7 +202,7 @@ THEN (
         event_type: "APPLICATION_UPDATED",
         aggregate_id: <string>$after.id,
         aggregate_type: "application",
-        version: $after.version + 1,
+        version: 1,
         payload: {
             before: $before,
             after: $after
@@ -240,7 +222,7 @@ THEN (
         event_type: "APPLICATION_DELETED",
         aggregate_id: <string>$before.id,
         aggregate_type: "application",
-        version: $before.version,
+        version: 1,
         payload: $before,
         metadata: {
             source: "surrealdb-event"
@@ -311,12 +293,6 @@ UPSERT environment_state:`ec30283f-2b63-485e-ab7a-5bd6f44c8878` CONTENT {
 
 DEFINE TABLE IF NOT EXISTS environment SCHEMAFULL CHANGEFEED 7d;
 
-DEFINE FIELD IF NOT EXISTS seed_key
-ON environment TYPE option<string>;
-
-DEFINE FIELD IF NOT EXISTS name
-ON environment TYPE string;
-
 DEFINE FIELD IF NOT EXISTS application_id
 ON environment TYPE record<application>;
 
@@ -326,17 +302,17 @@ ON environment TYPE record<environment_type>;
 DEFINE FIELD IF NOT EXISTS state_id
 ON environment TYPE record<environment_state>;
 
-DEFINE FIELD IF NOT EXISTS version
-ON environment TYPE int VALUE 1;
-
-DEFINE FIELD IF NOT EXISTS created_at
-ON environment TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON environment TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE FIELD IF NOT EXISTS updated_at
 ON environment TYPE datetime VALUE time::now();
 
 DEFINE INDEX IF NOT EXISTS environment_application_idx
 ON environment FIELDS application_id;
+
+DEFINE INDEX IF NOT EXISTS environment_application_type_idx
+ON environment FIELDS application_id, type_id UNIQUE;
 
 DEFINE INDEX IF NOT EXISTS environment_type_state_idx
 ON environment FIELDS type_id, state_id;
@@ -386,8 +362,8 @@ ON membership TYPE record<external_identity>;
 DEFINE FIELD IF NOT EXISTS organization_id
 ON membership TYPE record<organization>;
 
-DEFINE FIELD IF NOT EXISTS created_at
-ON membership TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON membership TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE INDEX IF NOT EXISTS membership_identity_organization_idx
 ON membership FIELDS identity_id, organization_id UNIQUE;
@@ -408,14 +384,12 @@ DELETE permission:message_read;
 DELETE permission:message_create;
 DELETE permission:message_translate;
 DELETE permission:application_create;
-DELETE permission:environment_create;
 DELETE permission:functionality_create;
 DELETE permission:`93faca26-c091-4bf6-bfd3-30e71201d34a`;
 DELETE permission:`3856a6e2-10c6-4b9c-94b0-6898ece6a136`;
 DELETE permission:`b778e79b-044a-4bf7-8423-b49c9bc5c3d9`;
 DELETE permission:`50fc21d2-0b1e-4a9e-a1da-fde253de49eb`;
 DELETE permission:`5db84b21-a06b-4e23-bce2-ca8f99b3c9e2`;
-DELETE permission:`b948bf50-2033-4ad7-8590-d57cc126b9d4`;
 DELETE permission:`0dc67f6b-104f-41f0-b757-e1b32429bd8e`;
 
 UPSERT permission:`93faca26-c091-4bf6-bfd3-30e71201d34a` CONTENT { code: "CONTEXT_SELECT" };
@@ -423,7 +397,6 @@ UPSERT permission:`3856a6e2-10c6-4b9c-94b0-6898ece6a136` CONTENT { code: "MESSAG
 UPSERT permission:`b778e79b-044a-4bf7-8423-b49c9bc5c3d9` CONTENT { code: "MESSAGE_CREATE" };
 UPSERT permission:`50fc21d2-0b1e-4a9e-a1da-fde253de49eb` CONTENT { code: "MESSAGE_TRANSLATE" };
 UPSERT permission:`5db84b21-a06b-4e23-bce2-ca8f99b3c9e2` CONTENT { code: "APPLICATION_CREATE" };
-UPSERT permission:`b948bf50-2033-4ad7-8590-d57cc126b9d4` CONTENT { code: "ENVIRONMENT_CREATE" };
 UPSERT permission:`0dc67f6b-104f-41f0-b757-e1b32429bd8e` CONTENT { code: "FUNCTIONALITY_CREATE" };
 
 DEFINE TABLE IF NOT EXISTS role SCHEMAFULL;
@@ -431,8 +404,8 @@ DEFINE TABLE IF NOT EXISTS role SCHEMAFULL;
 DEFINE FIELD IF NOT EXISTS name
 ON role TYPE string;
 
-DEFINE FIELD IF NOT EXISTS created_at
-ON role TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON role TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE INDEX IF NOT EXISTS role_name_idx
 ON role FIELDS name UNIQUE;
@@ -459,20 +432,11 @@ ON role_assignment TYPE record<membership>;
 DEFINE FIELD IF NOT EXISTS role_id
 ON role_assignment TYPE record<role>;
 
-DEFINE FIELD IF NOT EXISTS scope_type
-ON role_assignment TYPE string ASSERT $value IN ["ORGANIZATION", "APPLICATION", "ENVIRONMENT"];
-
 DEFINE FIELD IF NOT EXISTS organization_id
-ON role_assignment TYPE option<record<organization>>;
+ON role_assignment TYPE record<organization>;
 
-DEFINE FIELD IF NOT EXISTS application_id
-ON role_assignment TYPE option<record<application>>;
-
-DEFINE FIELD IF NOT EXISTS environment_id
-ON role_assignment TYPE option<record<environment>>;
-
-DEFINE FIELD IF NOT EXISTS created_at
-ON role_assignment TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON role_assignment TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE INDEX IF NOT EXISTS role_assignment_membership_idx
 ON role_assignment FIELDS membership_id;
@@ -480,18 +444,11 @@ ON role_assignment FIELDS membership_id;
 DEFINE INDEX IF NOT EXISTS role_assignment_role_idx
 ON role_assignment FIELDS role_id;
 
-DEFINE INDEX IF NOT EXISTS role_assignment_organization_scope_idx
+DEFINE INDEX IF NOT EXISTS role_assignment_organization_idx
 ON role_assignment FIELDS organization_id;
 
-DEFINE INDEX IF NOT EXISTS role_assignment_application_scope_idx
-ON role_assignment FIELDS application_id;
-
-DEFINE INDEX IF NOT EXISTS role_assignment_environment_scope_idx
-ON role_assignment FIELDS environment_id;
-
 DEFINE INDEX IF NOT EXISTS role_assignment_unique_idx
-ON role_assignment FIELDS membership_id, role_id, scope_type,
-    organization_id, application_id, environment_id UNIQUE;
+ON role_assignment FIELDS membership_id, role_id, organization_id UNIQUE;
 
 -- =============================================================
 -- ENVIRONMENT EVENTS
@@ -505,7 +462,7 @@ THEN (
         event_type: "ENVIRONMENT_CREATED",
         aggregate_id: <string>$after.id,
         aggregate_type: "environment",
-        version: $after.version,
+        version: 1,
         payload: $after,
         metadata: {
             source: "surrealdb-event"
@@ -522,7 +479,7 @@ THEN (
         event_type: "ENVIRONMENT_UPDATED",
         aggregate_id: <string>$after.id,
         aggregate_type: "environment",
-        version: $after.version + 1,
+        version: 1,
         payload: {
             before: $before,
             after: $after
@@ -542,7 +499,7 @@ THEN (
         event_type: "ENVIRONMENT_DELETED",
         aggregate_id: <string>$before.id,
         aggregate_type: "environment",
-        version: $before.version,
+        version: 1,
         payload: $before,
         metadata: {
             source: "surrealdb-event"
@@ -582,29 +539,17 @@ UPSERT functionality_state:`505cde87-96f2-4926-8dc6-b04529469bd3` CONTENT {
 
 DEFINE TABLE IF NOT EXISTS functionality SCHEMAFULL CHANGEFEED 7d;
 
-DEFINE FIELD IF NOT EXISTS seed_key
-ON functionality TYPE option<string>;
-
 DEFINE FIELD IF NOT EXISTS name
 ON functionality TYPE string;
 
 DEFINE FIELD IF NOT EXISTS application_id
 ON functionality TYPE record<application>;
 
-DEFINE FIELD IF NOT EXISTS start_date
-ON functionality TYPE datetime;
-
-DEFINE FIELD IF NOT EXISTS end_date
-ON functionality TYPE datetime;
-
 DEFINE FIELD IF NOT EXISTS state_id
 ON functionality TYPE record<functionality_state>;
 
-DEFINE FIELD IF NOT EXISTS version
-ON functionality TYPE int VALUE 1;
-
-DEFINE FIELD IF NOT EXISTS created_at
-ON functionality TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON functionality TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE FIELD IF NOT EXISTS updated_at
 ON functionality TYPE datetime VALUE time::now();
@@ -623,7 +568,7 @@ THEN (
         event_type: "FUNCTIONALITY_CREATED",
         aggregate_id: <string>$after.id,
         aggregate_type: "functionality",
-        version: $after.version,
+        version: 1,
         payload: $after,
         metadata: {
             source: "surrealdb-event"
@@ -640,7 +585,7 @@ THEN (
         event_type: "FUNCTIONALITY_UPDATED",
         aggregate_id: <string>$after.id,
         aggregate_type: "functionality",
-        version: $after.version + 1,
+        version: 1,
         payload: {
             before: $before,
             after: $after
@@ -660,7 +605,7 @@ THEN (
         event_type: "FUNCTIONALITY_DELETED",
         aggregate_id: <string>$before.id,
         aggregate_type: "functionality",
-        version: $before.version,
+        version: 1,
         payload: $before,
         metadata: {
             source: "surrealdb-event"
@@ -777,9 +722,6 @@ UPSERT message_category:`bf416ec8-64a9-43a4-b3db-0c8a79ba525f` CONTENT {
 
 DEFINE TABLE IF NOT EXISTS message SCHEMAFULL CHANGEFEED 7d;
 
-DEFINE FIELD IF NOT EXISTS seed_key
-ON message TYPE option<string>;
-
 DEFINE FIELD IF NOT EXISTS code
 ON message TYPE string;
 
@@ -801,23 +743,20 @@ ON message TYPE record<message_state>;
 DEFINE FIELD IF NOT EXISTS application_id
 ON message TYPE option<record<application>>;
 
-DEFINE FIELD IF NOT EXISTS application
-ON message TYPE option<string>;
-
 DEFINE FIELD IF NOT EXISTS functionality_id
 ON message TYPE option<record<functionality>>;
 
-DEFINE FIELD IF NOT EXISTS version
-ON message TYPE int VALUE 1;
-
-DEFINE FIELD IF NOT EXISTS created_at
-ON message TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON message TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE FIELD IF NOT EXISTS updated_at
 ON message TYPE datetime VALUE time::now();
 
 DEFINE INDEX IF NOT EXISTS message_code_idx
 ON message FIELDS code;
+
+DEFINE INDEX IF NOT EXISTS message_application_code_idx
+ON message FIELDS application_id, code UNIQUE;
 
 DEFINE INDEX IF NOT EXISTS message_catalogs_idx
 ON message FIELDS type_id, category_id, status_id;
@@ -834,7 +773,7 @@ THEN (
         event_type: "MESSAGE_CREATED",
         aggregate_id: <string>$after.id,
         aggregate_type: "message",
-        version: $after.version,
+        version: 1,
         payload: $after,
         metadata: {
             source: "surrealdb-event"
@@ -851,7 +790,7 @@ THEN (
         event_type: "MESSAGE_UPDATED",
         aggregate_id: <string>$after.id,
         aggregate_type: "message",
-        version: $after.version + 1,
+        version: 1,
         payload: {
             before: $before,
             after: $after
@@ -871,7 +810,7 @@ THEN (
         event_type: "MESSAGE_DELETED",
         aggregate_id: <string>$before.id,
         aggregate_type: "message",
-        version: $before.version,
+        version: 1,
         payload: $before,
         metadata: {
             source: "surrealdb-event"
@@ -913,9 +852,6 @@ UPSERT message_environment_state:`e68930ad-772a-4d38-beae-b20434372957` CONTENT 
 
 DEFINE TABLE IF NOT EXISTS message_environment SCHEMAFULL CHANGEFEED 7d;
 
-DEFINE FIELD IF NOT EXISTS seed_key
-ON message_environment TYPE option<string>;
-
 DEFINE FIELD IF NOT EXISTS message_id
 ON message_environment TYPE record<message>;
 
@@ -925,11 +861,8 @@ ON message_environment TYPE record<environment>;
 DEFINE FIELD IF NOT EXISTS state_data_id
 ON message_environment TYPE record<message_environment_state>;
 
-DEFINE FIELD IF NOT EXISTS version
-ON message_environment TYPE int VALUE 1;
-
-DEFINE FIELD IF NOT EXISTS created_at
-ON message_environment TYPE datetime VALUE time::now();
+DEFINE FIELD OVERWRITE created_at
+ON message_environment TYPE datetime DEFAULT time::now() READONLY;
 
 DEFINE FIELD IF NOT EXISTS updated_at
 ON message_environment TYPE datetime VALUE time::now();
@@ -948,7 +881,7 @@ THEN (
         event_type: "MESSAGE_ENVIRONMENT_CREATED",
         aggregate_id: <string>$after.id,
         aggregate_type: "message_environment",
-        version: $after.version,
+        version: 1,
         payload: $after,
         metadata: {
             source: "surrealdb-event"
@@ -965,7 +898,7 @@ THEN (
         event_type: "MESSAGE_ENVIRONMENT_UPDATED",
         aggregate_id: <string>$after.id,
         aggregate_type: "message_environment",
-        version: $after.version + 1,
+        version: 1,
         payload: {
             before: $before,
             after: $after
@@ -985,175 +918,7 @@ THEN (
         event_type: "MESSAGE_ENVIRONMENT_DELETED",
         aggregate_id: <string>$before.id,
         aggregate_type: "message_environment",
-        version: $before.version,
-        payload: $before,
-        metadata: {
-            source: "surrealdb-event"
-        },
-        created_at: time::now()
-    }
-);
-
--- =============================================================
--- PARAMETER
--- =============================================================
-
-DEFINE TABLE IF NOT EXISTS parameter SCHEMAFULL CHANGEFEED 7d;
-
-DEFINE FIELD IF NOT EXISTS message_id
-ON parameter TYPE record<message>;
-
-DEFINE FIELD IF NOT EXISTS name
-ON parameter TYPE string;
-
-DEFINE FIELD IF NOT EXISTS description
-ON parameter TYPE string;
-
-DEFINE FIELD IF NOT EXISTS version
-ON parameter TYPE int VALUE 1;
-
-DEFINE FIELD IF NOT EXISTS created_at
-ON parameter TYPE datetime VALUE time::now();
-
-DEFINE FIELD IF NOT EXISTS updated_at
-ON parameter TYPE datetime VALUE time::now();
-
-DEFINE INDEX IF NOT EXISTS parameter_message_idx
-ON parameter FIELDS message_id;
-
-DEFINE EVENT parameter_created
-ON parameter
-WHEN $event = "CREATE"
-THEN (
-    CREATE domain_events CONTENT {
-        event_type: "PARAMETER_CREATED",
-        aggregate_id: <string>$after.id,
-        aggregate_type: "parameter",
-        version: $after.version,
-        payload: $after,
-        metadata: {
-            source: "surrealdb-event"
-        },
-        created_at: time::now()
-    }
-);
-
-DEFINE EVENT parameter_updated
-ON parameter
-WHEN $event = "UPDATE"
-THEN (
-    CREATE domain_events CONTENT {
-        event_type: "PARAMETER_UPDATED",
-        aggregate_id: <string>$after.id,
-        aggregate_type: "parameter",
-        version: $after.version + 1,
-        payload: {
-            before: $before,
-            after: $after
-        },
-        metadata: {
-            source: "surrealdb-event"
-        },
-        created_at: time::now()
-    }
-);
-
-DEFINE EVENT parameter_deleted
-ON parameter
-WHEN $event = "DELETE"
-THEN (
-    CREATE domain_events CONTENT {
-        event_type: "PARAMETER_DELETED",
-        aggregate_id: <string>$before.id,
-        aggregate_type: "parameter",
-        version: $before.version,
-        payload: $before,
-        metadata: {
-            source: "surrealdb-event"
-        },
-        created_at: time::now()
-    }
-);
-
--- =============================================================
--- REPRESENT PARAMETER
--- =============================================================
-
-DEFINE TABLE IF NOT EXISTS represent_parameter SCHEMAFULL CHANGEFEED 7d;
-
-DEFINE FIELD IF NOT EXISTS start
-ON represent_parameter TYPE string;
-
-DEFINE FIELD IF NOT EXISTS end
-ON represent_parameter TYPE string;
-
-DEFINE FIELD IF NOT EXISTS application_id
-ON represent_parameter TYPE record<application>;
-
-DEFINE FIELD IF NOT EXISTS default_parameter
-ON represent_parameter TYPE bool;
-
-DEFINE FIELD IF NOT EXISTS parameter
-ON represent_parameter TYPE bool;
-
-DEFINE FIELD IF NOT EXISTS version
-ON represent_parameter TYPE int VALUE 1;
-
-DEFINE FIELD IF NOT EXISTS created_at
-ON represent_parameter TYPE datetime VALUE time::now();
-
-DEFINE FIELD IF NOT EXISTS updated_at
-ON represent_parameter TYPE datetime VALUE time::now();
-
-DEFINE INDEX IF NOT EXISTS represent_parameter_application_idx
-ON represent_parameter FIELDS application_id;
-
-DEFINE EVENT represent_parameter_created
-ON represent_parameter
-WHEN $event = "CREATE"
-THEN (
-    CREATE domain_events CONTENT {
-        event_type: "REPRESENT_PARAMETER_CREATED",
-        aggregate_id: <string>$after.id,
-        aggregate_type: "represent_parameter",
-        version: $after.version,
-        payload: $after,
-        metadata: {
-            source: "surrealdb-event"
-        },
-        created_at: time::now()
-    }
-);
-
-DEFINE EVENT represent_parameter_updated
-ON represent_parameter
-WHEN $event = "UPDATE"
-THEN (
-    CREATE domain_events CONTENT {
-        event_type: "REPRESENT_PARAMETER_UPDATED",
-        aggregate_id: <string>$after.id,
-        aggregate_type: "represent_parameter",
-        version: $after.version + 1,
-        payload: {
-            before: $before,
-            after: $after
-        },
-        metadata: {
-            source: "surrealdb-event"
-        },
-        created_at: time::now()
-    }
-);
-
-DEFINE EVENT represent_parameter_deleted
-ON represent_parameter
-WHEN $event = "DELETE"
-THEN (
-    CREATE domain_events CONTENT {
-        event_type: "REPRESENT_PARAMETER_DELETED",
-        aggregate_id: <string>$before.id,
-        aggregate_type: "represent_parameter",
-        version: $before.version,
+        version: 1,
         payload: $before,
         metadata: {
             source: "surrealdb-event"
@@ -1376,9 +1141,6 @@ ON message_data_collection FIELDS status.name;
 
 DEFINE TABLE IF NOT EXISTS message_environment_readmodel SCHEMALESS;
 
-DEFINE FIELD IF NOT EXISTS seed_key
-ON message_environment_readmodel TYPE option<string>;
-
 DEFINE FIELD IF NOT EXISTS source_id
 ON message_environment_readmodel TYPE option<string>;
 
@@ -1473,13 +1235,13 @@ UPDATE role_permission SET permission_id = permission:`50fc21d2-0b1e-4a9e-a1da-f
 WHERE permission_id = permission:message_translate;
 UPDATE role_permission SET permission_id = permission:`5db84b21-a06b-4e23-bce2-ca8f99b3c9e2`
 WHERE permission_id = permission:application_create;
-UPDATE role_permission SET permission_id = permission:`b948bf50-2033-4ad7-8590-d57cc126b9d4`
-WHERE permission_id = permission:environment_create;
 UPDATE role_permission SET permission_id = permission:`0dc67f6b-104f-41f0-b757-e1b32429bd8e`
 WHERE permission_id = permission:functionality_create;
 
 -- Recreate only this seed's deterministic records. SurrealDB 3.1.4 can
 -- report a self-conflict when UPSERT CONTENT meets an existing unique value.
+LET $init_now = time::now();
+
 DELETE message_environment_readmodel:`2e7a4c91-6b35-48fd-a2e8-1c9d5f703b64`;
 DELETE message_data_collection:`b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c`;
 DELETE message_environment:`2e7a4c91-6b35-48fd-a2e8-1c9d5f703b64`;
@@ -1491,7 +1253,6 @@ DELETE role_permission:`00502d82-a2cd-413a-b655-d32c9b63eec6`;
 DELETE role_permission:`8b5e802c-60cb-438e-8dd6-a62a6d57fd47`;
 DELETE role_permission:`7ed9d909-7178-413a-a9d0-7e1960006061`;
 DELETE role_permission:`a2646025-bc41-42f9-970c-1a10567f603f`;
-DELETE role_permission:`5c4351ce-b88b-435e-8800-8ed743ad5ec4`;
 DELETE role_permission:`a923c070-243f-4f5c-b35b-bdff8076b6b4`;
 DELETE role_permission:simulated_context_select;
 DELETE role_permission:simulated_message_read;
@@ -1505,6 +1266,8 @@ DELETE external_identity:`1d6c8f43-9a25-4b7e-b031-8f2d5c7a964e`;
 DELETE role:`3762dbe9-eed2-42c3-a6b0-678ce2e8c6a9`;
 DELETE role:simulated_security_admin;
 DELETE functionality:`5a8e2c74-1d39-4f6b-b7c2-0e9a3d5f8164`;
+DELETE environment:`de1b8223-1e9c-4807-beec-b2c1cff44e73`;
+DELETE environment:`ebe114e4-01d4-427b-9773-b63325ddd55c`;
 DELETE environment:`7b3e5d91-a2c8-46f0-9d14-5e7a1b6c3f82`;
 DELETE application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23`;
 DELETE organization:`8f2d3a10-6b47-4c91-a5e8-2d7f9b3c1a40`;
@@ -1519,66 +1282,69 @@ DELETE application:`22222222-2222-2222-2222-222222222222`;
 DELETE organization:`11111111-1111-1111-1111-111111111111`;
 
 UPSERT organization:`8f2d3a10-6b47-4c91-a5e8-2d7f9b3c1a40` CONTENT {
-    name: "MessageUcoLab Demo",
-    version: 1,
-    created_at: d'2026-01-01T00:00:00Z',
-    updated_at: d'2026-01-01T00:00:00Z'
+    name: "UCO",
+    created_at: $init_now,
+    updated_at: $init_now
 };
 
 UPSERT application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23` CONTENT {
-    seed_key: "simulated-security-demo",
-    name: "Demo Application",
+    name: "Arquisoft",
     organization_id: organization:`8f2d3a10-6b47-4c91-a5e8-2d7f9b3c1a40`,
     language_id: language_base:`6319ca87-47b3-4e0e-994f-3166378988f2`,
-    start_date: d'2026-01-01T00:00:00Z',
-    end_date: d'2999-01-01T00:00:00Z',
     state_id: application_state:`dfb7a7cb-66f6-4b73-a1d8-803336f72ebe`,
-    version: 1,
-    created_at: d'2026-01-01T00:00:00Z',
-    updated_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now,
+    updated_at: $init_now
 };
 
 UPSERT environment:`7b3e5d91-a2c8-46f0-9d14-5e7a1b6c3f82` CONTENT {
-    seed_key: "simulated-security-demo",
-    name: "Development",
     application_id: application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23`,
     type_id: environment_type:`3ba48618-abb9-40c2-b700-e4413dd9332b`,
     state_id: environment_state:`e6e00788-eda8-40fd-aa31-5763133e8834`,
-    version: 1,
-    created_at: d'2026-01-01T00:00:00Z',
-    updated_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now,
+    updated_at: $init_now
+};
+
+UPSERT environment:`ebe114e4-01d4-427b-9773-b63325ddd55c` CONTENT {
+    application_id: application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23`,
+    type_id: environment_type:`19b374bd-503a-4e65-b729-4c2442a69a4e`,
+    state_id: environment_state:`e6e00788-eda8-40fd-aa31-5763133e8834`,
+    created_at: $init_now,
+    updated_at: $init_now
+};
+
+UPSERT environment:`de1b8223-1e9c-4807-beec-b2c1cff44e73` CONTENT {
+    application_id: application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23`,
+    type_id: environment_type:`71ff34c1-1f4b-4858-943e-771907071c02`,
+    state_id: environment_state:`e6e00788-eda8-40fd-aa31-5763133e8834`,
+    created_at: $init_now,
+    updated_at: $init_now
 };
 
 UPSERT functionality:`5a8e2c74-1d39-4f6b-b7c2-0e9a3d5f8164` CONTENT {
-    seed_key: "simulated-security-demo",
     name: "General Messages",
     application_id: application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23`,
-    start_date: d'2026-01-01T00:00:00Z',
-    end_date: d'2999-01-01T00:00:00Z',
     state_id: functionality_state:`407de974-c8aa-43e2-a5cf-22dc7c44054b`,
-    version: 1,
-    created_at: d'2026-01-01T00:00:00Z',
-    updated_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now,
+    updated_at: $init_now
 };
 
 UPSERT external_identity:`1d6c8f43-9a25-4b7e-b031-8f2d5c7a964e` CONTENT {
     issuer: "https://issuer.example",
     subject: "subject-1",
     email: "user@example.com",
-    principal_type: "HUMAN",
-    created_at: d'2026-01-01T00:00:00Z',
-    updated_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now,
+    updated_at: $init_now
 };
 
 UPSERT membership:`e9a4b2c7-3d81-4f56-a0e9-6c1b8d2f7435` CONTENT {
     identity_id: external_identity:`1d6c8f43-9a25-4b7e-b031-8f2d5c7a964e`,
     organization_id: organization:`8f2d3a10-6b47-4c91-a5e8-2d7f9b3c1a40`,
-    created_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now
 };
 
 UPSERT role:`3762dbe9-eed2-42c3-a6b0-678ce2e8c6a9` CONTENT {
     name: "Simulated Security Administrator",
-    created_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now
 };
 
 UPSERT role_permission:`70cc345c-3b96-459d-857b-29b0fea9bb0e` CONTENT {
@@ -1601,10 +1367,6 @@ UPSERT role_permission:`a2646025-bc41-42f9-970c-1a10567f603f` CONTENT {
     role_id: role:`3762dbe9-eed2-42c3-a6b0-678ce2e8c6a9`,
     permission_id: permission:`5db84b21-a06b-4e23-bce2-ca8f99b3c9e2`
 };
-UPSERT role_permission:`5c4351ce-b88b-435e-8800-8ed743ad5ec4` CONTENT {
-    role_id: role:`3762dbe9-eed2-42c3-a6b0-678ce2e8c6a9`,
-    permission_id: permission:`b948bf50-2033-4ad7-8590-d57cc126b9d4`
-};
 UPSERT role_permission:`a923c070-243f-4f5c-b35b-bdff8076b6b4` CONTENT {
     role_id: role:`3762dbe9-eed2-42c3-a6b0-678ce2e8c6a9`,
     permission_id: permission:`0dc67f6b-104f-41f0-b757-e1b32429bd8e`
@@ -1613,11 +1375,8 @@ UPSERT role_permission:`a923c070-243f-4f5c-b35b-bdff8076b6b4` CONTENT {
 UPSERT role_assignment:`3c7f1a82-5e94-4b6d-8a23-9d0e7f4c1b65` CONTENT {
     membership_id: membership:`e9a4b2c7-3d81-4f56-a0e9-6c1b8d2f7435`,
     role_id: role:`3762dbe9-eed2-42c3-a6b0-678ce2e8c6a9`,
-    scope_type: "ORGANIZATION",
     organization_id: organization:`8f2d3a10-6b47-4c91-a5e8-2d7f9b3c1a40`,
-    application_id: NONE,
-    environment_id: NONE,
-    created_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now
 };
 
 UPSERT active_context:`1d6c8f43-9a25-4b7e-b031-8f2d5c7a964e` CONTENT {
@@ -1625,64 +1384,55 @@ UPSERT active_context:`1d6c8f43-9a25-4b7e-b031-8f2d5c7a964e` CONTENT {
     organization_id: organization:`8f2d3a10-6b47-4c91-a5e8-2d7f9b3c1a40`,
     application_id: application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23`,
     environment_id: environment:`7b3e5d91-a2c8-46f0-9d14-5e7a1b6c3f82`,
-    updated_at: d'2026-01-01T00:00:00Z'
+    updated_at: $init_now
 };
 
 UPSERT message:`b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c` CONTENT {
-    seed_key: "simulated-security-demo",
-    code: "DEMO_WELCOME",
+    code: "MSG_WELCOME",
     title: "Welcome",
     content: "Welcome to MessageUcoLab",
     type_id: message_type:`0c71601d-96b3-417e-b385-06b10ba126d9`,
     category_id: message_category:`3b337f14-dde1-436e-829a-eebacb556eb4`,
     status_id: message_state:`4223b3dc-c991-4603-a746-d37ce5ecd976`,
     application_id: application:`c4a91e72-8d36-4f5b-b2a7-6e1c9d804f23`,
-    application: "Demo Application",
     functionality_id: functionality:`5a8e2c74-1d39-4f6b-b7c2-0e9a3d5f8164`,
-    version: 1,
-    created_at: d'2026-01-01T00:00:00Z',
-    updated_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now,
+    updated_at: $init_now
 };
 
 UPSERT message_environment:`2e7a4c91-6b35-48fd-a2e8-1c9d5f703b64` CONTENT {
-    seed_key: "simulated-security-demo",
     message_id: message:`b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c`,
     environment_id: environment:`7b3e5d91-a2c8-46f0-9d14-5e7a1b6c3f82`,
     state_data_id: message_environment_state:`10ddbab2-352e-48de-b9eb-de0895ddb944`,
-    version: 1,
-    created_at: d'2026-01-01T00:00:00Z',
-    updated_at: d'2026-01-01T00:00:00Z'
+    created_at: $init_now,
+    updated_at: $init_now
 };
 
 UPSERT message_data_collection:`b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c` CONTENT {
-    seed_key: "simulated-security-demo",
     source_id: "message:b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c",
     message_id: "message:b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c",
-    code: "DEMO_WELCOME",
+    code: "MSG_WELCOME",
     title: "Welcome",
     content: "Welcome to MessageUcoLab",
-    application: "Demo Application",
     type: { id: "message_type:0c71601d-96b3-417e-b385-06b10ba126d9", name: "Functional" },
     category: { id: "message_category:3b337f14-dde1-436e-829a-eebacb556eb4", name: "Information" },
     status: { id: "message_state:4223b3dc-c991-4603-a746-d37ce5ecd976", name: "Active" },
     functionality: { id: "functionality:5a8e2c74-1d39-4f6b-b7c2-0e9a3d5f8164", name: "General Messages" },
     projection_version: 1,
-    generated_at: d'2026-01-01T00:00:00Z'
+    generated_at: $init_now
 };
 
 UPSERT message_environment_readmodel:`2e7a4c91-6b35-48fd-a2e8-1c9d5f703b64` CONTENT {
-    seed_key: "simulated-security-demo",
     source_id: "message_environment:2e7a4c91-6b35-48fd-a2e8-1c9d5f703b64",
     message_environment_id: "message_environment:2e7a4c91-6b35-48fd-a2e8-1c9d5f703b64",
     message_id: "message:b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c",
     environment_id: "environment:7b3e5d91-a2c8-46f0-9d14-5e7a1b6c3f82",
-    environment: { id: "environment:7b3e5d91-a2c8-46f0-9d14-5e7a1b6c3f82", name: "Development" },
+    environment: { id: "environment:7b3e5d91-a2c8-46f0-9d14-5e7a1b6c3f82" },
     message: {
         id: "message:b6d3f821-7a4e-49c5-8d12-3f0b9e6a274c",
-        code: "DEMO_WELCOME",
+        code: "MSG_WELCOME",
         title: "Welcome",
         content: "Welcome to MessageUcoLab",
-        application: "Demo Application",
         type: { id: "message_type:0c71601d-96b3-417e-b385-06b10ba126d9", name: "Functional" },
         category: { id: "message_category:3b337f14-dde1-436e-829a-eebacb556eb4", name: "Information" },
         status: { id: "message_state:4223b3dc-c991-4603-a746-d37ce5ecd976", name: "Active" },
@@ -1690,5 +1440,5 @@ UPSERT message_environment_readmodel:`2e7a4c91-6b35-48fd-a2e8-1c9d5f703b64` CONT
     },
     status: { id: "message_environment_state:10ddbab2-352e-48de-b9eb-de0895ddb944", name: "Active" },
     projection_version: 1,
-    generated_at: d'2026-01-01T00:00:00Z'
+    generated_at: $init_now
 };

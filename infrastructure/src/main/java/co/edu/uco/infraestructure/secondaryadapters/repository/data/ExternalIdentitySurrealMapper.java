@@ -15,7 +15,6 @@ public final class ExternalIdentitySurrealMapper
         externalIdentity.setIssuer(model.getIssuer());
         externalIdentity.setSubject(model.getSubject());
         externalIdentity.setEmail(model.getEmail());
-        externalIdentity.setPrincipalType(model.getPrincipalType());
         return externalIdentity;
     }
 
@@ -25,7 +24,6 @@ public final class ExternalIdentitySurrealMapper
                 externalIdentity.getId(),
                 externalIdentity.getIssuer(),
                 externalIdentity.getSubject(),
-                externalIdentity.getEmail(),
-                externalIdentity.getPrincipalType());
+                externalIdentity.getEmail());
     }
 }

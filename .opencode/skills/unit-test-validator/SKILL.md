@@ -14,16 +14,22 @@ Aplica esta validación a TODA prueba nueva o modificada antes de reportarla com
 terminada. Si algo falla, no la marques como válida: corrígela o repórtala como
 pendiente con la razón exacta.
 
-## 1. Verificación de ejecución y cobertura
+## 1. Verificación final de ejecución y cobertura
+
+Esta validación forma parte del flujo de `unit-test-agent`. Ejecuta el siguiente
+comando una sola vez, después de completar la auditoría estática y todas las
+ediciones. No lo ejecutes como baseline ni lo repitas si la tarea actual ya tiene
+un resultado final vigente del mismo comando:
 
 ```bash
 ./mvnw clean verify
 ```
 
 - Confirma BUILD SUCCESS en los 3 módulos (`utils`, `core`, `infrastructure`).
-- Abre el reporte JaCoCo de cada módulo (`target/site/jacoco/index.html` o
-  `jacoco.xml`) y confirma que la cobertura de **líneas Y ramas** (branches) sea
-  ≥80% — no valides solo el porcentaje agregado del proyecto, valida por módulo.
+- Abre el reporte JaCoCo de los módulos afectados (`target/site/jacoco/index.html`
+  o `jacoco.xml`) y revisa la cobertura de **líneas Y ramas** (branches). Reporta
+  el resultado por módulo y cualquier incumplimiento del Quality Gate configurado,
+  pero no crees pruebas de clases no relacionadas solo para elevar el porcentaje.
 - Sospecha si un archivo pasó de 0% a 100% con muy pocos tests: revisa que no sea
   cobertura "de paso" (el código se ejecuta pero no se verifica nada relevante).
 
@@ -190,8 +196,8 @@ repo — revísalos explícitamente antes de dar una clase de test por terminada
 - **Tests casi idénticos que solo cambian un valor de entrada/salida**: si hay
   3 o más métodos `@Test` con la misma estructura y solo cambia el dato de
   entrada/resultado esperado, conviértelos en un único `@ParameterizedTest`
-  (ver la skill `junit5-best-practices`, sección 3) en vez de mantenerlos
-  duplicados.
+  en vez de mantenerlos duplicados (ver la skill `java-junit`, sección de
+  pruebas parametrizadas).
 
 - **Excepciones genéricas en código de PRODUCCIÓN (no de test)**: si al
   auditar aparece un `throw new RuntimeException(...)` o `Exception` genérica

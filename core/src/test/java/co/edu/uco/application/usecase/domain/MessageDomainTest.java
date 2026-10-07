@@ -2,12 +2,14 @@ package co.edu.uco.application.usecase.domain;
 
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class MessageDomainTest {
+
+    private static final UUID SAFE_DEFAULT_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     @Test
     void setters_storeValues() {
@@ -79,11 +81,58 @@ class MessageDomainTest {
     @Test
     void setFunctionality_storesFunctionality() {
         MessageDomain domain = new MessageDomain();
-        FunctionalityDomain functionality = FunctionalityDomain.create(UUID.randomUUID(), "payment",
-                LocalDateTime.of(2024, 1, 1, 0, 0), LocalDateTime.of(2024, 12, 31, 23, 59));
+        FunctionalityDomain functionality = FunctionalityDomain.create(UUID.randomUUID(), "payment");
         domain.setFunctionality(functionality);
 
         assertThat(domain.getFunctionality()).isSameAs(functionality);
+    }
+
+    @Test
+    void setType_assignsSafeDefaultDomainObject_whenNull() {
+        MessageDomain domain = new MessageDomain();
+
+        domain.setType(null);
+
+        assertAll(
+                () -> assertThat(domain.getType()).isNotNull(),
+                () -> assertThat(domain.getType().getId()).isEqualTo(SAFE_DEFAULT_ID),
+                () -> assertThat(domain.getType().getName()).isEmpty());
+    }
+
+    @Test
+    void setCategory_assignsSafeDefaultDomainObject_whenNull() {
+        MessageDomain domain = new MessageDomain();
+
+        domain.setCategory(null);
+
+        assertAll(
+                () -> assertThat(domain.getCategory()).isNotNull(),
+                () -> assertThat(domain.getCategory().getId()).isEqualTo(SAFE_DEFAULT_ID),
+                () -> assertThat(domain.getCategory().getName()).isEmpty());
+    }
+
+    @Test
+    void setStatus_assignsSafeDefaultDomainObject_whenNull() {
+        MessageDomain domain = new MessageDomain();
+
+        domain.setStatus(null);
+
+        assertAll(
+                () -> assertThat(domain.getStatus()).isNotNull(),
+                () -> assertThat(domain.getStatus().getId()).isEqualTo(SAFE_DEFAULT_ID),
+                () -> assertThat(domain.getStatus().getName()).isEmpty());
+    }
+
+    @Test
+    void setFunctionality_assignsSafeDefaultDomainObject_whenNull() {
+        MessageDomain domain = new MessageDomain();
+
+        domain.setFunctionality(null);
+
+        assertAll(
+                () -> assertThat(domain.getFunctionality()).isNotNull(),
+                () -> assertThat(domain.getFunctionality().getId()).isEqualTo(SAFE_DEFAULT_ID),
+                () -> assertThat(domain.getFunctionality().getName()).isEmpty());
     }
 
 }

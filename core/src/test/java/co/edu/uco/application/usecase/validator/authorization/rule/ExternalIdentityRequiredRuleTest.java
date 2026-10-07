@@ -2,14 +2,14 @@ package co.edu.uco.application.usecase.validator.authorization.rule;
 
 import co.edu.uco.application.secondaryports.catalog.CatalogPort;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.crosscutting.catalog.MessageCatalogCodeEnum;
 import co.edu.uco.crosscutting.exceptions.UnauthorizedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -46,10 +46,11 @@ class ExternalIdentityRequiredRuleTest {
         verifyNoInteractions(catalogPort);
     }
 
-    @ParameterizedTest(name = "[{0}] identity is accepted")
-    @EnumSource(PrincipalType.class)
-    void validate_doesNotThrow_forAnyPrincipalType(PrincipalType principalType) {
-        ExternalIdentity identity = new ExternalIdentity("issuer", "subject", null, principalType, Instant.MAX);
+    @ParameterizedTest(name = "[{index}] email={0} identity is accepted")
+    @ValueSource(strings = {"user@example.com", "service@example.com"})
+    @NullSource
+    void validate_doesNotThrow_forAnyEmail(String email) {
+        ExternalIdentity identity = new ExternalIdentity("issuer", "subject", email, Instant.MAX);
 
         assertThatCode(() -> rule.validate(identity)).doesNotThrowAnyException();
 
@@ -58,8 +59,7 @@ class ExternalIdentityRequiredRuleTest {
 
     @Test
     void validate_doesNotThrow_whenIdentityHasNoExpiration() {
-        ExternalIdentity identity = new ExternalIdentity("issuer", "subject", "user@example.com",
-                PrincipalType.HUMAN, null);
+        ExternalIdentity identity = new ExternalIdentity("issuer", "subject", "user@example.com", null);
 
         assertThatCode(() -> rule.validate(identity)).doesNotThrowAnyException();
 
@@ -80,6 +80,6 @@ class ExternalIdentityRequiredRuleTest {
     }
 
     private static ExternalIdentity identity(Instant expiration) {
-        return new ExternalIdentity("issuer", "subject", "user@example.com", PrincipalType.HUMAN, expiration);
+        return new ExternalIdentity("issuer", "subject", "user@example.com", expiration);
     }
 }

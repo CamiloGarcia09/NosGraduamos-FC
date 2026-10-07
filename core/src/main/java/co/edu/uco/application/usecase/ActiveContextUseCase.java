@@ -162,7 +162,7 @@ public final class ActiveContextUseCase implements HandlingActiveContextPort {
                 .organization(CatalogItemDTO.create(application.getOrganization().getId().toString(),
                         application.getOrganization().getName()))
                 .application(CatalogItemDTO.create(application.getId().toString(), application.getName()))
-                .environment(CatalogItemDTO.create(environment.getId().toString(), environment.getName()))
+                .environment(CatalogItemDTO.create(environment.getId().toString(), environment.getType().getName()))
                 .build();
     }
 

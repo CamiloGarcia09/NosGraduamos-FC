@@ -4,16 +4,6 @@ public final class InfrastructureConstant {
 
     private InfrastructureConstant() {}
 
-    public static final String COLLECTION_TOKEN = "token";
-    public static final String COLLECTION_TOKEN_STATE = "token_state";
-    public static final String COLLECTION_MESSAGE_ENVIRONMENT = "message_environment";
-    public static final String COLLECTION_ENVIRONMENT = "environment";
-    public static final String COLLECTION_APPLICATION = "application";
-    public static final String COLLECTION_STATUS_MESSAGE_ENVIRONMENT = "status_message_environment";
-    public static final String COLLECTION_ENVIRONMENT_TYPE = "environment_type";
-    public static final String COLLECTION_REPRESENT_PARAMETER = "represent_parameter";
-    public static final String COLLECTION_PARAMETER = "parameter";
-
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_CREATION_DATE = "creation_date";
@@ -88,13 +78,8 @@ public final class InfrastructureConstant {
     public static final String DOPPLER_DTO_VALUE = "value";
     public static final String DOPPLER_DTO_RAW = "raw";
     public static final String DOPPLER_CONFIG_PREFIX = "doppler";
-    public static final String WEB_CONFIG_API_MESSAGE = "/messageucolab/v1/application/**/message/*";
     public static final String WEB_CONFIG_API_APPLICATION = "/messageucolab/v1/application/**/message/*";
-    public static final String WEB_CONFIG_API_ENVIRONMENT = "/messageucolab/v1/application/environment";
-    public static final String WEB_CONFIG_API_MESSAGE_LIST = "/messageucolab/v1/application/messages";
-    public static final String WEB_CONFIG_API_MESSAGE_CODE = "/messageucolab/v1/application/messages/*";
-    public static final String WEB_CONFIG_API_MESSAGE_CODE_TRANSLATION = "/messageucolab/v1/application/messages/*/translation";
-    public static final String WEB_CONFIG_API_CREATE_MESSAGE = "/messageucolab/v1/application/message";
+    public static final String WEB_CONFIG_API_MESSAGES = "/messageucolab/v1/messages/**";
     public static final String WEB_CONFIG_API_CATALOG = "/messageucolab/v1/catalog/**";
 
     public static final String SWAGGER_UI_HTML = "/swagger-ui.html";

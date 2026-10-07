@@ -7,7 +7,8 @@
 - Antes de correr la app: levantar infraestructura con `docker compose up -d` en `deployment/docker`.
 - No hay linter/formatter configurado — no asumas reglas de estilo automáticas.
 - Todo cambio debe respetar Clean/Hexagonal Architecture y pasar el Quality Gate de SonarCloud (ver sección "Clean Architecture y SonarCloud").
-- Tests: crear/modificar SIEMPRE delegando al agente `unit-test-agent`; auditar con el skill `unit-test-validator`. No escribir tests en la conversación principal (quema tokens de la cuota principal).
+- Tests: no crear, modificar ni ejecutar pruebas automáticamente después de un cambio. Preguntar primero si el usuario autoriza invocar `unit-test-agent`; una petición explícita de crear, modificar o ejecutar pruebas ya cuenta como autorización.
+- Crear/modificar pruebas SIEMPRE mediante `unit-test-agent` y auditarlas allí con `unit-test-validator`. No escribir tests en la conversación principal (quema tokens de la cuota principal).
 
 ## Qué es este proyecto
 API de mensajes multientorno con catálogo jerárquico (Organización → Aplicación → Módulo → Funcionalidad → Parámetro), soporte de tokens, traducción asistida por IA, caché Redis y eventos SSE en memoria. Diseñada para desplegarse en Azure con secretos en Key Vault/Doppler y observabilidad vía Grafana/Prometheus/Loki.
@@ -49,6 +50,15 @@ cd ../..
 - Prometheus: `http://localhost:8085/actuator/prometheus`
 
 ## Testing
+
+### Autorización obligatoria para invocar el agente de pruebas
+
+- Después de realizar un cambio de producción, no crear ni ejecutar pruebas automáticamente. Preguntar al usuario si autoriza invocar `unit-test-agent` y esperar su respuesta.
+- Si el usuario pide explícitamente crear, modificar, auditar o ejecutar pruebas, esa petición constituye autorización para invocar `unit-test-agent`; no es necesario volver a preguntar.
+- La autorización corresponde a la ejecución completa de `unit-test-agent`. Una vez concedida, el subagente puede crear o modificar pruebas, auditarlas y ejecutar los comandos Maven necesarios sin solicitar permisos adicionales por cada comando.
+- El agente principal no debe ejecutar pruebas ni comandos que las incluyan indirectamente, como `./mvnw clean verify`, como consecuencia automática de una tarea de producción.
+- Si el usuario no autoriza `unit-test-agent`, finalizar la tarea de producción e indicar que no se crearon ni ejecutaron pruebas.
+
 ```bash
 ./mvnw test            # Unitarios e integración (JUnit 5)
 ./mvnw clean verify    # Build + tests + reporte JaCoCo
@@ -60,10 +70,12 @@ No hay linter/formatter configurado actualmente — no introducir reglas de esti
 ### Delegación obligatoria de tests
 Aplica en todas las sesiones, incluso nuevas:
 
-1. **Crear o modificar pruebas unitarias** → delegar SIEMPRE al agente `unit-test-agent` (subagente con contexto aislado). No editar archivos de test en la conversación principal.
-2. **Auditar pruebas ya escritas** → usar el skill `unit-test-validator` dentro de un subagente, no en la conversación principal.
-3. **Conversación principal** → solo coordinar: leer plan/archivos clave, lanzar agentes, revisar resúmenes y actualizar documentación (`PLAN_SEGURIDAD_Y_CONTEXTO.md`, etc.).
-4. Tras el subagente, la conversación principal solo verifica con `./mvnw clean verify` (o tests focalizados) y reporta el resultado; no reescribe tests salvo fallo puntual que el agente no pueda resolver.
+1. **Antes de delegar** → solicitar autorización para invocar `unit-test-agent`, salvo que el usuario ya haya pedido explícitamente trabajar con pruebas.
+2. **Crear o modificar pruebas unitarias** → delegar SIEMPRE al agente `unit-test-agent` (subagente con contexto aislado). No editar archivos de test en la conversación principal.
+3. **Auditar pruebas ya escritas** → aplicar el skill `unit-test-validator` dentro de `unit-test-agent`, no en la conversación principal.
+4. **Tareas de producción** → el agente principal implementa únicamente el cambio solicitado; no debe añadir pruebas por iniciativa propia ni invocar automáticamente el subagente.
+5. **Verificación autorizada** → `unit-test-agent` realiza una única ejecución de `./mvnw clean verify` al final de su trabajo. No se requiere una segunda autorización para ese comando ni una segunda verificación desde la conversación principal.
+6. **Conversación principal** → coordina la autorización, lanza el subagente, revisa su resumen y reporta el resultado; no reescribe tests salvo un fallo puntual que el subagente no pueda resolver.
 
 ## Manejo de errores
 - Jerarquía base en `core`: `BusinessException`, `ValidationException`, `ConflictException`, `NotFoundException`, `TechnicalException`.

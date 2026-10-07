@@ -35,6 +35,7 @@ class MessageFunctionalityBelongsApplicationRuleTest {
     private static final UUID FUNCTIONALITY_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614175106");
     private static final UUID OTHER_FUNCTIONALITY_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614175198");
     private static final String OUTSIDE_APPLICATION_MESSAGE = "Functionality outside application";
+    private static final String DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
 
     @Mock
     private CatalogPort catalogPort;
@@ -49,7 +50,7 @@ class MessageFunctionalityBelongsApplicationRuleTest {
     }
 
     @Test
-    void validate_doesNotThrow_whenFunctionalityBelongsToTheRequestedApplication() {
+    void validate_doesNotThrow_whenFunctionalityBelongsToTheContextApplication() {
         when(functionalityCatalogRepository.findAllByApplicationId(APPLICATION_ID.toString()))
                 .thenReturn(List.of(functionality(FUNCTIONALITY_ID, APPLICATION_ID)));
 
@@ -62,10 +63,9 @@ class MessageFunctionalityBelongsApplicationRuleTest {
     void validate_doesNotThrow_whenIdentifiersUseDifferentCase() {
         CreateMessageValidationContext context = new CreateMessageValidationContext(
                 CreateMessageDTO.builder()
-                        .applicationId(APPLICATION_ID.toString().toUpperCase())
                         .functionalityId(FUNCTIONALITY_ID.toString().toUpperCase())
                         .build(),
-                null);
+                APPLICATION_ID.toString().toUpperCase());
         when(functionalityCatalogRepository.findAllByApplicationId(APPLICATION_ID.toString()))
                 .thenReturn(List.of(functionality(FUNCTIONALITY_ID, APPLICATION_ID)));
 
@@ -122,6 +122,26 @@ class MessageFunctionalityBelongsApplicationRuleTest {
                         .containsExactly(403, OUTSIDE_APPLICATION_MESSAGE));
     }
 
+    @Test
+    void validate_throwsForbiddenUsingFun146_whenContextApplicationIdIsAbsent() {
+        when(functionalityCatalogRepository.findAllByApplicationId(DEFAULT_UUID)).thenReturn(List.of());
+        when(catalogPort.getMessage(MessageCatalogCodeEnum.FUN_146.getCode()))
+                .thenReturn(OUTSIDE_APPLICATION_MESSAGE);
+        CreateMessageValidationContext context = new CreateMessageValidationContext(
+                CreateMessageDTO.builder()
+                        .functionalityId(FUNCTIONALITY_ID.toString())
+                        .build(),
+                null);
+
+        assertThatThrownBy(() -> rule.validate(context))
+                .isInstanceOf(ForbiddenException.class)
+                .satisfies(exception -> assertThat((ForbiddenException) exception)
+                        .extracting(ForbiddenException::getHttpStatus, ForbiddenException::getUserMessage)
+                        .containsExactly(403, OUTSIDE_APPLICATION_MESSAGE));
+
+        verify(functionalityCatalogRepository).findAllByApplicationId(DEFAULT_UUID);
+    }
+
     private static Stream<List<FunctionalityData>> functionalitiesOutsideApplication() {
         FunctionalityData withoutApplication = new FunctionalityData();
         withoutApplication.setId(FUNCTIONALITY_ID);
@@ -136,14 +156,13 @@ class MessageFunctionalityBelongsApplicationRuleTest {
     private static CreateMessageValidationContext context() {
         return new CreateMessageValidationContext(
                 CreateMessageDTO.builder()
-                        .applicationId(APPLICATION_ID.toString())
                         .functionalityId(FUNCTIONALITY_ID.toString())
                         .build(),
-                null);
+                APPLICATION_ID.toString());
     }
 
     private static FunctionalityData functionality(UUID functionalityId, UUID applicationId) {
         return new FunctionalityData(functionalityId, "Functionality",
-                ApplicationData.build(applicationId, "Application"), null, null);
+                ApplicationData.build(applicationId, "Application"));
     }
 }

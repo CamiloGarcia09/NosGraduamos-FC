@@ -2,6 +2,11 @@
 
 A Spring Boot application for message handling and processing.
 
+The current persistence schema is supported only for new SurrealDB installations. Existing database
+volumes are not migrated; recreate the SurrealDB volume before starting a deployment with this schema.
+The domain no longer persists `parameter` or `represent_parameter`; technical configuration parameters
+continue to be read through `CatalogParameterPort` from `parameter.properties`.
+
 ## Azure CI/CD
 
 Microsoft-hosted CI and protected Azure deployment run as separate Azure DevOps pipelines. The Azure for Students deployment, Doppler setup, infrastructure provisioning, and operations are documented in [`docs/azure-deployment.md`](docs/azure-deployment.md).
@@ -209,26 +214,26 @@ curl http://localhost:8000/actuator/health
 2. Message endpoints:
 
 ```bash
-# Get messages for an application
+# Get messages for the authenticated environment
 # Direct access
-curl http://localhost:8085/messageucolab/v1/application/messages
+curl http://localhost:8085/messageucolab/v1/messages
 
 # Through API Gateway
-curl http://localhost:8000/messageucolab/v1/application/messages
+curl http://localhost:8000/messageucolab/v1/messages
 
 # Get a specific message by code
 # Direct access
-curl http://localhost:8085/messageucolab/v1/application/messages/{messageCode}
+curl "http://localhost:8085/messageucolab/v1/messages?code={messageCode}"
 
 # Through API Gateway
-curl http://localhost:8000/messageucolab/v1/application/messages/{messageCode}
+curl "http://localhost:8000/messageucolab/v1/messages?code={messageCode}"
 
 # Translate a specific message
 # Direct access
-curl "http://localhost:8085/messageucolab/v1/application/messages/{messageCode}/translation?targetLanguage=en"
+curl -X POST "http://localhost:8085/messageucolab/v1/messages/{messageCode}/translations" -H "Content-Type: application/json" -d '{"sourceLanguage":"auto","targetLanguage":"en"}'
 
 # Through API Gateway
-curl "http://localhost:8000/messageucolab/v1/application/messages/{messageCode}/translation?targetLanguage=en"
+curl -X POST "http://localhost:8000/messageucolab/v1/messages/{messageCode}/translations" -H "Content-Type: application/json" -d '{"sourceLanguage":"auto","targetLanguage":"en"}'
 
 # Get token for an application
 # Direct access
@@ -346,8 +351,6 @@ Before configuring Debezium and KSQLDB, you must create the necessary Kafka them
    kafka-topics --create --if-not-exists --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1 --topic postgres.public.message_environment_state_data
    kafka-topics --create --if-not-exists --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1 --topic postgres.public.message_state_data
    kafka-topics --create --if-not-exists --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1 --topic postgres.public.message_type_data
-   kafka-topics --create --if-not-exists --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1 --topic postgres.public.parameter_data
-   kafka-topics --create --if-not-exists --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1 --topic postgres.public.represent_parameter_data
    kafka-topics --create --if-not-exists --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1 --topic postgres.public.token_data
    kafka-topics --create --if-not-exists --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1 --topic postgres.public.token_state_data
    ```
@@ -401,7 +404,7 @@ To configure CDC with Debezium, follow these steps:
         "value.converter.schemas.enable": "false",
         "transforms.unwrap.add.fields": "op,source.ts_ms",
         "transforms.extractId.field": "id",
-        "table.include.list": "public.language_base_data,public.application_state_data,public.application_data,public.environment_type_data,public.environment_state_data,public.environment_data,public.functionality_state_data,public.functionality_data,public.message_category_data,public.message_type_data,public.message_state_data,public.message_data,public.message_environment_state_data,public.message_environment_data,public.parameter_data,public.represent_parameter_data,public.token_state_data,public.token_data,public.message_data_table"
+        "table.include.list": "public.language_base_data,public.application_state_data,public.application_data,public.environment_type_data,public.environment_state_data,public.environment_data,public.functionality_state_data,public.functionality_data,public.message_category_data,public.message_type_data,public.message_state_data,public.message_data,public.message_environment_state_data,public.message_environment_data,public.token_state_data,public.token_data,public.message_data_table"
       }
    }'
    ```

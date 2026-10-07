@@ -1,7 +1,6 @@
 package co.edu.uco.application.usecase.domain.aggregate.entities;
 
 import co.edu.uco.application.usecase.domain.aggregate.Entity;
-import co.edu.uco.application.usecase.domain.security.AuthorizationScopeType;
 import lombok.Getter;
 
 import java.util.UUID;
@@ -14,10 +13,7 @@ public final class RoleAssignmentEntity extends Entity<UUID> {
     private UUID id;
     private UUID membershipId;
     private UUID roleId;
-    private AuthorizationScopeType scopeType;
     private UUID organizationId;
-    private UUID applicationId;
-    private UUID environmentId;
 
     @Override
     public void setId(final UUID id) {
@@ -32,19 +28,7 @@ public final class RoleAssignmentEntity extends Entity<UUID> {
         this.roleId = getDefaultUUID(roleId);
     }
 
-    public void setScopeType(final AuthorizationScopeType scopeType) {
-        this.scopeType = scopeType;
-    }
-
     public void setOrganizationId(final UUID organizationId) {
         this.organizationId = getDefaultUUID(organizationId);
-    }
-
-    public void setApplicationId(final UUID applicationId) {
-        this.applicationId = getDefaultUUID(applicationId);
-    }
-
-    public void setEnvironmentId(final UUID environmentId) {
-        this.environmentId = getDefaultUUID(environmentId);
     }
 }

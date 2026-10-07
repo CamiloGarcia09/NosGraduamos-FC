@@ -1,6 +1,7 @@
 package co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl;
 
 import co.edu.uco.application.secondaryports.entity.ApplicationData;
+import co.edu.uco.application.secondaryports.entity.EnvironmentData;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.secondaryports.repository.ApplicationRepository;
 import co.edu.uco.application.usecase.domain.aggregate.entities.OrganizationEntity;
@@ -10,10 +11,9 @@ import com.surrealdb.Object;
 import com.surrealdb.Surreal;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.List;
 
-import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.datetime;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.quote;
 import static co.edu.uco.infraestructure.secondaryadapters.repository.surreal.impl.SurrealQLUtil.recordIdLiteral;
 
@@ -24,6 +24,9 @@ public class ApplicationSurrealRepositoryAdapterImpl extends SurrealCatalogSuppo
     private static final String SURREAL_TABLE_ORGANIZATION = "organization";
     private static final String SURREAL_TABLE_LANGUAGE_BASE = "language_base";
     private static final String SURREAL_TABLE_APPLICATION_STATE = "application_state";
+    private static final String SURREAL_TABLE_ENVIRONMENT = "environment";
+    private static final String SURREAL_TABLE_ENVIRONMENT_TYPE = "environment_type";
+    private static final String SURREAL_TABLE_ENVIRONMENT_STATE = "environment_state";
     private static final String SELECT_ALL_FROM = "SELECT * FROM ";
     private static final String LIMIT_ONE = " LIMIT 1;";
 
@@ -51,26 +54,43 @@ public class ApplicationSurrealRepositoryAdapterImpl extends SurrealCatalogSuppo
     }
 
     @Override
-    public void create(final ApplicationData application, final String languageId, final LocalDateTime startDate,
-                       final LocalDateTime endDate, final String stateId) {
-        final String upsertSql = "UPSERT " + recordIdLiteral(SURREAL_TABLE_APPLICATION, application.getId().toString())
-                 + " CONTENT { "
-                 + "name: " + quote(application.getName()) + ", "
+    public void createWithEnvironments(final ApplicationData application, final String languageId, final String stateId,
+                                       final List<EnvironmentData> environments,
+                                       final String environmentStateId) {
+        final String applicationUpsert = "UPSERT "
+                + recordIdLiteral(SURREAL_TABLE_APPLICATION, application.getId().toString())
+                + " CONTENT { "
+                + "name: " + quote(application.getName()) + ", "
                 + "organization_id: " + recordIdLiteral(
                         SURREAL_TABLE_ORGANIZATION, application.getOrganization().getId().toString()) + ", "
                 + "language_id: " + recordIdLiteral(SURREAL_TABLE_LANGUAGE_BASE, languageId) + ", "
-                + "start_date: " + datetime(startDate) + ", "
-                + "end_date: " + datetime(endDate) + ", "
                 + "state_id: " + recordIdLiteral(SURREAL_TABLE_APPLICATION_STATE, stateId)
                 + " };";
+        final StringBuilder transaction = new StringBuilder("BEGIN TRANSACTION;")
+                .append(applicationUpsert);
+        environments.forEach(environment -> transaction.append(environmentUpsert(environment, environmentStateId)));
+        transaction.append("COMMIT TRANSACTION;");
+
         try {
-            log.info("Executing SurrealQL upsert application: {}", upsertSql);
-            surreal.query(upsertSql);
+            log.info("Creating application and {} default environments atomically", environments.size());
+            surreal.query(transaction.toString());
         } catch (Exception ex) {
-            log.error("Error al persistir la aplicación en SurrealDB", ex);
+            log.error("Error al persistir la aplicación y sus ambientes en SurrealDB", ex);
             throw BusinessException.buildTechnicalException(
-                    "Error al persistir la aplicación en la base de datos SurrealDB", ex, ExceptionLocation.INFRASTRUCTURE);
+                    "Error al persistir la aplicación y sus ambientes en la base de datos SurrealDB",
+                    ex, ExceptionLocation.INFRASTRUCTURE);
         }
+    }
+
+    private String environmentUpsert(final EnvironmentData environment, final String stateId) {
+        return "UPSERT " + recordIdLiteral(SURREAL_TABLE_ENVIRONMENT, environment.getId().toString())
+                + " CONTENT { "
+                + "application_id: " + recordIdLiteral(
+                        SURREAL_TABLE_APPLICATION, environment.getApplication().getId().toString()) + ", "
+                + "type_id: " + recordIdLiteral(
+                        SURREAL_TABLE_ENVIRONMENT_TYPE, environment.getType().getId().toString()) + ", "
+                + "state_id: " + recordIdLiteral(SURREAL_TABLE_ENVIRONMENT_STATE, stateId)
+                + " };";
     }
 
     private ApplicationData toApplicationData(final Object obj) {

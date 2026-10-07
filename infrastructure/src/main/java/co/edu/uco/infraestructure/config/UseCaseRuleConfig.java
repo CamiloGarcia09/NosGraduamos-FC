@@ -7,10 +7,12 @@ import co.edu.uco.application.secondaryports.repository.ApplicationRepository;
 import co.edu.uco.application.secondaryports.repository.ActiveContextRepository;
 import co.edu.uco.application.secondaryports.repository.ApplicationCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.EnvironmentRepository;
+import co.edu.uco.application.secondaryports.repository.EnvironmentReferenceCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.ExternalIdentityRepository;
 import co.edu.uco.application.secondaryports.repository.EnvironmentCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.FunctionalityCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.MessageCategoryCatalogRepository;
+import co.edu.uco.application.secondaryports.repository.MessageCodeQueryPort;
 import co.edu.uco.application.secondaryports.repository.MessageEnvironmentStateCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.MessageStateCatalogRepository;
 import co.edu.uco.application.secondaryports.repository.MessageTypeCatalogRepository;
@@ -147,10 +149,10 @@ public class UseCaseRuleConfig {
     CreateMessageCompositeValidator createMessageCompositeValidator(
             CatalogPort catalogPort,
             RecordExistsCatalogPort recordExistsCatalogPort,
-            EnvironmentRepository environmentRepository,
-            FunctionalityCatalogRepository functionalityCatalogRepository) {
+            FunctionalityCatalogRepository functionalityCatalogRepository,
+            MessageCodeQueryPort messageCodeQueryPort) {
         return new CreateMessageCompositeValidator(
-                catalogPort, recordExistsCatalogPort, environmentRepository, functionalityCatalogRepository);
+                catalogPort, recordExistsCatalogPort, functionalityCatalogRepository, messageCodeQueryPort);
     }
 
     @Bean
@@ -190,13 +192,14 @@ public class UseCaseRuleConfig {
     @Bean
     HandlingCreateApplicationPort handlingCreateApplicationPort(
             ApplicationRepository applicationRepository,
+            EnvironmentReferenceCatalogRepository environmentReferenceCatalogRepository,
             CreateApplicationCompositeValidator validator,
             HandlingActiveContextPort handlingActiveContextPort,
             AuthorizationCompositeValidator authorizationCompositeValidator,
             CatalogPort catalogPort,
             LoggingPortFactory loggerFactory) {
         return new CreateApplicationUseCase(
-                applicationRepository, validator, handlingActiveContextPort,
+                applicationRepository, environmentReferenceCatalogRepository, validator, handlingActiveContextPort,
                 authorizationCompositeValidator, catalogPort, loggerFactory);
     }
 

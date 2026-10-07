@@ -6,7 +6,7 @@ services:
     routes:
       - name: messageucolab-api
         paths:
-          - /messageucolab/v1/application
+          - /messageucolab/v1
         strip_path: false
 
       - name: messageucolab-health

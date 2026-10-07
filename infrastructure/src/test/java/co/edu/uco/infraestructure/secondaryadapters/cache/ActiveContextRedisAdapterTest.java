@@ -4,7 +4,6 @@ import co.edu.uco.application.secondaryports.logging.LoggingPort;
 import co.edu.uco.application.secondaryports.logging.LoggingPortFactory;
 import co.edu.uco.application.usecase.domain.aggregate.entities.ActiveContextEntity;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.infraestructure.config.ActiveContextCacheProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -252,7 +251,7 @@ class ActiveContextRedisAdapterTest {
     }
 
     private ExternalIdentity identity(final String issuer, final String subject) {
-        return new ExternalIdentity(issuer, subject, "mail@example.com", PrincipalType.HUMAN, Instant.MAX);
+        return new ExternalIdentity(issuer, subject, "mail@example.com", Instant.MAX);
     }
 
     private ActiveContextEntity context() {

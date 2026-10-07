@@ -4,7 +4,6 @@ import co.edu.uco.application.primaryports.dto.context.ActiveContextDTO;
 import co.edu.uco.application.primaryports.dto.context.AvailableContextDTO;
 import co.edu.uco.application.primaryports.dto.context.SelectActiveContextDTO;
 import co.edu.uco.application.usecase.domain.security.ExternalIdentity;
-import co.edu.uco.application.usecase.domain.security.PrincipalType;
 import co.edu.uco.application.usecase.handling.HandlingActiveContextPort;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +20,7 @@ class ActiveContextUseCaseFacadeImplTest {
     private final HandlingActiveContextPort port = mock(HandlingActiveContextPort.class);
     private final ActiveContextUseCaseFacadeImpl facade = new ActiveContextUseCaseFacadeImpl(port);
     private final ExternalIdentity identity =
-            new ExternalIdentity("issuer", "subject", null, PrincipalType.HUMAN, Instant.MAX);
+            new ExternalIdentity("issuer", "subject", null, Instant.MAX);
 
     @Test
     void methods_delegateAndReturnPortResults() {
